@@ -85,8 +85,6 @@ spec:
 
 ---
 
-**Role**: K8s Operator  
-**Input**: Manifests  
-**Output**: Running services
+**Role**: K8s Operator **Input**: Manifests **Output**: Running services
 
 > K8s locally.

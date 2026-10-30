@@ -66,7 +66,14 @@ console.log('\n🚌 E2E GRAND TOUR (pass 119)\n');
     // GATE A — FRESH INSTALL (clean clone boots)
     // ============================================
     try {
-        execFileSync('git', ['clone', '-q', '--depth', '1', ROOT, tmpClone]);
+        // (2026-10-27) cloud/other-user worktrees trip git's dubious-ownership
+        // guard on the clone SOURCE — environmental, not a code defect. The
+        // child carries its OWN throwaway config via GIT_CONFIG_GLOBAL (never
+        // the machine's real global): same honest clone, no env noise.
+        const gitEnv = { ...process.env, NODE_PATH: path.join(ROOT, 'node_modules') };
+        gitEnv.GIT_CONFIG_GLOBAL = path.join(os.tmpdir(), 'vant-grand-tour-gitconfig-' + process.pid);
+        fs.writeFileSync(gitEnv.GIT_CONFIG_GLOBAL, '[safe]\n\tdirectory = *\n');
+        execFileSync('git', ['clone', '-q', '--depth', '1', ROOT, tmpClone], { env: gitEnv });
         report('gate A: fresh clone has NO private brains and NO node_modules',
             !fs.existsSync(path.join(tmpClone, 'models', 'private', 'vant'))
                 && !fs.existsSync(path.join(tmpClone, 'node_modules')),

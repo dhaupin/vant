@@ -36,8 +36,7 @@ Sacrifice shows:
 - Hard lines that hold
 - What's non-negotiable
 
-Easy choices reveal priorities.
-Hard choices reveal values.
+Easy choices reveal priorities. Hard choices reveal values.
 
 ---
 

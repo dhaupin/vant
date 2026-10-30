@@ -263,6 +263,43 @@ function checkDebris(sweep) {
     }
 }
 
+// (issues #252) THE INVARIANT, first-class: "using brain must imply
+// recent backup." A first-class 'Last backup' line per brain in the
+// stack: RECENT is green, and both NEVER (an absence-of-data — the
+// exactly-the-brain-that-dies-tonight-shape) and STALE (past the
+// freshness window) report as FINDINGS, never a silent green light.
+// Ask 3 rides here: an ephemeral-zone warning when the models root
+// resolves inside a git mount (the wipe killed untracked in-mount
+// files). Never fails health over a probe error (same posture as
+// checkLock).
+function checkBackupStaleness() {
+    console.log('\n' + theme.label('💾 Backup staleness:'));
+    try {
+        const staleness = require('../lib/backup-staleness');
+        const report = staleness.stalenessReport();
+        if (report.ledgerError) {
+            console.log('  ' + theme.status.warn('receipt ledger unreadable (' + report.ledgerError + ') — treat every brain as NEVER until · vant backup create stamps it'));
+        }
+        for (const b of report.brains) {
+            if (b.status === 'NEVER') {
+                console.log('  ' + theme.status.fail(b.brain + ': NEVER backed up (FINDING) — one resync is a burial; run · vant backup create'));
+            } else if (b.status === 'STALE') {
+                console.log('  ' + theme.status.fail(b.brain + ': last backup ' + b.ageHuman + ' (FINDING, window ' + Math.round(report.windowMs / 60000) + 'm)'));
+            } else {
+                console.log('  ' + theme.status.ok(b.brain + ': last backup ' + (b.ageHuman || 'recent')));
+            }
+        }
+        const zone = staleness.ephemeralZone();
+        if (zone.insideRepo) {
+            console.log('  ' + theme.status.warn('EPHEMERAL ZONE: models root inside git mount ' + zone.gitRoot + ' — untracked content dies on resync (issue #252 was that lesson)'));
+        } else {
+            console.log('  ' + theme.status.ok('models root is outside any git mount (durable-zone posture)'));
+        }
+    } catch (e) {
+        console.log('  ' + theme.status.warn('Backup staleness unavailable: ' + e.message));
+    }
+}
+
 // (pass 176) Brain integrity (#166): the BrainVerifier tier gets a live
 // surface. Recomputes the brain's content root and compares it to the last
 // anchor in the anchor ledger — a partial write, bad sync, or overeager
@@ -319,10 +356,11 @@ function run() {
     checkMigration();
     checkLock();
     checkBrainIntegrity();
+    checkBackupStaleness();
     checkDebris(sweep);
     
     console.log('\n');
 }
 
 run();
-module.exports = { checkModel, checkConfig, checkEnv, checkDirs, checkBrainIntegrity, run };
+module.exports = { checkModel, checkConfig, checkEnv, checkDirs, checkBrainIntegrity, checkBackupStaleness, run };

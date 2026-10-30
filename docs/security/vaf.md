@@ -9,8 +9,7 @@ description: VAF, the Vant Application Firewall - input validation for every wri
 
 # VAF
 
-VAF, the Vant Application Firewall, validates all input before it reaches
-storage, the runtime, or the MCP surface.
+VAF, the Vant Application Firewall, validates all input before it reaches storage, the runtime, or the MCP surface.
 
 ## What it checks
 
@@ -54,8 +53,7 @@ vaf.check('input', { name: 'input', type: 'string', maxLength: 500 });
 
 ## Configuration
 
-Tuning happens through the `CONFIG` surface and config keys, not a
-runtime setter:
+Tuning happens through the `CONFIG` surface and config keys, not a runtime setter:
 
 ```javascript
 const vaf = require('./lib/vaf');
@@ -64,13 +62,7 @@ vaf.CONFIG.MAX_STRING_LENGTH;      // default 100000
 vaf.CONFIG.BLOCK_PATH_TRAVERSAL;   // default true
 ```
 
-`MAX_STRING_LENGTH` and `BLOCK_PATH_TRAVERSAL` can be set in config
-(`vant config set`) and are read at load time. Other exposed validators:
-`validateString`, `validateObject`, `validateSafePath`,
-`checkPathTraversal`, `checkContent`, `sanitizeContent`,
-`checkFileExtension`, `checkWordStacking`, `checkCommandStacking`,
-`sanitize`, `middleware`, `getStatus`, plus the rate-limit seam
-`checkRateLimit`/`recordFailedAttempt`/`isBlocked` and `reset`.
+`MAX_STRING_LENGTH` and `BLOCK_PATH_TRAVERSAL` can be set in config (`vant config set`) and are read at load time. Other exposed validators: `validateString`, `validateObject`, `validateSafePath`, `checkPathTraversal`, `checkContent`, `sanitizeContent`, `checkFileExtension`, `checkWordStacking`, `checkCommandStacking`, `sanitize`, `middleware`, `getStatus`, plus the rate-limit seam `checkRateLimit`/`recordFailedAttempt`/`isBlocked` and `reset`.
 
 ## Integration
 

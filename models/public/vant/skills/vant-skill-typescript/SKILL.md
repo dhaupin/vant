@@ -67,8 +67,6 @@ npx tsc --watch
 
 ---
 
-**Role**: TypeScript Developer  
-**Input**: .ts files  
-**Output**: .js files
+**Role**: TypeScript Developer **Input**: .ts files **Output**: .js files
 
 > Typed JS.

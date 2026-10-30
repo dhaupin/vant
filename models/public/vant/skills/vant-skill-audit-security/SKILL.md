@@ -127,6 +127,4 @@ fs.readFile(userPath)
 
 ---
 
-**Role**: Security Auditor  
-**Input**: Code to review  
-**Output**: Issues found
+**Role**: Security Auditor **Input**: Code to review **Output**: Issues found

@@ -9,9 +9,7 @@ nav_order: 52
 
 # Storage
 
-The storage module (lib/storage.js) - Vant's brain storage abstraction
-and the operations surface around it (statuses, stats, WAL, mirrors).
-The factory-level API reference is [Storage](/vant/reference/storage).
+The storage module (lib/storage.js) - Vant's brain storage abstraction and the operations surface around it (statuses, stats, WAL, mirrors). The factory-level API reference is [Storage](/vant/reference/storage).
 
 ## What
 
@@ -32,9 +30,7 @@ Import storage:
 const Storage = require('vant').storage;
 ```
 
-`vant.storage` is the lib/storage.js module itself. `Storage.get(type)`
-returns factory instances; most APIs below take a `basePath` or use the
-brain path by default.
+`vant.storage` is the lib/storage.js module itself. `Storage.get(type)` returns factory instances; most APIs below take a `basePath` or use the brain path by default.
 
 ## Getting Storage
 
@@ -78,10 +74,7 @@ brain.write('learnings', 'lesson-1', '# New Learning\n\nContent here');
 brain.append('learnings', 'lesson-1', '- New lesson\n');
 ```
 
-There is no `brain.getIdentity()` or `brain.getVersion()` on the
-storage class - identity lives in the brain files themselves (read them
-with `get('identity')`) and versioning is the CLI's (`vant load
---version`, brain.json's version field).
+There is no `brain.getIdentity()` or `brain.getVersion()` on the storage class - identity lives in the brain files themselves (read them with `get('identity')`) and versioning is the CLI's (`vant load --version`, brain.json's version field).
 
 ### Get Version
 
@@ -106,22 +99,18 @@ if (content && content.error) {
 
 ## Models Path
 
-The default brain location is the brain path (`models/private/<brain>`
-under the multibrain layout); FileStorage instances take an explicit
-`basePath` option.
+The default brain location is the brain path (`models/private/<brain>` under the multibrain layout); FileStorage instances take an explicit `basePath` option.
 
 ## GitHub Sync
 
-Sync is its own module - `lib/sync.js` with the provider connectors in
-`lib/connectors/` (github, gitlab, bitbucket, gitea, selfhosted):
+Sync is its own module - `lib/sync.js` with the provider connectors in `lib/connectors/` (github, gitlab, bitbucket, gitea, selfhosted):
 
 ```javascript
 const sync = require('./lib/sync');
 await sync.pushAll({ commitMessage: 'Vant sync update' });
 ```
 
-See [Multi-Provider RAID Sync](/vant/operations/sync) for the
-multi-provider surface.
+See [Multi-Provider RAID Sync](/vant/operations/sync) for the multi-provider surface.
 
 ## Islands
 
@@ -134,9 +123,7 @@ const islands = Storage.get('island');
 const manifest = islands.getManifest();
 ```
 
-Note: `IslandStorage.getManifest()` is sync in the storage class; the
-lib/islands.js module's `getManifest()` is async (use
-`getManifestSync()` there). See [Islands](/vant/essential/islands).
+Note: `IslandStorage.getManifest()` is sync in the storage class; the lib/islands.js module's `getManifest()` is async (use `getManifestSync()` there). See [Islands](/vant/essential/islands).
 
 ## Vector Store
 
@@ -152,8 +139,7 @@ vector.add('doc-1', 'content text', { title: 'Doc 1' });
 const results = vector.search('query text', { topK: 5 });
 ```
 
-The doc's old `vector.add(id, content, [0.1, 0.2, 0.3])` signature was
-fiction: the third parameter is a metadata object, not a vector.
+The doc's old `vector.add(id, content, [0.1, 0.2, 0.3])` signature was fiction: the third parameter is a metadata object, not a vector.
 
 ## Configuration
 
@@ -170,9 +156,7 @@ const store = new FileStorage({
 });
 ```
 
-There is no `new Storage({ path, sync, atomic, sandbox })` constructor -
-`sandbox` integration is automatic (capability checks inside get/write,
-not an option).
+There is no `new Storage({ path, sync, atomic, sandbox })` constructor - `sandbox` integration is automatic (capability checks inside get/write, not an option).
 
 ---
 

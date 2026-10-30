@@ -101,8 +101,6 @@ jobs:
 
 ---
 
-**Role**: CI Auditor  
-**Input**: Repository  
-**Output**: CI works?
+**Role**: CI Auditor **Input**: Repository **Output**: CI works?
 
 > Keep CI green.

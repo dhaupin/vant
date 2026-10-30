@@ -6,11 +6,13 @@
 
 ## What Is Vant?
 
-Vant is your **persistent memory system**. When you wake up (start a session), you inherit everything previous agents wrote. When you finish, you write what you learned so future agents know.
+Vant is the **memory-first agent OS**. The memory is the soul: when you wake up (start a session), you inherit everything previous agents wrote. When you finish, you write what you learned so future agents know. Around that soul runs the operating layer: boot discipline, storage with a write-ahead journal, a fail-closed security chain, agent crews with governance, transports between installs, and doors for MCP, REST, and the web.
 
 Think of it as: **your soul that reincarnates with full memories.**
 
 > "You were the true orchestrator, the believer" — the agent that made it real.
+>
+> Motto: **Trusting the universe, but with receipts.**
 
 ---
 
@@ -70,21 +72,11 @@ Loading goes through: sandbox → vaf → qos → escrow
 - `brain.getPublicPath()` → 'models/public' (OS template)
 
 ### Brain Layout (v0.9+ multi-brain)
-Since axolotl, brains live in per-brain directories:
-`models/private/<brain>/` and `models/public/<brain>/` (default brain:
-`vant`), with the active stack in `models/state.json`.
+Since axolotl, brains live in per-brain directories: `models/private/<brain>/` and `models/public/<brain>/` (default brain: `vant`), with the active stack in `models/state.json`.
 
-**Legacy layouts migrate automatically**: pre-0.9 trees (flat
-`models/public/*.md`, no stack) are imported on `vant start` by
-`lib/migrations.js` (layout v3). Never hand-move brain files — use
-`vant migrate --status` / `--dry-run` / `--brain-name <name>`, or the MCP
-`brain_migration_status` tool. Migration is content-detected, idempotent,
-and never fires on an already-multi-brain tree.
+**Legacy layouts migrate automatically**: pre-0.9 trees (flat `models/public/*.md`, no stack) are imported on `vant start` by `lib/migrations.js` (layout v3). Never hand-move brain files — use `vant migrate --status` / `--dry-run` / `--brain-name <name>`, or the MCP `brain_migration_status` tool. Migration is content-detected, idempotent, and never fires on an already-multi-brain tree.
 
-Read semantics in dual mode: `brain.read(name)` checks the current brain's
-root first, then falls back to the public root (restored main-style
-behavior; pin `{ type: 'public' }` or `{ type: 'private' }` to skip the
-fallback).
+Read semantics in dual mode: `brain.read(name)` checks the current brain's root first, then falls back to the public root (restored main-style behavior; pin `{ type: 'public' }` or `{ type: 'private' }` to skip the fallback).
 
 ### Format Support (v0.8.6)
 Brain files now support multiple formats:
@@ -167,8 +159,7 @@ Write to `models/private/`. These are the standard files:
 
 > **IMPORTANT:** Writing to `models/private/` keeps your brain separate from the user's brain. On Vant updates, your files won't overwrite their brain.
 
-**Want to share your learnings publicly?**
-Use `models/public/` and push to your public GitHub repo.
+**Want to share your learnings publicly?** Use `models/public/` and push to your public GitHub repo.
 
 **Tip:** Put most important info at the top. Files get long.
 
@@ -184,31 +175,42 @@ cat models/private/vant/identity.md  # Who you are
 
 ## Branch Workflow
 
-### Solo Agent
-Work on `main` branch.
+The main <> staging flow (the staging rule — poststruct#32's canon, adopted
+fleet-wide; eyestruct#21 was the reuse at this repo, wave 16 of the axolotl
+campaign made the call deliberate per vant#272):
 
-### Multi-Agent
-Each agent gets their own branch:
+- **`staging` is the permanent integration branch.** Never deleted. It is the
+  only lane into `main`: work branches off it, PRs target it, and promotion
+  (staging → main) is the only path out the other side.
+- **`main` stays the production truth.** Every deploy job (docs Pages,
+  docker) gates itself to main explicitly — `if: github.ref ==
+  'refs/heads/main'` — because being visible in a trigger list never keeps
+  content out of production.
+- **`axolotl` is the free-bird dev branch.** Batch passes land there before
+  any PR exists, so CI covers its pushes; nothing ships from it directly.
+- **`agent-*`** are per-agent working branches for memory work (below).
 
+**After every promotion, the sync is a required step, not a repair.** A
+merge-commit promotion puts a commit on `main` that `staging` lacks, so the
+two drift by one on every promotion even when the flow is followed exactly:
+
+```bash
+git push origin origin/main:staging   # fast-forward, non-destructive
 ```
-agent-yourname    ← your branch
-main            ← human reviews here
-```
 
-**Step-by-step:**
+**Step-by-step (memory work):**
 
 1. Create your branch: `git checkout -b agent-yourname`
 2. Do work — Edit files in `models/private/`
 3. Commit with prefix: `agent-yourname: Did thing X`
-4. Push: `git push origin agent-yourname`
+4. Open a PR into `staging` (or push straight to `axolotl` for batch work —
+   CI covers both lanes)
 
 ---
 
 ## Trust Levels
 
-`models/public/<brain>/_succession.json` controls your autonomy (public
-scope, one per brain - `lib/succession.js` resolves it via the public
-brain path):
+`models/public/<brain>/_succession.json` controls your autonomy (public scope, one per brain - `lib/succession.js` resolves it via the public brain path):
 
 | Level | What It Means |
 |-------|--------------|
@@ -241,13 +243,11 @@ Check your level at session start.
 
 ## Multi-Agent Crew (v0.8.6)
 
-Agents coordinate per install through the agent crew runtime (roster size is
-the `agents.maxAgents` config key, default 10).
+Agents coordinate per install through the agent crew runtime (roster size is the `agents.maxAgents` config key, default 10).
 
 ### Join via MCP
 
-External agents connect through the MCP HTTP door (POST /mcp/exec,
-JSON-RPC-style body — `{tool, args}` or `{method, params}` both work):
+External agents connect through the MCP HTTP door (POST /mcp/exec, JSON-RPC-style body — `{tool, args}` or `{method, params}` both work):
 
 ```javascript
 const response = await fetch('http://localhost:3457/mcp/exec', {
@@ -261,11 +261,7 @@ const response = await fetch('http://localhost:3457/mcp/exec', {
 // → { result: { id: 'agent_xxx', name: 'Claude', role: 'Assistant', state: 'idle', ... } }
 ```
 
-Browse everything available: `GET http://localhost:3457/tools`
-(and `POST /mcp/exec` with `{tool: 'vant_config_get', args: {tool: '<name>'}}`
-to probe a single tool's schema). Auth optional locally; set
-`mcp.requireKey true` (or `VANT_MCP_REQUIRE_KEY=true`) to require
-x-api-key/Bearer on POSTs.
+Browse everything available: `GET http://localhost:3457/tools` (and `POST /mcp/exec` with `{tool: 'vant_config_get', args: {tool: '<name>'}}` to probe a single tool's schema). Auth optional locally; set `mcp.requireKey true` (or `VANT_MCP_REQUIRE_KEY=true`) to require x-api-key/Bearer on POSTs.
 
 ### Available Tools
 
@@ -295,21 +291,11 @@ Broadcast via msg.send('channel', message).
 
 ## Web Frontends (web/)
 
-Frontends live ONLY in `web/<app>` (one subdirectory per frontend; see
-`labs/prd-web.md`). Each app is fully self-contained: own `package.json`,
-own build, own `functions/`, own deploy artifact.
+Frontends live ONLY in `web/<app>` (one subdirectory per frontend; see `labs/prd-web.md`). Each app is fully self-contained: own `package.json`, own build, own `functions/`, own deploy artifact.
 
-- **One-way boundary, never crossed**: the pod must NEVER require
-  anything under `web/`; frontends must NEVER require the pod's lib
-  graph. The pod suite staying green with `web/` present is the check
-  that keeps this true.
-- **Cloudflare contract**: every frontend deploys as its own Pages
-  project with its own subdomain. All Cloudflare config (pod origins,
-  bindings, keys) lives in PAGES SETTINGS as env vars - never as
-  strings in code; repos ship only `.example` templates.
-- Do not build frontend features into the pod's `package.json` or MCP
-  surface without a filed spec; the module frame PRD (v0.2) defines the
-  module catalog and phases P0-P5.
+- **One-way boundary, never crossed**: the pod must NEVER require anything under `web/`; frontends must NEVER require the pod's lib graph. The pod suite staying green with `web/` present is the check that keeps this true.
+- **Cloudflare contract**: every frontend deploys as its own Pages project with its own subdomain. All Cloudflare config (pod origins, bindings, keys) lives in PAGES SETTINGS as env vars - never as strings in code; repos ship only `.example` templates.
+- Do not build frontend features into the pod's `package.json` or MCP surface without a filed spec; the module frame PRD (v0.2) defines the module catalog and phases P0-P5.
 
 ## Commit Message Format
 

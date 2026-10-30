@@ -166,6 +166,28 @@ async function run() {
             console.log('⚠️ Legacy brain data detected. Convert before restoring:');
             console.log('   const { converted } = require("vant/lib/transform").migrateLegacyBrainStorage(data);');
         }
+
+        // (K5, 2026-10-25) INSPECT GAINS CENSUS SEMANTICS — brains are
+        // entries, not mass. The kernel-gated brain-level census rides this
+        // run (registration + verb wiring only): every brain dir on the
+        // tree becomes a named entry classified real vs carcass. Additive,
+        // best-effort, NEVER destructive — the retire door (stale stones)
+        // is wired in lib/horcrux-census.js and its call site is the
+        // decommission run, not this display.
+        try {
+            const census = require('../lib/horcrux-census').censusBrains({});
+            const realN = census.real.length;
+            const carcassN = census.carcass.length;
+            console.log(`\n--- Brain Census (kernel-dated, seq ${census.journalSeq}) ---`);
+            console.log(`Real: ${realN} · Carcass: ${carcassN}`);
+            for (const e of census.all.slice(0, 24)) {
+                const name = e.id.split('/').pop() + ' (' + e.id.split('/')[0] + ')';
+                console.log(`  ${e.kind === 'brain' ? '●' : '○'} ${name}${e.kind === 'brain-carcass' ? '  [carcass]' : ''}`);
+            }
+            if (census.all.length > 24) console.log(`  … +${census.all.length - 24} more`);
+        } catch (censusErr) {
+            console.log('⚠️ Brain census unavailable: ' + (censusErr.code ? censusErr.code + ' ' : '') + String(censusErr.message || censusErr).slice(0, 100));
+        }
         
     } else if (subcmd === 'restore') {
         const horcruxPath = args[1] || defaultPath;
@@ -236,7 +258,7 @@ async function run() {
         console.log('Creating horcrux:', outputPath);
         
         const transform = require('../lib/transform');
-        // (#195, pass 207) Optional carrier art pack: `vant horcrux create <path> <pw> --art backup|stone|comms|airgap`.
+        // (#195, pass 207) Optional carrier art pack: `vant horcrux create <path> <pw> --art backup|stone|comms|airgap|crest`.
         // Default = the transform fallback's AMBER-DEEP backup pack (seeded
         // from the active brain name). Unknown pack → refuse before gather.
         const artFlagIdx = args.indexOf('--art');
@@ -371,7 +393,7 @@ async function run() {
             process.exit(1);
         }
 
-        // (#195, pass 207) Optional carrier art pack: `vant horcrux refresh <pw> --art backup|stone|comms|airgap`.
+        // (#195, pass 207) Optional carrier art pack: `vant horcrux refresh <pw> --art backup|stone|comms|airgap|crest`.
         const _artIdx = args.indexOf('--art');
         let _artPack = null;
         if (_artIdx >= 0) {

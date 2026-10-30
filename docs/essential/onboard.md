@@ -47,9 +47,7 @@ When you wake up (start a session):
 
 ### Non-Interactive Verbs
 
-The routed `onboard` command exposes a small verb set (verified on the
-real CLI): `status`, `wake`, `summary`, `files`, `read <file>`,
-`search <term>`, `system`, `help`.
+The routed `onboard` command exposes a small verb set (verified on the real CLI): `status`, `wake`, `summary`, `files`, `read <file>`, `search <term>`, `system`, `help`.
 
 ```bash
 # Install state + brain summary + next steps (the wake loop anchor)
@@ -73,8 +71,7 @@ vant onboard system
 vant onboard help
 ```
 
-For interactive browsing use `vant onboard` bare (the browser)
-or `cat` brain files directly:
+For interactive browsing use `vant onboard` bare (the browser) or `cat` brain files directly:
 
 ## Interactive Commands
 
@@ -123,9 +120,7 @@ vant onboard search "authentication"
 vant onboard search "python"
 ```
 
-Results list matching brain files with their titles (filename match
-and content match, one line each). For scored hybrid/RAG search use
-`vant search` instead (see [Search](/vant/memory/search)).
+Results list matching brain files with their titles (filename match and content match, one line each). For scored hybrid/RAG search use `vant search` instead (see [Search](/vant/memory/search)).
 
 ## Use Cases
 

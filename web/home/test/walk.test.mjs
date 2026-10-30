@@ -5,7 +5,8 @@
  * without a React transform (same shape as test/config.test.mjs).
  */
 import { describe, expect, it } from 'vitest'
-import { WALK, LEARN, routeKey } from '../src/walk.mjs'
+import { featureLive } from '../src/gates.mjs'
+import { WALK, WALK_LIVE, STATUS_LIVE, LEARN, routeKey, hopChain } from '../src/walk.mjs'
 import config from '../ssr.config.js'
 
 const routes = config.routes.map((r) => r.path)
@@ -34,6 +35,13 @@ describe('src/walk.mjs - the walk contract (one list, four surfaces)', () => {
         }
     })
 
+    it('reads the tour in the owner order (issue #264 adds Struct audit)', () => {
+        expect(WALK.map((s) => s.label)).toEqual([
+            'Home', 'Install', 'Brain', 'Security', 'Showcase',
+            'Status', 'Struct audit', 'Releases', 'GitHub', 'Docs', 'Contact',
+        ])
+    })
+
     it('carries only ONE Home origin (footer renders the same list)', () => {
         // PageWalk skips index 0; anything else would double-render Home
         expect(WALK.filter((s) => s.href === '/')).toHaveLength(1)
@@ -50,6 +58,67 @@ describe('src/walk.mjs - the footer Learn contract (nine docs doors)', () => {
         expect(new Set(hrefs).size).toBe(hrefs.length)
         for (const l of LEARN) {
             expect(l.href.startsWith('https://docs.creadev.org/vant/')).toBe(true)
+        }
+    })
+})
+
+describe('hopChain - the menu-derived prev/next contract (externals ride along)', () => {
+    const ix = (href) => WALK.findIndex((s) => s.href === href)
+
+    it('walks internal stops directly (Showcase: Security <-> Status, Status -> Struct audit next)', () => {
+        const back = hopChain(WALK, ix('/showcase'), -1)
+        const fwd = hopChain(WALK, ix('/showcase'), 1)
+        expect(back.externals).toEqual([])
+        expect(back.internal.label).toBe('Security')
+        expect(fwd.externals).toEqual([])
+        expect(fwd.internal.label).toBe('Status')
+        const fromStatus = hopChain(WALK, ix('/status'), 1)
+        expect(fromStatus.externals).toEqual([])
+        expect(fromStatus.internal.href).toBe('/audit')
+    })
+
+    it('renders the externals, then the tour hop that skips them (Struct audit next)', () => {
+        const fwd = hopChain(WALK, ix('/audit'), 1)
+        expect(fwd.externals.map((s) => s.label)).toEqual(['Releases', 'GitHub', 'Docs'])
+        expect(fwd.internal.href).toBe('/contact')
+    })
+
+    it('collects the externals behind a prev hop too (Contact prev)', () => {
+        const back = hopChain(WALK, ix('/contact'), -1)
+        expect(back.externals.map((s) => s.label)).toEqual(['Docs', 'GitHub', 'Releases'])
+        expect(back.internal.href).toBe('/audit')
+    })
+
+    it('wraps the tour back to Home after the last stop (Contact next)', () => {
+        const fwd = hopChain(WALK, ix('/contact'), 1)
+        expect(fwd.externals).toEqual([])
+        expect(fwd.internal.href).toBe('/')
+    })
+
+    it('holds the deploy gate: STATUS_LIVE off hides only the Status stop', () => {
+        // gates.mjs owns the flag; walk.mjs only mirrors it. The lazy
+        // resolver follows the same VITE_<NAME>_LIVE law for future gates.
+        // The test environment sets no VITE_* vars, so the gate is OFF here:
+        // the not-yet-wired posture is the default. WALK stays the pinned
+        // full tour; WALK_LIVE is the same tour minus the unwired stop.
+        expect(STATUS_LIVE).toBe(false)
+        expect(WALK_LIVE).toEqual(WALK.filter((s) => s.href !== '/status'))
+        expect(WALK_LIVE.length).toBe(10)
+    })
+
+    it('resolves gates by name the same VITE_<NAME>_LIVE way (future surfaces)', () => {
+        expect(featureLive('status')).toBe(false)
+        expect(featureLive('relay')).toBe(false)
+    })
+
+    it('never returns an external as the internal hop and never loops forever', () => {
+        for (let i = 0; i < WALK.length; i++) {
+            for (const dir of [-1, 1]) {
+                const { externals, internal } = hopChain(WALK, i, dir)
+                expect(externals.length).toBeLessThan(WALK.length)
+                for (const s of externals) { expect(s.href.startsWith('/')).toBe(false) }
+                if (internal) { expect(internal.href.startsWith('/')).toBe(true) }
+            }
         }
     })
 })

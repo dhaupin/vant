@@ -72,6 +72,19 @@ const SOURCES = [
         targets: [
             'web/dashboard/src/frame/CarrierShare.tsx'
         ]
+    },
+    // (vant issue #264, the STRUCT-audit skeleton) the second kit-side
+    // member: the StructAudit data contract + poststruct adapter stub +
+    // the pure mock board. Same shape law: TSX in, no .d twin, byte-
+    // identical + hash-pinned to kit head. Home renders its own flavor
+    // presentation over the same contract (its pure-data module cites
+    // this file as the shape's single source).
+    {
+        source: path.join(ROOT, 'web', 'kit', 'components', 'struct-audit.tsx'),
+        types: null,
+        targets: [
+            'web/dashboard/src/frame/StructAudit.tsx'
+        ]
     }
 ];
 

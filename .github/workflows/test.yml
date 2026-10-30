@@ -6,12 +6,18 @@ name: VANT CI
 on:
   workflow_dispatch:
   push:
-    # axolotl is the working batch branch: batch passes land there BEFORE
-    # any PR opens (post-merge, no PR event exists) - so push-trigger CI
-    # must cover it or batch passes ship ungated.
-    branches: [main, develop, 'agent-*', axolotl]
+    # The staging rule (poststruct#32's canon; eyestruct#21 was the reuse,
+    # adopted vant-wide in wave 16, vant#272): staging is the PERMANENT
+    # integration branch - work PRs target it, promotion to main is the
+    # only way out. axolotl is the free-bird dev branch: batch passes still
+    # land there BEFORE any PR opens (post-merge, no PR event exists), so
+    # push CI must cover it too or batch passes ship ungated. `develop` no
+    # longer rides the list: it has not existed in the branch slate for a
+    # while (checked on adoption day) and a trigger for a missing branch
+    # is drift by another name.
+    branches: [main, staging, 'agent-*', axolotl]
   pull_request:
-    branches: [main, develop]
+    branches: [main, staging]
   schedule:
     - cron: '0 0 * * 0'  # Weekly (default branch only, single job = cheap)
 
@@ -41,15 +47,46 @@ jobs:
       - name: Security checks (tokens + npm audit)
         run: |
           ! grep -rE "ghp_[a-zA-Z0-9]{36}" . --include="*.js"
-          npm audit --audit-level=high
+          # --omit=dev: eyestruct (dev-only, the visual gate) rides the
+          # puppeteer chrome-installer chain, whose extract-zip dep carries
+          # an upstream high advisory with NO fix - the chain exists only
+          # for LAN-local capture verbs (look/diff/walk), which vant's CI
+          # never runs (the gate lane is browserless by design). The prod
+          # tree stays clean-0-high, and that is the surface CI promises.
+          npm audit --omit=dev --audit-level=high
 
       - name: Run tests
         run: |
           node -e "console.log('vant', require('./package.json').version)"
           node test/ci.js
           node test/runner.js
-          node test/evals/vibe.js
-          node test/coverage.js
+
+      - name: Eyes gate (eyestruct@1.0 visual ledger, browserless)
+        # The crashtest lane aimed at appearance instead of attackability.
+        # eyestruct@1.0 (npm v1.0.0): `gate` is read-only over
+        # labs/.eyes/ - every committed visual artifact must be explained
+        # by a ledger row and every row must reference a live artifact on
+        # disk. Browserless by design: capture verbs (look/diff/walk) are
+        # LAN-local against the pinned chrome; CI runs the meanings, not
+        # the pixels.
+        run: npx eyestruct gate
+
+      - name: Packs deep lint (packstruct@1 author-time gate, vant#247)
+        # The live-corpus receipt + CI lane, same commit: every pack
+        # manifest is checked against the real SPEC v1 (fields, name==dir,
+        # entry-exists, version shape) and --deep probes each entry's
+        # import + default export + id census. Zero sockets, in-process,
+        # runs in seconds; a violation fails the job at author time
+        # instead of failing a pack load somewhere downstream.
+        run: npm run packs:lint
+
+      - name: Packs conformance audit (packstruct §7 harness, ALLOWED-pinned)
+        # The host-loader face (crashtest's real loader) runs against
+        # packstruct's bundled conformance corpus. Regressions outside the
+        # allowlist fail the job; the pinned "clean" row is the documented
+        # engine finding, deleted when its fix lands (see
+        # scripts/audit-packs-gate.js for the honest pin).
+        run: npm run packs:audit
 
       - name: Surface consistency (no phantom endpoints, links, community doors)
         run: npm run lint:surface
@@ -71,6 +108,15 @@ jobs:
 
       - name: Docs truthfulness gate (doc promises resolve to real tree, R3-F9)
         run: node scripts/check-docs-truthfulness.js
+
+      - name: Pass-ledger open-items gate (drift is machine-visible, pass-354 arc)
+        # The pass-ledger census reads the REAL ledger docs and pins them
+        # to a committed snapshot: any open-item open/close/line-move must
+        # update labs/open-items.snapshot.json in the SAME commit as the
+        # ledger edit - a conscious act, never background churn. The
+        # weekly cron re-runs this job, so drift is re-measured weekly
+        # even when the week's commits never touched a ledger.
+        run: npm run ledger:gate
 
       - name: Run standalone suites
         # (pass 293) THE HARNESS, not a bare loop: the old `for f in …`
@@ -102,10 +148,17 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        # crashtest@1.0.0 ships on npm — the consumption path — so the
-        # CI gate runs the REAL pack loader + Harness straight from the
-        # installed package, no clone step.
+        # crashtest@1.1.0 ships on npm — the consumption path (the S0→S1
+        # v1.0.x→v1.1.0 adoption, vant#249) — so the CI gate runs the
+        # REAL pack loader + two-pod Harness + expectation tables straight
+        # from the installed package, no clone step.
         run: npm ci
+
+      - name: Determinism preflight (crashtest #13 blocker 3, adopted with the 1.1.0 run root)
+        # The no-wall-clock law enforced for free: flat-greps the declared
+        # pack sources for Date.now / new Date( / Math.random and exits 2
+        # naming file:line. Wire-once, every pack's determinism law holds.
+        run: npx crashtest lint-determinism
 
       - name: Crashtest gate (contract table + real-harness run root)
         run: node test/ci-crashtest-gate.js

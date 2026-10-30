@@ -19,6 +19,4 @@ description: The Vant runtime - programmatic API, MCP server, and headless REST 
 
 ## Picking a channel
 
-Driving an agent harness that speaks MCP: [MCP](/vant/runtime/mcp). Writing Node code
-against Vant: the [runtime API](/vant/runtime/runtime). Everything else, including CI and
-containers: the [CLI](/vant/reference/cli) and the [headless REST server](/vant/reference/rest-api).
+Driving an agent harness that speaks MCP: [MCP](/vant/runtime/mcp). Writing Node code against Vant: the [runtime API](/vant/runtime/runtime). Everything else, including CI and containers: the [CLI](/vant/reference/cli) and the [headless REST server](/vant/reference/rest-api).

@@ -72,8 +72,6 @@ type Query {
 
 ---
 
-**Role**: GraphQL Developer  
-**Input**: Query  
-**Output**: Data
+**Role**: GraphQL Developer **Input**: Query **Output**: Data
 
 > Query.

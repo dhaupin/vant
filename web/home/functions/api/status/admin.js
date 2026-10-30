@@ -56,12 +56,19 @@ export async function onRequestPost(context) {
                 const out = await clearAlert(db)
                 return json(200, { ok: true, cleared: out.cleared })
             }
-            case 'endpoint.add': {
-                const spec = validEndpointSpec({ name: body.name, url: body.url, kind: body.kind, options: body.options })
-                if (!spec.ok) return json(400, { error: spec.reason })
-                const out = await addEndpoint(db, spec)
-                return json(200, { ok: true, added: out.added, endpoints: await getEndpoints(db) })
+        case 'endpoint.add': {
+            // Cost wall: endpoint cap (env STATUS_MAX_ENDPOINTS, plain Text,
+            // default 24) - an unlimited table would turn one cold public
+            // GET into a probe per row, forever.
+            const max = Number(env.STATUS_MAX_ENDPOINTS || '') || 24
+            const spec = validEndpointSpec({ name: body.name, url: body.url, kind: body.kind, options: body.options })
+            if (!spec.ok) return json(400, { error: spec.reason })
+            const out = await addEndpoint(db, spec, max)
+            if (out.capped) {
+                return json(400, { error: `endpoint cap reached (${out.capped}): remove an endpoint first, or raise STATUS_MAX_ENDPOINTS in the Pages settings (plain Text)` })
             }
+            return json(200, { ok: true, added: out.added, endpoints: await getEndpoints(db) })
+        }
             case 'endpoint.remove': {
                 const out = await removeEndpoint(db, body.target)
                 return json(200, { ok: true, removed: out.removed, endpoints: await getEndpoints(db) })

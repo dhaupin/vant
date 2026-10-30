@@ -176,7 +176,19 @@ async function getEndpoints(db) {
     return res.results || []
 }
 
-async function addEndpoint(db, spec) {
+/**
+ * Add an endpoint (admin door only). The cap (default 24, tunable with
+ * STATUS_MAX_ENDPOINTS in the Pages settings, plain Text) is a COST WALL:
+ * every cold public GET sweeps every endpoint, so an unlimited table turns
+ * one compromised admin key into an unbounded edge-egress hammer.
+ */
+async function addEndpoint(db, spec, maxEndpoints = 24) {
+    let cap = 0
+    if (Number(maxEndpoints) > 0) cap = Number(maxEndpoints)
+    if (cap > 0) {
+        const row = await db.prepare('SELECT COUNT(*) AS n FROM status_endpoints').first()
+        if (row && Number(row.n) >= cap) return { added: false, capped: cap }
+    }
     const res = await db.prepare(
         'INSERT OR IGNORE INTO status_endpoints (name, url, kind, kind_options, created_at) VALUES (?, ?, ?, ?, ?)'
     ).bind(spec.name, spec.url, spec.kind, JSON.stringify(spec.options || {}), new Date().toISOString()).run()

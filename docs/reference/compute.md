@@ -15,8 +15,7 @@ Execute code in sandboxed environments. Supports multiple languages.
 
 ## Languages Supported
 
-Language connectors live in `lib/connectors/` (subprocess per language):
-python, julia, rust, plus node/ruby/go/php connectors.
+Language connectors live in `lib/connectors/` (subprocess per language): python, julia, rust, plus node/ruby/go/php connectors.
 
 ## Functions
 
@@ -29,9 +28,7 @@ python, julia, rust, plus node/ruby/go/php connectors.
 | `list()` | Available languages |
 | `has(lang)` | Check language availability |
 
-Shortcuts pass the language through: `compute.python(...)`,
-`compute.julia(...)`, `compute.rust(...)` - they call `invoke` with the
-same `(func, args)` signature.
+Shortcuts pass the language through: `compute.python(...)`, `compute.julia(...)`, `compute.rust(...)` - they call `invoke` with the same `(func, args)` signature.
 
 ## Usage
 
@@ -59,9 +56,7 @@ const s = compute.status();
 | `compute:invoking` | Before exec |
 | `compute:invoked` | After completion |
 
-Also exported: `stopSidecars()` (tear the language sidecars down), the
-`Compute` class, and the multibrain config seams
-`getBrainComputeConfig`/`setBrainComputeConfig`/`getStackComputeConfigs`.
+Also exported: `stopSidecars()` (tear the language sidecars down), the `Compute` class, and the multibrain config seams `getBrainComputeConfig`/`setBrainComputeConfig`/`getStackComputeConfigs`.
 
 ---
 

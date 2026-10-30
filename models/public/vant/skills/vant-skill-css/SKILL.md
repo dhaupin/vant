@@ -66,8 +66,6 @@ parent > child /* child */
 
 ---
 
-**Role**: CSS Developer  
-**Input**: Styles  
-**Output**: Visuals
+**Role**: CSS Developer **Input**: Styles **Output**: Visuals
 
 > Style.

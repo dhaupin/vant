@@ -95,11 +95,7 @@ docker run -v vant-brain:/app/models dhaupin/vant vant start
 
 ## Upgrading an existing volume (pre-multi-brain layout)
 
-If your volume predates the multi-brain layout (brain files flat in
-`models/public/`), the first `vant start` on the axolotl line (v0.8.6,
-the build you are now running) imports it automatically, default brain
-name `vant`, confirmation banner on the CLI.
-Skip with `--no-migrate`, or run manually:
+If your volume predates the multi-brain layout (brain files flat in `models/public/`), the first `vant start` on the axolotl line (v0.8.6, the build you are now running) imports it automatically, default brain name `vant`, confirmation banner on the CLI. Skip with `--no-migrate`, or run manually:
 
 ```bash
 docker run -v vant-brain:/app/models dhaupin/vant vant migrate --status
@@ -108,8 +104,7 @@ docker run -v vant-brain:/app/models dhaupin/vant vant migrate --brain-name mybr
 docker run -v vant-brain:/app/models dhaupin/vant vant migrate
 ```
 
-Detection is content-based and idempotent; nothing is lost, and repeat runs
-are no-ops.
+Detection is content-based and idempotent; nothing is lost, and repeat runs are no-ops.
 
 ## Environment Variables
 

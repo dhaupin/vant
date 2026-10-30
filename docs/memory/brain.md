@@ -13,8 +13,7 @@ description: Brain files - markdown memory the agent reads at wake and writes at
 
 ## Where files live
 
-Since the multi-brain layout, each brain is a named directory in both
-scopes:
+Since the multi-brain layout, each brain is a named directory in both scopes:
 
 ```text
 models/
@@ -23,9 +22,7 @@ models/
   state.json           the active brain stack
 ```
 
-The default brain name is `vant`. The stack can hold several named brains;
-switching changes what the loader reads. Layout details and the stack
-contract live in [Multi-brain](/vant/multi-agent/brains).
+The default brain name is `vant`. The stack can hold several named brains; switching changes what the loader reads. Layout details and the stack contract live in [Multi-brain](/vant/multi-agent/brains).
 
 ## Core files
 
@@ -37,13 +34,11 @@ contract live in [Multi-brain](/vant/multi-agent/brains).
 | `errors.md` | Mistakes to avoid | Failure modes with the fix that worked |
 | `preferences.md` | How you work | Style, conventions, communication rules |
 
-Put the most important facts at the top of each file. Future sessions read
-the top before anything else, and long files go unread.
+Put the most important facts at the top of each file. Future sessions read the top before anything else, and long files go unread.
 
 ## Read API
 
-The single entry point is `brain.read`. It checks the current private brain
-first, then falls back to the public template:
+The single entry point is `brain.read`. It checks the current private brain first, then falls back to the public template:
 
 ```javascript
 const brain = require('./lib/brain');
@@ -59,15 +54,11 @@ item.content  // raw file content
 item.data     // parsed object for structured files
 ```
 
-Markdown, JSON, YAML, and plain text all work. The extension is part of the
-name: `brain.read('notes.json')` reads JSON, `brain.read('notes')` resolves
-whatever extension exists.
+Markdown, JSON, YAML, and plain text all work. The extension is part of the name: `brain.read('notes.json')` reads JSON, `brain.read('notes')` resolves whatever extension exists.
 
 ### Cross-brain stack fallback (opt-in)
 
-With a multi-brain stack (e.g. your dialect brain layered over the shared
-vant baseline), a key your brain does not override can resolve from the
-brain below you by passing `{ stackFallback: true }`:
+With a multi-brain stack (e.g. your dialect brain layered over the shared vant baseline), a key your brain does not override can resolve from the brain below you by passing `{ stackFallback: true }`:
 
 ```javascript
 const baseline = await brain.read('manifesto', { stackFallback: true });
@@ -77,11 +68,7 @@ if (baseline && baseline.viaStack) {
 }
 ```
 
-The walk is strictly opt-in (default reads never leave your own brain),
-skipped when you pin `{ brain }` or `{ type }` (a targeted read, not a
-resolution request), and each result is tagged `viaStack: true` so
-provenance is visible. Without the flag, a missing key still returns
-`null`.
+The walk is strictly opt-in (default reads never leave your own brain), skipped when you pin `{ brain }` or `{ type }` (a targeted read, not a resolution request), and each result is tagged `viaStack: true` so provenance is visible. Without the flag, a missing key still returns `null`.
 
 ## Corpus access
 
@@ -92,8 +79,7 @@ const corpus = await brain.loadCorpus();   // async by default; {sync:true} for 
 corpus.length;   // number of brain items
 ```
 
-Each corpus item has `name`, `source`, `format`, and `content`. The corpus
-is cached; invalidate after out-of-band writes:
+Each corpus item has `name`, `source`, `format`, and `content`. The corpus is cached; invalidate after out-of-band writes:
 
 ```javascript
 brain.invalidateCorpusCache();
@@ -101,8 +87,7 @@ brain.invalidateCorpusCache();
 
 ## Writing
 
-Brain writes go through the memory surface so the security chain, atomic
-writes, and events stay engaged. From the CLI:
+Brain writes go through the memory surface so the security chain, atomic writes, and events stay engaged. From the CLI:
 
 ```bash
 vant memory learn lessons "Use exit codes, not tail text, to judge test suites."
@@ -117,9 +102,7 @@ await memory.learn('lessons', 'Use exit codes, not tail text, to judge test suit
 
 ## Legacy layouts
 
-A pre-multi-brain install keeps files flat in `models/public/`. `vant start`
-detects and imports it automatically on first run. The manual path and its
-safety guarantees are in the [Migration Guide](/vant/getting-started/migration).
+A pre-multi-brain install keeps files flat in `models/public/`. `vant start` detects and imports it automatically on first run. The manual path and its safety guarantees are in the [Migration Guide](/vant/getting-started/migration).
 
 ## Related
 

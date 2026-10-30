@@ -92,8 +92,6 @@ Allow: /
 
 ---
 
-**Role**: SEO Auditor  
-**Input**: URL  
-**Output**: Findable?
+**Role**: SEO Auditor **Input**: URL **Output**: Findable?
 
 > Make it discoverable.

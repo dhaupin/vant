@@ -11,9 +11,7 @@ description: Keep the brain corpus lean - prune stale files, fluff, and supersed
 
 > A brain that grows forever stops being read. Prune it.
 
-Brains accumulate. Lessons repeat, goals go stale, files nobody reads slow
-down every corpus load and every embedding pass. The prune surface removes
-the weight on purpose.
+Brains accumulate. Lessons repeat, goals go stale, files nobody reads slow down every corpus load and every embedding pass. The prune surface removes the weight on purpose.
 
 ## CLI
 
@@ -23,8 +21,7 @@ Preview what would go:
 vant prune --dry-run
 ```
 
-Apply it (bare `vant prune` is itself a dry run - deletion needs the
-force flag):
+Apply it (bare `vant prune` is itself a dry run - deletion needs the force flag):
 
 ```bash
 vant prune --force
@@ -37,8 +34,7 @@ vant prune --list    # show prunable files
 vant prune --stats   # prune statistics
 ```
 
-Prune targets stale version folders, superseded files, and fluff content,
-with retention policies controlling how much history stays.
+Prune targets stale version folders, superseded files, and fluff content, with retention policies controlling how much history stays.
 
 ## Daemon mode
 
@@ -49,9 +45,7 @@ vant prune --daemon
 vant prune --daemon --interval=21600000   # interval in ms (default: 24h)
 ```
 
-Each daemon tick runs a real prune pass under an internal admin context
-(`prune-daemon`), so `--stale-days=<n>` can override the age threshold
-there too.
+Each daemon tick runs a real prune pass under an internal admin context (`prune-daemon`), so `--stale-days=<n>` can override the age threshold there too.
 
 ## Tuning
 
@@ -60,10 +54,7 @@ vant prune --list --stale-days=30   # age threshold override (default: 90)
 vant prune --list --no-fluff        # stale files only, skip fluff detection
 ```
 
-(`--no-fluff` is honored on the `--list` pass; the main prune pass always
-runs with fluff detection on.) The stale-days default comes from the
-`prune.staleDays` config key (`lib/prune.js` exports it as
-`DEFAULT_STALE_DAYS`).
+(`--no-fluff` is honored on the `--list` pass; the main prune pass always runs with fluff detection on.) The stale-days default comes from the `prune.staleDays` config key (`lib/prune.js` exports it as `DEFAULT_STALE_DAYS`).
 
 ## Programmatic
 
@@ -73,23 +64,17 @@ const prune = require('./lib/prune');
 const result = await prune.prune({ dryRun: true, userCtx });
 ```
 
-`prune()` takes `{ dryRun, staleDays, removeFluff, userCtx }`. The result
-reports what was found and what was removed before anything is deleted,
-so the dry-run result can be reviewed in automation. Related exports:
-`getStats()`, `listPrunable()`, `isFluff()`, `DEFAULT_STALE_DAYS`.
+`prune()` takes `{ dryRun, staleDays, removeFluff, userCtx }`. The result reports what was found and what was removed before anything is deleted, so the dry-run result can be reviewed in automation. Related exports: `getStats()`, `listPrunable()`, `isFluff()`, `DEFAULT_STALE_DAYS`.
 
 ## Practice
 
-Prune on a schedule, not on a feeling. The cron surface can drive it
-periodically:
+Prune on a schedule, not on a feeling. The cron surface can drive it periodically:
 
 ```bash
 vant cron list
 ```
 
-Shows scheduled jobs; add a prune job through `vant cron`. Keep the interval
-honest: a monthly prune of an active brain is usually enough, and the
-dry-run result makes each pass reviewable before it is destructive.
+Shows scheduled jobs; add a prune job through `vant cron`. Keep the interval honest: a monthly prune of an active brain is usually enough, and the dry-run result makes each pass reviewable before it is destructive.
 
 ## Related
 

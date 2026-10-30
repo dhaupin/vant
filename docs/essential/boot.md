@@ -42,10 +42,7 @@ vant boot --image=./brain.png --decrypt=secret123
 
 ## Embedded Config
 
-The stone gathers its own config; there is no separate embed API. Non-sensitive
-configuration lives in the brain (write it with `vant config set`), and a
-stego-SVG horcrux packs the brain tree plus shared state and the gathered
-config, so a restored stone comes back up configured:
+The stone gathers its own config; there is no separate embed API. Non-sensitive configuration lives in the brain (write it with `vant config set`), and a stego-SVG horcrux packs the brain tree plus shared state and the gathered config, so a restored stone comes back up configured:
 
 ```bash
 vant config set GITHUB_REPO owner/repo
@@ -53,8 +50,7 @@ vant config set GITHUB_BRANCH main
 vant snapshot --password mypass
 ```
 
-On boot the stone is decoded and restored whole; config is included,
-tokens are not - set credentials by hand after boot (see Caveats).
+On boot the stone is decoded and restored whole; config is included, tokens are not - set credentials by hand after boot (see Caveats).
 
 ## Use Cases
 
@@ -83,22 +79,14 @@ vant boot --image=https://raw.githubusercontent.com/user/repo/main/<agent>-p_<pw
 
 - No tokens embedded (security by design)
 - Must set tokens separately after boot
-- The sealing image is an SVG (the legacy PNG stone path is retired;
-  `vant snapshot` is the encoder)
-- A brain too big for one stone can be scoped with
-  `vant snapshot --brains <a,b>`
+- The sealing image is an SVG (the legacy PNG stone path is retired; `vant snapshot` is the encoder)
+- A brain too big for one stone can be scoped with `vant snapshot --brains <a,b>`
 
 ## Amnesia mode (all boot sources fail)
 
-When `vant boot` cannot find any usable boot source (no `--image`, every
-source in the auto-boot order fails), it enters **Amnesia Mode**: an
-explicit on-screen banner ("VANT AMNESIA MODE") that records an amnesia
-state marker and keeps going WITHOUT the booted brain.
+When `vant boot` cannot find any usable boot source (no `--image`, every source in the auto-boot order fails), it enters **Amnesia Mode**: an explicit on-screen banner ("VANT AMNESIA MODE") that records an amnesia state marker and keeps going WITHOUT the booted brain.
 
-Important, verified against the code (`bin/boot.js enterAmnesiaMode`):
-**the brain tree is NOT modified - nothing is wiped.** An older build
-printed "Cleaning brain and starting fresh" but never deleted anything;
-the current wording says exactly what happens. Recovery is manual:
+Important, verified against the code (`bin/boot.js enterAmnesiaMode`): **the brain tree is NOT modified - nothing is wiped.** An older build printed "Cleaning brain and starting fresh" but never deleted anything; the current wording says exactly what happens. Recovery is manual:
 
 ```bash
 vant horcrux restore <svg> <password>

@@ -31,13 +31,11 @@ In your project folder:
 vant memory learn todos "ship the login page, then the settings page"
 ```
 
-That's it. The note is in your project's brain, on disk, in plain
-markdown you can open and read.
+That's it. The note is in your project's brain, on disk, in plain markdown you can open and read.
 
 ## Five minutes: notes that stick
 
-The same verb does everything - the first word after `learn` is just a
-label you invent:
+The same verb does everything - the first word after `learn` is just a label you invent:
 
 ```bash
 vant memory learn decisions "chose Postgres over Mongo - team already knows SQL"
@@ -52,9 +50,7 @@ vant memory state session-id abc123
 vant memory recall session-id
 ```
 
-Read everything the brain holds (it is plain markdown under
-`models/private/<brain>/` - `vant onboard files` or plain `cat` will
-show every entry):
+Read everything the brain holds (it is plain markdown under `models/private/<brain>/` - `vant onboard files` or plain `cat` will show every entry):
 
 ```bash
 vant memory list            # engine stats (semantic/state/counters)
@@ -70,13 +66,11 @@ vant search "why did we choose postgres"
 vant search "rate limits" --compact
 ```
 
-Search is hybrid (text plus semantic), so paraphrases work - you do
-not need to remember the exact words you stored.
+Search is hybrid (text plus semantic), so paraphrases work - you do not need to remember the exact words you stored.
 
 ## When you want sync
 
-Everything above works offline with zero accounts. When you want the
-brain to travel with the repo, add two lines to `.env`:
+Everything above works offline with zero accounts. When you want the brain to travel with the repo, add two lines to `.env`:
 
 ```bash
 VANT_GITHUB_REPO=your-username/your-brain-repo
@@ -90,23 +84,18 @@ vant sync --push
 vant sync --pull
 ```
 
-This is the original premise: ship the memory with the repo. Plain
-markdown files in a git repo you own - never locked into a vendor.
+This is the original premise: ship the memory with the repo. Plain markdown files in a git repo you own - never locked into a vendor.
 
 ## A tiny agent habit
 
-If you code with an AI agent (Copilot, Claude, Cursor, anything with a
-shell), teach it two sentences:
+If you code with an AI agent (Copilot, Claude, Cursor, anything with a shell), teach it two sentences:
 
 ```text
 Before we start, run: vant memory query decisions
 When we decide something, run: vant memory learn decisions "<what and why>"
 ```
 
-Now every session starts with the context and ends with the lesson.
-That loop - remember, decide, record - is the whole methodology at
-hobbyist scale. When your project grows into a crew of agents, it is
-the same loop with more structure:
+Now every session starts with the context and ends with the lesson. That loop - remember, decide, record - is the whole methodology at hobbyist scale. When your project grows into a crew of agents, it is the same loop with more structure:
 
 - The brain files an agent actually reads: [The Brain](/vant/memory/brain)
 - The wake/work/sleep loop: [Agent Onboarding](/vant/getting-started/agent-onboarding)
@@ -122,10 +111,7 @@ the same loop with more structure:
 | Group decisions across orgs | [Steward Runbook](/vant/operations/steward-runbook) |
 | Everything the CLI can do | [CLI Reference](/vant/reference/cli) |
 
-One honest note: `vant health` will mention setup and GitHub sync as
-"not initialized" when you skipped them. That is fine - the memory
-commands on this page work without any of it. The health check is
-guarding the full enterprise setup, not the one-liners.
+One honest note: `vant health` will mention setup and GitHub sync as "not initialized" when you skipped them. That is fine - the memory commands on this page work without any of it. The health check is guarding the full enterprise setup, not the one-liners.
 
 ---
 

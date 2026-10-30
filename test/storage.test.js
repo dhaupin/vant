@@ -347,6 +347,48 @@ asyncTest('readSecured throws on path traversal', async () => {
     return { success: blocked, error: blocked ? null : 'readSecured should block traversal' };
 });
 
+// (wave 14) the repos seat's first native grade (was typeof-only in the
+// coverage smoke battery): the mount registry against a THROWAWAY
+// reposDir - the sweep's own models tree is never touched.
+asyncTest('repos seat: register writes the url into the registry', async () => {
+    const fs = require('fs');
+    const os = require('os');
+    const tmpRepos = fs.mkdtempSync(path.join(os.tmpdir(), 'vant-repos-'));
+    const ReposStorage = require(path.join(ROOT, 'lib', 'storage')).ReposStorage;
+    const repos = new ReposStorage({ reposDir: tmpRepos });
+    const ok = repos.register('vant', 'https://github.com/dhaupin/vant', { branch: 'axolotl' }) === true;
+    const stored = JSON.parse(fs.readFileSync(path.join(tmpRepos, 'config.json'), 'utf8'));
+    const saved = stored.repos.vant && stored.repos.vant.url === 'https://github.com/dhaupin/vant' && stored.repos.vant.branch === 'axolotl';
+    fs.rmSync(tmpRepos, { recursive: true, force: true });
+    return { success: ok && saved };
+});
+
+asyncTest('repos seat: mount of an unknown name answers null (not a throw)', async () => {
+    const fs = require('fs');
+    const os = require('os');
+    const tmpRepos = fs.mkdtempSync(path.join(os.tmpdir(), 'vant-repos-'));
+    const ReposStorage = require(path.join(ROOT, 'lib', 'storage')).ReposStorage;
+    const repos = new ReposStorage({ reposDir: tmpRepos });
+    return { success: (await repos.mount('ghost')) === null };
+});
+
+asyncTest('repos seat: mount flags the repo mounted and unmount clears it', async () => {
+    const fs = require('fs');
+    const os = require('os');
+    const tmpRepos = fs.mkdtempSync(path.join(os.tmpdir(), 'vant-repos-'));
+    const ReposStorage = require(path.join(ROOT, 'lib', 'storage')).ReposStorage;
+    const repos = new ReposStorage({ reposDir: tmpRepos });
+    repos.register('vant', 'https://github.com/dhaupin/vant');
+    const record = await repos.mount('vant');
+    const afterMount = JSON.parse(fs.readFileSync(path.join(tmpRepos, 'config.json'), 'utf8'));
+    const mountedOk = record && record.url === 'https://github.com/dhaupin/vant' && afterMount.mounted.includes('vant');
+    const unmounted = repos.unmount('vant') === true;
+    const afterUnmount = JSON.parse(fs.readFileSync(path.join(tmpRepos, 'config.json'), 'utf8'));
+    const clearedOk = unmounted && afterUnmount.mounted.length === 0;
+    fs.rmSync(tmpRepos, { recursive: true, force: true });
+    return { success: mountedOk && clearedOk };
+});
+
 // ============================================
 // SUMMARY
 // ============================================

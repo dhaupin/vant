@@ -61,16 +61,11 @@ const status = await sync.getStatus();
 // { providers: { github: { connected, branches, current }, ... } }
 ```
 
-`pullAny` returns the pulled corpus plus per-provider results; a
-provider that fails is skipped and the next is tried. Also exported:
-`rebase(provider)`, `diffCorpus()`, `scanConflictMarkers()`,
-`getConfiguredProviders()`, plus the round-trip verify seams
-`verifyProvider(name)` / `verifyAllProviders()`.
+`pullAny` returns the pulled corpus plus per-provider results; a provider that fails is skipped and the next is tried. Also exported: `rebase(provider)`, `diffCorpus()`, `scanConflictMarkers()`, `getConfiguredProviders()`, plus the round-trip verify seams `verifyProvider(name)` / `verifyAllProviders()`.
 
 ## Configuration
 
-A provider is configured when its token + repo resolve. Tokens come
-from config or env per provider class (`lib/connectors/`):
+A provider is configured when its token + repo resolve. Tokens come from config or env per provider class (`lib/connectors/`):
 
 ```bash
 # GitHub

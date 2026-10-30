@@ -9,13 +9,11 @@ description: Crypto primitives in lib/encrypt - AES-256-GCM, HMAC token signing,
 
 # Encryption
 
-Reference for the primitives in `lib/encrypt`. For how to use them safely
-in an agent workflow, see [Best Practices](/vant/security/best-practices).
+Reference for the primitives in `lib/encrypt`. For how to use them safely in an agent workflow, see [Best Practices](/vant/security/best-practices).
 
 ## Message encryption
 
-Vant uses AES-256-GCM for message encryption. Every method returns an
-authTag, so tampering is detected on decrypt.
+Vant uses AES-256-GCM for message encryption. Every method returns an authTag, so tampering is detected on decrypt.
 
 | Method | Algorithm | Auth |
 |--------|-----------|------|
@@ -45,11 +43,7 @@ authTag, so tampering is detected on decrypt.
 | `VANT_API_KEY` | Server authentication |
 | `VANT_MSG_ENCRYPTED` | Enable message encryption (default: true) |
 
-Token payloads are base64 (visible, signature-protected, not secret).
-Tokens are signed, not encrypted: use only for data that is safe to
-expose to the holder. For key hygiene and secret handling in agent
-workflows, see [Best Practices](/vant/security/best-practices) and
-[Environment & Limits](/vant/security/environment).
+Token payloads are base64 (visible, signature-protected, not secret). Tokens are signed, not encrypted: use only for data that is safe to expose to the holder. For key hygiene and secret handling in agent workflows, see [Best Practices](/vant/security/best-practices) and [Environment & Limits](/vant/security/environment).
 
 ## Related
 

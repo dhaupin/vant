@@ -25,7 +25,7 @@ const SUBMIT_BODY = [
     '',
     '**Project:** [project name]',
     '**Production URL:** [the public site your install runs or serves]',
-    '**Industry:** [one or two words, e.g. research, fintech, creative, infrastructure]',
+    '**Industry:** [up to two short tags, e.g. research, fintech, creative, infrastructure, security, CI]',
     '**One-line purpose:** [what the install actually does all day]',
     '**Longer description:** [a few sentences. What the install is, what its agents solve, anything you are proud of. This is the "read more" text on your card.]',
     '**Picture URL:** [an https link to a square logo or wide screenshot we may hotlink on the card]',
@@ -49,7 +49,9 @@ function ShowcaseCard({ entry }) {
             <div className="sc-body">
                 <div className="sc-headrow">
                     <h3>{entry.title}</h3>
-                    <span className="sc-tag">{entry.industry}</span>
+                    <span className="sc-tags">
+                        {entry.industry.map((tag) => <span className="sc-tag" key={tag}>{tag}</span>)}
+                    </span>
                 </div>
                 <p>{entry.blurb}</p>
                 <details className="sc-more">

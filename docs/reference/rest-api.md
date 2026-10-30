@@ -9,15 +9,9 @@ description: The headless server - booting, security chain, and every built-in p
 
 # Headless Server & REST API
 
-The headless server is the embedder door: plain HTTP routes on
-`lib/server.js`, registered by `lib/api.js`. It is how CI, containers, and
-any non-Node client drive Vant. Every registered route is a thin proxy to
-an MCP tool, so a response is simply that tool's result JSON - the MCP door
-(port 3457) stays the tool catalog; the REST sidecar's own `/tools` is
-retired (`410 Gone`, issue #187).
+The headless server is the embedder door: plain HTTP routes on `lib/server.js`, registered by `lib/api.js`. It is how CI, containers, and any non-Node client drive Vant. Every registered route is a thin proxy to an MCP tool, so a response is simply that tool's result JSON - the MCP door (port 3457) stays the tool catalog; the REST sidecar's own `/tools` is retired (`410 Gone`, issue #187).
 
-For the protocol view of all Vant wires (MCP tool door, REST, crew bus),
-see [RPC](/vant/advanced/rpc).
+For the protocol view of all Vant wires (MCP tool door, REST, crew bus), see [RPC](/vant/advanced/rpc).
 
 ## Booting it
 
@@ -74,34 +68,19 @@ await server.listen();
 | `VANT_SERVER_AUTH_REQUIRED` | Set to `1` to require auth | unset |
 | `VANT_AUTH_KEY` | The API key callers must present | unset |
 
-TLS turns on automatically when `VANT_SERVER_CERT` and `VANT_SERVER_KEY`
-are both set; `VANT_SERVER_BIND` widens the bind off loopback deliberately.
+TLS turns on automatically when `VANT_SERVER_CERT` and `VANT_SERVER_KEY` are both set; `VANT_SERVER_BIND` widens the bind off loopback deliberately.
 
 ## Request pipeline
 
 Every request passes the server's security chain before a route runs:
 
-1. **VAF** - input validation on the URL and the body (path traversal,
-   injection, size guards)
-2. **QoS** - rate limiting plus concurrency: per-client rate limit
-   (60/min default), a circuit breaker that opens after 5 consecutive
-   failures and retries after 60s, and a bulkhead capping concurrent
-   requests at 10. Responses carry `X-RateLimit-Limit` and
-   `X-RateLimit-Remaining` headers (remaining is a static placeholder
-   today)
-3. **API key check** - when `VANT_SERVER_AUTH_REQUIRED=1` (or the
-   `server.authRequired` config), the `x-api-key` header must carry a
-   valid key. `VANT_AUTH_KEY` is the canonical source;
-   `VANT_API_KEY` still works as a deprecated alias (warn-once)
-4. **Escrow** - per-request budget tracking; each request costs 10 and
-   is blocked when the budget is exhausted
-5. Every response carries an `X-Request-Id` header for tracing, plus
-   the security headers
+1. **VAF** - input validation on the URL and the body (path traversal, injection, size guards)
+2. **QoS** - rate limiting plus concurrency: per-client rate limit (60/min default), a circuit breaker that opens after 5 consecutive failures and retries after 60s, and a bulkhead capping concurrent requests at 10. Responses carry `X-RateLimit-Limit` and `X-RateLimit-Remaining` headers (remaining is a static placeholder today)
+3. **API key check** - when `VANT_SERVER_AUTH_REQUIRED=1` (or the `server.authRequired` config), the `x-api-key` header must carry a valid key. `VANT_AUTH_KEY` is the canonical source; `VANT_API_KEY` still works as a deprecated alias (warn-once)
+4. **Escrow** - per-request budget tracking; each request costs 10 and is blocked when the budget is exhausted
+5. Every response carries an `X-Request-Id` header for tracing, plus the security headers
 
-Security headers on every response: `Content-Security-Policy: default-src
-'self'`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`,
-`X-XSS-Protection: 1; mode=block`, `Strict-Transport-Security` (on TLS),
-`Referrer-Policy: strict-origin-when-cross-origin`.
+Security headers on every response: `Content-Security-Policy: default-src 'self'`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `X-XSS-Protection: 1; mode=block`, `Strict-Transport-Security` (on TLS), `Referrer-Policy: strict-origin-when-cross-origin`.
 
 The QoS knobs are administrable in-process:
 
@@ -124,8 +103,7 @@ qos.getLayerStatus();
 
 ## Built-in endpoints
 
-Every `lib/server.js` instance serves three built-ins before any registered
-route runs:
+Every `lib/server.js` instance serves three built-ins before any registered route runs:
 
 | Method | Path | What |
 |--------|------|------|
@@ -149,9 +127,7 @@ curl -X POST http://localhost:3456/call \
   }'
 ```
 
-With the JSON-RPC envelope the response wraps as
-`{ "jsonrpc": "2.0", "id": 1, "result": ... }` (or carries `error`);
-flat shapes return the tool result directly.
+With the JSON-RPC envelope the response wraps as `{ "jsonrpc": "2.0", "id": 1, "result": ... }` (or carries `error`); flat shapes return the tool result directly.
 
 ---
 
@@ -173,8 +149,7 @@ curl -X POST http://localhost:3456/brain/identity \
   -d '{"content": "# NAME: Nova"}'
 ```
 
-A brain load returns `{ id, name, content }` (content truncated at 500
-characters); a save returns `{ saved: true, name: "..." }`.
+A brain load returns `{ id, name, content }` (content truncated at 500 characters); a save returns `{ saved: true, name: "..." }`.
 
 ### Streams (work items)
 

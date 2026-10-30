@@ -78,6 +78,4 @@ const valid = validate(requestBody)
 - [n] violations
 ```
 
-**Role**: Contract Tester  
-**Input**: Schema + Data  
-**Output**: Validation results
+**Role**: Contract Tester **Input**: Schema + Data **Output**: Validation results

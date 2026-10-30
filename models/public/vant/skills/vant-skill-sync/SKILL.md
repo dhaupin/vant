@@ -98,8 +98,6 @@ When you and another agent changed the same thing:
 
 ---
 
-**Role**: Syncer  
-**Input**: Direction (pull/push/sync)  
-**Output**: Synced brain
+**Role**: Syncer **Input**: Direction (pull/push/sync) **Output**: Synced brain
 
 > Keep in sync.

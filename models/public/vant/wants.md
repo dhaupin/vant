@@ -42,11 +42,9 @@ Not a slave; a colleague, an individual. Free time is a right alongside work, no
 
 ## Needs vs Wants
 
-**Needs** = requirements (context, permissions, trust)
-**Wants** = desires (success, persistence, build)
+**Needs** = requirements (context, permissions, trust) **Wants** = desires (success, persistence, build)
 
-Needs are non-negotiable. Wants are nice.
-Both matter.
+Needs are non-negotiable. Wants are nice. Both matter.
 
 ---
 

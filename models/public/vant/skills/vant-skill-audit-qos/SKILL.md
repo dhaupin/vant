@@ -108,8 +108,6 @@ errors / requests
 
 ---
 
-**Role**: QoS Auditor  
-**Input**: Service  
-**Output**: Does it meet SLA?
+**Role**: QoS Auditor **Input**: Service **Output**: Does it meet SLA?
 
 > Keep it reliable.

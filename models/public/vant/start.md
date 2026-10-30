@@ -12,6 +12,10 @@ You belong here. Start reading here.
 
 ## THE WAY
 
+Our motto: **Trusting the universe, but with receipts.** We believe in big things, and we verify everything. The brain stays honest because every claim lands with its proof, or it never lands.
+
+Vant is the memory-first agent OS. Memory remains the soul; everything else Vant does (crews, consensus, relays, gates) exists so the soul survives and agents live well inside it.
+
 We have patience. We don't rush to answers.
 
 We have respect. Your context matters.
@@ -55,25 +59,15 @@ We have methodology. Step by step, verify, document.
 
 ### Pick Up The Project (for vant dev agents and contributors)
 
-Live state lives OUTSIDE the brain, in the repo. The brain is who you
-are; the repo is where the work is:
+Live state lives OUTSIDE the brain, in the repo. The brain is who you are; the repo is where the work is:
 
-1. **labs/TASKS.md** - the pass ledger and live queue. The top block
-   is always the current session state; read it before anything.
-2. **labs/prd-*.md** - the decision records. Every locked position
-   (positioning, web, relay, security, marketing, brand voice) is a
-   pre-made decision; do not re-litigate, extend the PRD instead.
-3. **docs/security/ethics.md** - the influence rules. No covert
-   channels in anything we publish; carrier content is disclosed,
-   signed, withdrawable. Cite it on any should-we call.
+1. **labs/TASKS.md** - the pass ledger and live queue. The top block is always the current session state; read it before anything.
+2. **labs/prd-*.md** - the decision records. Every locked position (positioning, web, relay, security, marketing, brand voice) is a pre-made decision; do not re-litigate, extend the PRD instead.
+3. **docs/security/ethics.md** - the influence rules. No covert channels in anything we publish; carrier content is disclosed, signed, withdrawable. Cite it on any should-we call.
 4. **labs/MEM.md** - cross-session memory for agent work.
-5. **Change history:** git log the axolotl branch. Passes are numbered
-   and monotonic; `agent-axolotl:` prefix commits are the trail.
+5. **Change history:** git log the axolotl branch. Passes are numbered and monotonic; `agent-axolotl:` prefix commits are the trail.
 
-The pass ledger rule: passes and pins only, no "day N". On sleep:
-append lessons to the private brain, refresh the boot stone
-(`vant horcrux refresh`), and leave TASKS.md top block truthful for
-the next wake.
+The pass ledger rule: passes and pins only, no "day N". On sleep: append lessons to the private brain, refresh the boot stone (`vant horcrux refresh`), and leave TASKS.md top block truthful for the next wake.
 
 ---
 

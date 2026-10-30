@@ -14,13 +14,10 @@ nav_order: 55
 ## What You'll Build
 
 Two real automation surfaces:
-- **Webhook server** - `lib/webhooks.js`: an inbound HTTP receiver for
-  HMAC-signed custom routes (`vant webhooks`)
+- **Webhook server** - `lib/webhooks.js`: an inbound HTTP receiver for HMAC-signed custom routes (`vant webhooks`)
 - **Scheduled jobs** - interval timers via `vant.cron` (brain prune, sync)
 
-No prebuilt GitHub-push route ships - the server takes routes YOU
-register. To sync on GitHub activity, use `vant watch` (polling) or
-the scheduler below.
+No prebuilt GitHub-push route ships - the server takes routes YOU register. To sync on GitHub activity, use `vant watch` (polling) or the scheduler below.
 
 ## Why Webhooks?
 
@@ -30,11 +27,7 @@ the scheduler below.
 
 ## Webhook Server (Vant's)
 
-Vant ships its own webhook system (`bin/webhooks.js` + `lib/webhooks.js`),
-serving on port 3467 by default. It is an INTAKE: custom routes register
-via the library (`register({ name, source, secret, dispatch, ... })`),
-requests POST to `<url>/<source>` with an HMAC signature header, and the
-ack honestly reports `{ received, event, source, handlers, dispatched }`
+Vant ships its own webhook system (`bin/webhooks.js` + `lib/webhooks.js`), serving on port 3467 by default. It is an INTAKE: custom routes register via the library (`register({ name, source, secret, dispatch, ... })`), requests POST to `<url>/<source>` with an HMAC signature header, and the ack honestly reports `{ received, event, source, handlers, dispatched }`
 - identical signed bytes replay as 409, stale envelopes refuse 401.
 
 The CLI manages the outbound/side list:
@@ -54,13 +47,11 @@ VANT_WEBHOOK_PORT=3467    # optional (default 3467)
 VANT_WEBHOOK_BIND=127.0.0.1  # default loopback; set deliberately to widen
 ```
 
-Crew-bus events are also emitted as `webhook:crew.<type>` events you can
-subscribe to in-process.
+Crew-bus events are also emitted as `webhook:crew.<type>` events you can subscribe to in-process.
 
 ## Scheduled Jobs
 
-Use cron - schedules are interval timers in milliseconds
-(1000-86400000), not cron expressions:
+Use cron - schedules are interval timers in milliseconds (1000-86400000), not cron expressions:
 
 ```javascript
 const cron = require('vant').cron;
@@ -77,16 +68,14 @@ cron.schedule({
 });
 ```
 
-For pruning, use the real prune CLI on a schedule outside the process
-(cron tab or your scheduler of choice):
+For pruning, use the real prune CLI on a schedule outside the process (cron tab or your scheduler of choice):
 
 ```bash
 # Daily prune at 2am (system crontab)
 0 2 * * * cd /path/to/vant && vant prune --stale-days=14 --force
 ```
 
-(flags are `=`-joined, and `--force` is what takes it out of the default
-dry run)
+(flags are `=`-joined, and `--force` is what takes it out of the default dry run)
 
 ## Custom Webhooks
 

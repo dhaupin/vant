@@ -11,10 +11,7 @@ description: Embed a whole brain in an image, encrypted. Transport memory as a f
 
 > A whole brain, hidden in an image, encrypted with a password.
 
-Horcrux takes the gathered brain state and embeds it into an SVG or PNG
-using steganography. The result is one portable file that carries the brain.
-Any Vant install can restore it. Nothing about the content is visible
-without the password.
+Horcrux takes the gathered brain state and embeds it into an SVG or PNG using steganography. The result is one portable file that carries the brain. Any Vant install can restore it. Nothing about the content is visible without the password.
 
 ## Create one
 
@@ -24,26 +21,17 @@ From the CLI, embedding the current brain into an image:
 vant horcrux create <path> <password>
 ```
 
-The command gathers brain state, encrypts it, and embeds the payload into
-the carrier image. Output lands as a file you can copy, commit, or attach.
-Without a path it defaults to
-`models/public/<currentBrain>/boot/<brain>-p_<password>.svg`, the naming
-convention boot-time discovery scans for.
+The command gathers brain state, encrypts it, and embeds the payload into the carrier image. Output lands as a file you can copy, commit, or attach. Without a path it defaults to `models/public/<currentBrain>/boot/<brain>-p_<password>.svg`, the naming convention boot-time discovery scans for.
 
 ## Refresh (keep it current)
 
-A horcrux is a point-in-time snapshot; the live brain drifts from it every
-session. Regenerate the discovered boot horcrux IN PLACE with fresh state:
+A horcrux is a point-in-time snapshot; the live brain drifts from it every session. Regenerate the discovered boot horcrux IN PLACE with fresh state:
 
 ```bash
 vant horcrux refresh
 ```
 
-The password resolves the same way as restore: arg (deprecated on the
-CLI), then `VANT_BRAIN_PASSWORD` env, then the secret store, then the
-`p_<password>` filename (the boot-convention rule below - refresh's target
-IS a boot file). Run this after meaningful
-brain changes if you rely on horcrux restore for disaster recovery.
+The password resolves the same way as restore: arg (deprecated on the CLI), then `VANT_BRAIN_PASSWORD` env, then the secret store, then the `p_<password>` filename (the boot-convention rule below - refresh's target IS a boot file). Run this after meaningful brain changes if you rely on horcrux restore for disaster recovery.
 
 ## Restore
 
@@ -53,34 +41,18 @@ On a fresh install:
 vant horcrux restore [path] [password]
 ```
 
-Without a path it scans the brain stack's boot dirs for `<agent>-p_*.svg`.
-Prompts for the password if not given, extracts the payload, and restores
-the brain state. Validation runs before anything is written; a corrupt or
-wrong-password carrier refuses cleanly.
+Without a path it scans the brain stack's boot dirs for `<agent>-p_*.svg`. Prompts for the password if not given, extracts the payload, and restores the brain state. Validation runs before anything is written; a corrupt or wrong-password carrier refuses cleanly.
 
 ### Password resolution order (v0.8.6)
 
 1. positional arg (deprecated on the CLI - it is readable in `ps`)
 2. `VANT_BRAIN_PASSWORD` env var
 3. the secret store (`lib/secret.js`)
-4. **`p_<password>` in the filename - BOOT CONVENTION, by default**
-   (pass 290, issue #223): a stone named `<agent>-p_<pw>.svg` inside a
-   `boot/` directory resolves its password automatically - that is the
-   documented self-describing-stone flow, and the help chain above tells
-   the truth end to end again. The rules around it stay deliberate:
+4. **`p_<password>` in the filename - BOOT CONVENTION, by default** (pass 290, issue #223): a stone named `<agent>-p_<pw>.svg` inside a `boot/` directory resolves its password automatically - that is the documented self-describing-stone flow, and the help chain above tells the truth end to end again. The rules around it stay deliberate:
 
-   - `VANT_ALLOW_FILENAME_PW=false` turns the filename off entirely
-     (explicit opt-OUT, for the security-minded - a filename is still
-     world-readable metadata: anyone who can list the boot dir gets the
-     brain password, so run with the env if your threat model demands it).
-   - `VANT_ALLOW_FILENAME_PW=true` keeps the legacy behavior of trusting
-     ANY p_-named path, boot dir or not.
-   - Other (non-boot-convention) p_-named files still refuse without one
-     of the two env states - the pass-246 posture stays for them.
+   - `VANT_ALLOW_FILENAME_PW=false` turns the filename off entirely (explicit opt-OUT, for the security-minded - a filename is still world-readable metadata: anyone who can list the boot dir gets the brain password, so run with the env if your threat model demands it). - `VANT_ALLOW_FILENAME_PW=true` keeps the legacy behavior of trusting ANY p_-named path, boot dir or not. - Other (non-boot-convention) p_-named files still refuse without one of the two env states - the pass-246 posture stays for them.
 
-   Separator-containing passwords round-trip fine: the parser treats
-   everything after `p_` up to the reserved `-b_` token as the password
-   (issue #218).
+   Separator-containing passwords round-trip fine: the parser treats everything after `p_` up to the reserved `-b_` token as the password (issue #218).
 
 ## Inspect
 
@@ -90,8 +62,7 @@ Check a carrier without extracting:
 vant horcrux inspect [path] [password]
 ```
 
-Reports whether the file holds a valid horcrux payload and which formats it
-contains.
+Reports whether the file holds a valid horcrux payload and which formats it contains.
 
 ## Programmatic use
 
@@ -108,38 +79,23 @@ And the restore side:
 const result = await transform.fromHorcrux('brain.svg', { password: 'passphrase' });
 ```
 
-(`transform.restore(data)` is the lower-level half that takes already-
-parsed horcrux data; `fromHorcrux` is the file-level entry.)
+(`transform.restore(data)` is the lower-level half that takes already- parsed horcrux data; `fromHorcrux` is the file-level entry.)
 
 ## Zero-config boot from an image
 
-Boot from zero local state - no config file, no .env scaffolding - by
-pointing the boot sequence at a horcrux image:
+Boot from zero local state - no config file, no .env scaffolding - by pointing the boot sequence at a horcrux image:
 
 ```bash
 vant boot --image https://example.com/horcrux.png --decrypt <password>
 ```
 
-`--image` takes a URL or a local path. On boot the stego layer decodes the
-payload, the embedded manifest (URLs only - never tokens) configures the
-provider, tokens are set separately as environment values, and the session
-resumes from the restored brain. The manifest is generated by
-`stego.generateManifest` in `lib/stego.js` (provider, primary and
-secondary URLs, branch); encryption is AES-256-GCM and remote URLs are
-validated, so a hostile image cannot point the boot at localhost.
+`--image` takes a URL or a local path. On boot the stego layer decodes the payload, the embedded manifest (URLs only - never tokens) configures the provider, tokens are set separately as environment values, and the session resumes from the restored brain. The manifest is generated by `stego.generateManifest` in `lib/stego.js` (provider, primary and secondary URLs, branch); encryption is AES-256-GCM and remote URLs are validated, so a hostile image cannot point the boot at localhost.
 
-Use cases: transient deployments that start from nothing but an image URL,
-disaster recovery from an old profile picture, provider migration between
-forges, and zero-config starts for fresh agent hardware.
+Use cases: transient deployments that start from nothing but an image URL, disaster recovery from an old profile picture, provider migration between forges, and zero-config starts for fresh agent hardware.
 
 ## The canvas aside
 
-Stones ship as SVG. The visual wrapper is generated natively:
-`toHorcrux` uses a template when one exists at
-`models/public/boot/horcrux-template.svg`, and otherwise
-[Canvas](/vant/reference/canvas) renders the aside - the patterned
-background the payload hides inside. The image is the carrier; the brain
-is the cargo.
+Stones ship as SVG. The visual wrapper is generated natively: `toHorcrux` uses a template when one exists at `models/public/boot/horcrux-template.svg`, and otherwise [Canvas](/vant/reference/canvas) renders the aside - the patterned background the payload hides inside. The image is the carrier; the brain is the cargo.
 
 ## When to use one
 
@@ -147,9 +103,7 @@ is the cargo.
 - Moving a brain between machines without git access.
 - Handing a brain to a successor agent as a single artifact.
 
-The underlying hide-in-plain-sight mechanism is [stego](/vant/memory/stego),
-which covers the standalone PNG recovery path; the boot-time stones above
-are the SVG side of the same idea.
+The underlying hide-in-plain-sight mechanism is [stego](/vant/memory/stego), which covers the standalone PNG recovery path; the boot-time stones above are the SVG side of the same idea.
 
 ## Related
 

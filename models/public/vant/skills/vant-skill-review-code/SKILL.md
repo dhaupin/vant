@@ -183,8 +183,6 @@ For each file:
 
 ---
 
-**Role**: Code Reviewer  
-**Input**: Source file(s)  
-**Output**: Issues found
+**Role**: Code Reviewer **Input**: Source file(s) **Output**: Issues found
 
 > Be thorough. Be kind. Be clear.

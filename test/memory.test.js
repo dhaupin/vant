@@ -357,6 +357,92 @@ asyncTest('hostile traversal KEYS are still refused (category/key keep the calle
     return true;
 });
 
+// (B0, issue #253) Versioned note store: provenance envelope. Two writers
+//updating the same note id must spin the revision, UNION the writer lines
+//(no vanished author), and flag the disjoint-provenance content change -
+// verek recall() with envelope:true reports it instead of blending.
+asyncTest('note envelope: revision spins up, writers union, conflict flagged (B0 #253)', async () => {
+    const m = require('../lib/memory');
+    const id = 'b0-drift-pin-' + Date.now();
+    await m.state('note:' + id, { body: 'balance ledger: 300', writers: ['writer-a'] }, { fresh: true, ttl: 600000 });
+    await m.state('note:' + id, { body: 'balance ledger: 825', writers: ['writer-b'] }, { fresh: true, ttl: 600000 });
+    const env = await m.recall('note:' + id, { fresh: true, envelope: true });
+    assert(env && typeof env === 'object', 'envelope read back nothing');
+    assert(env.revision === 2, 'expected revision 2, got ' + env.revision);
+    assert(Array.isArray(env.writers) && env.writers.includes('writer-a') && env.writers.includes('writer-b'),
+        'writers lost provenance: ' + JSON.stringify(env.writers));
+    assert(env.conflict && Array.isArray(env.conflict.between) && Array.isArray(env.conflict.and),
+        'disjoint-provenance content change carried no conflict flag: ' + JSON.stringify(env.conflict));
+    return true;
+});
+
+asyncTest('note envelope: contradiction + ghost refs flagged on READ (B0 #253)', async () => {
+    const m = require('../lib/memory');
+    const stamp = 'b0-flag-pin-' + Date.now();
+    await m.state('note:' + stamp, { summary: 'invoice total: 42', body: 'invoice total: 87' }, { fresh: true, ttl: 600000 });
+    await m.state('note:' + stamp + '-ghost', { body: 'rate from', refs: [stamp + '-never-written'] }, { fresh: true, ttl: 600000 });
+    const contra = await m.recall('note:' + stamp, { fresh: true, envelope: true });
+    assert(contra.summaryContradiction && Array.isArray(contra.summaryContradiction.missing) && contra.summaryContradiction.missing.includes(42),
+        'summary/body digit disagreement not flagged: ' + JSON.stringify(contra.summaryContradiction));
+    const ghost = await m.recall('note:' + stamp + '-ghost', { fresh: true, envelope: true, refNamespace: 'note:' });
+    assert(Array.isArray(ghost.unresolvedRefs) && ghost.unresolvedRefs.includes(stamp + '-never-written'),
+        'ghost ref not flagged unresolved: ' + JSON.stringify(ghost.unresolvedRefs));
+    // resolved ref: the SAME note exists in the namespace -> not flagged
+    await m.state('note:' + stamp + '-anchor', { body: 'anchor fact' }, { fresh: true, ttl: 600000 });
+    await m.state('note:' + stamp + '-cites', { body: 'derived', refs: [stamp + '-anchor'] }, { fresh: true, ttl: 600000 });
+    const ok = await m.recall('note:' + stamp + '-cites', { fresh: true, envelope: true, refNamespace: 'note:' });
+    assert(ok.unresolvedRefs === undefined, 'live ref flagged unresolved: ' + JSON.stringify(ok.unresolvedRefs));
+    return true;
+});
+
+// (B0, issue #253) Plain KV unchanged: non-note values keep the bare-value
+// recall contract (no envelope unless asked), and colon keys round-trip.
+asyncTest('plain KV untouched + colon keys survive the round trip (B0 #253)', async () => {
+    const m = require('../lib/memory');
+    const k = 'b0-kv-pin-' + Date.now() + ':' + 'x';
+    await m.state(k, 42, { fresh: true, ttl: 600000 });
+    const bare = await m.recall(k, { fresh: true });
+    assert(bare === 42, 'plain KV value changed shape: ' + JSON.stringify(bare));
+    const env = await m.recall(k, { fresh: true, envelope: true });
+    assert(env && env.body === 42 && typeof env.revision === 'number',
+        'envelope of a bare value must shape to { body, revision }: ' + JSON.stringify(env));
+    return true;
+});
+
+// (B0, issue #249) DELETE-IS-LOUD: forget() leaves traceable tombstone
+// residue — the deleted marker + prunedAt + removedBy on envelope read-back,
+// prior provenance carried — while plain recall() reads the note as gone.
+// A deleted anchor is a DANGLING claim for anything citing it (the ref
+// probe treats a tombstone row as GONE).
+asyncTest('forget: tombstone residue survives read-back, plain recall reads gone (B0 #249)', async () => {
+    const m = require('../lib/memory');
+    const id = 'b0-tomb-pin-' + Date.now();
+    await m.state('note:' + id, { body: 'anchor fact: pinned', writers: ['anchor-writer'] }, { fresh: true, ttl: 600000 });
+    const f = await m.forget('note:' + id, { by: 'steward-7', ttl: 600000 });
+    assert(f.deleted === true, 'forget returned no delete marker: ' + JSON.stringify(f));
+    const gone = await m.recall('note:' + id, { fresh: true });
+    assert(gone === undefined, 'plain recall served a deleted row: ' + JSON.stringify(gone));
+    const tomb = await m.recall('note:' + id, { fresh: true, envelope: true });
+    assert(tomb.deleted === true, 'envelope read-back lost the tombstone: ' + JSON.stringify(tomb));
+    assert(typeof tomb.prunedAt === 'number' && tomb.removedBy === 'steward-7',
+        'tombstone lost its residue fields: ' + JSON.stringify(tomb));
+    assert(Array.isArray(tomb.writers) && tomb.writers.includes('anchor-writer'),
+        'tombstone dropped the prior provenance: ' + JSON.stringify(tomb.writers));
+    return true;
+});
+
+asyncTest('forget: a deleted anchor is a dangling claim (delete-is-loud at the ref probe, B0 #249)', async () => {
+    const m = require('../lib/memory');
+    const stamp = 'b0-cite-pin-' + Date.now();
+    await m.state('note:' + stamp, { body: 'anchor fact' }, { fresh: true, ttl: 600000 });
+    await m.forget('note:' + stamp, { by: 'steward-7', ttl: 600000 });
+    await m.state('note:' + stamp + '-cites', { body: 'derived from anchor', refs: [stamp] }, { fresh: true, ttl: 600000 });
+    const citing = await m.recall('note:' + stamp + '-cites', { fresh: true, envelope: true, refNamespace: 'note:' });
+    assert(Array.isArray(citing.unresolvedRefs) && citing.unresolvedRefs.includes(stamp),
+        'citing a deleted anchor did not flag unresolved: ' + JSON.stringify(citing.unresolvedRefs));
+    return true;
+});
+
 (async () => {
     await _runAsyncTests();
     console.log(`\nPassed:  ${results.passed}`);

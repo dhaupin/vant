@@ -12,11 +12,7 @@ description: The steganography mechanism - hide data, and whole brains, in image
 > Hide data in images. The mechanism underneath [horcrux](/vant/memory/horcrux), also
 > usable on its own for brain snapshots and recovery.
 
-Vant can encode an entire brain (memory, learnings, decisions) into an
-image using LSB (Least Significant Bit) steganography. The pipeline is:
-serialize the brain to JSON, compress with zlib (about 70 percent smaller),
-optionally encrypt with AES-256-GCM, then hide the payload in the image's
-low bits. Decoding reverses the process.
+Vant can encode an entire brain (memory, learnings, decisions) into an image using LSB (Least Significant Bit) steganography. The pipeline is: serialize the brain to JSON, compress with zlib (about 70 percent smaller), optionally encrypt with AES-256-GCM, then hide the payload in the image's low bits. Decoding reverses the process.
 
 ## What it is for
 
@@ -33,8 +29,7 @@ Hide the brain in an image:
 vant stego snapshot --input=avatar.png --output=brain.png
 ```
 
-Options: `--input` is the carrier image (default `avatar.png`), `--output`
-is the result (default `brain.png`), and `--encrypt` takes a password.
+Options: `--input` is the carrier image (default `avatar.png`), `--output` is the result (default `brain.png`), and `--encrypt` takes a password.
 
 Extract the brain again:
 
@@ -42,8 +37,7 @@ Extract the brain again:
 vant stego recover --input=brain.png --output=brain.json
 ```
 
-Options: `--input` is the image with the hidden brain, `--output` is the
-JSON destination (optional), `--decrypt` takes the password.
+Options: `--input` is the image with the hidden brain, `--output` is the JSON destination (optional), `--decrypt` takes the password.
 
 Check how much an image can hold:
 
@@ -70,9 +64,7 @@ const outputs = stego.encodeBrainChunked(['img1.png', 'img2.png', 'img3.png']);
 const brainData = stego.decodeBrainChunked(outputs);
 ```
 
-The same module carries the SVG variant that horcrux uses
-(`encodeSvg` / `decodeSvg`) plus the manifest functions behind
-[horcrux](/vant/memory/horcrux) boot-from-image.
+The same module carries the SVG variant that horcrux uses (`encodeSvg` / `decodeSvg`) plus the manifest functions behind [horcrux](/vant/memory/horcrux) boot-from-image.
 
 ## Capacity
 
@@ -93,6 +85,5 @@ The same module carries the SVG variant that horcrux uses
 
 ## Related
 
-- [Horcrux](/vant/memory/horcrux) - encrypted brain-in-image packaging,
-  with zero-config boot from an image
+- [Horcrux](/vant/memory/horcrux) - encrypted brain-in-image packaging, with zero-config boot from an image
 - [Boot](/vant/essential/boot) - the startup sequence

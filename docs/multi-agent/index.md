@@ -21,9 +21,4 @@ description: Multi-brain contexts, branch-per-agent crews, succession and trust 
 
 ## The short version
 
-Give each agent a brain context with [multi-brain](/vant/multi-agent/brains), isolate their
-work with [branches](/vant/multi-agent/branches), and control what a new generation inherits
-with [succession](/vant/multi-agent/succession). The programmatic crew
-surface (spawn, delegate, coordinate) is [Agents API](/vant/integrations/agents);
-the roster size is a config key
-(`agents.maxAgents`, default 10 via `VANT_AGENTS_MAX`), not a hard-coded cap.
+Give each agent a brain context with [multi-brain](/vant/multi-agent/brains), isolate their work with [branches](/vant/multi-agent/branches), and control what a new generation inherits with [succession](/vant/multi-agent/succession). The programmatic crew surface (spawn, delegate, coordinate) is [Agents API](/vant/integrations/agents); the roster size is a config key (`agents.maxAgents`, default 10 via `VANT_AGENTS_MAX`), not a hard-coded cap.

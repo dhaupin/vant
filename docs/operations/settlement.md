@@ -27,18 +27,10 @@ description: Cross-node payment - the buyer's escrow debits where the budget liv
 
 Two rules, both pinned:
 
-1. **The debit runs where the budget lives.** The buyer's escrow
-   checks and spends inside one critical section before the wire leg.
-   Nothing is owed TO the seller's books: the seller's node records a
-   CLAIM (what was sold, at what price, by whom), never cash.
-2. **The claim is only as good as the listing.** The owner verifies
-   the listing exists, the price matches, the buyer matches the
-   sending node's vetted principal, and scope admits the buyer - all
-   owner-side, before recording.
+1. **The debit runs where the budget lives.** The buyer's escrow checks and spends inside one critical section before the wire leg. Nothing is owed TO the seller's books: the seller's node records a CLAIM (what was sold, at what price, by whom), never cash.
+2. **The claim is only as good as the listing.** The owner verifies the listing exists, the price matches, the buyer matches the sending node's vetted principal, and scope admits the buyer - all owner-side, before recording.
 
-This is credit-side accounting deferred by design: the claims ledger
-is the proof of settlement, budgets stay sovereign, and no shared bank
-exists anywhere in the mesh.
+This is credit-side accounting deferred by design: the claims ledger is the proof of settlement, budgets stay sovereign, and no shared bank exists anywhere in the mesh.
 
 ## Local escrow vs settlement
 
@@ -49,12 +41,9 @@ exists anywhere in the mesh.
 | Failure mode | Refusal, no state change | Refusal, then an explicit unwind of the local debit |
 | Surface | [Escrow](/vant/security/escrow) | `lib/settlement.js` (JS surface: `install, makeInvoice, sendInvoice, requestStatus, list, get, status`) |
 
-`settle.request` / `settle.record` are WIRE message names routed
-through `install(bus)`, not exported API names - call `makeInvoice` /
-`sendInvoice` / `requestStatus` as in the example below.
+`settle.request` / `settle.record` are WIRE message names routed through `install(bus)`, not exported API names - call `makeInvoice` / `sendInvoice` / `requestStatus` as in the example below.
 
-Local escrow remains the budget guard for everything inside one
-install; settlement is the same discipline extended across the wire.
+Local escrow remains the budget guard for everything inside one install; settlement is the same discipline extended across the wire.
 
 ## The invoice
 
@@ -72,13 +61,11 @@ const r = await settlement.sendInvoice(crewBus, 'acme-node', inv);
 // { settled: true } or { settled: false, reason, code }
 ```
 
-The wire carries the invoice and the verdict; the listing itself never
-moves, and the owner's gates run unchanged on the seller's side.
+The wire carries the invoice and the verdict; the listing itself never moves, and the owner's gates run unchanged on the seller's side.
 
 ## Refusal codes
 
-A refusal is explicit (never a timeout): the buyer's local debit is
-unwound before anything settles.
+A refusal is explicit (never a timeout): the buyer's local debit is unwound before anything settles.
 
 | Code | Meaning | Usual fix |
 |------|---------|-----------|
@@ -92,10 +79,7 @@ unwound before anything settles.
 
 ## Idempotency
 
-Settlements are idempotent by `settlementId`: a replayed invoice re-acks
-the SAME claim rather than double-charging. Retries are therefore safe
-by construction - the ack means the claim exists, not that money moved
-again.
+Settlements are idempotent by `settlementId`: a replayed invoice re-acks the SAME claim rather than double-charging. Retries are therefore safe by construction - the ack means the claim exists, not that money moved again.
 
 Read the claims ledger:
 
@@ -104,9 +88,7 @@ settlement.list();             // newest first
 settlement.get(settlementId);  // one claim
 ```
 
-Aggregates only on status surfaces: settlement memos and topics stay
-local (the [Stewardship view](/vant/operations/agora) carries counts,
-not wallets).
+Aggregates only on status surfaces: settlement memos and topics stay local (the [Stewardship view](/vant/operations/agora) carries counts, not wallets).
 
 ## Related
 

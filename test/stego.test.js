@@ -86,6 +86,32 @@ test('stego has isOperationAllowed function', () => {
     return { success: typeof stego.isOperationAllowed === 'function' };
 });
 
+// (wave 14) the bootstrap channel's first native grade (was typeof-only
+// in the coverage smoke battery): manifest -> sealed envelope -> virgin
+// manifest round trip, the plaintext lane, and the wrong-key refusal.
+test('stego bootstrap round trip with a password', () => {
+    const stego = require(path.join(ROOT, 'lib', 'stego'));
+    const manifest = stego.generateManifest({ type: 'bootstrap', brain: 'vant' });
+    const sealed = stego.createBootstrap(manifest, 'wave14-passphrase');
+    const opened = stego.parseBootstrap(sealed, 'wave14-passphrase');
+    return { success: sealed && opened.brain === 'vant' && opened.version === '1.0', opened };
+});
+
+test('stego bootstrap plaintext lane round trips unencrypted', () => {
+    const stego = require(path.join(ROOT, 'lib', 'stego'));
+    const manifest = stego.generateManifest({ type: 'bootstrap' });
+    const raw = stego.createBootstrap(manifest); // no password => plain JSON
+    return { success: stego.parseBootstrap(raw).type === 'bootstrap' && typeof raw === 'string' && raw.length > 0 };
+});
+
+test('a wrong key refuses to open the bootstrap envelope', () => {
+    const stego = require(path.join(ROOT, 'lib', 'stego'));
+    const sealed = stego.createBootstrap({ type: 'bootstrap', created: 1 }, 'good-key');
+    let threw = false;
+    try { stego.parseBootstrap(sealed, 'wrong-key'); } catch (_e) { threw = true; }
+    return { success: threw };
+});
+
 console.log('\n--- RESULTS ---\n');
 console.log(`  Passed:  ${results.passed}`);
 console.log(`  Failed:  ${results.failed}`);

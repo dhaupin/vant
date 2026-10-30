@@ -65,6 +65,4 @@ test('job processed', async () => {
 [n] seconds
 ```
 
-**Role**: Integration Tester  
-**Input**: Components  
-**Output**: Integration results
+**Role**: Integration Tester **Input**: Components **Output**: Integration results

@@ -77,10 +77,7 @@ async function work() {
 }
 ```
 
-`lib/lock.js` is the lower-level path-lockfile primitive
-(`acquire(lockPath, {staleMs, waitMs})` returns `{ok, reason}`);
-`lib/brain-lock.js` wraps it with tokens, staleness sweeps, and the
-capability gates most brain writes require.
+`lib/lock.js` is the lower-level path-lockfile primitive (`acquire(lockPath, {staleMs, waitMs})` returns `{ok, reason}`); `lib/brain-lock.js` wraps it with tokens, staleness sweeps, and the capability gates most brain writes require.
 
 ## Workflow
 Multi-agent workflow steps.

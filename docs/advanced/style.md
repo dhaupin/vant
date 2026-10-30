@@ -164,8 +164,7 @@ git clone https://github.com/dhaupin/vant.git && cd vant
 npm ci && npm link
 ```
 
-This puts the `vant` command on your PATH. Use `npm link` so CLI access
-works anywhere.
+This puts the `vant` command on your PATH. Use `npm link` so CLI access works anywhere.
 
 Example output:
 

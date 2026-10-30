@@ -22,36 +22,15 @@
 
 ## 1. The thesis
 
-A world — real or synthetic — is state plus interaction under rules.
-Vant already *is* such a world for agents: Ground (durable state),
-Bodies (identity), Norms (gates), the Agora (decisions), the Post (the
-wire), Workshops (execution), Stewardship (observation). What it lacks
-is the vocabulary and primitives of a *synthetic world*: deterministic
-derivation from a seed, versioned world-state snapshots, and
-state-transition semantics that a second system (a game engine) can
-render.
+A world — real or synthetic — is state plus interaction under rules. Vant already *is* such a world for agents: Ground (durable state), Bodies (identity), Norms (gates), the Agora (decisions), the Post (the wire), Workshops (execution), Stewardship (observation). What it lacks is the vocabulary and primitives of a *synthetic world*: deterministic derivation from a seed, versioned world-state snapshots, and state-transition semantics that a second system (a game engine) can render.
 
-The direction of truth is settled: **vant is the source of truth**;
-synmergia (and any other client world) reads world state from vant and
-renders it. We do not port synmergia's code; we extract its PROVEN
-MODELS, express them in vant's vocabulary, and implement only the
-primitives vant's runtime lacks.
+The direction of truth is settled: **vant is the source of truth**; synmergia (and any other client world) reads world state from vant and renders it. We do not port synmergia's code; we extract its PROVEN MODELS, express them in vant's vocabulary, and implement only the primitives vant's runtime lacks.
 
 ## 2. The import frame (how borrowing works between our own projects)
 
-1. **Extract invariants, not code.** GDScript does not transplant into
-   Node. Synmergia's seed rules, state machines, and service boundaries
-   are surveyed and re-expressed in `labs/` vocabulary. Synmergia keeps
-   its implementation; vant owns the canonical model.
-2. **Implement only what vant's runtime lacks.** Candidate primitives
-   (confirmed/adjusted by the survey): seedable deterministic
-   derivation, world-state snapshots with version lineage, guarded
-   state transitions (the same gate discipline as everything else).
-3. **Close the loop through the mesh.** Synmergia's Godot server is a
-   peer node (genesis pair with an org install). World state is not
-   borrowed at all — it is SERVED by vant over the signed wire and
-   rendered by the game. The white paper's thesis with a game as the
-   first real client.
+1. **Extract invariants, not code.** GDScript does not transplant into Node. Synmergia's seed rules, state machines, and service boundaries are surveyed and re-expressed in `labs/` vocabulary. Synmergia keeps its implementation; vant owns the canonical model.
+2. **Implement only what vant's runtime lacks.** Candidate primitives (confirmed/adjusted by the survey): seedable deterministic derivation, world-state snapshots with version lineage, guarded state transitions (the same gate discipline as everything else).
+3. **Close the loop through the mesh.** Synmergia's Godot server is a peer node (genesis pair with an org install). World state is not borrowed at all — it is SERVED by vant over the signed wire and rendered by the game. The white paper's thesis with a game as the first real client.
 
 ## 3. SURVEY — the intake form (filled by PR from synmergia)
 
@@ -101,9 +80,7 @@ primitives vant's runtime lacks.
 
 ### 3.5 What stays in synmergia (the boundary)
 
-Rendering, physics, client prediction never move to vant — confirm
-and list anything ELSE that stays (plus anything surprisingly
-server-side worth knowing about):
+Rendering, physics, client prediction never move to vant — confirm and list anything ELSE that stays (plus anything surprisingly server-side worth knowing about):
 
 _FILL_
 
@@ -117,57 +94,35 @@ _FILL_
 
 ### Wave W1 — seed determinism (the first primitive)
 
-A `world` module on state-store: `derive(seed, ruleset)` producing a
-versioned, reproducible world snapshot; same seed + ruleset version =
-same world, provable by pin. Exact semantics inherit from the survey
-of synmergia's working system rather than invented here.
+A `world` module on state-store: `derive(seed, ruleset)` producing a versioned, reproducible world snapshot; same seed + ruleset version = same world, provable by pin. Exact semantics inherit from the survey of synmergia's working system rather than invented here.
 
 ### Wave W2 — world state + transitions
 
-Versioned snapshots, transition guards (scope/gate discipline),
-lineage for audit (the consensus localOrigin/lastSyncFrom pattern
-applied to worlds).
+Versioned snapshots, transition guards (scope/gate discipline), lineage for audit (the consensus localOrigin/lastSyncFrom pattern applied to worlds).
 
 ### Wave W3 — the mesh leg
 
-`world.snapshot` pull/push over crew-bus (merge rules decided by the
-survey — worlds may be owner-authoritative, unlike ballots), genesis
-pairing for the Godot server, mesh-status visibility.
+`world.snapshot` pull/push over crew-bus (merge rules decided by the survey — worlds may be owner-authoritative, unlike ballots), genesis pairing for the Godot server, mesh-status visibility.
 
 ### Wave W4 — synmergia as the first client
 
-The game reads world state from a vant node; the white paper gains its
-second real client and the "any shop, any runtime" proof.
+The game reads world state from a vant node; the white paper gains its second real client and the "any shop, any runtime" proof.
 
 ## 5. Security notes
 
-- World snapshots are protocol state: kind-marked, state-store only,
-  never secrets.
-- Seed values may be commercially sensitive (world uniqueness) — treat
-  like escrow data: runtime state, not brain content.
-- The mesh leg inherits every wire rule: signed envelopes, registered
-  peers only, gates run where the state lives.
+- World snapshots are protocol state: kind-marked, state-store only, never secrets.
+- Seed values may be commercially sensitive (world uniqueness) — treat like escrow data: runtime state, not brain content.
+- The mesh leg inherits every wire rule: signed envelopes, registered peers only, gates run where the state lives.
 
 ## 6. Open decisions (owner)
 
-1. Access: RESOLVED (2026-09-28) — the backwards PR flow. The
-   repo-reading agent PRs §3's answers against `axolotl`; no repo
-   grant is needed on the vant side. (Ground truth recorded:
-   `GET /installation/repositories` returns total_count 1 — only
-   dhaupin/vant is in the app's scope, and the mobile UI exposes no
-   adjustment.)
-2. Is synmergia's server authoritative-multiplayer already (determines
-   whether W3 is read-only serving or read+write)?
-3. Name: "world" as the module/frame term — too generic? (alternates:
-   realm — retired pass 40, avoid; dominion; terrain — too
-   geographic).
+1. Access: RESOLVED (2026-09-28) — the backwards PR flow. The repo-reading agent PRs §3's answers against `axolotl`; no repo grant is needed on the vant side. (Ground truth recorded: `GET /installation/repositories` returns total_count 1 — only dhaupin/vant is in the app's scope, and the mobile UI exposes no adjustment.)
+2. Is synmergia's server authoritative-multiplayer already (determines whether W3 is read-only serving or read+write)?
+3. Name: "world" as the module/frame term — too generic? (alternates: realm — retired pass 40, avoid; dominion; terrain — too geographic).
 
 ## 7. Success criteria
 
 1. Same seed + ruleset version provably derives the same world (pin).
-2. A world snapshot survives restart, carries lineage, and respects
-   gates (pinned).
-3. A peer (the Godot server) can fetch world state over the signed
-   wire without custom scripts (pinned live exercise).
-4. Synmergia's client renders vant-served state with minimal rework —
-   the survey's file:line evidence closes the loop.
+2. A world snapshot survives restart, carries lineage, and respects gates (pinned).
+3. A peer (the Godot server) can fetch world state over the signed wire without custom scripts (pinned live exercise).
+4. Synmergia's client renders vant-served state with minimal rework — the survey's file:line evidence closes the loop.

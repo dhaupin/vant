@@ -4,6 +4,7 @@ import {
   Brain,
   Briefcase,
   FileClock,
+  ListChecks,
   Waypoints,
   Cpu,
   Gauge,
@@ -212,6 +213,21 @@ export const MODULES = [
     families: [],
     icon: FileClock,
     load: () => import("../modules/audit"),
+  },
+  {
+    // (vant issue #264) the combined STRUCT families page: packstruct +
+    // crashtest + eyestruct + poststruct. Skeleton epoch (mock feeds,
+    // kit contract vendored + pinned); observe section since it is a
+    // read-only facts board.
+    id: "struct-audit",
+    title: "Struct audit",
+    blurb: "Packstruct + crashtest + eyestruct + poststruct findings.",
+    route: "/struct-audit",
+    tiers: ["O", "H", "A", "S"],
+    section: "observe",
+    families: [],
+    icon: ListChecks,
+    load: () => import("../modules/struct-audit"),
   },
   {
     id: "nodes",

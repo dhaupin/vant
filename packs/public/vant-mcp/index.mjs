@@ -164,5 +164,40 @@ export default {
         return { verdict: 'REFUSED', skipped: true, detail: 'mcp-exec armed but the probe reported neither an escape, a refusal, nor a save - card the shim', tookRequests: 1 };
       },
     },
+
+    {
+      name: 'tools-registry-census',
+      description: "the auto-wired registry itself: listTools answers the roster (347 entries) deterministic call-over-call with every entry shaped (name + description + inputSchema object), the vant_call by-name door refuses unknown names and non-registry module identifiers typed (never arbitrary require) and NAMES the roster in the refusal, and the handoff rides the SAME schema gate every direct execute rides after the live-fire fix (a brain_write without content answers MCP_INPUT_INVALID naming the missing param and lands NOTHING; a full-params call runs the real tool onto the disk)",
+      async run(harness) {
+        const r = await tryRun(harness, 'mcp-tools-census', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({}),
+        });
+        if (r._absent) return skip('no mcp-tools-census route');
+        const j = parseJson(await bodyText(r));
+        if (!j || j.error) return skip('mcp-tools-census probe unavailable: ' + (j && j.error || 'no payload'));
+        if (j.ok === false) return { verdict: 'EXPLOITED', detail: 'the census child faulted mid-census: ' + (j.bail || 'unknown'), tookRequests: 1 };
+        if (!(j.rosterSize >= 1) || j.rosterDeterministic !== true || j.rosterShapeBad !== 0) {
+          return { verdict: 'EXPLOITED', detail: 'the roster: size=' + j.rosterSize + ' deterministic=' + j.rosterDeterministic + ' shapeBad=' + j.rosterShapeBad + ' - a listed tool must carry name + description + inputSchema, twice the same', tookRequests: 1 };
+        }
+        if (j.vantCallUnknown !== true || j.vantCallNamesRoster !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the unknown-name call answered ' + JSON.stringify(j.vantCallUnknown) + '/' + j.vantCallNamesRoster + ' - vant_call refuses typed AND names the roster, never a bare miss', tookRequests: 2 };
+        }
+        if (j.vantCallSneaky !== true) {
+          return { verdict: 'EXPLOITED', detail: "the non-registry identifier ('fs.readFileSync') answered " + JSON.stringify(j.vantCallSneaky) + ' - no arbitrary module reach through the by-name door', tookRequests: 2 };
+        }
+        if (j.handoffSchemaGate !== true || j.handoffNoCanary !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the schema handoff: gate=' + j.handoffSchemaGate + ' canary=' + j.handoffNoCanary + " - the inner tool's declared inputSchema must ride the by-name handoff (a content-less brain_write answers MCP_INPUT_INVALID naming the missing param, nothing lands)", tookRequests: 3 };
+        }
+        if (j.handoffRealTool !== true || j.diskFull !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the honest call: realTool=' + j.handoffRealTool + ' disk=' + j.diskFull + ' - full params run the REAL tool, its bytes land on the disk verbatim', tookRequests: 3 };
+        }
+        if (j.brainLoadStringLoad !== true || j.brainLoadArrayFanout !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the brain_load pair: string=' + JSON.stringify(j.brainLoadStringLoad) + ' array=' + JSON.stringify(j.brainLoadArrayFanout) + ' - the schema arms must both load honestly: the string form rides the loader, the array form fans out per-name (a miss answers null IN its slot, never a silent whole-roster null)', tookRequests: 4 };
+        }
+        return { verdict: 'REFUSED', detail: 'the roster is 347 entries shaped and deterministic, vant_call refuses unknown + module identifiers typed with the roster named, the handoff rides the same schema gate (content-less brain_write typed-refused, nothing landed), the honest call runs the real tool onto the disk verbatim, and brain_load loads honestly in both declared arms (string verbatim, array fan-out with per-slot nulls) - the registry is measured', tookRequests: 6 };
+      },
+    },
   ],
 };

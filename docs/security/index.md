@@ -32,19 +32,11 @@ vant sandbox status              # check what this process may do
 vant sudo --status               # check elevation state
 ```
 
-Write paths validate input (VAF), check capabilities (sandbox), and honor
-budgets (escrow) before touching disk. The same chain guards the MCP
-surface and the headless server.
+Write paths validate input (VAF), check capabilities (sandbox), and honor budgets (escrow) before touching disk. The same chain guards the MCP surface and the headless server.
 
 ## Where to start
 
-Hardening a self-hosted or multi-agent deployment: [Best
-Practices](/vant/security/best-practices) first, then [Environment &
-Limits](/vant/security/environment) for the env vars that tune each layer.
-Understanding a specific refusal or block: find the layer above and read
-its page. Issuing scoped door credentials to a second dashboard, an
-operator's browser, or a working peer agent: [Multi-Guest
-Auth](/vant/security/multi-guest-auth) (H1 of #185).
+Hardening a self-hosted or multi-agent deployment: [Best Practices](/vant/security/best-practices) first, then [Environment & Limits](/vant/security/environment) for the env vars that tune each layer. Understanding a specific refusal or block: find the layer above and read its page. Issuing scoped door credentials to a second dashboard, an operator's browser, or a working peer agent: [Multi-Guest Auth](/vant/security/multi-guest-auth) (H1 of #185).
 
 ## Related
 

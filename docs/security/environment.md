@@ -50,8 +50,7 @@ repo
 **Avoid:**
 - `admin:org`
 - `delete_repo`
-- `write:discussion`
----
+- `write:discussion` ---
 
 ## POLLING CONSIDERATIONS
 Timing and rate limit details.
@@ -87,46 +86,32 @@ How your data is handled.
 **Your brain files:**
 - Memory files (`models/private/*`)
 - Configuration (non-secret)
-- Settings
-**NOT synced:**
+- Settings **NOT synced:**
 - `.env` files (gitignored)
 - Tokens
 - Local state
 - Cache files
 ### Repository Size
-**GitHub soft limit:** 1GB per repo
-**GitHub hard limit:** 2GB per repo
-**Best practices:**
+**GitHub soft limit:** 1GB per repo **GitHub hard limit:** 2GB per repo **Best practices:**
 - Keep brain files concise
 - Don't commit binaries
-- Use `.gitignore`
-See: [GitHub Large Files](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github)
+- Use `.gitignore` See: [GitHub Large Files](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github)
 ### Privacy
 Your brain is:
 - Stored on YOUR GitHub account
 - Visible to who you share with
-- Public or private - YOUR choice
----
+- Public or private - YOUR choice ---
 
 ## TOKEN SECURITY
 Keeping your GitHub token safe.
 
 ### Best Practices
 
-1. **Use Fine-Grained Tokens**
-   - Created October 2022+
-   - Minimum permissions
-   - Expiration dates
+1. **Use Fine-Grained Tokens** - Created October 2022+ - Minimum permissions - Expiration dates
 
-2. **Rotate Regularly**
-   - Every 90 days
-   - After suspicious activity
-   - When leaving organization
+2. **Rotate Regularly** - Every 90 days - After suspicious activity - When leaving organization
 
-3. **Never Commit**
-   - Add `.env` to `.gitignore`
-   - Don't paste in issues
-   - Don't share in chat
+3. **Never Commit** - Add `.env` to `.gitignore` - Don't paste in issues - Don't share in chat
 
 4. **Use .env Files**
    ```bash
@@ -138,21 +123,13 @@ Keeping your GitHub token safe.
 
 **If exposed:**
 
-1. **Immediate**: Revoke token
-   - GitHub -> Settings -> Developer -> Tokens
-   - Or: Settings -> Tokens (classic)
+1. **Immediate**: Revoke token - GitHub -> Settings -> Developer -> Tokens - Or: Settings -> Tokens (classic)
 
-2. **Check Audit Log**
-   - GitHub -> Settings -> Audit log
-   - Look for suspicious activity
+2. **Check Audit Log** - GitHub -> Settings -> Audit log - Look for suspicious activity
 
-3. **Generate New**
-   - Minimal scopes only
-   - Set expiration
+3. **Generate New** - Minimal scopes only - Set expiration
 
-4. **Update Vant**
-   - Update `.env`
-   - Restart node
+4. **Update Vant** - Update `.env` - Restart node
 
 ---
 ## SYSTEM REQUIREMENTS
@@ -178,10 +155,8 @@ Vant's runtime dependencies (package.json):
 - `yaml` - YAML parsing
 - `jsqr` + `qrcode-generator` - the QR carrier lane
 
-(CLI color is a zero-dependency ANSI face in `lib/theme.js` - there is no
-`chalk` package and no `js-yaml`. The HTTP/MCP servers are plain Node `http`
-- there is no express, cli-progress, or inquirer.)
----
+(CLI color is a zero-dependency ANSI face in `lib/theme.js` - there is no `chalk` package and no `js-yaml`. The HTTP/MCP servers are plain Node `http`
+- there is no express, cli-progress, or inquirer.) ---
 
 ## NETWORK CONSIDERATIONS
 Network requirements and behavior.
@@ -230,8 +205,7 @@ Configuration via environment.
 ### Security
 - Store in `.env` (gitignored)
 - Never in code
-- Never in logs
----
+- Never in logs ---
 
 ## ERROR HANDLING
 How errors are managed.
@@ -253,8 +227,7 @@ How errors are managed.
 3. **GitHub down**: Use offline, wait
 4. **Conflict**: Pull rebase or merge manually
 
----## LIMITATIONS
-Known limitations and workarounds.
+---## LIMITATIONS Known limitations and workarounds.
 ### Vant Limitations
 - Git-based sync for the brain files themselves (S3 backup is a separate CLI: `vant s3`)
 - No multi-user auth on the CLI (MCP/REST have key auth: `VANT_MCP_API_KEY`, `VANT_SERVER_AUTH_REQUIRED`)
@@ -269,8 +242,7 @@ Future support (not implemented):
 - GitLab
 - Gitea
 - Self-hosted Git
-- File system only
----
+- File system only ---
 
 ## MONITORING
 Tracking Vant health and activity.
@@ -307,8 +279,7 @@ Before using Vant with GitHub:
 - [ ] Backup plan in place
 - [ ] Understand manual sync
 - [ ] No automated polling
-- [ ] Privacy implications understood
----
+- [ ] Privacy implications understood ---
 
 ## SEE ALSO
 

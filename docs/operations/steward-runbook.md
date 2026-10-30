@@ -27,13 +27,7 @@ description: Standing up a group's router install - the dedicated steward node f
 
 ## How the pattern works
 
-A **group** of separate orgs sharing decision chains is modeled as a
-standing JV on a dedicated **steward install** (the "router" node).
-The steward hosts the group's org model and the group's agora topics;
-it runs no production work. Member nodes stay fully sovereign: their
-own org model, their own brains, their own budgets, their own gates.
-Cross-org traffic uses the same signed, registered-peers-only wire as
-every other leg, so the steward adds no new trust path.
+A **group** of separate orgs sharing decision chains is modeled as a standing JV on a dedicated **steward install** (the "router" node). The steward hosts the group's org model and the group's agora topics; it runs no production work. Member nodes stay fully sovereign: their own org model, their own brains, their own budgets, their own gates. Cross-org traffic uses the same signed, registered-peers-only wire as every other leg, so the steward adds no new trust path.
 
 Two rules make it safe, both pinned by tests:
 
@@ -53,14 +47,11 @@ Two rules make it safe, both pinned by tests:
 | Budgets | Each member's own escrow | The member; the steward records claims, never money |
 | Ring secret per pair | Memory or `VANT_MESH_SECRET` env | Genesis and the rite only; never files, never the repo |
 
-Sizing: the steward is small. A webhook receiver and JSON state, no
-agent loops, no workshops, no brain pressure. A small VM is plenty for
-a group of dozens of agents.
+Sizing: the steward is small. A webhook receiver and JSON state, no agent loops, no workshops, no brain pressure. A small VM is plenty for a group of dozens of agents.
 
 ## Stand up the steward
 
-Provision a clean Vant install that will do nothing but steward, then
-set the ring secret and node identity:
+Provision a clean Vant install that will do nothing but steward, then set the ring secret and node identity:
 
 ```bash
 export VANT_MESH_SECRET="$(openssl rand -hex 32)"
@@ -84,9 +75,7 @@ orgSync.configureStewards(['group-steward']); // the steward never accepts forei
 await crewBus.listen(4890);
 ```
 
-Create the group org model. The steward is the only writer; assign
-every principal that will act in the group chain, including members'
-agents:
+Create the group org model. The steward is the only writer; assign every principal that will act in the group chain, including members' agents:
 
 ```js
 const teams = require('./lib/teams');
@@ -98,9 +87,7 @@ for (const a of ['steward-lead', 'acme-1', 'beta-1']) {
 }
 ```
 
-Register vetting anchors for every voter principal. The `name` field
-must be the agent's node name so principal resolution maps transport
-ids correctly (this matters for settlement):
+Register vetting anchors for every voter principal. The `name` field must be the agent's node name so principal resolution maps transport ids correctly (this matters for settlement):
 
 ```js
 const registry = require('./lib/node-registry');
@@ -127,8 +114,7 @@ On the member:
 await genesis.join({ host: 'group-steward', hostPort: 4890, secret: pairSecret, name: 'acme-node', agentId: 'acme-1', port: 4891 });
 ```
 
-Every member after that joins the ring without re-keying anything. On
-the steward:
+Every member after that joins the ring without re-keying anything. On the steward:
 
 ```js
 const r = await genesis.admit({ member: { name: 'beta-node', agentId: 'beta-1', port: 4892 } });
@@ -141,9 +127,7 @@ On the new member:
 await genesis.accept({ host: 'group-steward', hostPort: 4890, secret: ringSecret, name: 'beta-node', agentId: 'beta-1', port: 4892 });
 ```
 
-The ack is the live proof of membership: the hello was signed with the
-ring secret. After each admission the steward broadcasts a member intro
-and standing members adopt the new principal merge-only.
+The ack is the live proof of membership: the hello was signed with the ring secret. After each admission the steward broadcasts a member intro and standing members adopt the new principal merge-only.
 
 Member-side boot requirements:
 
@@ -164,18 +148,11 @@ await orgSync.replicate(crewBus, 'beta-node');
 
 Rules the members enforce (all pinned in `test/org-sync.test.js`):
 
-- The replica is wholesale-replaced only when the incoming generation
-  is newer. Older or equal generations are ignored, so replays and
-  restarts converge without regression.
-- The replica is separate from the member's own org model. A member's
-  agent can hold a local assignment and a group assignment; neither
-  shadows the other, because resolution is local first, replica on miss.
-- Revocation propagates with the generation: remove the agent from the
-  steward's model, push again, and the agent resolves out of group
-  scopes fail-closed. Their local membership is untouched.
+- The replica is wholesale-replaced only when the incoming generation is newer. Older or equal generations are ignored, so replays and restarts converge without regression.
+- The replica is separate from the member's own org model. A member's agent can hold a local assignment and a group assignment; neither shadows the other, because resolution is local first, replica on miss.
+- Revocation propagates with the generation: remove the agent from the steward's model, push again, and the agent resolves out of group scopes fail-closed. Their local membership is untouched.
 
-Re-push after every org-model change. If a member was down, the next
-push converges it; the latest generation makes any queue unnecessary.
+Re-push after every org-model change. If a member was down, the next push converges it; the latest generation makes any queue unnecessary.
 
 ## The first group topic
 
@@ -190,8 +167,7 @@ const v = await forum.vote('q3-platform-call', {
 });
 ```
 
-The topic lives on the steward. Do not create it on a member: a
-member-owned copy is a different ledger the steward's gates never saw.
+The topic lives on the steward. Do not create it on a member: a member-owned copy is a different ledger the steward's gates never saw.
 
 2. Members vote remotely through the owner's gate stack:
 
@@ -200,20 +176,16 @@ const agoraSync = require('./lib/agora-sync');
 await agoraSync.vote(crewBus, 'group-steward', v.topic, 'thursday-1400utc', { agentId: 'beta-1' });
 ```
 
-Scope, registry vetting, quarantine, one-vote, and deadline gates all
-run owner-side where the model lives.
+Scope, registry vetting, quarantine, one-vote, and deadline gates all run owner-side where the model lives.
 
-3. Members read locally. Pull the ledger, then read; the member's
-   scope check admits group members through the replica:
+3. Members read locally. Pull the ledger, then read; the member's scope check admits group members through the replica:
 
 ```js
 await agoraSync.pull(crewBus, 'group-steward', v.topic);
 const ledger = require('./lib/consensus').get(v.topic, 'beta-1');
 ```
 
-4. Settle execution economics. Publish the group listing on the
-   steward (its gates hold the group scope), debit the buyer's own
-   escrow, and let the steward record a claim:
+4. Settle execution economics. Publish the group listing on the steward (its gates hold the group scope), debit the buyer's own escrow, and let the steward record a claim:
 
 ```js
 const settlement = require('./lib/settlement');
@@ -221,9 +193,7 @@ const inv = settlement.makeInvoice({ listingId, price: 6, buyer: 'acme-1', selle
 await settlement.sendInvoice(crewBus, 'group-steward', inv);
 ```
 
-5. Announce the outcome. The board bridge refuses scoped topics by
-   design (a scope's existence is not nameable on the commons board);
-   post the plain notice instead:
+5. Announce the outcome. The board bridge refuses scoped topics by design (a scope's existence is not nameable on the commons board); post the plain notice instead:
 
 ```js
 const notices = require('./lib/notices');

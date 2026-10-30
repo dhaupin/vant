@@ -74,8 +74,6 @@ browser_get_state(include_screenshot=true)
 
 ---
 
-**Role**: Browser Automator  
-**Input**: URLs  
-**Output**: Extracted data
+**Role**: Browser Automator **Input**: URLs **Output**: Extracted data
 
 > Web at your command.

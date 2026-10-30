@@ -26,17 +26,14 @@ Context first. Details later.
 
 ## PROJECT STATE (not in the brain)
 
-The brain carries identity, values, and method. The repo carries
-current truth. After the wake loop, before working:
+The brain carries identity, values, and method. The repo carries current truth. After the wake loop, before working:
 
 - labs/TASKS.md top block: the live pass ledger and queue
-- labs/prd-marketing.md §11: the channel checklist (what's open,
-  what's gated on npm, what's paused)
+- labs/prd-marketing.md §11: the channel checklist (what's open, what's gated on npm, what's paused)
 - docs/security/ethics.md: the influence bans (binding on all passes)
 - models/private/axolotl/lessons.md tail: the most recent arc
 
-Succession rule: if the stone restored you, the lessons tail IS your
-continuity. Read the last entry first; it ends where this one begins.
+Succession rule: if the stone restored you, the lessons tail IS your continuity. Read the last entry first; it ends where this one begins.
 
 ---
 

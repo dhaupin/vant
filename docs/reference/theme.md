@@ -28,9 +28,7 @@ Styling utility for CLI/UI output.
 
 ## Modes
 
-The default theme runs in `cli` mode; an `mcp` mode exists for the MCP
-result-shape helpers (`applyToMCP` with status/icon/color). There is no
-`json`/`html` enforcement - `create(mode)` just stores the mode string.
+The default theme runs in `cli` mode; an `mcp` mode exists for the MCP result-shape helpers (`applyToMCP` with status/icon/color). There is no `json`/`html` enforcement - `create(mode)` just stores the mode string.
 
 ## Usage
 

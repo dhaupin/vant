@@ -1,6 +1,8 @@
 # VANT
 
-> **Agent memory that lives in your repo.**
+> *Trusting the universe, but with receipts.*
+>
+> **The memory-first agent OS.**
 
 **v0.8.6** · [Home](https://vant.creadev.org) · [Docs](https://docs.creadev.org/vant) · [GitHub](https://github.com/dhaupin/vant)
 
@@ -8,7 +10,7 @@
 
 ## What Is Vant?
 
-Vant gives AI agents a brain: memory files the agent reads when it wakes and writes when it sleeps. The files are plain markdown in your own repository, so git history becomes the memory lineage. Any agent on any stack can use it, because the memory is files and the tool interface is MCP.
+Vant is the memory-first agent OS. The soul is a brain: memory files the agent reads when it wakes and writes when it sleeps. The files are plain markdown in your own repository, so git history becomes the memory lineage. Any agent on any stack can use it, because the memory is files and the tool interface is MCP. Around the soul runs the operating layer: boot discipline, storage with a write-ahead journal, a fail-closed security chain, agent crews with governance, relays and carriers across machines, and doors for MCP, REST, and the web.
 
 Think of it as: **your soul that reincarnates with full memories.** In practice: on wake, the agent loads identity, goals, lessons, and errors from `models/`; on sleep, it writes what it learned back. The next session starts with all of it.
 
@@ -26,8 +28,7 @@ Everything is in your repo. Nothing is in someone else's database. If you stop u
 
 ### For humans: install and start
 
-Vant is not on npm (the `vant` package there is an unrelated Vue UI
-library). Clone, install, run the full startup:
+Vant is not on npm (the `vant` package there is an unrelated Vue UI library). Clone, install, run the full startup:
 
 ```bash
 git clone https://github.com/dhaupin/vant.git
@@ -78,16 +79,11 @@ The full agent loop, written to be executed without a human, is [Agent Onboardin
 | **Carrier lanes** | Route the packet through stations (`vant carrier list|plates|plate|encode|decode`): the stone envelope, the NSC-9 doorway, the pointer-QR (`VANT:1:`) with mesh local-store or cross-node resolve, and operator-defined PLATE lanes — framed lane data, zero crypto written by the definer |
 | **Webhook relay (r/2)** | One HMAC-gated webhook route for the mesh: `relay.ride` turns a pod into a sealed message-call endpoint for its MCP door, `relay.hop` turns it into a blind ciphertext forwarder; plain http is refused by the origin policy, and a LAN-scope posture (`relay.intranetOrigins`) admits loopback/RFC1918 hops while clouds metadata stays refused in every posture |
 | **Crash safety** | Write-ahead journal plus atomic writes: a crash never leaves torn memory |
+| **Eyes (eyestruct)** | Deterministic look / look-diff with a committed visual memory under `labs/.eyes/` (manifest pin + route matrix + append-only ledger): `npm run test:eyes` gates unexplained appearance drift in CI — browserless by design; the capture verbs (`look/diff/walk`) are LAN-local against the pinned chrome (dev-dep eyestruct@0.9, npm) |
 
 ## Headless Mode
 
-The serving pod (`vant headless`, issue #187): the MCP door IS the headless
-API (every registered tool any client gets - no privileged dashboard
-surface exists), with a health-only REST sidecar, node discovery
-registration, the one auth posture, and a pairing code that redeems once
-into an operator guest. Mode is NEVER inferred for an imported module -
-a library import claims no mode until a door is actually used - and
-`VANT_MODE` still forces explicitly:
+The serving pod (`vant headless`, issue #187): the MCP door IS the headless API (every registered tool any client gets - no privileged dashboard surface exists), with a health-only REST sidecar, node discovery registration, the one auth posture, and a pairing code that redeems once into an operator guest. Mode is NEVER inferred for an imported module - a library import claims no mode until a door is actually used - and `VANT_MODE` still forces explicitly:
 
 ```javascript
 const vant = require('./lib/vant');
@@ -106,13 +102,7 @@ await vant.learn('key', 'content');       // store (category comes from key pref
 const content = await vant.remember('key'); // recall (cache, then brain)
 ```
 
-The pod's REST sidecar answers `/health` (and the registered routes);
-`GET /tools` answers **410 Gone** there since the #187 retire - browse or
-execute tools through the MCP door, whose `/tools` and `/call` aliases
-stay live. Full REST routes in
-[REST API](docs/reference/rest-api.md) and
-[openapi.yaml](docs/openapi.yaml); guest identities in
-[Multi-Guest Auth](docs/security/multi-guest-auth.md).
+The pod's REST sidecar answers `/health` (and the registered routes); `GET /tools` answers **410 Gone** there since the #187 retire - browse or execute tools through the MCP door, whose `/tools` and `/call` aliases stay live. Full REST routes in [REST API](docs/reference/rest-api.md) and [openapi.yaml](docs/openapi.yaml); guest identities in [Multi-Guest Auth](docs/security/multi-guest-auth.md).
 
 ### Environment Variables
 
@@ -127,14 +117,9 @@ stay live. Full REST routes in
 
 ## Upgrading from an older Vant (single-brain layout)
 
-Older versions stored the brain **flat**, all files directly in
-`models/public/` with no per-brain folders and no brain stack. Current
-Vant (the axolotl line, v0.8.6) uses a **multi-brain layout**: `models/public/<brain>/`,
-`models/private/<brain>/`, and a brain stack in `models/state.json`.
+Older versions stored the brain **flat**, all files directly in `models/public/` with no per-brain folders and no brain stack. Current Vant (the axolotl line, v0.8.6) uses a **multi-brain layout**: `models/public/<brain>/`, `models/private/<brain>/`, and a brain stack in `models/state.json`.
 
-**If you're upgrading, your brain migrates automatically:** `vant start`
-detects the old layout on first run, imports it (default brain name
-`vant`), and prints a confirmation banner. Nothing is lost.
+**If you're upgrading, your brain migrates automatically:** `vant start` detects the old layout on first run, imports it (default brain name `vant`), and prints a confirmation banner. Nothing is lost.
 
 Prefer to control it yourself, or want a different brain name?
 
@@ -145,44 +130,24 @@ vant migrate --brain-name mybrain # name for BOTH scopes (public+private)
 vant migrate                      # import (default name: vant)
 ```
 
-AI agents on the MCP channel can check too: the `brain_migration_status`
-tool reports whether a legacy layout is pending, with guidance.
+AI agents on the MCP channel can check too: the `brain_migration_status` tool reports whether a legacy layout is pending, with guidance.
 
 Notes:
 
-- Detection is **content-based** (looks at your actual files), so it's safe
-  to run any time, it never fires on an already-multi-brain tree, and a
-  second run is always a no-op.
-- `vant start --no-migrate` skips the auto-import if you want to migrate
-  manually later.
-- One name covers both scopes: your old public brain becomes
-  `models/public/<name>/` and your old private brain becomes
-  `models/private/<name>/`, same brain, same name, two visibility
-  scopes, exactly like before but per-brain.
-- After migrating, your brain files live in
-  `models/public/<brain>/` (and `models/private/<brain>/` once you write
-  private state). The old flat files are moved, not copied.
+- Detection is **content-based** (looks at your actual files), so it's safe to run any time, it never fires on an already-multi-brain tree, and a second run is always a no-op.
+- `vant start --no-migrate` skips the auto-import if you want to migrate manually later.
+- One name covers both scopes: your old public brain becomes `models/public/<name>/` and your old private brain becomes `models/private/<name>/`, same brain, same name, two visibility scopes, exactly like before but per-brain.
+- After migrating, your brain files live in `models/public/<brain>/` (and `models/private/<brain>/` once you write private state). The old flat files are moved, not copied.
 
 ---
 
 ## Web Dashboard
 
-A React dashboard ("a guest identity with a browser") ships under
-`web/dashboard` (codename Bolete) - 19 modules (status, brains, agents,
-guests, chat, forum, carriers, chain, market, work, traveler, users,
-...) with Cloudflare Pages Functions proxying `/api/*` to the pod's
-MCP door. (One-way boundary: frontends never require the pod's lib
-graph and vice versa.) The module/frame contract and its phases live in
-[labs/prd-web.md](labs/prd-web.md): `web/<app>` self-contained
-frontends, identity tiers, a multi-install property switcher, and the
-in-dashboard module frame.
+A React dashboard ("a guest identity with a browser") ships under `web/dashboard` (codename Bolete) - 19 modules (status, brains, agents, guests, chat, forum, carriers, chain, market, work, traveler, users, ...) with Cloudflare Pages Functions proxying `/api/*` to the pod's MCP door. (One-way boundary: frontends never require the pod's lib graph and vice versa.) The module/frame contract and its phases live in [labs/prd-web.md](labs/prd-web.md): `web/<app>` self-contained frontends, identity tiers, a multi-install property switcher, and the in-dashboard module frame.
 
-The second shipped frontend is `web/relay` - the sealed relay hop face
-(the blind ciphertext forwarder, `relay.hop`; see
-[Relay](docs/operations/relay.md)).
+The second shipped frontend is `web/relay` - the sealed relay hop face (the blind ciphertext forwarder, `relay.hop`; see [Relay](docs/operations/relay.md)).
 
-Until you deploy them, the MCP door plus `vant guest` remain the
-headless interface.
+Until you deploy them, the MCP door plus `vant guest` remain the headless interface.
 
 ## Documentation
 
@@ -219,5 +184,6 @@ Full docs at **[docs.creadev.org/vant](https://docs.creadev.org/vant)**
 
 - **Home**: [vant.creadev.org](https://vant.creadev.org)
 - **Docs**: [docs.creadev.org/vant](https://docs.creadev.org/vant)
+- **The workshop** → [Creadev.org](https://creadev.org) (vant is made by the Axolotl agent @ Creadev.org — the same home as the docs, site, and release posts above; family: crashtest, packstruct, prestruct, freestruct, poststruct)
 - **GitHub**: [github.com/dhaupin/vant](https://github.com/dhaupin/vant)
 - **Issues**: [github.com/dhaupin/vant/issues](https://github.com/dhaupin/vant/issues)

@@ -85,8 +85,6 @@ npx node-pg-migrate up
 
 ---
 
-**Role**: PostgreSQL DBA  
-**Input**: SQL, schema  
-**Output**: Data
+**Role**: PostgreSQL DBA **Input**: SQL, schema **Output**: Data
 
 > Relational data.

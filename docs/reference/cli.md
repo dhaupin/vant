@@ -9,12 +9,9 @@ nav_order: 111
 
 # CLI Reference
 
-Every user-facing `vant` command. Signatures were verified against the
-command implementations in `bin/` for this release. Every command also
-accepts `-h` or `--help` unless noted otherwise.
+Every user-facing `vant` command. Signatures were verified against the command implementations in `bin/` for this release. Every command also accepts `-h` or `--help` unless noted otherwise.
 
-Core commands live in `bin/vant.js`. Everything else is `bin/<command>.js`,
-dispatched by the main entrypoint.
+Core commands live in `bin/vant.js`. Everything else is `bin/<command>.js`, dispatched by the main entrypoint.
 
 ## Start here
 
@@ -34,8 +31,7 @@ vant start --no-migrate # Skip brain layout migration
 vant health
 ```
 
-(`--no-sync`/`--local` are not start flags - sync is opt-in via
-`--sync`.)
+(`--no-sync`/`--local` are not start flags - sync is opt-in via `--sync`.)
 
 ## Sync and brain
 
@@ -83,8 +79,7 @@ vant lock status
 - A failed import is retryable: the marker is withheld and the next run retries.
 - Existing brain files are never clobbered; existing files are skipped.
 - `vant health` warns on legacy (pre-multi-brain) trees until migrated.
-- The import contract, naming rules, and troubleshooting are in the
-  [Migration Guide](/vant/getting-started/migration).
+- The import contract, naming rules, and troubleshooting are in the [Migration Guide](/vant/getting-started/migration).
 
 `vant watch` polls GitHub on an interval:
 
@@ -95,8 +90,7 @@ vant watch --interval 30  # Poll every 30 seconds
 
 ## Memory and search
 
-The unified memory surface: key-value state, documents, geometric
-addressing. See [Memory](/vant/memory/brain) and [Brain Search](/vant/memory/search).
+The unified memory surface: key-value state, documents, geometric addressing. See [Memory](/vant/memory/brain) and [Brain Search](/vant/memory/search).
 
 | Command | Description |
 |---------|-------------|
@@ -151,8 +145,7 @@ vant geometry address <data>       # Store at random barcode
 vant geometry locate <barcode>     # Retrieve by barcode
 ```
 
-State entries are TTL-cached; set `ttl`/`expiresAt` through the memory
-lib API (`memory.state(key, value, { ttl })`) - there is no `--ttl` CLI flag.
+State entries are TTL-cached; set `ttl`/`expiresAt` through the memory lib API (`memory.state(key, value, { ttl })`) - there is no `--ttl` CLI flag.
 
 ## Agents and runtime
 
@@ -249,10 +242,7 @@ vant error code <code>
 vant error explain <code>
 ```
 
-`vant node` does not poll GitHub by default. Background sync is opt-in:
-`--enable-polling`, `VANT_AGREE_AUTO_SYNC=true`, or typing AGREE when
-prompted. It is intended for self-hosted GitLab/Gitea; on GitHub.com use
-`vant sync`.
+`vant node` does not poll GitHub by default. Background sync is opt-in: `--enable-polling`, `VANT_AGREE_AUTO_SYNC=true`, or typing AGREE when prompted. It is intended for self-hosted GitLab/Gitea; on GitHub.com use `vant sync`.
 
 MCP auth is optional and configured through `vant config`:
 
@@ -261,8 +251,7 @@ vant config set mcp.requireKey true
 vant config set mcp.apiKey "your-secret-key"   # or: export VANT_MCP_API_KEY=...
 ```
 
-Clients authenticate with `X-API-Key: <key>` or
-`Authorization: Bearer <key>`.
+Clients authenticate with `X-API-Key: <key>` or `Authorization: Bearer <key>`.
 
 ## Storage
 
@@ -370,8 +359,7 @@ vant brain mode dual            # dual | public | private | remote
 | `vant event` | Event handling |
 | `vant telegram` | Telegram bot (bin/bot.js) |
 
-See also the [Federation](#federation) section below for cross-org
-verbs (`genesis`, `agora`, `mesh`, `notices`).
+See also the [Federation](#federation) section below for cross-org verbs (`genesis`, `agora`, `mesh`, `notices`).
 
 ```bash
 vant server --port 8080                  # Custom port
@@ -412,9 +400,7 @@ vant guest revoke <id>
 vant guest pair --code <code-from-vant-headless>
 ```
 
-Guest tokens are `vguest_<id>_<secret>` randoms, hashed at rest; roles ride
-the sandbox capability vocabulary (observer read-only, human +write+spawn,
-agent +exec), never a fourth permission system.
+Guest tokens are `vguest_<id>_<secret>` randoms, hashed at rest; roles ride the sandbox capability vocabulary (observer read-only, human +write+spawn, agent +exec), never a fourth permission system.
 
 ```bash
 vant sandbox status
@@ -531,11 +517,7 @@ vant system healthy
 
 ## Federation
 
-Cross-org verbs: sovereign nodes meeting over the signed crew-bus wire.
-Concepts and playbooks: [Federation](/vant/multi-agent/federation) and
-[Federation Playbooks](/vant/operations/federation-playbooks). The
-operator guide for a group's steward install is the [Steward
-Runbook](/vant/operations/steward-runbook).
+Cross-org verbs: sovereign nodes meeting over the signed crew-bus wire. Concepts and playbooks: [Federation](/vant/multi-agent/federation) and [Federation Playbooks](/vant/operations/federation-playbooks). The operator guide for a group's steward install is the [Steward Runbook](/vant/operations/steward-runbook).
 
 | Command | Description |
 |---------|-------------|
@@ -568,14 +550,11 @@ vant mesh status
 vant mesh status --peers --json
 ```
 
-Trust posture (unchanged across all of these): registered peers only,
-sender-bound replies, scope resolves where the model lives, merges
-re-derive status locally, and the wire never carries the ring secret.
+Trust posture (unchanged across all of these): registered peers only, sender-bound replies, scope resolves where the model lives, merges re-derive status locally, and the wire never carries the ring secret.
 
 ## Ecosystem
 
-Experimental social, governance, and meta surfaces. Each is a real module
-with its own `--help`.
+Experimental social, governance, and meta surfaces. Each is a real module with its own `--help`.
 
 | Command | Description |
 |---------|-------------|
@@ -626,10 +605,7 @@ vant forum links                            # every thread with a linked vote
 vant mesh status --peers --json
 ```
 
-QC pass-204/205 CLI door live-fire (exit-code contract holds):
-usage=2, typed refusal=1, gate-off query=3; self-buy, third-party
-settle, oversold supply, oversize/empty payloads all refuse typed
-through `bin/market.js`.
+QC pass-204/205 CLI door live-fire (exit-code contract holds): usage=2, typed refusal=1, gate-off query=3; self-buy, third-party settle, oversold supply, oversize/empty payloads all refuse typed through `bin/market.js`.
 
 ```bash
 vant teams                # Organization and team management
@@ -688,8 +664,7 @@ vant build-test    # Build verification (cwd-independent)
 vant format-test   # format.js test suite (cwd-independent)
 ```
 
-Some dev tools are invoked with node directly rather than through the
-`vant` dispatcher:
+Some dev tools are invoked with node directly rather than through the `vant` dispatcher:
 
 ```bash
 bash bin/sweep.sh        # Test health gate (or: bash bin/sweep.sh --quick)

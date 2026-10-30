@@ -23,6 +23,12 @@ const ROOT = path.resolve(__dirname, '..');
 const DOC = path.join(ROOT, 'docs', 'reference', 'mcp-tools.md');
 const _noise = false; // child gates print their own lines; we title each
 
+// Kernel adoption (labs/prd-kernel.md §3 wiring map row 6): the docs-gate
+// chain registers as the 'docs-gates' consumer at run start. Registration
+// is clerk-not-judge — a refused carry surfaces on stderr at most and the
+// certification run itself never changes behavior.
+require('../lib/kernel-ledger').registerDocsGates();
+
 // ---------- registry sweeps ----------
 
 function registry() {

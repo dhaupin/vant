@@ -48,9 +48,9 @@ test('per-brain distinct art: same style across 3 seeds → 3 distinct outputs',
     return { success: distinct, error: 'expected 3 distinct stones' };
 });
 
-test('all four packs render non-trivially from the same seed', () => {
+test('all five packs render non-trivially from the same seed', () => {
     const names = art.packNames();
-    const ok = names.length === 4
+    const ok = names.length === 5
         && names.every(n => { const s = art.renderStoneArt({ style: n, seed: 'vant' }); return s.startsWith('<svg') && s.length > 1000; });
     return { success: ok, error: 'packs=' + JSON.stringify(names) };
 });
@@ -69,7 +69,7 @@ test('determinism is seed-locked engine-wide: no Math.random/Date.now in code', 
 test('unknown pack name is refused with the reserved list (engine)', () => {
     let threw = null;
     try { art.renderStoneArt({ style: 'minimal', seed: 'x' }); } catch (e) { threw = e; }
-    return { success: threw && threw.message.includes('backup, stone, comms, airgap'), error: threw && threw.message || 'no throw' };
+    return { success: threw && threw.message.includes('backup, stone, comms, airgap, crest'), error: threw && threw.message || 'no throw' };
 });
 
 test('unknown pack name is refused before a template is built (canvas path)', () => {
@@ -91,7 +91,7 @@ test('reserved pack names themselves can no longer hit the legacy fallback', () 
 test('canvas exposes the door surface: renderStoneArt + artPacks', () => {
     const ok = typeof canvas.renderStoneArt === 'function'
         && typeof canvas.artPacks === 'function'
-        && JSON.stringify(canvas.artPacks()) === JSON.stringify(['backup', 'stone', 'comms', 'airgap']);
+        && JSON.stringify(canvas.artPacks()) === JSON.stringify(['backup', 'stone', 'comms', 'airgap', 'crest']);
     return { success: ok };
 });
 
@@ -121,7 +121,7 @@ test('stego round-trip: art-pack carrier survives encode→decode byte-per messa
     return { success: d && d.message === msg, error: JSON.stringify(d && d.message) };
 });
 
-test('round-trip across ALL packs (4/4 carriers readable)', () => {
+test('round-trip across ALL packs (5/5 carriers readable)', () => {
     const stego = require(path.join(ROOT, 'lib', 'stego'));
     const failed = [];
     for (const pack of art.packNames()) {

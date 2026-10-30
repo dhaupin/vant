@@ -11,8 +11,7 @@ description: Named brains with a stack - several memory contexts in one install,
 
 > Several named brains in one install. Switch by name, series or parallel.
 
-Since the multibrain layout, every brain lives in a per-brain directory in
-both scopes, and `models/state.json` holds the active stack:
+Since the multibrain layout, every brain lives in a per-brain directory in both scopes, and `models/state.json` holds the active stack:
 
 ```text
 models/
@@ -23,9 +22,7 @@ models/
   state.json            { "stack": ["nova", "vant"], ... }
 ```
 
-The stack is ordered. The loader checks the current brain first and falls
-back through the stack, so a shared template brain can sit underneath a
-project brain.
+The stack is ordered. The loader checks the current brain first and falls back through the stack, so a shared template brain can sit underneath a project brain.
 
 ## Working with brains
 
@@ -39,8 +36,7 @@ brain.getBrainPath();          // current private brain path
 brain.getPublicPath();         // current public brain path
 ```
 
-Dual mode reads check the current brain's root first, then the public root.
-Pin a scope to skip the fallback:
+Dual mode reads check the current brain's root first, then the public root. Pin a scope to skip the fallback:
 
 ```javascript
 const item = await brain.read('identity');               // dual, with fallback
@@ -56,13 +52,11 @@ A legacy single-brain tree imports as one named brain covering both scopes:
 vant migrate --brain-name nova
 ```
 
-Names are segment-validated. Migration is content-detected and idempotent;
-the [Migration Guide](/vant/getting-started/migration) has the full contract.
+Names are segment-validated. Migration is content-detected and idempotent; the [Migration Guide](/vant/getting-started/migration) has the full contract.
 
 ## Agents per brain
 
-Agent rosters and configs scope per brain, with stack traversal for shared
-config. The agent crew workflow is in [Agents](/vant/multi-agent/agents).
+Agent rosters and configs scope per brain, with stack traversal for shared config. The agent crew workflow is in [Agents](/vant/multi-agent/agents).
 
 ---
 

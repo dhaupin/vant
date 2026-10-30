@@ -11,9 +11,7 @@ description: Vant memory systems - the brain files, the memory store, brain sear
 
 > The reason Vant exists. Three systems, all in your repo.
 
-Vant memory is not one thing. It is three systems with different jobs, plus
-two specialist formats. All of them store data as files under `models/` in
-your repository.
+Vant memory is not one thing. It is three systems with different jobs, plus two specialist formats. All of them store data as files under `models/` in your repository.
 
 | System | Job | Page |
 |--------|-----|------|
@@ -31,16 +29,11 @@ Specialist formats:
 | **Tempo** | The time-dilation keeper: agent attention sampled across an owner-stated wall-clock window | [Tempo](/vant/memory/tempo) |
 | **Leisure** | The want-list keeper: play held between invocations, tied into the zen/dream/tempo loop | [Leisure](/vant/memory/leisure) |
 
-Supporting surfaces: [pruning](/vant/memory/prune) keeps the corpus lean, [citations](/vant/memory/citations)
-ground agent claims in git-backed sources.
+Supporting surfaces: [pruning](/vant/memory/prune) keeps the corpus lean, [citations](/vant/memory/citations) ground agent claims in git-backed sources.
 
 ## The one-paragraph mental model
 
-Wake: read the brain, check migration status. Work: write facts into the
-memory store as they happen, search the corpus when context is missing.
-Sleep: write lessons into brain files, commit, push. Git history is the
-lineage; every generation of the agent inherits what the last one wrote.
-The full loop for agents is in [Agent Onboarding](/vant/getting-started/agent-onboarding).
+Wake: read the brain, check migration status. Work: write facts into the memory store as they happen, search the corpus when context is missing. Sleep: write lessons into brain files, commit, push. Git history is the lineage; every generation of the agent inherits what the last one wrote. The full loop for agents is in [Agent Onboarding](/vant/getting-started/agent-onboarding).
 
 ## Related
 

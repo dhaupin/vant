@@ -21,29 +21,17 @@ nav_order: 125
 
 LLMs are token-limited. Loading 60+ brain files on startup is expensive. Entropy Patching enables:
 
-1. **Tamper-evident lossless restore** - `decompress()` refuses any
-   envelope whose seed no longer hashes its restored bytes
-2. **Git-native diffs** - Segments are stored verbatim, so the diff
-   story stays whole
+1. **Tamper-evident lossless restore** - `decompress()` refuses any envelope whose seed no longer hashes its restored bytes
+2. **Git-native diffs** - Segments are stored verbatim, so the diff story stays whole
 3. **Selective inspection** - Read the scan stats without hydrating
 
 ## Path policy (read this first)
 
-Input and output paths go through the VAF path gate (`lib/vaf.js
-checkPathTraversal`): **operate inside the repository tree**. Paths typed
-as system locations (`/tmp/`, `/home/`, `/etc/`, `/var/`, `/bin/`,
-`/opt/`, `/boot/`, `/dev/`, `/sys/`, `/proc/`, `/snap/`, `/lib*`),
-Windows drive letters, `~`/`$HOME` expansions, encoded traversal
-(`%2e%2e`, double-encoding), or anything containing `..` are blocked
-with `SECURITY_PATH_TRAVERSAL`.
+Input and output paths go through the VAF path gate (`lib/vaf.js checkPathTraversal`): **operate inside the repository tree**. Paths typed as system locations (`/tmp/`, `/home/`, `/etc/`, `/var/`, `/bin/`, `/opt/`, `/boot/`, `/dev/`, `/sys/`, `/proc/`, `/snap/`, `/lib*`), Windows drive letters, `~`/`$HOME` expansions, encoded traversal (`%2e%2e`, double-encoding), or anything containing `..` are blocked with `SECURITY_PATH_TRAVERSAL`.
 
-In practice this means the file 19-mind-fusion compression examples below
-run on files under `models/`, `docs/`, or the repo root - not on
-`/tmp` scratch files. Use a project-local working directory if you need
-scratch space.
+In practice this means the file 19-mind-fusion compression examples below run on files under `models/`, `docs/`, or the repo root - not on `/tmp` scratch files. Use a project-local working directory if you need scratch space.
 
-This gate is deliberate and shared with every other CLI input path; do
-not file it as a bug.
+This gate is deliberate and shared with every other CLI input path; do not file it as a bug.
 
 ## How It Works
 
@@ -86,8 +74,7 @@ This enables lightweight "what changed" queries without full hydration.
 
 ### Use Case 1: Brain Compression
 
-Compress a brain file (or a directory of them) for storage as
-`.vpatch` envelopes; restore exactly with `--decompress`:
+Compress a brain file (or a directory of them) for storage as `.vpatch` envelopes; restore exactly with `--decompress`:
 
 ```bash
 # Compress one file into models/latent/
@@ -146,8 +133,7 @@ vant compress <file> -t 0.9       # Custom threshold
 vant compress <file.vpatch> -d     # -d / --decompress
 ```
 
-(The older `--output` long spelling is accepted too; `-o` and `--output`
-are the same flag, as are `-d` and `--decompress`.)
+(The older `--output` long spelling is accepted too; `-o` and `--output` are the same flag, as are `-d` and `--decompress`.)
 
 ## API Reference
 
@@ -178,8 +164,7 @@ const stats = entropy.getEntropyStats(buffer, opts);
 
 ### compress() and decompress()
 
-Lossless: segments store the ORIGINAL bytes verbatim (base64 in the
-envelope); `decompress()` concatenates them back and verifies the seed.
+Lossless: segments store the ORIGINAL bytes verbatim (base64 in the envelope); `decompress()` concatenates them back and verifies the seed.
 
 ```javascript
 const result = entropy.compress(bufferOrPath, outputDir, { windowSize, threshold });
@@ -189,9 +174,7 @@ const back = entropy.decompress(vpatchPath, outputPath);
 // { path, byteCount } - original byte length restored exactly
 ```
 
-Tamper-EVIDENCE: the latent seed is `lib/hash.sha256` of the original
-content. `decompress()` recomputes it over the restored bytes and REFUSES
-on mismatch - a mutated .vpatch fails loudly, never restores silently.
+Tamper-EVIDENCE: the latent seed is `lib/hash.sha256` of the original content. `decompress()` recomputes it over the restored bytes and REFUSES on mismatch - a mutated .vpatch fails loudly, never restores silently.
 
 ### shannonEntropy()
 
@@ -264,17 +247,12 @@ vant compress file.md --stats           # view entropy stats first
 }
 ```
 
-Lossless by construction: the concatenation of `segmentsData` (in
-`segments` offset order) IS the original file. `decompress()` restores
-it exactly and verifies the latent seed.
+Lossless by construction: the concatenation of `segmentsData` (in `segments` offset order) IS the original file. `decompress()` restores it exactly and verifies the latent seed.
 
 ## Security
 
-- Capability gate: output requires sandbox `canWrite`. A fresh default
-  sandbox self-grants with a printed notice (same posture as `vant
-  snapshot`/`vant clean`); an explicitly locked-down sandbox refuses.
-- Tamper-EVIDENCE: latent seed (sha256 of original) is verified on every
-  `decompress()`; a mutated envelope refuses loudly.
+- Capability gate: output requires sandbox `canWrite`. A fresh default sandbox self-grants with a printed notice (same posture as `vant snapshot`/`vant clean`); an explicitly locked-down sandbox refuses.
+- Tamper-EVIDENCE: latent seed (sha256 of original) is verified on every `decompress()`; a mutated envelope refuses loudly.
 - Writes go to the requested output dir only (`models/latent` default).
 - Hash source: `lib/hash.js` (the one hash source).
 
@@ -315,16 +293,11 @@ Recommended: Add to `vant start` sequence for auto k-detection.
 
 ### 3. Semantic Seed (Anchoring)
 
-The latent seed is a CONTENT anchor (sha256 of the original bytes),
-used for tamper evidence on restore. If you want a LLM-facing semantic
-anchor ("where to place" restored high-entropy data), store a summary
-in your brain alongside the .vpatch - the envelope is byte-discipline,
-not prose.
+The latent seed is a CONTENT anchor (sha256 of the original bytes), used for tamper evidence on restore. If you want a LLM-facing semantic anchor ("where to place" restored high-entropy data), store a summary in your brain alongside the .vpatch - the envelope is byte-discipline, not prose.
 
 ### 4. Generational Evolution
 
-Track entropy drift across sessions by comparing the `overall` stat of
-two .vpatch files for the same source:
+Track entropy drift across sessions by comparing the `overall` stat of two .vpatch files for the same source:
 
 ```javascript
 const a = entropy.getEntropyStats(oldContent);

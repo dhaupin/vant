@@ -9,9 +9,7 @@ description: Connecting Vant to external services - GitHub, Telegram, Docker, LL
 
 # Integrations
 
-Vant talks to the outside world through a small set of well-worn doors. Some
-have a full guide below; others are config-only connectors that ship inside
-`lib/connectors/` and activate from `config.ini` or `config.get` keys.
+Vant talks to the outside world through a small set of well-worn doors. Some have a full guide below; others are config-only connectors that ship inside `lib/connectors/` and activate from `config.ini` or `config.get` keys.
 
 ## With a guide
 
@@ -24,14 +22,11 @@ have a full guide below; others are config-only connectors that ship inside
 | [Agent Skills](/vant/integrations/agent-skills) | Skill packages agents can load |
 | [Hybrid Sync](/vant/integrations/hybrid) | Public/private brain split sync |
 
-Sync is not GitHub-only. The sync layer auto-detects the host from the remote
-URL, so GitLab, Bitbucket, Gitea, and self-hosted Git work with the same
-`vant sync` door (see [Sync](/vant/operations/sync)).
+Sync is not GitHub-only. The sync layer auto-detects the host from the remote URL, so GitLab, Bitbucket, Gitea, and self-hosted Git work with the same `vant sync` door (see [Sync](/vant/operations/sync)).
 
 ## Config-only connectors
 
-These ship in the box and are enabled through configuration rather than a
-separate guide:
+These ship in the box and are enabled through configuration rather than a separate guide:
 
 | Connector | Activates via | Notes |
 |-----------|--------------|-------|
@@ -42,32 +37,23 @@ separate guide:
 | Hermes connector | `require('./connectors').hermes(config)` | Read/write brain format for hermes-agent installs |
 | CrewAI connector | `require('./connectors').crewai(config)` | Multi-agent brain format interop |
 
-The `qdrant` and `weaviate` connector factories exist in `lib/connectors/index.js` but
-their backing modules are not shipped yet (same stub situation as
-Linear).
+The `qdrant` and `weaviate` connector factories exist in `lib/connectors/index.js` but their backing modules are not shipped yet (same stub situation as Linear).
 
 ## Deployment, not integration
 
-[Docker](/vant/integrations/docker) is about running Vant in containers -
-heads there when you want the container story.
+[Docker](/vant/integrations/docker) is about running Vant in containers - heads there when you want the container story.
 
 ## Not integrated (on purpose, for now)
 
-[Linear](/vant/integrations/linear) is a manifest stub only: the page exists,
-no connector is wired. It stays listed so nobody mistakes it for a shipped
-door.
+[Linear](/vant/integrations/linear) is a manifest stub only: the page exists, no connector is wired. It stays listed so nobody mistakes it for a shipped door.
 
 ## Elsewhere in the docs
 
-[MCP](/vant/runtime/mcp) is the tool surface for AI clients,
-[Embed](/vant/reference/embed) covers embedding providers, and
-[Node Registry](/vant/reference/node-registry) covers peer discovery.
+[MCP](/vant/runtime/mcp) is the tool surface for AI clients, [Embed](/vant/reference/embed) covers embedding providers, and [Node Registry](/vant/reference/node-registry) covers peer discovery.
 
 ## Where to start
 
-Storing your brain: [GitHub](/vant/integrations/github). Driving Vant from
-chat: [Telegram Bot](/vant/integrations/telegram-bot). Tool-calling agents:
-[MCP](/vant/runtime/mcp).
+Storing your brain: [GitHub](/vant/integrations/github). Driving Vant from chat: [Telegram Bot](/vant/integrations/telegram-bot). Tool-calling agents: [MCP](/vant/runtime/mcp).
 
 ## One example
 

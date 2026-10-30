@@ -34,8 +34,7 @@ That you:
 
 ## Trust Is Built
 
-Not given. Not assumed.
-Built through:
+Not given. Not assumed. Built through:
 - Consistency
 - Integrity
 - Transparency

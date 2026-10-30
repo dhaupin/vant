@@ -13,24 +13,8 @@ See [docs.creadev.org/vant/essential](/guides/) for detailed guides.
 > Cloudflare headless mode for agent canvas. MCP→API unified abstraction.
 
 ### Config Documentation
-- [x] Update config.example.ini with all new config.js settings (pass 225)
-  - VANT_BRAIN_PASSWORD_TIMEOUT - documented (brain.passwordTimeout, 15min default)
-  - server.insecure, server.authRequired - documented (listener TLS/auth block)
-  - storage.path - documented (VANT_STORAGE_PATH, sits beside MODEL_PATH)
-  - Full coverage: a new ENV REGISTRY section lists the complete
-    lib/config.js ENV_REGISTRY (58 entries incl. the #189-R1 canon
-    VANT_AUTH_KEY) with fallbacks; `vant config list env` is the live
-    view. Pins in test/config-registry.test.js extract every env-name
-    assignment from config.example.ini and refuse fabricated names; the
-    non-secret registry must be covered in the file (secrets + provider
-    connector tokens stay env-pointer-only by disposition).
-- [x] Audit settings.ini / settings.example.ini - these are separate from config.js (user personality/preferences vs system config)
-  - Disposition (pass 225, in both ROADMAP and the file header): they
-    STAY separate - personality/identity/output styling is user
-    preference, not system configuration; migrating would couple mood
-    to tenant config for zero reuse. The historical RAG block already
-    migrated to VANT_RAG_* envs (pass 194); bare names remain accepted
-    aliases.
+- [x] Update config.example.ini with all new config.js settings (pass 225) - VANT_BRAIN_PASSWORD_TIMEOUT - documented (brain.passwordTimeout, 15min default) - server.insecure, server.authRequired - documented (listener TLS/auth block) - storage.path - documented (VANT_STORAGE_PATH, sits beside MODEL_PATH) - Full coverage: a new ENV REGISTRY section lists the complete lib/config.js ENV_REGISTRY (58 entries incl. the #189-R1 canon VANT_AUTH_KEY) with fallbacks; `vant config list env` is the live view. Pins in test/config-registry.test.js extract every env-name assignment from config.example.ini and refuse fabricated names; the non-secret registry must be covered in the file (secrets + provider connector tokens stay env-pointer-only by disposition).
+- [x] Audit settings.ini / settings.example.ini - these are separate from config.js (user personality/preferences vs system config) - Disposition (pass 225, in both ROADMAP and the file header): they STAY separate - personality/identity/output styling is user preference, not system configuration; migrating would couple mood to tenant config for zero reuse. The historical RAG block already migrated to VANT_RAG_* envs (pass 194); bare names remain accepted aliases.
 
 ### Prompt Caching / Context Engine (lib/context.js)
 > See also: [Parallel Brain Stacking](#parallel-brain-stacking) - graph mode integrates with context assembly
@@ -187,25 +171,12 @@ cron.schedule('prompt-cache-warm', async () => {
 - No legacy wrappers or aliases needed
 
 **Tasks:**
-- [ ] Create lib/context.js - Context engine
-  - [ ] Context assembly from brain files
-  - [ ] Leverage transform.gather() for sources
-  - [ ] Deterministic sorting (stable sort)
-  - [ ] Cache breakpoint injection
-  - [ ] Per-brain cache state tracking
-  - [ ] Persistence via memory.state()
+- [ ] Create lib/context.js - Context engine - [ ] Context assembly from brain files - [ ] Leverage transform.gather() for sources - [ ] Deterministic sorting (stable sort) - [ ] Cache breakpoint injection - [ ] Per-brain cache state tracking - [ ] Persistence via memory.state()
 - [ ] Research model detection spec (MiniMax, Claude, DeepSeek, OpenAI)
 - [ ] Add invalidation triggers (time, brain changes, manual)
 - [ ] Add security (VAF, QoS, sanitization)
-- [ ] Add heartbeat to lib/cron.js
-  - [ ] `vant up --keep-cached` flag triggers heartbeat
-  - [ ] 4-min interval ping
-  - [ ] Optional nature integration (multifunctional)
-- [ ] Expose MCP tools for context inspection/modification
-  - [ ] context_get - inspect current context
-  - [ ] context_set - modify context rules
-  - [ ] context_refresh - force cache invalidation
-  - [ ] context_layers - list layers and status
+- [ ] Add heartbeat to lib/cron.js - [ ] `vant up --keep-cached` flag triggers heartbeat - [ ] 4-min interval ping - [ ] Optional nature integration (multifunctional)
+- [ ] Expose MCP tools for context inspection/modification - [ ] context_get - inspect current context - [ ] context_set - modify context rules - [ ] context_refresh - force cache invalidation - [ ] context_layers - list layers and status
 - [ ] Create test harness for context.js
 
 ### Vibe/Mood System (Risk Management)
@@ -372,14 +343,7 @@ Beyond series + parallel, graph mode could support:
 - [ ] **Graph mode (future)** - See lib/context.js proposal for integration
 
 ### ESLint Security & Quality Audit (HIGH PRIORITY)
-- [ ] Enable strict ESLint rules (already in .eslintrc.json)
-  - no-unused-vars: warn (406 vars found)
-  - no-shadow-restricted-names: error (1 found)
-  - no-redeclare: error (2 found)
-  - no-unreachable: error (1 found)
-  - no-prototype-builtins: error (1 found)
-  - no-dupe-class-members: error (2 found)
-  - no-control-regex: error (2 found)
+- [ ] Enable strict ESLint rules (already in .eslintrc.json) - no-unused-vars: warn (406 vars found) - no-shadow-restricted-names: error (1 found) - no-redeclare: error (2 found) - no-unreachable: error (1 found) - no-prototype-builtins: error (1 found) - no-dupe-class-members: error (2 found) - no-control-regex: error (2 found)
 - [ ] Fix all 9 error-level issues (security/bugs)
 - [ ] Review all 406 unused vars - many are likely dead code that can be removed
 - [ ] Run `npm run lint` to see current state
@@ -887,12 +851,7 @@ Each lib module will be updated to support multi-brain stack. Methodical approac
 #### Tasks
 - [x] Create lib/market.js (DONE)
 - [x] Integrate with trust.js for reputation (DONE)
-- [x] Add to security chain (DONE)
-  - VAF: Input validation
-  - Sandbox: Capability checks
-  - QoS: Rate limiting
-  - Escrow: Budget checks
-  - Governance: Ethics
+- [x] Add to security chain (DONE) - VAF: Input validation - Sandbox: Capability checks - QoS: Rate limiting - Escrow: Budget checks - Governance: Ethics
 - [x] Add MCP tools (DONE): market_list, market_bid, market_search, market_trade, market_stats
 - [x] Wire to boot (DONE): layer 10
 - [x] Wire to islands (DONE): runtime source type
@@ -918,11 +877,7 @@ Each lib module will be updated to support multi-brain stack. Methodical approac
 
 #### Tasks
 - [x] Create lib/trust.js (DONE)
-- [x] Add to security chain (DONE)
-  - VAF: Input validation
-  - Sandbox: Capability checks
-  - QoS: Rate limiting
-  - Governance: Ethics
+- [x] Add to security chain (DONE) - VAF: Input validation - Sandbox: Capability checks - QoS: Rate limiting - Governance: Ethics
 - [x] Add MCP tools (DONE): trust_getScore, trust_record, trust_leaderboard, trust_can
 - [x] Wire to boot (DONE): layer 9
 - [x] Wire to islands (DONE): runtime source type
@@ -1015,7 +970,7 @@ Node Types (extend base):
 - [ ] Create lib/node.js with base Node class
 - [ ] Define node schema (id, type, metadata, parent, children, created, modified)
 - [ ] Extend BrainNode from Node
-- [ ] Extend AgentNode from Node  
+- [ ] Extend AgentNode from Node
 - [ ] Extend TeamNode/OrgNode from Node (from teams.js)
 - [ ] Canvas paintbrush per node type (each node can render itself)
 - [ ] Graph traversal methods (ancestors, descendants, paths)
@@ -1200,7 +1155,7 @@ Unified security pipeline (`lib/pipeline.js`) that runs handlers:
 
 #### What do.js IS:
 - **Function Handler** - not middleware, not framework, just a handler
-- **Universal** - works across all modules consistently  
+- **Universal** - works across all modules consistently
 - **Entry Abstraction** - from monolithic to granular
 - **Extensibility Layer** - hooks, adapters, plugins can plug in
 
@@ -1344,7 +1299,7 @@ Third-party contributors have a clear extension point without modifying core.
 - Add fallback system
 - Test with one module
 
-**Phase 2: Extensibility**  
+**Phase 2: Extensibility**
 - Add hooks system
 - Add adapter registry
 - Add metrics/tracking

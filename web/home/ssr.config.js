@@ -32,9 +32,9 @@ export default {
     siteUrl: 'https://vant.creadev.org',
     siteName: 'Vant',
     author: 'dhaupin',
-    tagline: 'Persistent memory for AI agents',
+    tagline: 'The memory-first agent OS',
     ogImage: 'https://vant.creadev.org/vant-og.png',
-    keywords: 'AI agents, agent memory, MCP, markdown memory, open source',
+    keywords: 'agent OS, AI agents, agent memory, MCP, markdown memory, open source',
 
     appLayoutPath: '/src/AppLayout.jsx',
 
@@ -49,9 +49,9 @@ export default {
             priority: '1.0',
             changefreq: 'weekly',
             meta: {
-                title: 'Vant - Persistent memory for AI agents',
+                title: 'Vant - The memory-first agent OS',
                 description:
-                    'Vant gives any AI agent a brain: markdown memory files in your own repository. Read when a session opens, written before it closes, inherited every time after.',
+                    'Vant is the memory-first agent OS: the soul is a brain of markdown memory files in your own repository, plus the transports, governance, and runtime agents live inside. Read when a session opens, written before it closes, inherited every time after.',
             },
         },
         {
@@ -132,6 +132,16 @@ export default {
                 title: 'Status - Vant',
                 description:
                     'Vant surfaces status: every public asset swept from the edge with 35 days of uptime history, an ongoing-issue alert spot, and an honest fallback.',
+            },
+        },
+        {
+            path: '/audit',
+            priority: '0.5',
+            changefreq: 'daily',
+            meta: {
+                title: 'Struct audit - Vant',
+                description:
+                    'The four STRUCT families combined on one page: packstruct conformance, the crashtest packs floor, the eyestruct vision battery, and the poststruct render audit. Skeleton epoch: mock-shaped cards until the live feeds wire in.',
             },
         },
         {

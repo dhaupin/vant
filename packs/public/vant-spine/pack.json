@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "vant-spine",
+  "description": "The engine-parity spine battery for the state engine: canonical bytes, the StateTree put/diff/snapshot laws, the fold/cellstore rebate arithmetic, checkpoint recovery, the anchor ledger, the hot set's durability, and the persistent grants / WAL denial posture. In-process, no sockets; the geometry and world/clock/mesh faces ride later slices.",
+  "version": "0.1.0",
+  "entry": "index.mjs"
+}

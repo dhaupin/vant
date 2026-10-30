@@ -1,8 +1,23 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 87,
+  "_headingCount": 88,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 358 (the cron truth: Pages has no cron triggers, and the docs stop pretending it does)",
+      "sections": [
+        {
+          "name": "Fixed: the setup docs taught a dashboard section that does not exist",
+          "items": [
+            "The owner could not find \"Settings → Functions → Cron triggers\" on",
+            "Verified live: the vant-pub deploy serves the fresh 503 shape"
+          ]
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

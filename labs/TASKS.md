@@ -1,7 +1,67 @@
 # Vant Labs — Session Task Tracker
 
 **Branch:** axolotl  
-**Last Updated:** pass 351-352 arc (the FICTION SWEEP: the home site
+**Last Updated:** pass 354 arc (2026-10-25, THE KERNEL WIRING ARC +
+THE PACK BATCH + THE ROUND-TRIP: the §3 kernel wiring map FULLY
+RECEIPTED — rows 4-7 registered in one batch (K6-K9: pipeline
+attest-of-outcomes + step census; prune census-of-prunable + retire-
+with-ledger door (dry-run default) + the namespace-overwrite kill;
+sudo census through the PUBLIC surface only (listTasks/getGrants/
+getHealthChecks) + elevation-audit succeed; docs-gates census of the
+six real gate scripts, registered at cert-gate run start). Pass-ledger
+surface BUILT (lib/pass-ledger.js — real-docs open-item census in the
+ledger's own marker dialect, pure ceremony formatter — THIS ENTRY WAS
+STAMPED THROUGH IT, ledgersReadable() visibility seam). Crashtest pack
+batch: vant-kernel v0.3.0 roster rows (10 attacks, 10/10 REFUSED),
+vant-pass-ledger v0.1.0 (4 rows), packs/README fleet ledger rows. The
+ROUND-TRIP: full real-harness sweep — 9 packs / 0 EXPLOITED, library
+rows 30 REFUSED / 0 / 19 honest skips; honest-absence hardening for
+the pass-ledger doc legs (ledgersReadable() + explicit skipped-REFUSED
+when labs/ is not visible at a sandbox run root). The WIDE SWEEP
+re-arm CRASHTEST_SWEEP_DEFAULTS=1: 16 packs, 7 wide-sweep rows
+measured (cve-feed 2/0, next-middleware-shapes 2/0, qs-shapes 2/0,
+vite-dev-shapes 2/0, wp-money-shapes 3/0; wp-roles + wp-stock-smoke
+honest skips — targets not declared on this run root), ZERO findings,
+KNOWN-FINDINGS whitelist still EMPTY. The marketing-tables template
+consumer REGISTERED (register-only) — the §3 map's last row, so the
+map is FULLY RECEIPTED: every row that can be registered is. Pins:
+kernel-wiring 24/24, pass-ledger 13/13, crashtest pack contract
+91/0/0 double-run deterministic, kernel seed 69/0. Receipts on
+vant#250 throughout. Next: nothing structural left on the §3 map —
+future rows open only with new surfaces.)
+**Prior — pass 353 arc (2026-10-23, THE CRASHTEST PIT STOP +
+THE GRADUATION: the D1/KV-shaped library rows armed over the
+harness fake backend — fixture routes charge/profile/device/upload in
+scripts/crashtest-run.js; library rows 25/0/5-skips → 30 REFUSED / 0
+EXPLOITED / 0 skips; the upload fixture's own name permit measured a
+real finding on the hour of arming (double-extension stored verbatim →
+EXPLOITED) and the single-dot-extension permit landed the same pass;
+both CI gate layers green, whitelists still empty. Cross-repo asks
+filed on dhaupin/crashtest: #9 fakeD1/FakeKV breadth (supplements
+Rook's #8), #10 memory rows, #11 governance rows, #12 env-claims
+manifest, #13 the vant census (258 suites / ~54k lines, ~70-80%
+pack-shaped), #14 chaining/step-scoped verdicts. Two-engine spec:
+labs/prd-crashtest.md + labs/prd-crashtest-casestudy.md (S0 measured,
+S1 anchored-projected). Identity waves: the motto "Trusting the
+universe, but with receipts" adopted (prd-brand §6 - hero kicker,
+footer, README, docs hub, brain "THE WAY", AGENTS.md); the backronym
+KEEP-forever exactly "Versatile" (misspelling sweep clean,
+labs/prd-brand §2); the GRADUATION - vant is canonically "the
+memory-first agent OS" (prd-brand §1, prd-marketing forms ladder;
+memory stays the wedge, OS claims map to the layer table in
+docs/essential/architecture.md). BRAIN ROTATION: private layer pruned
+29 → 13 dirs (16 test-carcass brains swept); the fifth art pack
+'crest' (CREST-DUSK, the OS wave) joined the reserved four
+(14/14 art-pack pins, 5/5 stego round-trips); the boot stone ROTATED:
+models/public/vant/boot/axolotl-p_axolotl-os-2026.svg
+(password axolotl-os-2026), honest post-prune mass 10 brains/corpus,
+inspect valid, boot discovery resolves it, .sha256 verified sidecar,
+anchor re-pinned (the ledger had drifted since Oct 13: vant horcrux
+anchor → verify green). Prior stone archived to labs/archives/horcruxes/
+with its still-working casing. Gates: language 211, docs style 126,
+home 13, web-home style 40, surface consistency, changelog parity,
+art packs 14/14 — all PASS.)
+**Prior — pass 351-352 arc (the FICTION SWEEP: the home site
 and docs hub audited claim-by-claim against the code; commits
 74185ec7 (pass 351: npm-link install truth, five-minute copy, section
 numbering, AGENTS.md succession path) and 623794d2 (pass 352: embedConfig

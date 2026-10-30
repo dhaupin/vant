@@ -92,8 +92,6 @@ vant islands create [island-name]
 
 ---
 
-**Role**: Island Manager  
-**Input**: Island name  
-**Output**: Loaded context
+**Role**: Island Manager **Input**: Island name **Output**: Loaded context
 
 > Isolate your context.

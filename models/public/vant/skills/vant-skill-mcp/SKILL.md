@@ -73,8 +73,6 @@ node bin/mcp.js
 
 ---
 
-**Role**: MCP Server  
-**Input**: Brain files  
-**Output**: JSON-RPC tools
+**Role**: MCP Server **Input**: Brain files **Output**: JSON-RPC tools
 
 > Brain as tools.

@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "vant-home",
+  "description": "The vant.creadev.org SITE wire (web/home Pages Functions): the status API is the deploy's only runtime surface, so the site wire gets the same verdict discipline as the pod - typed unwired refusals, a fuzz floor on the summary GET, admin-door key/body discipline, and an honest cost cap that keeps one compromised key from becoming an edge-egress hammer. In-process handlers over a statement-mapped fake D1 - zero sockets.",
+  "version": "0.1.0",
+  "entry": "index.mjs"
+}

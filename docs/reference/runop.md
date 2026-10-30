@@ -9,9 +9,7 @@ description: The runtime operator - init, run, and stop the middleware pipeline.
 
 # Runop API
 
-The runtime operator initializes, runs, and stops the middleware pipeline.
-It was absorbed into `lib/pipeline.js` (there is no `lib/runop.js`), and
-the same surface fronts the `vant runop` CLI.
+The runtime operator initializes, runs, and stops the middleware pipeline. It was absorbed into `lib/pipeline.js` (there is no `lib/runop.js`), and the same surface fronts the `vant runop` CLI.
 
 ## CLI
 

@@ -85,8 +85,6 @@ const count = await client.incr(`ratelimit:${key}`)
 
 ---
 
-**Role**: Redis Operator  
-**Input**: Keys, values  
-**Output**: Fast data
+**Role**: Redis Operator **Input**: Keys, values **Output**: Fast data
 
 > In-memory speed.

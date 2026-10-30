@@ -29,6 +29,10 @@ describe('src/showcase.mjs - the card contract', () => {
             ids.add(c.id)
             expect(c.title).toBeTruthy()
             expect(c.industry).toBeTruthy()
+            expect(Array.isArray(c.industry)).toBe(true)
+            expect(c.industry.length).toBeGreaterThanOrEqual(1)
+            expect(c.industry.length).toBeLessThanOrEqual(2)
+            for (const tag of c.industry) { expect(tag).toBeTruthy() }
             expect(c.url).toMatch(/^https:\/\//)
             expect(c.img).toMatch(/^\//)
             expect(c.imgAlt).toBeTruthy()
@@ -52,10 +56,11 @@ describe('src/showcase.mjs - the card contract', () => {
         }
     })
 
-    it('leads with the self entry: Axolotl at Creadev.org', () => {
+    it('leads with the community entry (Crashtest) and keeps the self entry', () => {
         const first = SHOWCASE[0]
-        expect(first.id).toBe('axolotl-creadev')
-        expect(first.title).toContain('Axolotl')
-        expect(first.url).toBe('https://creadev.org')
+        expect(first.id).toBe('crashtest-creadev')
+        expect(first.title).toBe('Crashtest')
+        expect(first.url).toBe('https://crashtest.creadev.org')
+        expect(SHOWCASE.some((c) => c.id === 'axolotl-creadev')).toBe(true)
     })
 })

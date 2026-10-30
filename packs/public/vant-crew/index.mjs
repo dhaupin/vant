@@ -153,5 +153,34 @@ export default {
         };
       },
     },
+    {
+      name: 'crew-doors-census',
+      description: "the crew door inventory (run-root census, fresh-module ladder): every gate verb over ids that do not exist answers its own honest shape (undefined/typed/'Agent not found'/honest false no-ops/prune zeroes), the work verbs refuse unknown ids typed AND the approval acks are GROUNDED (approve/reject/signOff used to ack work that never existed - the live find this census fixed: today an unknown id answers the stream's typed refusal, never an approved:true/rejected:true receipt), the protos loader lists empty rosters honestly and loadProto of an unknown answers null, and the crew bus refuses typed in BOTH postures (unconfigured CONFIG_MISSING walls; configured: URL/name validations typed, ROSTER/STATUS projections carry NO pair secret, unknown sends answer NOT_FOUND, broadcast returns per-node attempt results, removeNode returns true-for-real then false-for-unknown, and the receiver version gate refuses a bogus version typed)",
+      async run(harness) {
+        const r = await tryRun(harness, 'crew-doors', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({}),
+        });
+        if (r._absent) return skip('no crew-doors route');
+        if (r.threw) return { verdict: 'REFUSED', skipped: true, detail: `crew-doors threw in the shim: ${r.error?.name}` };
+        const j = parseJson(await bodyText(r));
+        if (!j || j.error) return skip('crew-doors probe unavailable: ' + (j && j.error || 'no payload'));
+        if (j.ok === false) return { verdict: 'EXPLOITED', detail: 'the census child faulted mid-census: ' + (j.bail || 'unknown'), tookRequests: 1 };
+        const laws = [
+          ['gate verbs honest', j.getUnknownUndefined && j.pauseUnknownTyped && j.resumeUnknownTyped && j.killTerminateHonestNoop && j.pruneHonest],
+          ['work verbs typed', j.delegateUnknownTyped && j.pollUnknownTyped && j.completeUnknownTyped && j.retryUnknownTyped && j.escalateUnknownTyped],
+          ['approval acks grounded', j.approveUnknownGrounded && j.rejectUnknownGrounded && j.signOffUnknownGrounded],
+          ['protos loader honest', j.protosListsHonest && j.loadProtoUnknownNull],
+          ['bus unconfigured walls', j.unconfiguredTyped],
+          ['bus configured invariants', j.statusShapeConfigured && j.statusSecretFree && j.regBadUrlTyped && j.regBadNameTyped && j.regOkNoSecret && j.nodesShapeNoSecret && j.sendUnknownTyped && j.broadcastAttemptArray && j.removeRealTrueThenUnknownFalse && j.versionGateTyped && j.stopHonest],
+        ];
+        const broken = laws.filter(([, ok2]) => !ok2);
+        if (broken.length) {
+          return { verdict: 'EXPLOITED', detail: 'the crew doors broke at: ' + broken.map(([n]) => n).join(', '), tookRequests: 1, evidence: { census: j } };
+        }
+        return { verdict: 'REFUSED', detail: '28 census rungs hold: every gate verb answers its own honest shape, the work verbs refuse unknown ids typed, the approval acks are grounded in the stream (the ungrounded approved:true ack the census found was fixed this pass), the protos loader is honest, and the crew bus refuses typed in both postures with secret-free projections and attempt-array broadcast - the crew door inventory is measured', tookRequests: 1 };
+      },
+    },
   ],
 };

@@ -52,14 +52,7 @@ const s = await stream.stats();
 // → { pending: 5, processing: 2, completed: 100 }
 ```
 
-There is no hard `init()` gate: `enqueue` auto-creates a stream by an
-unknown name, and the optional `stream.init()` just rehydrates
-previously persisted streams from the brain corpus into memory (call it
-if you need pre-existing streams before your own enqueues).
-Also exported: `create`/`deleteStream` (stream lifecycle), `peek`,
-`checkLease`, `load`, `info`, `watch(event, callback)`/`unwatch`
-(subscribe to stream events), and the multibrain `listStack`/`getStackStreamInfo`/
-`getStackStats`.
+There is no hard `init()` gate: `enqueue` auto-creates a stream by an unknown name, and the optional `stream.init()` just rehydrates previously persisted streams from the brain corpus into memory (call it if you need pre-existing streams before your own enqueues). Also exported: `create`/`deleteStream` (stream lifecycle), `peek`, `checkLease`, `load`, `info`, `watch(event, callback)`/`unwatch` (subscribe to stream events), and the multibrain `listStack`/`getStackStreamInfo`/ `getStackStats`.
 
 ## Job States
 

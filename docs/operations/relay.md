@@ -9,13 +9,9 @@ nav_order: 67
 
 # The Relay - the r/2 webhook-native face
 
-The relay is a connection layer of vant, not an app
-([prd-relay.md](https://github.com/dhaupin/vant/blob/axolotl/labs/prd-relay.md)):
-encrypted pipes connecting installs - and each other - gated so not just
-anyone flows.
+The relay is a connection layer of vant, not an app ([prd-relay.md](https://github.com/dhaupin/vant/blob/axolotl/labs/prd-relay.md)): encrypted pipes connecting installs - and each other - gated so not just anyone flows.
 
-**The pass-236 ruling (owner):** there is NO `lib/relay` module. The relay
-face is COMPOSED out of the existing webhook/door transports:
+**The pass-236 ruling (owner):** there is NO `lib/relay` module. The relay face is COMPOSED out of the existing webhook/door transports:
 
 | Relay duty | The existing system it rides |
 |------------|------------------------------|
@@ -27,8 +23,7 @@ face is COMPOSED out of the existing webhook/door transports:
 | the api face | `lib/api.js` relay - mount/status handlers, `relaySend` client seam |
 | boot wiring | `vant.startFull`/`startHeadless` mount the face when the posture is ON |
 
-The guard is mechanical: `test/no-legacy-bloat.test.js` FAILS the moment
-`lib/relay.js` reappears.
+The guard is mechanical: `test/no-legacy-bloat.test.js` FAILS the moment `lib/relay.js` reappears.
 
 ## The wire (r/2)
 
@@ -51,10 +46,7 @@ relay.ride payload = { ct }                 this pod is the ENDPOINT: the
             tunnel), and the door's answer re-envelopes into ack.reply.ct.
 ```
 
-Transport refusals ride HTTP statuses (the webhook transport's own):
-401 unsigned/missigned/stale, 409 replay (identical signed bytes),
-404 route missing (posture OFF is route-missing), 413 over 1 MiB.
-Application refusals ride typed replies INSIDE the 200 ack:
+Transport refusals ride HTTP statuses (the webhook transport's own): 401 unsigned/missigned/stale, 409 replay (identical signed bytes), 404 route missing (posture OFF is route-missing), 413 over 1 MiB. Application refusals ride typed replies INSIDE the 200 ack:
 
 | Reply code | Meaning |
 |------------|---------|
@@ -70,12 +62,7 @@ Application refusals ride typed replies INSIDE the 200 ack:
 
 ## The kit: one contract, checksummed copies
 
-The contract lives ONCE, in `web/kit/contracts/relay-contract.js` (+ `.d.ts`
-twin) at version **r/2**: the wire, the signature header, typed reply
-codes, the envelope rule, flavors, and the honest caps shape. Renderers
-hold their own checksummed copies - vendored by
-`scripts/vendor-relay-kit.js`, pinned by `.sha256` sidecars, and the
-parity pins (`test/relay-parity.test.js`) FAIL on any drift from kit head:
+The contract lives ONCE, in `web/kit/contracts/relay-contract.js` (+ `.d.ts` twin) at version **r/2**: the wire, the signature header, typed reply codes, the envelope rule, flavors, and the honest caps shape. Renderers hold their own checksummed copies - vendored by `scripts/vendor-relay-kit.js`, pinned by `.sha256` sidecars, and the parity pins (`test/relay-parity.test.js`) FAIL on any drift from kit head:
 
 | Renderer | Their copy | Verified by |
 |----------|------------|-------------|
@@ -87,8 +74,7 @@ Change the kit, then re-run the vendoring - the pins fail closed.
 
 ## The origin policy (pass 270)
 
-One resolver (`lib/api.js _relayOriginPolicy`) answers every hop origin;
-the postures widen in this order:
+One resolver (`lib/api.js _relayOriginPolicy`) answers every hop origin; the postures widen in this order:
 
 | Posture | Config | Plain-http hop origins | Outbound fetch dial |
 |---------|--------|------------------------|---------------------|
@@ -96,12 +82,7 @@ the postures widen in this order:
 | INTRANET (LAN-scope) | `relay.intranetOrigins true` | ONLY private-LAN scopes: loopback (127/8, ::1), RFC1918 (10/8, 172.16/12, 192.168/16), IPv6 ULA (fc::/7) | `network.fetch internalPolicy: 'privateLan'` - LAN carve-out, but link-local (169.254 cloud metadata!), multicast and 0.0.0.0 STILL refused |
 | LAB ESCAPE | `relay.allowPrivateOrigins true` | any scheme anywhere | `skipDomainCheck` (the pre-270 escape, unchanged) |
 
-The intranet posture is the mesh-on-a-LAN default recommendation: pods
-relay to their neighbors without becoming LAN probers, and the
-metadata-hostile wall survives every posture. Pilot pinned:
-`scripts/pilot-two-relays.js` runs the WHOLE lane under the intranet
-posture (no lab escape armed) and the H6 pin holds the posture line on
-real sockets.
+The intranet posture is the mesh-on-a-LAN default recommendation: pods relay to their neighbors without becoming LAN probers, and the metadata-hostile wall survives every posture. Pilot pinned: `scripts/pilot-two-relays.js` runs the WHOLE lane under the intranet posture (no lab escape armed) and the H6 pin holds the posture line on real sockets.
 
 ## Bring-up (the pod IS the relay + the endpoint)
 
@@ -113,10 +94,7 @@ vant server                          # (or all / headless) - the boot mounts the
 vant relay status                    # posture truth
 ```
 
-The boot mounts the face onto the webhook transport (its own port, 3467
-default, loopback-bound like every listener; widen deliberately with
-`VANT_WEBHOOK_*`). OFF is first-class: no register, no server, no route.
-ON without a gate secret binds NOTHING (fail-closed).
+The boot mounts the face onto the webhook transport (its own port, 3467 default, loopback-bound like every listener; widen deliberately with `VANT_WEBHOOK_*`). OFF is first-class: no register, no server, no route. ON without a gate secret binds NOTHING (fail-closed).
 
 ## The client seam
 
@@ -132,35 +110,18 @@ const r = await relay.send(
 // r.reply.raw = the upstream's verbatim answer
 ```
 
-`relaySend` composes the crew envelope, HMAC-signs the raw bytes, posts
-to `/relay`, and returns the merged ack. The same wire the dashboard edge
-speaks (secondary consumer, owner ruling).
+`relaySend` composes the crew envelope, HMAC-signs the raw bytes, posts to `/relay`, and returns the merged ack. The same wire the dashboard edge speaks (secondary consumer, owner ruling).
 
 ## Why the riding transports make this stronger
 
-- The SSRF posture is NOT new code: `network.fetch` already refused
-  loopback/RFC1918/link-local/IP literals and DNS-rebinding before r/2
-  existed - hop forwards simply inherit it. The lab escape
-  (`relay.allowPrivateOrigins`) widens BOTH dials together (the scheme
-  rule + network's private-IP wall); public posture keeps the full wall.
-- Replay is NOT new code: the webhook transport's `_replayCheck` refuses
-  byte-identical signed envelopes (409) and stale envelopes (401) for
-  every route; the ride adds the inner-nonce TTL cache (rung 2) on top.
-- The door stays the door: rides dispatch through the pod's own MCP door
-  over loopback - its full auth chain executes; the relay layer margins
-  nothing around auth.
-- The relay stays BLIND: the gate secret is spent at verification, the
-  channel key is never held, and every body it carries is ciphertext.
+- The SSRF posture is NOT new code: `network.fetch` already refused loopback/RFC1918/link-local/IP literals and DNS-rebinding before r/2 existed - hop forwards simply inherit it. The lab escape (`relay.allowPrivateOrigins`) widens BOTH dials together (the scheme rule + network's private-IP wall); public posture keeps the full wall.
+- Replay is NOT new code: the webhook transport's `_replayCheck` refuses byte-identical signed envelopes (409) and stale envelopes (401) for every route; the ride adds the inner-nonce TTL cache (rung 2) on top.
+- The door stays the door: rides dispatch through the pod's own MCP door over loopback - its full auth chain executes; the relay layer margins nothing around auth.
+- The relay stays BLIND: the gate secret is spent at verification, the channel key is never held, and every body it carries is ciphertext.
 
 ## Pins, rebuilt fresh
 
-`test/relay.test.js` walks the FULL loops over real sockets: signed gate
-(401/200/409 ladder), the hop round trip (forward + verbatim answer +
-no-body-leak + secret-never-rides), the ride loop (envelope -> open ->
-nonce -> door -> re-envelope, bearer inside), typed ride refusals through
-the pipe, the OFF posture, the body cap, the counters, and the sender
-seam. `test/relay-parity.test.js` pins face-to-kit constants, vendored
-byte-identity, shape agreement, and the retired-wire lies.
+`test/relay.test.js` walks the FULL loops over real sockets: signed gate (401/200/409 ladder), the hop round trip (forward + verbatim answer + no-body-leak + secret-never-rides), the ride loop (envelope -> open -> nonce -> door -> re-envelope, bearer inside), typed ride refusals through the pipe, the OFF posture, the body cap, the counters, and the sender seam. `test/relay-parity.test.js` pins face-to-kit constants, vendored byte-identity, shape agreement, and the retired-wire lies.
 
 ---
 

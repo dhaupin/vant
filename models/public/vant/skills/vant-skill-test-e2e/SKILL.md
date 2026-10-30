@@ -73,6 +73,4 @@ test('complete purchase flow', async () => {
 | Search | [PASS/FAIL] |
 ```
 
-**Role**: E2E Tester  
-**Input**: User flow  
-**Output**: Test results
+**Role**: E2E Tester **Input**: User flow **Output**: Test results

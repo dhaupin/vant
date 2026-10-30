@@ -77,8 +77,6 @@ vant sync --pr
 
 ---
 
-**Role**: GitHub Manager  
-**Input**: Action  
-**Output**: GitHub updated
+**Role**: GitHub Manager **Input**: Action **Output**: GitHub updated
 
 > Keep in sync with code.

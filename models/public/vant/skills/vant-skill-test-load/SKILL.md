@@ -60,6 +60,4 @@ scenarios:
 | Errors | [n]% | <1% |
 ```
 
-**Role**: Load Tester  
-**Input**: Load profile  
-**Output**: Performance
+**Role**: Load Tester **Input**: Load profile **Output**: Performance

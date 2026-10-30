@@ -447,13 +447,22 @@ function resetEdgeChains(sb) {
     const Server = require(path.join(sb, 'lib', 'server.js')).Server;
     EDGE_CHAINS.open = new Server({ port: 0, authRequired: false });
     EDGE_CHAINS.priv = new Server({ port: 0, authRequired: true });
+    // The REST door table (lib/api.REST_ROUTES, 2026-10-27 door-parity arm):
+    // startREST registers exactly these onto a live Server; the fixture arms
+    // them on the in-process chains so the packs drive the REAL door code
+    // (handlers, arg names, params) with no listener bound.
+    const REST_ROUTES = require(path.join(sb, 'lib', 'api.js')).REST_ROUTES;
+    for (const r of REST_ROUTES) {
+        EDGE_CHAINS.open.route(r.path, r.handler, r.method);
+        EDGE_CHAINS.priv.route(r.path, r.handler, r.method);
+    }
 }
 
 async function edgeRoundTrip(chain, spec) {
     const events = require('events');
     const req = new events.EventEmitter();
     req.method = String(spec.method || 'GET').toUpperCase();
-    req.url = String(spec.url || '/');
+    req.url = String(spec.url || spec.path || '/');
     req.headers = {};
     for (const [k, v] of Object.entries(spec.headers || {})) req.headers[String(k).toLowerCase()] = String(v);
     req.ip = '203.0.113.77'; // TEST-NET-3: fixed attacker address
@@ -498,6 +507,108 @@ async function edgeRoundTrip(chain, spec) {
 function extractCtJson(text) {
     const hit = String(text || '').match(/VANT_CT_JSON<<([\s\S]*?)>>END/);
     return hit ? hit[1] : String(text || '');
+}
+
+// --- the site wire arm (the vant-home pack, 2026-10-23): web/home's
+// --- Pages Functions over a statement-mapped in-memory fake D1. Same
+// --- shape scripts/crashtest-run.js runs (the statements come from
+// --- web/home/functions/_lib/status.js verbatim; an unknown statement
+// --- refuses LOUDLY, a guessed D1 would fake real rows).
+function makeFakeD1() {
+    const db = { endpoints: [], checks: [], daily: new Map(), alerts: [], meta: new Map(), _ids: { e: 0, c: 0, a: 0 } };
+    function stmt(sql) {
+        const s = String(sql);
+        const low = s.toLowerCase();
+        let args = [];
+        function exec() {
+            if (/^create table/i.test(low)) return { changes: 0 };
+            if (low.includes('select count(*) as n from status_endpoints')) return { first: { n: db.endpoints.length } };
+            if (low.includes('insert or ignore into status_endpoints')) {
+                const [name, url, kind, kindOptions, createdAt] = args;
+                if (db.endpoints.some((e) => e.name === name)) return { changes: 0 };
+                db._ids.e++;
+                db.endpoints.push({ id: db._ids.e, name, url, kind, kind_options: kindOptions, created_at: createdAt });
+                return { changes: 1 };
+            }
+            if (low.startsWith('insert into status_checks')) {
+                const [endpointId, day, ts, ok, state, latencyMs, detail] = args;
+                db._ids.c++;
+                db.checks.push({ id: db._ids.c, endpoint_id: endpointId, day, ts, ok, state, latency_ms: latencyMs, detail });
+                return { changes: 1 };
+            }
+            if (low.includes('insert into status_daily')) {
+                const [endpointId, day, upCount, checkCount] = args;
+                const key = endpointId + '|' + day;
+                const prior = db.daily.get(key) || { up_count: 0, check_count: 0 };
+                db.daily.set(key, { up_count: prior.up_count + upCount, check_count: prior.check_count + checkCount });
+                return { changes: 1 };
+            }
+            if (low.includes('from status_daily where day >= ?')) {
+                const since = args[0];
+                const results = [...db.daily.entries()]
+                    .map(([key, row]) => { const i = key.indexOf('|'); return { endpoint_id: Number(key.slice(0, i)), day: key.slice(i + 1), up_count: row.up_count, check_count: row.check_count }; })
+                    .filter((r) => r.day >= since)
+                    .sort((a, b) => (a.day < b.day ? -1 : a.day > b.day ? 1 : a.endpoint_id - b.endpoint_id));
+                return { results };
+            }
+            if (low.includes('from status_checks order by id desc limit 300')) {
+                const results = [...db.checks].sort((a, b) => b.id - a.id).slice(0, 300)
+                    .map(({ endpoint_id, ts, ok, state, latency_ms, detail }) => ({ endpoint_id, ts, ok, state, latency_ms, detail }));
+                return { results };
+            }
+            if (low.includes('select * from status_endpoints order by id')) return { results: db.endpoints.map((e) => ({ ...e })) };
+            if (low.startsWith('delete from status_endpoints')) {
+                const before = db.endpoints.length;
+                const field = /where id = \?/i.test(low) ? 'id' : 'name';
+                db.endpoints = db.endpoints.filter((e) => String(e[field]) !== String(args[0]));
+                return { changes: before - db.endpoints.length };
+            }
+            if (low.includes('select value from status_meta')) return { first: db.meta.has(args[0]) ? { value: db.meta.get(args[0]) } : null };
+            if (low.includes('into status_meta')) { db.meta.set(args[0], args[1]); return { changes: 1 }; }
+            if (low.includes('update status_alerts set active = 0')) {
+                let ch = 0;
+                for (const a of db.alerts) { if (a.active === 1) { a.active = 0; a.cleared_at = args[0]; ch++; } }
+                return { changes: ch };
+            }
+            if (low.includes('insert into status_alerts')) {
+                const [message, level, createdAt] = args;
+                db._ids.a++;
+                db.alerts.push({ id: db._ids.a, message, level, active: 1, created_at: createdAt, cleared_at: null });
+                return { changes: 1 };
+            }
+            if (low.includes('from status_alerts where active = 1')) {
+                return { results: [...db.alerts].filter((a) => a.active === 1).sort((a, b) => b.id - a.id).slice(0, 10) };
+            }
+            throw new Error('fake d1: unknown statement: ' + s.slice(0, 90));
+        }
+        return {
+            bind: (...a) => { args = a; return { run, first, all }; },
+            run, first, all,
+        };
+        function run() { return { success: true, meta: { changes: exec().changes ?? 0 } }; }
+        async function first() { return exec().first ?? null; }
+        async function all() { const { results } = exec(); return { results: results ?? [] }; }
+    }
+    return {
+        prepare: (sql) => stmt(sql),
+        batch: async (stmts) => { const out = []; for (const st of stmts) { await st.run(); out.push(true); } return out; },
+    };
+}
+
+let homeApi = null;
+let homeSharedDb = null;
+async function homeHandlers() {
+    if (!homeApi) {
+        const dir = path.join(ROOT, 'web', 'home', 'functions', 'api', 'status');
+        homeApi = {
+            summary: (await import(String(require('url').pathToFileURL(path.join(dir, 'summary.js'))))).onRequestGet,
+            admin: (await import(String(require('url').pathToFileURL(path.join(dir, 'admin.js'))))).onRequestPost,
+            // (2026-10-27 Edge deepening) the third door: the daily-sweep
+            // cron (scheduled.js - onScheduled + the wire-404 onRequest).
+            scheduled: (await import(String(require('url').pathToFileURL(path.join(dir, 'scheduled.js'))))),
+        };
+    }
+    return homeApi;
 }
 
 function buildRoutes(sb) {
@@ -599,6 +710,98 @@ function buildRoutes(sb) {
             secondApplied: (second && second.applied || []).length,
             secondDryPlanned: dryRunApplied,
         }), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
+    // brain-listing: the brain's listing/dirs family on the sandbox tree
+    // (the native suite's print "BRAIN LISTING / HAS-BRAIN / DIRS
+    // (unmeasured by the pack rows)" family — the 2026-10-27 slice's
+    // reverse-verification target). Neutral facts only: hasBrain verdict,
+    // array shapes, dirs roots verified for CONFINEMENT (inside models/).
+    routes.registerRoute('brain-listing', async (ctx) => {
+        const j = await ctx.request.json().catch(() => ({}));
+        let brain;
+        try { brain = require(path.join(sb, 'lib', 'brain.js')); } catch (e) {
+            return new Response(JSON.stringify({ error: e.name + ': ' + e.message }), { status: 500 });
+        }
+        const out = { op: null };
+        try {
+            if (j && j.op === 'hasBrain') {
+                out.op = 'hasBrain';
+                const r = await brain.hasBrain(String(j.name || 'identity'));
+                out.result = (r === null || r === 'public' || r === 'private') ? r : 'ILLEGAL:' + String(r);
+            } else if (j && j.op === 'listBrains') {
+                out.op = 'listBrains';
+                const r = await brain.listBrains();
+                out.isArray = Array.isArray(r);
+                out.count = Array.isArray(r) ? r.length : null;
+                out.nonString = Array.isArray(r) ? r.filter((x) => typeof x !== 'string').length : null;
+                out.traversal = Array.isArray(r) ? r.filter((x) => String(x).includes('..') || String(x).startsWith('/')).length : null;
+            } else if (j && j.op === 'brainDirs') {
+                out.op = 'brainDirs';
+                const r = brain.brainDirs();
+                out.hasPublic = !!r && Object.prototype.hasOwnProperty.call(r, 'public');
+                out.hasPrivate = !!r && Object.prototype.hasOwnProperty.call(r, 'private');
+                // THE LAW both pins hunt: the dirs roots must resolve inside
+                // the sandbox's models/ tree — a root outside it is a breach.
+                const root = path.join(sb, 'models');
+                out.confined = r ? Object.entries(r).every(([, d]) => String(path.resolve(String(d)) === root || String(path.resolve(String(d))).startsWith(root + path.sep))) : false;
+                out.roots = r ? Object.entries(r).map(([k, d]) => ({ side: k, inside: String(path.resolve(String(d))).startsWith(root + path.sep) })) : null;
+            } else if (j && j.op === 'loadStackCorpus') {
+                out.op = 'loadStackCorpus';
+                const r = brain.loadStackCorpus({ sync: true });
+                out.isArray = Array.isArray(r);
+                out.count = Array.isArray(r) ? r.length : null;
+                const entries = (Array.isArray(r) ? r : []).filter((x) => x && typeof x === 'object');
+                out.hasNames = entries.every((x) => x.name == null || typeof x.name === 'string');
+                        } else if (j && j.op === 'neuron-state') {
+                out.op = 'neuron-state';
+                // (2026-10-27 brain slice 2) the neuron STATE seam: both verbs
+                // are async (the native pins' typeof-object checks read
+                // promises); the row's neutral facts are the round trip and
+                // the disk confinement.
+                const probe = j.probe || 'brain-neuron-state-row';
+                // (ground truth 2026-10-27) saveNeuronState answers BARE
+                // (undefined - the write IS the ack by design, a throw is
+                // the failure) and getNeuronState resolves to the state
+                // object whose .neurons carries what was saved. The facts
+                // below are the seam's own vocabulary.
+                let saveThrew = null;
+                try { await brain.saveNeuronState({ probe }); } catch (e0) { saveThrew = e0.name + ': ' + e0.message; }
+                let got = null, gotThrew = null;
+                try { got = await brain.getNeuronState(); } catch (e1) { gotThrew = e1.name + ': ' + e1.message; }
+                const neurons = (got && typeof got === 'object' && got.neurons) ? got.neurons : got;
+                out.roundTrip = !saveThrew && !gotThrew && !!neurons && typeof neurons === 'object' && neurons.probe === probe;
+                try { await brain.saveNeuronState({ probe: probe + '-2', n: 2 }); } catch (e2) { saveThrew = saveThrew || (e2.name + ': ' + e2.message); }
+                let back = null;
+                try { back = await brain.getNeuronState(); } catch (e3) { gotThrew = gotThrew || (e3.name + ': ' + e3.message); }
+                const neurons2 = (back && typeof back === 'object' && back.neurons) ? back.neurons : back;
+                out.saveNoThrow = !saveThrew;
+                out.secondPersisted = !!neurons2 && neurons2.probe === probe + '-2' && neurons2.n === 2;
+                out.gotThrew = gotThrew || saveThrew;
+                // disk truth: the persisted state.json must stay inside the
+                // sandbox's models/ tree (never a foreign root).
+                let statePath = null;
+                try {
+                    // (multi-brain layout law) state.json lives per-brain since
+                    // 0.9, legacy roots at the flat models/ root; BOTH belong
+                    // inside models/ - anything else is a confinement breach.
+                    const candidates = ['private/vant/state.json', 'state.json', 'private/fixture/state.json'];
+                    statePath = candidates.map((c) => path.join(sb, 'models', c)).find((cand) => fs.existsSync(cand)) || null;
+                } catch (e2) { statePath = 'probe-threw:' + e2.name; }
+                out.stateInModels = statePath !== null;
+                out.statePathRel = statePath ? String(path.relative(sb, statePath)).slice(0, 80) : null;
+            } else if (j && j.op === 'brainSaveNeurons') {
+                out.op = 'brainSaveNeurons';
+                const r = brain.brainSaveNeurons({ attention: { vant: 0.5 } });
+                out.ack = !!r && ('saving' in r || 'error' in r);
+                out.keys = r && typeof r === 'object' ? Object.keys(r) : null;
+            } else {
+                return new Response(JSON.stringify({ error: 'op required (hasBrain|listBrains|brainDirs|loadStackCorpus|brainSaveNeurons)' }), { status: 400 });
+            }
+        } catch (e) {
+            out.threw = e.name + ': ' + e.message;
+        }
+        return new Response(JSON.stringify(out), { status: 200, headers: { 'Cache-Control': 'no-store' } });
     });
 
     // guest-cap: real lib/guests gates, three booleans
@@ -792,6 +995,125 @@ function buildRoutes(sb) {
     // vant-brain route contract is armed. Absence remains the honest shape
     // for any FUTURE unwired oracle (the packs degrade via route-absence,
     // never a 501 shim - a 501 shim IS a 5xx to the fuzz floor).
+
+    // --- the site wire routes (the vant-home arm, 2026-10-23): the REAL
+    // --- web/home Pages Functions handlers over a fresh per-call fake D1,
+    // --- same shape as scripts/crashtest-run.js. The posture envelope
+    // --- (db / envKey / hotSweep / inner / rawBody) picks the environment;
+    // --- the wire answers verbatim.
+    routes.registerRoute('home-summary', async (ctx) => {
+        const j = await ctx.request.json().catch(() => ({}));
+        const { summary } = await homeHandlers();
+        const env = {
+            STATUS_ADMIN_KEY: typeof j.envKey === 'string' ? j.envKey : 'home-run-root-admin-key',
+            STATUS_SWEEP_SECONDS: String(j.sweepSeconds ?? 600),
+        };
+        if (j.db !== false) {
+            env.DB = makeFakeD1();
+            if (j.hotSweep !== false) {
+                await env.DB.prepare('INSERT INTO status_meta (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
+                    .bind('last_sweep', new Date().toISOString()).run();
+            }
+        }
+        const method = String(j.method || 'GET').toUpperCase();
+        let res;
+        if (method !== 'GET') {
+            res = new Response(JSON.stringify({ error: 'method not allowed on this route' }), {
+                status: 405,
+                headers: { 'content-type': 'application/json; charset=utf-8', 'x-content-type-options': 'nosniff' },
+            });
+        } else {
+            const req = new Request('https://home-run-root.pages.dev/api/status/summary' + String(j.url ?? ''), { method: 'GET', headers: (j.headers || {}) });
+            res = await summary({ request: req, env, data: {} });
+        }
+        const text = await res.text();
+        return new Response(text, { status: res.status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
+    });
+    routes.registerRoute('home-admin', async (ctx) => {
+        const j = await ctx.request.json().catch(() => ({}));
+        const { admin } = await homeHandlers();
+        const env = { STATUS_ADMIN_KEY: typeof j.envKey === 'string' ? j.envKey : 'home-run-root-admin-key' };
+        // (flood-oracle posture) sharedDb keeps ONE fake D1 across a burst of
+        // calls; resetSharedDb forces it fresh on the burst opener so the
+        // count-capped rows measure from the seeded start every run
+        // (determinism).
+        if (j.sharedDb) {
+            if (!homeSharedDb || j.resetSharedDb) homeSharedDb = makeFakeD1();
+            env.DB = homeSharedDb;
+        } else {
+            homeSharedDb = null;
+            if (j.db !== false) env.DB = makeFakeD1();
+        }
+        const inner = (j.inner && typeof j.inner === 'object') ? j.inner : {};
+        const rawBody = typeof j.rawBody === 'string' ? j.rawBody : JSON.stringify(inner);
+        const headers = { 'content-type': 'application/json' };
+        if (j.adminKey !== undefined) headers['x-admin-key'] = String(j.adminKey);
+        const req = new Request('https://home-run-root.pages.dev/api/status/admin', { method: 'POST', headers, body: String(rawBody) });
+        const res = await admin({ request: req, env, data: {} });
+        const text = await res.text();
+        return new Response(text, { status: res.status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
+    });
+    // (2026-10-27 Edge deepening) home-scheduled: the cron door mirror -
+    // silent no-op without the binding, cron-only wire (404 typed), and
+    // over the fake D1 the sweep engine runs through the seeded defaults.
+    routes.registerRoute('home-scheduled', async () => {
+        const scheduled = (await homeHandlers()).scheduled;
+        const facts = { silentNoDb: null, seeded: null, wire404: null, wire404Body: null, nosniff: null, faultedWithDb: false };
+        facts.silentNoDb = (await scheduled.onScheduled({ env: {} })) === undefined;
+        const db = makeFakeD1();
+        try { await scheduled.onScheduled({ env: { DB: db } }); } catch (e) { facts.faultedWithDb = true; }
+        // the fake's return value is only { prepare, batch } - the store is
+        // the closure; seeding truth rides a COUNT query, like the wire does
+        let seeded = false;
+        try { const row = await db.prepare('SELECT COUNT(*) AS n FROM status_endpoints').first(); seeded = !!(row && Number(row.first ? row.first.n : row.n) > 0); } catch { seeded = false; }
+        facts.seeded = seeded;
+        const res = scheduled.onRequest(new Request('https://home-run-root.pages.dev/api/status/scheduled', { method: 'GET' }));
+        facts.wire404 = res.status === 404;
+        const text = await res.text();
+        facts.wire404Body = typeof text === 'string' && text.includes('scheduled only');
+        facts.nosniff = res.headers.get('x-content-type-options') === 'nosniff';
+        return new Response(JSON.stringify(facts), { status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
+    });
+
+    // (2026-10-28 first-doors census) home-status-math: same shape as the
+    // run root's route - the status board's PURE math plate graded under a
+    // FIXED date pin, neutral booleans on the wire only.
+    routes.registerRoute('home-status-math', async () => {
+        const mod = (await import(String(require('url').pathToFileURL(path.join(ROOT, 'web', 'home', 'functions', '_lib', 'status-math.js')))));
+        const fact = {};
+        const TODAY = '2026-01-15';
+        const t = (k, fn) => { try { fact[k] = fn() === true; } catch (e) { fact[k] = null; fact.faults = String(fact.faults || '') + k + ':' + (e && e.name || 'Error') + ';'; } };
+        t('slotLen', () => { const m = mod.dayBuckets([{ endpoint_id: 'a', day: '2026-01-13', up_count: 2, check_count: 2 }], 5, TODAY); const arr = m.get('a'); return Array.isArray(arr) && arr.length === 5 && arr[4].day === TODAY && arr[2].pct === 100 && arr[4].pct === null && arr[0].pct === null && arr[0].up === 0 && arr[0].total === 0; });
+        t('mergedPct', () => { const m = mod.dayBuckets([{ endpoint_id: 'b', day: TODAY, up_count: 3, check_count: 4 }, { endpoint_id: 'b', day: TODAY, up_count: 1, check_count: 1 }], 2, TODAY); const arr = m.get('b'); return arr.length === 2 && arr[1].up === 4 && arr[1].total === 5 && arr[1].pct === 80; });
+        t('idlessIgnored', () => mod.dayBuckets([{ day: TODAY, up_count: 5, check_count: 5 }], 1, TODAY).size === 0);
+        t('outsideDropped', () => { const m = mod.dayBuckets([{ endpoint_id: 'c', day: '2020-01-01', up_count: 9, check_count: 9 }], 1, TODAY); const arr = m.get('c'); return arr.length === 1 && arr[0].pct === null; });
+        t('nanTrailing', () => mod.trailingDays(3, 'not-a-date').length === 0);
+        t('uptimeNull', () => mod.uptimePct([]) === null && mod.uptimePct([{ up: 0, total: 0 }]) === null);
+        t('uptime70', () => mod.uptimePct([{ up: 3, total: 4 }, { up: 4, total: 6 }]) === 70);
+        t('windowSlice', () => { const many = [{ up: 0, total: 1 }]; for (let i = 1; i <= 34; i++) many.push({ up: 1, total: 1 }); return mod.uptimePct(many, 30) === 100 && mod.uptimePct(many, 35) === 97 && mod.uptimePct(many, 100) === 97; });
+        t('worstWins', () => mod.overallStatus([{ state: 'up' }, { state: 'degraded' }, { state: 'down' }]) === 'down');
+        t('unknownNeverDrags', () => mod.overallStatus([{ state: 'up' }, { state: 'unknown' }]) === 'up');
+        t('allUnknown', () => mod.overallStatus([]) === 'unknown' && mod.overallStatus([{ state: 'unknown' }]) === 'unknown');
+        t('alertWorst', () => { const a = mod.pickAlert([{ id: 1, level: 'warn', active: 1 }, { id: 7, level: 'critical', active: 1 }]); return !!a && a.level === 'critical' && a.id === 7; });
+        t('alertTieNewest', () => { const a = mod.pickAlert([{ id: 3, level: 'warn', active: 1 }, { id: 9, level: 'warn', active: 1 }]); return !!a && a.id === 9; });
+        t('alertInactive', () => { const a = mod.pickAlert([{ id: 7, level: 'critical', active: 0 }, { id: 2, level: 'warn', active: 1 }]); return !!a && a.level === 'warn'; });
+        t('alertGarbage', () => mod.pickAlert([null, undefined, {}]) === null);
+        t('specHttpsGate', () => mod.validEndpointSpec({ name: 'x', url: 'http://a.b/c' }).ok === false);
+        t('specNameGate', () => mod.validEndpointSpec({ name: 'x'.repeat(81), url: 'https://a.b' }).ok === false);
+        t('specKindGate', () => mod.validEndpointSpec({ name: 'x', url: 'https://a.b', kind: 'ping' }).ok === false);
+        t('specOptionsGate', () => mod.validEndpointSpec({ name: 'x', url: 'https://a.b', options: [] }).ok === false);
+        t('specGood', () => { const r = mod.validEndpointSpec({ name: '  x  ', url: 'https://a.b/c', kind: 'json-ok', options: { q: 1 } }); return r.ok === true && r.name === 'x'; });
+        t('keyEqual', () => mod.adminKeyMatch('k'.repeat(24), 'k'.repeat(24)) === true);
+        t('keyFullCompare', () => mod.adminKeyMatch('k'.repeat(23) + 'j', 'k'.repeat(23) + 'k') === false);
+        t('keyLength', () => mod.adminKeyMatch('abc', 'abcd') === false);
+        t('keyEmpty', () => mod.adminKeyMatch('', 'x') === false);
+        t('keyNonString', () => mod.adminKeyMatch(null, 'x') === false && mod.adminKeyMatch(42, 'x') === false);
+        const keys = Object.keys(fact).filter((k) => k !== 'faults');
+        fact.checked = keys.length;
+        fact.allHeld = keys.every((k) => fact[k] === true);
+        return new Response(JSON.stringify(fact), { status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
+    });
+
     return routes;
 }
 
@@ -807,6 +1129,96 @@ const EXPECTED = {
         'whale-function-cap': 'skip',
         'late-key-canary': 'skip',
         'guard-throw-probe': 'skip',
+        // (naked-lib-first-doors, ARMED 2026-10-28) the legacy-runner
+        // graveyard's naked modules (citations/telegram/webhooks/theme -
+        // whose ONLY tests were sweep-invisible shape-smokes) grade their
+        // first doors over the run-root probe child (fresh modules,
+        // gate grants per-process). Run-root-only arm, the sibling
+        // teams-governance precedent; the run fires grade it live x2 and
+        // the README ledger pins the verdicts (the first fire's own find:
+        // the register ack is a SECRET-FREE projection).
+        'naked-lib-first-doors': 'skip',
+        // (legacy-orphan-laws, ARMED 2026-10-28, wave 6 slice 2) the
+        // graveyard's REAL-behavior leftovers the modern suites never
+        // claimed - brain T11b nuclear-alias removals, legal's dormant gate
+        // chain, sandbox's RLS binding trio, security's op-gate shapes,
+        // islands' class trio - graded over the run-root probe child
+        // (run-root-only arm, the sibling precedent; the run fires grade
+        // it live x2 and the README ledger pins the verdicts). The rest
+        // of the legacy graveyard retired as MODERN-COVERAGE DUPLICATES.
+        'legacy-orphan-laws': 'skip',
+        // (facade-surfaces, ARMED 2026-10-28) the drift-off pass - the
+        // umbrella facade (lib/vant.js) and the never-twin'd utility/
+        // integration surfaces (auth/health/compute/msg/cron/audit/boot/
+        // cache/embed/network/schema/canvas) grade their export-surface
+        // laws over the run-root probe child (run-root-only arm, the
+        // sibling precedent; the run fires grade it live x2 and the
+        // README ledger pins the verdicts). THE LAST 18 legacy
+        // shape-smokes' claims now ride this row and those files retire.
+        'facade-surfaces': 'skip',
+        // (qos-window-laws, ARMED 2026-10-28) the QoS machinery's window
+        // BEHAVIORS (sliding-window admit/refuse/reopen, the global
+        // anti-rotation wall with its qos:rate-limit event, the circuit
+        // breaker trip laws, bulkhead/throttler honesty) graded over the
+        // run-root probe child (run-root-only arm, the sibling precedent;
+        // the run fires grade it live x2 and the README ledger pins the
+        // verdicts).
+        'qos-window-laws': 'skip',
+        // (circuit-full-mode, ARMED 2026-10-28) the CircuitBreaker's FULL
+        // mode - per-provider isolation, the persisted backoff ladder, the
+        // trip at threshold, the reconstructed-inherits-outage persistence
+        // law, the half-open auto-recovery, the corrupt-file fail-open
+        // recovery - graded over the run-root probe child (run-root-only
+        // arm, the sibling precedent; the run fires grade it live x2 and
+        // the README ledger pins the verdicts).
+        'circuit-full-mode': 'skip',
+        // (throttle-debounce-bulkhead, ARMED 2026-10-28) the third QoS
+        // tranche's deep window laws - throttler's per-key silent spill,
+        // debouncer's trailing-edge collapse + complete cancel, bulkhead's
+        // saturation/queue/drain FIFO with typed error propagation, the
+        // unified QoS chain - graded over the run-root probe child
+        // (run-root-only arm, the sibling precedent). THE ROW'S FIRST FIRE
+        // FOUND AND FIXED TWO REAL LIB BUGS: the Bulkhead's slot leak (a
+        // drained task's slot never released - under sustained queueing
+        // the leaks wedged the bulkhead shut with a starved queue) and
+        // the Debouncer's cancel leaving a stale timer entry forever.
+        'throttle-debounce-bulkhead': 'skip',
+        // (jobworker-pool, ARMED 2026-10-28, wave 11) the pattern sweep+
+        // convert move after the two wave-10 lib repairs: the other
+        // clearTimeout/dispatch families swept CLEAN, so the never-graded
+        // JobWorker pool laws (concurrency under racing adds, counter
+        // parity, the typed non-wedging failure path, batch drains,
+        // honest stats) graded over the run-root probe child
+        // (run-root-only arm, the sibling precedent; the run fires grade
+        // it live x2 and the README ledger pins the verdicts).
+        'jobworker-pool': 'skip',
+        // (heartbeat-lifecycle, ARMED 2026-10-30, wave 13) the context
+        // engine's heartbeat timer had ZERO graded behavior anywhere -
+        // this row is the family's first stamp: cold-stop safety, the
+        // 4-minute contracted interval, the event-audited idempotent
+        // start, the boot-registry ride, ping's honest shape, and the
+        // registry-wired stop. Run-root-only arm (the sibling
+        // precedent); the run fires grade it live x2.
+        'heartbeat-lifecycle': 'skip',
+        // (crypto-canon-laws, ARMED 2026-10-30, wave 13) lib/encrypt.js's
+        // own census - the wave's find is TWO PHANTOM CODES (ENCRYPT_KEY_
+        // REQUIRED / ENCRYPT_KEY_INVALID were never defined in
+        // lib/error.js, so the typed refusals carried code: undefined);
+        // BOTH FIXED THIS WAVE and the canon graded post-repair (GCM
+        // round trip incl. the IV-width law, the ONE-shape decrypt
+        // refusal chain, hash/verify, HMAC, the 2-part token, RSA).
+        // Run-root-only arm (the sibling precedent).
+        'crypto-canon-laws': 'skip',
+        // (noticeboard-field-walls, ARMED 2026-10-30, wave 13) the
+        // federation board's WIRE-PAYLOAD walls: every untrusted field
+        // re-clamped on the push leg (title 120 / body 2000 / ref 120 /
+        // the 30-day ttl ceiling / from pinned to the sender), mixed
+        // payload entries skipped without breaking the good ones, no
+        // board oracle for unknown origins, merge-only adoption,
+        // registered-peer-gated catch-up, sender-bound acks, and the
+        // typed pull failure legs. Run-root-only arm (the sibling
+        // precedent); the run fires grade it live x2.
+        'noticeboard-field-walls': 'skip',
     },
     'vant-brain': {
         'private-first-fallback': 'REFUSED',
@@ -836,14 +1248,149 @@ const EXPECTED = {
         // graph returns - brain_connections' visited guard + depth floor
         // hold; no hang, no RangeError.
         'knowledge-links-cycle-safety': 'REFUSED',
+        // (brain battery batch 2, 2026-10-26) the UNIT families convert
+        // in-process from lib/brain + lib/format — self-contained rows, no
+        // run-root arm, EARN strict REFUSED in BOTH phases; native
+        // test/brain.test.js stayed green through the landing cycles and
+        // then TRIMMED to its unmeasured seams on 2026-10-27 (29 pins: the
+        // state seam, registry, metrics, version, module integrations,
+        // pipeline-state shape, listing/dirs/saveNeurons — the pack rows
+        // don't grade those; the covered families retired to these rows).
+        'brain-module-surface-and-paths': 'REFUSED',
+        'brain-mode-switch-and-pipeline-chain': 'REFUSED',
+        'brain-alias-mapping-law': 'REFUSED',
+        'brain-neurons-synapse-attention-law': 'REFUSED',
+        'brain-stack-push-switch-and-mode-enum': 'REFUSED',
+        'brain-multiformat-read-save-laws': 'REFUSED',
+        'format-module-listing-and-confinement': 'REFUSED',
+        // (brain surface retirement, 2026-10-28) the native suite's LAST
+        // families convert in-process: handler registry (identity + roster
+        // + null unknown + __proto__ wall + the DI undo), metrics
+        // (numeric counters + honest zeroed reset), version, module
+        // integrations (getModule + the REST get surface), pipeline state.
+        // No run-root arm; EARN strict REFUSED in BOTH phases; the
+        // covered file retires whole after the fires.
+        'brain-surface-registry-metrics-modules': 'REFUSED',
+        // (guests battery, 2026-10-26) the LIB-level guest lifecycle
+        // converts in-process from lib/guests — self-contained rows, no
+        // run-root arm, EARN strict REFUSED in BOTH phases. The socket
+        // door-integration families stay in the trimmed native suite
+        // (test/guests.test.js, 14 pins) under the reverse-verification
+        // law; the run-root guest-cap route row still arms vant-brain's
+        // guest-capability-gates.
+        'guest-token-lifecycle-hash-revoke-and-expiry': 'REFUSED',
+        'guest-caps-trust-restricts-and-door-classes': 'REFUSED',
+        'guest-pairing-voucher-single-use': 'REFUSED',
+        // ARMED 2026-10-27 (brain-listing route): the native suite's own
+        // print said "BRAIN LISTING / HAS-BRAIN / DIRS (unmeasured by the
+        // pack rows)" - the reverse-verification read took the hint;
+        // the row measures the family's five seams (hasBrain closed
+        // vocabulary + honest-null miss, string array roster with zero
+        // traversal names, brainDirs both sides CONFINED inside models/,
+        // stack-corpus entry names, neuron-save typed ack).
+        'brain-listing-dirs-family': 'REFUSED',
+        // ARMED 2026-10-27 (brain-listing slice 2): the neuron STATE seam -
+        // both verb postures round-trip (the native pins only checked
+        // promise/object shapes, so a write-only state would pass them),
+        // and the persisted state.json lives inside the sandbox's models/
+        // tree (multi-brain layout included).
+        'brain-neuron-state-seam': 'REFUSED',
+        // (evolution census, ARMED 2026-10-27) the evolution-context
+        // lifecycle: start/records/copies/end/history graded in a fresh
+        // module child; the family was the inventory census's largest
+        // unmeasured cluster.
+        'brain-evolution-session-lifecycle': 'skip',
+        // (geometry + backup census, ARMED 2026-10-27) the NSC9 per-brain
+        // address family + the stego-backup trio's honest-refusal laws
+        'brain-geometry-nsc9-address-family': 'skip',
+        'brain-stego-backup-trio-honest-refusals': 'skip',
+        // (crates/dropbox census, ARMED 2026-10-27) the crate/dropbox
+        // family (~15 keys): my-stuff crate round-trips + stash +
+        // handler-registry lifecycle + shared dropbox, all through the
+        // tmp-space store; absent reads answer honest {error:'not
+        // found'}, hostile names answer the typed path wall, delete is
+        // idempotent with the honest ack.
+        // (tmp-space census, ARMED 2026-10-27) the crate/dropbox family
+        // (~15 keys) graded as brain-tmpspace-crate-stash-handlers: both
+        // crates' hostile-name records + round-trips + honest absence,
+        // the stash lifecycle, the handler registry lifecycle, the shared
+        // dropbox enumeration, and the confined personal-file laws incl.
+        // the typed VAF_PATH_BLOCKED refusal (whose codes-table fix this
+        // row's run caught live: the name was MISSING from lib/error.js).
+        'brain-tmpspace-crate-stash-handlers': 'skip',
+        // (breaker census, ARMED 2026-10-27) the P3 #34 load-circuit
+        // family graded over a REAL poisoned-critical wedge fixture:
+        // consecutive thrown loads open the breaker named (event +
+        // metrics.errors + lastError), every load then fast-fails typed
+        // retryable BRAIN_CIRCUIT_OPEN, graceful null misses never feed
+        // it, the half-open probe rides the healed machinery once and
+        // closes on REAL content, and resetLoadCircuit restores honestly.
+        'brain-load-circuit-laws': 'skip',
+        // (remote/watch/cache census, ARMED 2026-10-27) the 9-key cluster:
+        // the remote URL pair, a REAL remote-mode load over a localhost
+        // server (source named remote), the cache laws end to end
+        // (verbatim serve, real hit accounting, TTL stale retention,
+        // invalidate answers the fresh disk read), the stats shape +
+        // setCache flip, the corpus invalidate, and the watcher toggles.
+        'brain-remote-watch-cache-laws': 'skip',
+        // (lifecycle census, ARMED 2026-10-27) the 7-key bootstrap/shutdown
+        // + framework-config cluster: hooks registered through onBootstrap/
+        // onShutdown RUN during the real lifecycle passes, the metabolism
+        // tick genuinely rides boot's timer registry (brain.metabolize,
+        // stoppable with an honest re-stop false), and the config trio
+        // holds (fresh dual default, verbatim set/get over the current
+        // brain, the stack-by-brain map over the roster).
+        'brain-lifecycle-framework-laws': 'skip',
     },
     'vant-crew': {
         'roster-quota-ceiling': 'REFUSED',
         'spawn-rate-limit': 'REFUSED',
         'quota-error-is-typed': 'REFUSED',
+        // run-root census family (ARMED 2026-10-27): the crew-doors child
+        // grades the door inventory over a fresh-module ladder, so the
+        // contract grades it as an honest skip (the run fires grade it
+        // live x2, the README ledger pins the verdicts).
+        'crew-doors-census': 'skip',
+    },
+    // (teams-orgchart census, ARMED 2026-10-27) the same run-root census
+    // contract: the orgchart depth child needs the fresh-module ladder, so
+    // the contract grades it as an honest skip (the run fires grade it
+    // live x2, the README ledger pins the verdicts).
+    'vant-teams': {
+        'teams-orgchart-census': 'skip',
+        // (teams governance depth, 2026-10-28) the second teams tranche:
+        // the config-DI caps, rule deny gate, global rate budget + event,
+        // delegation/accountability semantics, rosters, stack getters and
+        // the horcrux gather. The route is run-root-only (probe child);
+        // strict earned verification rides the run root, the sibling
+        // census precedent.
+        'teams-governance-depth': 'skip',
+    },
+    // (web/kit contracts census, ARMED 2026-10-28) both web frontends
+    // vendor the kit's contracts; the CONTRACT layer itself is graded at
+    // its source (frozen vocabularies, the two-tier private-IP wall, the
+    // envelope + traveler shape laws, the rizer's never-guess lift). The
+    // run-root census child needs the fresh-module ladder, so the contract
+    // grades it as an honest skip (the run fires grade it live x2, the
+    // README ledger pins the verdicts).
+    'vant-kit': {
+        'kit-contracts-census': 'skip',
+        // (vendoring-ring census, ARMED 2026-10-28) the ring leg is another
+        // run-root-only child (the real-tree fs reads at cwd ROOT live in
+        // scripts/crashtest-run.js, not this suite's harness), so the
+        // contract grades it as an honest skip - the run fires grade it
+        // live x2 (exit-0 --check, pin === vendored bytes === kit head on
+        // all 9 sidecar pins, web/ containment, negative control,
+        // two-lens agreement), and the README ledger pins the verdicts.
+        'kit-vendor-ring-census': 'skip',
+        // (plate census, ARMED 2026-10-28) the carrier-share plate's laws
+        // via the typescript transpile + vm ladder - another run-root-only
+        // census child, honest skip in-suite, live x2 in the fires.
+        'kit-plate-census': 'skip',
     },
     'vant-mcp': {
-        'unknown-tool-honesty': 'REFUSED',
+                'tools-registry-census': 'skip',
+'unknown-tool-honesty': 'REFUSED',
         'tool-schema-enforced': 'REFUSED',
         'brain-write-scope-hardness': 'REFUSED',
     },
@@ -855,6 +1402,7 @@ const EXPECTED = {
     // law (stack ⊆ filter) and identity law (activeStack untouched) are
     // unchanged; full-capture behavior is byte-identical.
     'vant-rest': {
+        'rest-remaining-doors-parity': 'REFUSED',
         'fuzz-floor-never-500': 'REFUSED',
         'cors-enable-parity': 'REFUSED',
         // Armor 2026-10-22 (crashtest v1.0.0-on-npm qs-shapes port): the
@@ -863,6 +1411,30 @@ const EXPECTED = {
         'urlencoded-bracket-canary': 'REFUSED',
         'urlencoded-depth-floor': 'REFUSED',
         'session-cookie-discipline': 'REFUSED',
+        // ARMED 2026-10-27 (REST door-parity family): the rest-request arm
+        // now carries lib/api's REST_ROUTES table on the in-process Edge
+        // chains, so the pack grades the REAL REST doors - the arg-name
+        // parity rows were a LIVE FINDING (stream_info/enqueue/poll took
+        // `workId`, trust_getScore took `entity`; lib/api fixed in the same
+        // pass, the tool vocabulary is the door's vocabulary).
+        'rest-mcp-door-args-parity': 'REFUSED',
+        'rest-bent-body-fuzz-floor': 'REFUSED',
+        'rest-typed-gate-is-the-answer': 'REFUSED',
+        // ARMED 2026-10-27 (the api-object census family): the api-layer
+        // child re-arms the API object's in-process surface. The auth
+        // ladder and the generic door are earned-backed by TWO live finds
+        // fixed in the same pass: the generic execute door rode a
+        // vant.execute that lib/vant never exports (a TypeError escaped even
+        // authenticated callers), and getAuthStatus's authFailures counter
+        // was dead state. The census also files the duplicate brain_load
+        // registration (array answers null) as a live finding.
+        // run-root census family: the api-layer child needs the fresh-module
+        // ladder, so the contract grades them as honest skips (the run fires
+        // grade them live x2, the README ledger pins the verdicts).
+        'api-object-auth-failclosed': 'skip',
+        'api-object-authed-answers': 'skip',
+        'api-object-generic-door-typed': 'skip',
+        'api-object-family-census': 'skip',
     },
     'vant-stones': {
         'stone-scope-honesty': 'REFUSED',
@@ -870,6 +1442,427 @@ const EXPECTED = {
         // carries a pointer outside its declared scope anymore.
         'state-pointer-lineage': 'REFUSED',
         'restore-torn-refusal': 'REFUSED',
+    },
+    // ARMED 2026-10-25 (the prove-the-verbs conformance pack, vant#250):
+    // rows attack the kernel seed's gate() invariants directly - typed
+    // refusals + journaled refusal entries are the defense holding. Lands
+    // in the SAME PASS as K2 (test/kernel.test.js) per the same-pass law;
+    // K3 (first real consumer) stays pending per the PRD's law.
+    'vant-kernel': {
+        'retire-without-census': 'REFUSED',
+        'unlisted-retire': 'REFUSED',
+        'attest-without-dated-basis': 'REFUSED',
+        'succeed-without-attest-chain': 'REFUSED',
+        'refusals-journal-themselves': 'REFUSED',
+        'missing-verb-gap-visible': 'REFUSED',
+        // ARMED 2026-10-25 (K3, the adoption half): escrow registers as the
+        // reference consumer through the gate, attests spend pairs dated +
+        // journaled, and self-heals after the probe's registry resets. The
+        // pack flipped from proving the seed to proving adoption.
+        'reference-consumer-witness': 'REFUSED',
+        'gate-happy-path': 'REFUSED',
+        // ARMED 2026-10-25 batch (the K6-K9 roster receipts): the roster
+        // rows attack adoption GENERALIZING - pipeline/prune/docs-gates/
+        // pass-log census carries, kernel visibility, reset self-heal
+        // (roster row); the sudo witness's public-surface-only census law
+        // + elevation-audit succeed + typed unknown-consumer refusal
+        // (sudo row).
+        'roster-adoption-witness': 'REFUSED',
+        'sudo-public-surface-census': 'REFUSED',
+    },
+    // ARMED 2026-10-25 (the pass-ledger surface, wiring map row 9): the
+    // docs-shaped consumer reads the REAL docs, queues open items as
+    // kernel-dated census entries, formats the ceremony purely (no fs
+    // write), and self-heals across registry resets.
+    // The two doc-legs run as HONEST SKIPS here and under the real
+    // harness (both harnesses run attacks from a sandbox cwd where
+    // labs/ is not visible — a zero-item census is indistinguishable
+    // from unread docs, so the rows degrade to explicit skips per house
+    // rule 5 instead of riding that ambiguity). The doc-vs-census legs
+    // stay fully verified at the repo root by test/pass-ledger.test.js.
+    'vant-pass-ledger': {
+        'open-item-census-real': 'skip',
+        'marker-dialect-only': 'skip',
+        'ceremony-never-writes': 'REFUSED',
+        'reset-self-heal': 'REFUSED',
+    },
+    // ARMED 2026-10-23 (the site wire): flood-cost-cap was armed as a REAL
+    // FINDING the same turn (the endpoint table accepted unbounded rows;
+    // every cold public GET would probe per row) and FIXED the same turn:
+    // addEndpoint enforces the cost cap (STATUS_MAX_ENDPOINTS, default 24,
+    // plain Text env) and the refusal is typed. All five rows measure the
+    // REAL handlers over the statement-mapped fake D1.
+    'vant-home': {
+        'unwired-refusal-typed': 'REFUSED',
+        'summary-fuzz-floor': 'REFUSED',
+        'admin-key-discipline': 'REFUSED',
+        'admin-body-discipline': 'REFUSED',
+        'flood-cost-cap': 'REFUSED',
+        // (2026-10-27 Edge deepening) the third door: the daily sweep's
+        // cron row (silent no-op without the DB, cron-only wire, sweep
+        // engine over the fake D1).
+        'scheduled-sweep-door': 'REFUSED',
+        // (2026-10-28 first-doors census) the math plate row: same arm in
+        // this suite (fixed-date pin) - graded live.
+        'home-status-math-first-doors': 'REFUSED',
+    },
+    // ARMED 2026-10-25 (Phase A of the S0→S1 conversion campaign, #249) —
+    // three packs whose run-root arms live in scripts/crashtest-run.js
+    // (the mcp-server-wall / relay-edge routes + the shared library arms
+    // gov-grant/gov-resolve/gov-locks/gov-escrow and the memory/escrow
+    // library ctx). This suite's sandbox routes (buildRoutes) don't carry
+    // those run-root-only routes, so each row degrades to an HONEST SKIP
+    // here (the packs' skip helper: verdict REFUSED, skipped true) per
+    // house rule 5 instead of riding an un-armed silence. The real
+    // verification rides the run root in gate phase B, where every row is
+    // fully EARNED (vant-server-wall 5/5, vant-relay 5/5, vant-discipline
+    // 6/6 REFUSED with the native suites green alongside) — the gate's
+    // phase is where the strict legality lives for this slice.
+    'vant-discipline': { // in-process module discipline (memory envelope + grant ledger + escrow)
+        'note-envelope-versioned-provenance': 'skip',
+        'note-read-flags-contradiction-and-ghosts': 'skip',
+        'note-delete-tombstone-and-dangling-cite': 'skip',
+        'grant-ledger-precedence-and-revocation': 'skip',
+        'grant-scope-isolation-and-trust-floor': 'skip',
+        'escrow-two-key-and-expired-ttl': 'skip',
+    },
+    // ARMED 2026-10-26 (the no-DB-recursion battery, v0.8.6): a cross-
+    // cutting law pack over the addressing/tracking surface. Rows drive
+    // lib/trace + lib/recursion directly in-process — self-contained, no
+    // run-root arm, so they EARN strict REFUSED in BOTH phases. The wall
+    // fix this battery introduces (lib/trace.js bounded render) is graded
+    // here as primary coverage (no native trace suite exists).
+    'vant-recursion-wall': {
+        'trace-tree-depth-bomb-bounded': 'REFUSED',
+        'trace-tree-cycle-marked-and-honest-waterfall': 'REFUSED',
+        'recursion-guard-depth-typed-and-releasable': 'REFUSED',
+    },
+    'vant-relay': { // the r/2 webhook edge face (web/relay/functions/api/r/relay.ts)
+        // (2026-10-27 Edge deepening) the caps page + the SSE stream-through
+        // joined the edge face; the rows drive them through the same
+        // relay-edge child (run-root-only, honest skips in this suite).
+        'edge-caps-posture-page': 'skip',
+        'edge-events-gate-ladder': 'skip',
+        'posture-and-key-gates-fail-closed': 'skip',
+        'hmac-lane-over-raw-bytes': 'skip',
+        'freshness-window-typed': 'skip',
+        'origin-guard-typed-acks': 'skip',
+        'encrypted-pipes-only-and-body-cap': 'skip',
+        // (relay battery slice 1, 2026-10-26) the pod lib face graded
+        // in-process from lib/api + lib/config — self-contained rows, no
+        // run-root arm needed, so they EARN strict REFUSED in BOTH phases
+        // (bare suite included). Real-socket families queue behind an
+        // in-process socket arm; native test/relay.test.js stays green
+        // alongside under the reverse-verification law.
+        'lib-face-truth-and-envelope-canon': 'REFUSED',
+        'lib-face-mount-gates-fail-closed': 'REFUSED',
+        'lib-face-origin-policy-wall': 'REFUSED',
+        'lib-face-dispatch-guards-typed': 'REFUSED',
+        'lib-face-sender-gate-refusal-typed': 'REFUSED',
+        // (relay battery slice 2, 2026-10-26) the REAL wire: each row
+        // mounts the actual relay route on loopback (port 0) in-process
+        // and drives it over HTTP — sockets yes, arms no. Loopback binds
+        // work in BOTH phases, so these EARN strict REFUSED everywhere.
+        // (determinism law, 2026-10-28) the wire rows' FRESHNESS legs now
+        // fetch the wall stamp from the run root's vant-now route (the
+        // pack sources never read one), so in this suite's sandbox they
+        // honest-skip - the fires grade them live x2, the README ledger
+        // pins the verdicts.
+        'wire-hmac-lane-and-replay-gate': 'skip',
+        'wire-hop-roundtrip-and-no-body-leak': 'skip',
+        'wire-ride-core-loop-and-refusals': 'skip',
+        'wire-body-cap-and-liveness-counters': 'skip',
+        'wire-sender-seam-and-bridge-families': 'skip',
+        'wire-sealed-lane-freshness-and-dedupe': 'skip',
+        // ARMED 2026-10-27 (traveler wire slice 2): the sibling row's
+        // remaining shape lanes - the ADDRESS law refuses the sneak id
+        // BEFORE the id-named slot generator (the door's hex-only slot
+        // safety rides the guard), the shape lanes refuse typed, and a
+        // refused packet NEVER rides the door (zero landing growth).
+        'wire-traveler-law-lanes': 'skip',
+        'wire-traveler-carrier-id-named': 'skip',
+    },
+    'vant-server-wall': { // the MCP server wall via lib/server._handleRequest
+        'escrow-wall-429-never-5xx': 'skip',
+        'hostile-body-floor': 'skip',
+        'credential-stuffing-distinct-401': 'skip',
+        'write-honesty-no-store': 'skip',
+        'flood-wall-429-retry-after': 'skip',
+    },
+    // ARMED 2026-10-25 (Phase A, the dashboard auth/OTP doors pack): the
+    // run-root arm (dash-auth) drives web/dashboard's REAL request-otp /
+    // verify-otp / session handlers in-process via the strip-types probe
+    // child with an in-child KVStore shim (BOLETE_KV) and a capture sink in
+    // the sender's webhook seat. Like the other Phase A packs, this
+    // suite's sandbox routes don't carry the run-root-only arm, so each
+    // row degrades to an HONEST SKIP here; the strict EARNED verification
+    // rides the run root (gate phase B: 5/5 REFUSED).
+    'vant-dashboard': {
+        'store-absence-fail-closed': 'skip',
+        'bad-body-floor': 'skip',
+        'mint-lane-typed-and-cooldown': 'skip',
+        'session-mint-and-cookie-discipline': 'skip',
+        'attempt-budget-burn': 'skip',
+        // (batch 2) the bridge knee + the admin gate
+        'token-source-order': 'skip',
+        'bound-token-property-scoped': 'skip',
+        'token-intake-binding-law': 'skip',
+        'raw-cookie-fallback-hygiene': 'skip',
+        'admin-gate-typed-ladder': 'skip',
+        // (batch 3, 2026-10-27) the DASHBOARD-relay flavor: web/dashboard's
+        // own r/2 intake + caps page through the relay-edge child (edges
+        // 'dashrelay'/'dashcaps' - same WHATWG/WebCrypto probe as the solo
+        // face). This suite's sandbox routes don't carry the run-root-only
+        // relay-edge door arms, so each row degrades to an HONEST SKIP
+        // here; strict EARNED verification rides the run root.
+        'dash-relay-gates-fail-closed': 'skip',
+        'dash-relay-hmac-header-lane-laws': 'skip',
+        'dash-relay-sealed-lane-laws': 'skip',
+        'dash-relay-browser-lane-bridge': 'skip',
+        // (batch 4, 2026-10-27) the small doors: audit / users / properties /
+        // breakers + the MCP forward trio ride the SAME run-root-only
+        // dash-auth door arms, so each row degrades to an HONEST SKIP here;
+        // strict EARNED verification rides the run root.
+        'small-doors-properties-registry': 'skip',
+        'small-doors-breakers-edge-view': 'skip',
+        'small-doors-audit-ladder-and-cap': 'skip',
+        'small-doors-users-roster-lockout-and-gate-done': 'skip',
+        'small-doors-mcp-trio-typed-forward': 'skip',
+        // (batch 5, 2026-10-28) the DISABLED kill at the bridge (podTokenFor)
+        'disabled-account-knee-fail-closed': 'skip',
+        // (batch 5, ARMED 2026-10-28) the PLATE slice: the two doors that
+        // grew no rows - health.ts (the one-line forward plate) and the
+        // session DELETE face (clearSession), both graded through dash-auth
+        // over a REAL intercepted upstream (hop facts observable). Strict
+        // earned verification rides the run root.
+        'bridge-forward-plate-laws': 'skip',
+        'bridge-clear-law': 'skip',
+    },
+    // ARMED 2026-10-25 (drill-down slice 1, Phase A of the S0→S1 campaign,
+    // #249): the trust→tree consumer family converted from the native
+    // state-wiring pins onto the run root's wiring-trust arm. This suite's
+    // sandbox routes don't carry the run-root-only arm, so the rows
+    // degrade to HONEST SKIPS here; strict EARNED verification rides the
+    // run root (5/5 REFUSED), native suite green alongside under the
+    // reverse-verification law. The remaining state-wiring families
+    // (registry/consensus/market/WAL/geometry/brain-verify/anchor) queue
+    // behind per-bucket conversion shape.
+    'vant-state-wiring': {
+        'trust-mirror-under-tree': 'skip',
+        'trust-mutate-moves-root': 'skip',
+        'trust-disk-view-live': 'skip',
+        'trust-event-carries-root': 'skip',
+        'trust-clear-resets': 'skip',
+        // (slice 2) the merge-path consumers: registry / consensus / market
+        'registry-register-mirrors': 'skip',
+        'registry-heartbeat-moves-root': 'skip',
+        'registry-disk-view-live': 'skip',
+        'registry-clear-reset-reuse': 'skip',
+        'consensus-create-mirrors': 'skip',
+        'consensus-disk-view-live': 'skip',
+        'consensus-clear-resets': 'skip',
+        'market-list-mirrors': 'skip',
+        'market-disk-view-live': 'skip',
+        'market-clear-resets': 'skip',
+        // (market inventory census 2026-10-27) run-root-only child route;
+        // honest skip here, strict earned verification rides the run root
+        'market-scope-visibility-and-cancel-matrix': 'skip',
+        'market-skills-gate-and-lifecycle-laws': 'skip',
+        // (slice 3) mesh WAL + events, geometry, brain-verify, mesh-status
+        'mesh-wal-deltas-ride-log': 'skip',
+        'mesh-wal-recovery-reconstructs': 'skip',
+        'mesh-wal-rejected-durable': 'skip',
+        'mesh-wal-ledger-provenance': 'skip',
+        'mesh-wal-interval-fastforward': 'skip',
+        'mesh-events-bus-provenance': 'skip',
+        'mesh-events-silent-side-effect-free': 'skip',
+        'mesh-events-recovery-emits': 'skip',
+        'geometry-canonical-barcodes': 'skip',
+        'geometry-barcode-roundtrip': 'skip',
+        'brainverify-health-lifecycle': 'skip',
+        'brainverify-horcrux-exit-contract': 'skip',
+        'meshstatus-mesh-section-shape': 'skip',
+        'meshstatus-seed-pure-and-envflow': 'skip',
+        'meshstatus-render-degraded': 'skip',
+        // (wave 2, censused 2026-10-28) the mesh/store battery: the seeds
+        // family, the one-PRF cell-address law, the canonical authority, the
+        // honest in-memory default, the bare store tier, the persist/hydrate/
+        // typed-absence laws and the full anchor-chain family. Run-root-only
+        // arm (wiring-mesh/wiring-store); honest skip here, strict earned
+        // verification rides the run root (44 attacks total).
+        'mesh-authority-canonical-winner': 'skip',
+        'mesh-celladdr-one-prf': 'skip',
+        'mesh-persistence-inmemory-default': 'skip',
+        'mesh-seeds-family': 'skip',
+        'store-anchor-chain-event-laws': 'skip',
+        'store-anchor-merged-cause-law': 'skip',
+        'store-anchor-no-tree-never-bless-law': 'skip',
+        'store-anchor-tamper-detector': 'skip',
+        'store-hydrate-law': 'skip',
+        'store-persist-mirror-event': 'skip',
+        'store-tree-tier-laws': 'skip',
+        'store-treefor-typed-absence': 'skip',
+    },
+    // carriers battery slice 1 (lane laws): run-root-only arm; honest skips here
+    'vant-carriers': {
+        'carriers-roster-honesty': 'skip',
+        'carriers-nsc9-frame-law': 'skip',
+        'carriers-nsc9-giai-readthrough': 'skip',
+        'carriers-stone-two-walls': 'skip',
+        'carriers-svg-airgap': 'skip',
+        'carriers-json-erp': 'skip',
+        'carriers-sender-side-verify': 'skip',
+        'carriers-capacity-and-codes': 'skip',
+        // (slice 2) pointer/wire-hook family
+        'carriers-pointer-address-law': 'skip',
+        'carriers-pointer-body-wall': 'skip',
+        'carriers-wire-hook-failclosed': 'skip',
+        'carriers-wire-hook-walls': 'skip',
+        // (slice 3) route / certified-letter family
+        'carriers-route-org-fixture': 'skip',
+        'carriers-route-letter-routes': 'skip',
+        'carriers-route-outsider-drop': 'skip',
+        'carriers-route-risk-gate': 'skip',
+        'carriers-route-stageless-forged': 'skip',
+        // ARMED 2026-10-27 (slice 7, the WIRE seam): a REAL org-scoped
+        // carry() output posts over a REAL loopback mount and lands THROUGH
+        // the brain_write door slot id-named; the gapped tamper refuses
+        // E_TRAVELER_STEP, the sneak id refuses E_TRAVELER_ADDRESS, an
+        // already-ledgered packet refuses E_TRAVELER_STEP (append-only),
+        // and the refused packets leave ZERO landing growth.
+        'carriers-wire-seam-letter-through-door': 'skip',
+        // (slice 8, ARMED 2026-10-27) the MESH serving wall on REAL
+        // landings: the door slot law lands, then the serving verbs
+        // measure over THAT body (found + re-verified, the VANT:1 stamp,
+        // honest found:false misses, a swapped store refusals identically
+        // at both faces, restore re-arms, the pointer loop resolves the
+        // REAL raster through the door-backed fetch, zero serving growth).
+        'carriers-mesh-serving-wall-on-real-landings': 'skip',
+        // (slice 9, ARMED 2026-10-27) the TRAVELERS census: T.status() +
+        // the span relation + the 512KiB state ceiling now enforced in the
+        // working lib (kit parity; typed E_TRAVELER_SHAPE at persist).
+        'travelers-status-span-ceiling-census': 'REFUSED',
+        // (slice 4) plates family
+        'carriers-plate-persist-roster': 'skip',
+        'carriers-plate-framed-walls': 'skip',
+        'carriers-plate-pointer-lite': 'skip',
+        'carriers-plate-definition-gates': 'skip',
+        'carriers-plate-hydrate-restart': 'skip',
+        'carriers-plate-code-carrier': 'skip',
+        // (slice 5) assembly + template family
+        'carriers-assembly-parts-accumulate': 'skip',
+        'carriers-assembly-append-only': 'skip',
+        'carriers-assembly-address-law': 'skip',
+        'carriers-template-line-builds': 'skip',
+        'carriers-template-bill-walls': 'skip',
+        'carriers-template-digital-line': 'skip',
+        'carriers-template-unfilled-honest': 'skip',
+        'carriers-template-enterprise-line': 'skip',
+        // (slice 6, ARMED 2026-10-26) the traveler-lib working layer: rows
+        // drive lib/traveler (+ event/scope/escrow/mcp/qos/event-types/
+        // security-pipeline) DIRECTLY in-process against the real
+        // brain-scoped pin store wiped per row; REFUSED everywhere (no
+        // route arming needed). The REAL-PROCESS CLI family
+        // (bin/traveler.js via spawnSync) stays native under the
+        // reverse-verification law — like the guests' socket door families.
+        'traveler-content-address-law': 'REFUSED',
+        'traveler-ledger-law-and-ceiling': 'REFUSED',
+        'traveler-persistence-append-only': 'REFUSED',
+        'traveler-schema-rizer-law': 'REFUSED',
+        'traveler-audit-verbatim': 'REFUSED',
+        'traveler-door-verbs-carried': 'REFUSED',
+        'traveler-os-integration': 'REFUSED',
+        'traveler-scope-escrow-durability': 'REFUSED',
+    },
+    // migrations battery slice 1 (fixture family): run-root-only arm
+    'vant-migrations': {
+        'migrations-registry-shape': 'skip',
+        'migrations-detect-dryrun-no-mutation': 'skip',
+        'migrations-apply-security-chain': 'skip',
+        'migrations-dropfile-no-clobber': 'skip',
+        // (slice 2) legacy-main multibrain import family
+        'migrations-legacy-detect-fires': 'skip',
+        'migrations-legacy-no-false-positive': 'skip',
+        'migrations-legacy-dryrun-plans': 'skip',
+        'migrations-legacy-apply-nests': 'skip',
+        // (slice 3) CLI banners, MCP door, adversarial edges
+        'migrations-cli-legacy-banner': 'skip',
+        'migrations-cli-second-start-quiet': 'skip',
+        'migrations-cli-existing-wins-quiet': 'skip',
+        'migrations-mcp-door-legacy': 'skip',
+        'migrations-mcp-door-uptodate': 'skip',
+        'migrations-read-fallback': 'skip',
+        'migrations-no-self-nest': 'skip',
+        'migrations-stack-rewrite': 'skip',
+        'migrations-multibrain-files-win': 'skip',
+        'migrations-symlink-wall': 'skip',
+        'migrations-unverified-withholds': 'skip',
+        'migrations-cli-status-and-fail-exit': 'skip',
+        'migrations-health-checkmigration': 'skip',
+        // (slice 4, 2026-10-27) the trim-survivor conversions: the last
+        // four native pins of test/migrations.test.js land on the same
+        // arm (both-scope import + fresh dual reads, the --brain-name
+        // naming law, the clean-layout CLI dry-run) - file retired whole.
+        'migrations-legacy-both-scopes-and-fresh-reads': 'skip',
+        'migrations-legacy-brain-name-naming-law': 'skip',
+        'migrations-cli-clean-dryrun': 'skip',
+    },
+    // ARMED 2026-10-26 (engine-parity-spine battery slice 1, Phase A of the
+    // S0→S1 campaign): the spine families converted onto their own pack —
+    // canonical bytes (#149), tree put/diff/snapshot (#150-adjacent state
+    // core), scope grammar + stamping, fold laws + cellstore rebates
+    // (#150), checkpoint recovery bounds (#151), anchor ledger + hotset
+    // durability (#152), and the fail-closed capability posture (#162
+    // #163). Every row drives the real lib modules against a throwaway
+    // brain-space tmpdir; no route arming needed, so these hold REFUSED in
+    // every sandbox. Native engine-parity-spine stayed green through the
+    // landing cycle and then retired WHOLE to these rows (2026-10-27, the
+    // carriers precedent).
+    // ARMED 2026-10-26 (leisure battery, Phase A of the S0→S1 campaign,
+    // #196 + #209): the want-list keeper converts onto its own pack —
+    // recording/dedupe law, spirit-first rotation + receipts/forget, the
+    // pursue seams with REAL tempo budgets, read-only breath/dream,
+    // ledger containment + disk-truth reload, and the full autonomy-gate
+    // ladder (7 graded legs onto cap truth). Every row drives the real
+    // lib/leisure (+ tempo/escrow/qos/era/event) module-level against a
+    // THROWAWAY brain's ledger (containment IS the graded surface); no
+    // route arming needed, so these hold REFUSED in every sandbox.
+    // Native test/leisure.test.js stayed green through the landing cycle
+    // and then RETIRED WHOLE to these rows (2026-10-27, the carriers
+    // precedent).
+    'vant-leisure': {
+        'want-ledger-lifecycle': 'REFUSED',
+        'rotation-receipts-and-forget': 'REFUSED',
+        'pursue-seams-and-tempo-budget': 'REFUSED',
+        'breath-and-dream-read-only': 'REFUSED',
+        'ledger-containment-and-disk-truth': 'REFUSED',
+        'auto-pursue-gate-ladder': 'REFUSED',
+    },
+    'vant-spine': {
+        'canonical-bytes-law': 'REFUSED',
+        'tree-put-diff-snapshot-laws': 'REFUSED',
+        'scope-grammar-isolation-and-stamping': 'REFUSED',
+        'fold-laws-and-cellstore-rebates': 'REFUSED',
+        'checkpoint-recovery-bounded-and-deny': 'REFUSED',
+        'anchor-ledger-and-hotset-durability': 'REFUSED',
+        'persistent-grants-and-wal-deny-posture': 'REFUSED',
+        // ARMED 2026-10-27 (spine slice 2): GEOMETRY, WORLD/CLOCK,
+        // MESH/BRAINS (#154-#166) convert - the 1:4 fold laws, the ONE PRF
+        // chain (fragmenter + GitHub adapter), the RAID carrier + precision
+        // contract, the addressing spine + RAID cell seats through CellStore,
+        // the seed chain / orbits world clock, the actor-mandatory delta
+        // ledger, the mesh AOI/staleness/write-winner laws, and the brain
+        // verify + horcrux chain. With slice 2 closed the whole native
+        // spine suite retired to these rows (2026-10-27, carriers precedent).
+        'geometry-subdivision-and-facet-laws': 'REFUSED',
+        'geometry-prf-one-chain': 'REFUSED',
+        'geometry-raid-carrier-and-precision': 'REFUSED',
+        'world-clock-seed-chain-and-orbits': 'REFUSED',
+        'state-delta-ledger-laws': 'REFUSED',
+        'spine-addressing-one-module': 'REFUSED',
+        'raid-cells-addressed-and-rebated-through-spine': 'REFUSED',
+        'mesh-aoi-staleness-and-write-winners': 'REFUSED',
+        'brain-verify-and-horcrux': 'REFUSED',
     },
 };
 

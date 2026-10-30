@@ -19,8 +19,7 @@ Manage git branches programmatically:
 - List branches
 - Switch branches## Get Current Branch
 
-Branches live in `lib/branch.js` (there is no `vant.branch` getter -
-`vant.agents` covers the runtime crew):
+Branches live in `lib/branch.js` (there is no `vant.branch` getter - `vant.agents` covers the runtime crew):
 
 ```javascript
 const branch = require('./lib/branch');
@@ -65,9 +64,7 @@ await branch.deleteBranch('agent-1', true);    // also on the remote
 await branch.merge('agent-1');  // into current
 ```
 
-Also exported: `commit(agentId, message)`, `push()`, `status()`,
-`createPR()`, and the aliases `switchBranch` (= checkout) and
-`getStatus` (= status).
+Also exported: `commit(agentId, message)`, `push()`, `status()`, `createPR()`, and the aliases `switchBranch` (= checkout) and `getStatus` (= status).
 
 ---
 

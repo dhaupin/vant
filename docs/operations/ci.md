@@ -34,10 +34,7 @@ Vant uses GitHub Actions for CI.
 | docs.yml | push to main | Build and deploy docs to GitHub Pages | Auto |
 | docker.yml | push to main, release branches, tags | Build and push container image | Auto |
 
-CI is one job by design: tests, security checks, and validation run in a
-single `ci` job to keep GitHub Actions minutes low. Concurrency is set to
-`cancel-in-progress`, so a new push cancels the stale run on the same
-branch or PR instead of queueing behind it.
+CI is one job by design: tests, security checks, and validation run in a single `ci` job to keep GitHub Actions minutes low. Concurrency is set to `cancel-in-progress`, so a new push cancels the stale run on the same branch or PR instead of queueing behind it.
 
 ### Test Workflow
 
@@ -127,9 +124,7 @@ npm run lint
 npm run lint:fix
 ```
 
-There is no `npm run build` / `build:watch` - Vant is plain Node with
-no build step. The repo's other gates: `npm run lint:docs`,
-`npm run lint:surface`, `npm run lint:helpers`, `npm run lint:locks`.
+There is no `npm run build` / `build:watch` - Vant is plain Node with no build step. The repo's other gates: `npm run lint:docs`, `npm run lint:surface`, `npm run lint:helpers`, `npm run lint:locks`.
 
 ---
 

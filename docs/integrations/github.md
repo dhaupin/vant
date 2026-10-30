@@ -33,8 +33,7 @@ gh repo create vant-brain --private
 
 1. Go to: https://github.com/settings/tokens
 2. Click "Generate new token (classic)"
-3. Select scopes:
-   - `repo` (full control): required
+3. Select scopes: - `repo` (full control): required
 4. Copy token
 
 ### 3. Configure
@@ -161,8 +160,6 @@ git push origin experiment-feature
 # Create PR on GitHub for review
 # Merge to main when ready
 ```
-
-
 
 | Issue Solution |
 |-------|----------|
