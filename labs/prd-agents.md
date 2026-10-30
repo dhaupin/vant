@@ -1,9 +1,6 @@
 # Vant Agent System — Product Requirements Document
 
-**Version:** 1.0  
-**Branch:** axolotl  
-**Date:** 2026-09-19  
-**Status:** Implemented (v0.8.6, axolotl line)
+**Version:** 1.0 **Branch:** axolotl **Date:** 2026-09-19 **Status:** Implemented (v0.8.6, axolotl line)
 
 ---
 

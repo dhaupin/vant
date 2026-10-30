@@ -85,8 +85,7 @@ vant lock force
 
 ### Unit Test
 
-The repo's tests are plain-Node scripts with assert (no mocha/jest
-runner). A unit test looks like:
+The repo's tests are plain-Node scripts with assert (no mocha/jest runner). A unit test looks like:
 
 ```javascript
 const assert = require('assert');

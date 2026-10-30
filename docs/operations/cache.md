@@ -31,8 +31,7 @@ In-memory cache layer for fast recall.
 
 ## Quick Start
 
-`lib/cache.js` exports the `Cache` class - instantiate your own or use
-the defaults you pass in:
+`lib/cache.js` exports the `Cache` class - instantiate your own or use the defaults you pass in:
 
 ```javascript
 const { Cache } = require('./lib/cache');
@@ -56,8 +55,7 @@ cache.set('key', 'value', { ttl: 60000 });  // expire in 60 seconds
 cache.set('key', 'value');  // falls back to defaultTTL (1 hour)
 ```
 
-Keys are strings (max 256 chars), values up to 10MB. Large string values
-are gzipped automatically when compression is enabled.
+Keys are strings (max 256 chars), values up to 10MB. Large string values are gzipped automatically when compression is enabled.
 
 ## Get
 
@@ -66,10 +64,7 @@ const value = cache.get('key');
 // Returns value or undefined (expired/missing entries return undefined)
 ```
 
-Reading a key does NOT extend its TTL: expiry is checked against the
-deadline stored at `set()` time (the in-module refresh line is a no-op -
-`now + (expiry - now)` equals `expiry`). Re-`set()` the key to move the
-deadline.
+Reading a key does NOT extend its TTL: expiry is checked against the deadline stored at `set()` time (the in-module refresh line is a no-op - `now + (expiry - now)` equals `expiry`). Re-`set()` the key to move the deadline.
 
 ## Remove
 

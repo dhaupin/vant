@@ -20,8 +20,7 @@ The network layer handles HTTP/HTTPS communication:
 - Domain whitelist (`setAllowedDomains` / `isDomainAllowed`)
 - Online state (`isOnline`, `checkOnline`)
 
-Circuit breaking lives in `lib/qos.js` (`CircuitBreaker`), not here;
-there is no response cache in this module.
+Circuit breaking lives in `lib/qos.js` (`CircuitBreaker`), not here; there is no response cache in this module.
 
 ## Quick Start
 
@@ -33,8 +32,7 @@ const network = require('./lib/network');
 
 ## Fetch
 
-Make HTTP requests - `fetch` resolves to the response BODY STRING on
-2xx and rejects on non-2xx (there is no `{ json, status }` wrapper):
+Make HTTP requests - `fetch` resolves to the response BODY STRING on 2xx and rejects on non-2xx (there is no `{ json, status }` wrapper):
 
 ```javascript
 const body = await network.fetch('https://api.example.com/data');
@@ -65,8 +63,7 @@ Redirects (3xx + Location) are followed automatically.
 
 ## Retry
 
-Retry is a separate export that wraps any function with exponential
-backoff (there is no `fetchWithRetry`):
+Retry is a separate export that wraps any function with exponential backoff (there is no `fetchWithRetry`):
 
 ```javascript
 const result = await network.retry(
@@ -112,26 +109,20 @@ console.log(network.getAllowedDomains());
 
 ## Circuit Breaker
 
-Network routes external calls through a circuit breaker (shared with
-QoS):
+Network routes external calls through a circuit breaker (shared with QoS):
 
 ```javascript
 const stats = network.getCircuitStatus();
 console.log(stats.state);  // CLOSED | OPEN (time-based recovery)
 ```
 
-After repeated failures the circuit opens to prevent cascade; it
-closes again after the timeout elapses. Internal/reserved addresses
-are additionally guarded by `resolveAndCheckIP` (SSRF gate).
+After repeated failures the circuit opens to prevent cascade; it closes again after the timeout elapses. Internal/reserved addresses are additionally guarded by `resolveAndCheckIP` (SSRF gate).
 
 ---
 
 ## Integration
 
-Network integrates with sandbox: when the sandbox denies `canNetwork`,
-per-call fetches are refused (system-initiated calls can opt out with
-`system: true`). Domain restrictions are enforced inside network.js on
-every request plus an IP-resolution SSRF gate:
+Network integrates with sandbox: when the sandbox denies `canNetwork`, per-call fetches are refused (system-initiated calls can opt out with `system: true`). Domain restrictions are enforced inside network.js on every request plus an IP-resolution SSRF gate:
 
 ```javascript
 network.setAllowedDomains(['api.github.com']);

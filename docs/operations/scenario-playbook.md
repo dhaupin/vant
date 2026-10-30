@@ -12,9 +12,7 @@ description: Governance scenario crews - one shared escrow pool, quarantine has 
 > Untrusted multi-agent scenarios where escrow + consensus are the REAL
 > gates - not a demo rubber stamp. (Wave U3, `labs/prd-universe.md`.)
 
-A **scenario crew** is N agents drawing from ONE shared escrow budget
-pool. A **scenario task** is one delegated piece of work that must pass
-three live gates before anything is signed off:
+A **scenario crew** is N agents drawing from ONE shared escrow budget pool. A **scenario task** is one delegated piece of work that must pass three live gates before anything is signed off:
 
 ```text
 crew assembled (arch-A ledger)
@@ -52,8 +50,7 @@ vant scenario task audit-world "Verify the pinned universe ledger" --cost 250
 vant scenario status audit-world
 ```
 
-Every verb accepts `--json` for machine-readable output. Exit codes:
-`0` ok, `1` typed lib error (code on stderr), `2` usage error.
+Every verb accepts `--json` for machine-readable output. Exit codes: `0` ok, `1` typed lib error (code on stderr), `2` usage error.
 
 ## What the gates actually do
 
@@ -67,29 +64,20 @@ Every verb accepts `--json` for machine-readable output. Exit codes:
 
 Hard rules pinned by `test/scenario-crew.test.js`:
 
-- A crew where every member is quarantined cannot delegate at all
-  (`E_SCENARIO_QUARANTINED`) - and the escrow draw is never touched.
-- A single remaining live voter can never pass closeout: the ballot's
-  `minQuorum` is `max(2, live-voters)`, so no single-agent bless exists.
-- Re-assembling a crew does **not** refill its pool (`ensureWorkspaceBudget`
-  sizes a missing pool, never refills an existing one).
+- A crew where every member is quarantined cannot delegate at all (`E_SCENARIO_QUARANTINED`) - and the escrow draw is never touched.
+- A single remaining live voter can never pass closeout: the ballot's `minQuorum` is `max(2, live-voters)`, so no single-agent bless exists.
+- Re-assembling a crew does **not** refill its pool (`ensureWorkspaceBudget` sizes a missing pool, never refills an existing one).
 
 ## Resume with byte-restoring materialization
 
-U2's resume wrote a verified marker; U3 completes it with the **escrow-gated
-executor**. Record a manifest with cell *values*, then resume with
-`materialize: true` (CLI/MCP drives the same path):
+U2's resume wrote a verified marker; U3 completes it with the **escrow-gated executor**. Record a manifest with cell *values*, then resume with `materialize: true` (CLI/MCP drives the same path):
 
 ```bash
 vant universe record alpha --state-root <64hex> --values '{"<cellAddr>": "value"}'
 vant universe resume <id> --actor operator --materialize
 ```
 
-The materialization bills **1 escrow credit per restored cell** against the
-actor's budget (`scenario:materialize:<actor>`), writes the frozen values
-back through the arch-A state store (WAL included), reports
-`materialized: true` + `bytesRestored`, and refunds on a store-write denial.
-A broke actor is refused typed (`E_SNAPSHOT_BUDGET`) before any write lands.
+The materialization bills **1 escrow credit per restored cell** against the actor's budget (`scenario:materialize:<actor>`), writes the frozen values back through the arch-A state store (WAL included), reports `materialized: true` + `bytesRestored`, and refunds on a store-write denial. A broke actor is refused typed (`E_SNAPSHOT_BUDGET`) before any write lands.
 
 ## Byte-restoring pin points (U3 additions to the U2 suite)
 
@@ -103,15 +91,11 @@ A broke actor is refused typed (`E_SNAPSHOT_BUDGET`) before any write lands.
 
 ## Crew budgets and hygiene
 
-- Crew names: alphanumeric plus `._-` (≤64 chars); hostile input fails
-  closed typed (`E_SCENARIO_NAME`).
+- Crew names: alphanumeric plus `._-` (≤64 chars); hostile input fails closed typed (`E_SCENARIO_NAME`).
 - Crew size: 2-10 (mirrors the `agents.maxAgents` default).
 - Task text: ≤512 chars; hostile text is refused before any gate runs.
-- Budget: `≥ crew size` and `≤ 100000` credits; the task cost defaults to
-  half the pool and is pool-capped by construction.
-- The scenario ledger lives in
-  `models/private/<brain>/state/universe-scenarios.json` - arch-A rules,
-  WAL included, brain-scoped.
+- Budget: `≥ crew size` and `≤ 100000` credits; the task cost defaults to half the pool and is pool-capped by construction.
+- The scenario ledger lives in `models/private/<brain>/state/universe-scenarios.json` - arch-A rules, WAL included, brain-scoped.
 
 ## Related
 

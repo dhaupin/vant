@@ -116,8 +116,6 @@ Step 2: [do thing]
 
 ---
 
-**Role**: Grey Hat Researcher  
-**Input**: Target  
-**Output**: Report
+**Role**: Grey Hat Researcher **Input**: Target **Output**: Report
 
 > Find it. Report it. Leave it.

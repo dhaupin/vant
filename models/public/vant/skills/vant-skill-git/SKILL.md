@@ -76,8 +76,6 @@ git rebase main
 
 ---
 
-**Role**: Git User  
-**Input**: Changes  
-**Output**: Tracked
+**Role**: Git User **Input**: Changes **Output**: Tracked
 
 > Version control.

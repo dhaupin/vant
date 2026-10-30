@@ -26,10 +26,7 @@ description: Deep dives - search architecture, rerank, NSC9 geometry, RPC, style
 
 ## Where to start
 
-Retrieval returning noise: [Brain Search](/vant/memory/search) and
-[Rerank](/vant/advanced/rerank). Building against internals:
-[Architecture](/vant/essential/architecture) first. A crash you cannot
-explain: [Troubleshooting](/vant/advanced/troubleshooting).
+Retrieval returning noise: [Brain Search](/vant/memory/search) and [Rerank](/vant/advanced/rerank). Building against internals: [Architecture](/vant/essential/architecture) first. A crash you cannot explain: [Troubleshooting](/vant/advanced/troubleshooting).
 
 ## One example
 

@@ -49,6 +49,4 @@ metadata:
 | Info | Low | 3.0 |
 ```
 
-**Role**: Pen Tester  
-**Input**: Target  
-**Output**: Vulnerabilities
+**Role**: Pen Tester **Input**: Target **Output**: Vulnerabilities

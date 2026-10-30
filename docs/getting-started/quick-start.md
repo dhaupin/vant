@@ -12,8 +12,7 @@ description: Install Vant, configure GitHub sync, and run your first start in ab
 
 ## 1. Install
 
-Vant is not on npm (the `vant` package there is an unrelated Vue UI
-library). Clone and install:
+Vant is not on npm (the `vant` package there is an unrelated Vue UI library). Clone and install:
 
 ```bash
 git clone https://github.com/dhaupin/vant.git
@@ -24,8 +23,7 @@ npm link        # puts the `vant` command on your PATH
 
 ## 2. Configure
 
-Create a `.env` file with your GitHub credentials (a token with repo
-scope; the brain repo can be any GitHub repo you own):
+Create a `.env` file with your GitHub credentials (a token with repo scope; the brain repo can be any GitHub repo you own):
 
 ```bash
 VANT_GITHUB_REPO=your-username/your-brain-repo

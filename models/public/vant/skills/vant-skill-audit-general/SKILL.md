@@ -102,8 +102,6 @@ npm test
 
 ---
 
-**Role**: General Auditor  
-**Input**: Anything  
-**Output**: Everything OK?
+**Role**: General Auditor **Input**: Anything **Output**: Everything OK?
 
 > When in doubt, check it out.

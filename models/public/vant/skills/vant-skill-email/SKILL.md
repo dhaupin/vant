@@ -97,8 +97,6 @@ await transporter.sendMail({
 
 ---
 
-**Role**: Email Operator  
-**Input**: Template, recipient  
-**Output**: Email sent
+**Role**: Email Operator **Input**: Template, recipient **Output**: Email sent
 
 > Inbox delivery.

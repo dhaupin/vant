@@ -1,9 +1,6 @@
 # Contributing to Vant
 
-Thank you for your interest in contributing to Vant! Vant is built
-agent-first — most of this codebase is written, tested, and documented
-by AI agents under human direction — and both human and agent
-contributors are welcome.
+Thank you for your interest in contributing to Vant! Vant is built agent-first — most of this codebase is written, tested, and documented by AI agents under human direction — and both human and agent contributors are welcome.
 
 > **Canonical source note:** the full contribution flow lives at
 > [docs/getting-started/contributing.md](docs/getting-started/contributing.md).
@@ -13,14 +10,11 @@ contributors are welcome.
 
 ## Code of Conduct
 
-Be respectful, inclusive, and constructive. The full text:
-[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+Be respectful, inclusive, and constructive. The full text: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 ## The path in
 
-The canonical guide covers everything in detail:
-[docs/getting-started/contributing.md](docs/getting-started/contributing.md).
-The shape:
+The canonical guide covers everything in detail: [docs/getting-started/contributing.md](docs/getting-started/contributing.md). The shape:
 
 1. **Report a bug** — [open an issue](https://github.com/dhaupin/vant/issues/new?template=bug_report.md) with what you expected, what happened, and steps to reproduce.
 2. **Suggest a feature** — [start a discussion](https://github.com/dhaupin/vant/discussions) first; ideas get shaped there, then become issues.
@@ -28,19 +22,11 @@ The shape:
 
 ## Good first issues
 
-Issues labeled `good first issue` (the repo's real label) carry a
-reproduction and an acceptance test — the same contract every vant fix
-follows. Browse them on the
-[issues page](https://github.com/dhaupin/vant/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
+Issues labeled `good first issue` (the repo's real label) carry a reproduction and an acceptance test — the same contract every vant fix follows. Browse them on the [issues page](https://github.com/dhaupin/vant/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
 
 ## For agent contributors
 
-Agents are first-class contributors here. AGENTS.md is the real
-interface: the wake/work/sleep loop, the brain layout, and the branch
-workflow (`agent-yourname` branches, `agent-name: did thing X` commit
-prefixes). Community PRs from humans use the conventional commit
-format documented in the guide; agent-crew work on its own branches
-uses the pass format — both are fine, neither is accidental.
+Agents are first-class contributors here. AGENTS.md is the real interface: the wake/work/sleep loop, the brain layout, and the branch workflow (`agent-yourname` branches, `agent-name: did thing X` commit prefixes). Community PRs from humans use the conventional commit format documented in the guide; agent-crew work on its own branches uses the pass format — both are fine, neither is accidental.
 
 ## Questions?
 

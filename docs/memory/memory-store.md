@@ -12,9 +12,7 @@ description: Key-value state and document memory with TTL, sandbox gating, and g
 > Key-value state and documents, written during the session, read later by
 > anything with access.
 
-The brain files are for the things every session must know. The memory store
-is for everything else: intermediate state, cached facts, documents worth
-keeping, values with a shelf life.
+The brain files are for the things every session must know. The memory store is for everything else: intermediate state, cached facts, documents worth keeping, values with a shelf life.
 
 ## CLI
 
@@ -24,8 +22,7 @@ All store operations run through the memory command:
 vant memory state <key> <value>
 ```
 
-Sets a key-value pair. Pairs live in a TTL cache, so this is the right home
-for session-scoped facts:
+Sets a key-value pair. Pairs live in a TTL cache, so this is the right home for session-scoped facts:
 
 ```bash
 vant memory recall <key>
@@ -81,8 +78,7 @@ await state('session-token', 'abc', { ttl: 3600000 });
 
 ## Geometric addressing
 
-The store exposes geometry-backed addressing for spatially organized
-retrieval. Store at an address and locate it later:
+The store exposes geometry-backed addressing for spatially organized retrieval. Store at an address and locate it later:
 
 ```javascript
 const { address, locate } = require('./lib/memory');
@@ -94,9 +90,7 @@ The addressing scheme itself is documented in [Geometry](/vant/memory/geometry).
 
 ## Gating
 
-Store operations run through the sandbox capability gate. A denied session
-gets coded refusals instead of silent failures, and every write is atomic:
-a crash mid-write never leaves a torn document.
+Store operations run through the sandbox capability gate. A denied session gets coded refusals instead of silent failures, and every write is atomic: a crash mid-write never leaves a torn document.
 
 ## Related
 

@@ -11,10 +11,7 @@ nav_order: 17
 
 > Real-world projects and code examples built with Vant## Ideas for Projects
 
-*(No community showcase yet - these are directions worth building, not
-shipped projects. Submit yours via
-[GitHub Issues](https://github.com/dhaupin/vant/issues) and it will land
-here with a real link.)*
+*(No community showcase yet - these are directions worth building, not shipped projects. Submit yours via [GitHub Issues](https://github.com/dhaupin/vant/issues) and it will land here with a real link.)*
 
 ## AI Development Agents
 
@@ -74,10 +71,7 @@ Working examples for common tasks.
 
 ### Basic Memory Operations
 
-`lib/storage`'s BrainStorage store is the raw file layer under the brain
-(`get` / `write` / `append` / `has` / `list` / `query` - there is no
-`load`/`set`/`save`; every write persists as an atomic write, and the
-GitHub push is `vant sync --push`):
+`lib/storage`'s BrainStorage store is the raw file layer under the brain (`get` / `write` / `append` / `has` / `list` / `query` - there is no `load`/`set`/`save`; every write persists as an atomic write, and the GitHub push is `vant sync --push`):
 
 ```javascript
 const brain = require('./lib/storage').get('brain');
@@ -176,9 +170,7 @@ function queryBrain() {
 }
 ```
 
-(For the higher-level read with private-first fallback, use
-`brain.read('lessons')` from `lib/brain.js` - see
-[The Brain](/vant/memory/brain).)
+(For the higher-level read with private-first fallback, use `brain.read('lessons')` from `lib/brain.js` - see [The Brain](/vant/memory/brain).)
 
 ### Appending to Lessons
 
@@ -252,9 +244,7 @@ Last Sync: ${health.lastSync}
 
 ### Outbound Notifications
 
-There is no built-in Slack/Discord/email notifier. The real outbound
-surfaces are the in-process event bus, outbound webhooks, and the
-Telegram bot (see [Telegram Bot](/vant/integrations/telegram-bot)):
+There is no built-in Slack/Discord/email notifier. The real outbound surfaces are the in-process event bus, outbound webhooks, and the Telegram bot (see [Telegram Bot](/vant/integrations/telegram-bot)):
 
 ```javascript
 // 1. React to brain events in-process (lib/event.js exports the Event
@@ -295,9 +285,7 @@ function versionExample() {
 
 > **Warning for GitHub.com**: Auto-save triggers a sync which counts against rate limits and violates GitHub.com ToS if used for continuous polling. **Use for manual save only**, or use with self-hosted GitLab/Gitea.
 
-There is no `lib/auto-update` module. Auto-save-on-exit is what
-`lib/sync.js` push does: wire a SIGINT handler around `vant sync
---push`, or run `vant sync --push "session save"` before you exit.
+There is no `lib/auto-update` module. Auto-save-on-exit is what `lib/sync.js` push does: wire a SIGINT handler around `vant sync --push`, or run `vant sync --push "session save"` before you exit.
 
 ```javascript
 const sync = require('./lib/sync');

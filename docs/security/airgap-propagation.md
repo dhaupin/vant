@@ -38,9 +38,7 @@ For air-gapped environments:
 
 ## Encode (Carrier)
 
-The CLI exposes the brain pipeline (`vant stego` verbs: `snapshot`,
-`recover`, `capacity`, `upload`). Generic message encode/decode are
-lib-only - embed arbitrary config text programmatically:
+The CLI exposes the brain pipeline (`vant stego` verbs: `snapshot`, `recover`, `capacity`, `upload`). Generic message encode/decode are lib-only - embed arbitrary config text programmatically:
 
 ```javascript
 const stego = require('./lib/stego');
@@ -53,10 +51,7 @@ stego.encode('GITHUB_REPO=owner/brain', 'config.png', 'propagated.png',
 const out = stego.decode('propagated.png', { password: 'carrier-pass' });
 ```
 
-For a whole-brain transfer, use the CLI directly - `vant stego snapshot`
-embeds the brain, `vant horcrux create` embeds it encrypted. No `vant
-stego encode`/`decode` CLI verbs exist (a reader following this page
-with the CLI would hit "Unknown command").
+For a whole-brain transfer, use the CLI directly - `vant stego snapshot` embeds the brain, `vant horcrux create` embeds it encrypted. No `vant stego encode`/`decode` CLI verbs exist (a reader following this page with the CLI would hit "Unknown command").
 
 ## Transfer
 

@@ -112,6 +112,4 @@ npm run build
 
 ---
 
-**Role**: QC Auditor  
-**Input**: Code to check  
-**Output**: Standards met?
+**Role**: QC Auditor **Input**: Code to check **Output**: Standards met?

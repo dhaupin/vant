@@ -29,12 +29,7 @@ Vant is a Node.js process whose entire state is your repository: markdown brain 
 | Git | 2.20+ | Brain sync works through git; branch awareness built in |
 | GitHub PAT | - | `repo` scope, set as `GITHUB_TOKEN` (env var, never in config). PRIVATE: treat it like a password - it lives only in `.env` (gitignored) or your shell exports, never a config file, a commit, or a public panel field |
 
-Dependencies are deliberately tiny: `yaml`, plus the QR
-symbology lane's two pure-JS MIT packages (`qrcode-generator`, `jsqr`).
-CLI color is a zero-dependency internal ANSI face in `lib/theme.js`
-(NO_COLOR/CI/TERM=dumb/piped output renders plain); `chalk` and the
-never-imported `js-yaml` left the dependency list in pass 338. No database
-driver, no Redis client.
+Dependencies are deliberately tiny: `yaml`, plus the QR symbology lane's two pure-JS MIT packages (`qrcode-generator`, `jsqr`). CLI color is a zero-dependency internal ANSI face in `lib/theme.js` (NO_COLOR/CI/TERM=dumb/piped output renders plain); `chalk` and the never-imported `js-yaml` left the dependency list in pass 338. No database driver, no Redis client.
 
 ---
 
@@ -177,20 +172,7 @@ Every listener binds to `127.0.0.1` by default on bare installs (the Docker imag
 
 ### The webhook relay lane (r/2, optional)
 
-With a posture armed (`vant config set relay.enabled true`, then
-`vant relay gate` + `vant relay channel`), every server boot mounts the
-relay face onto the webhook transport: the pod serves the HMAC-gated
-`POST /relay` route (sealed `relay.ride` inside e2e envelopes + blind
-`relay.hop` ciphertext forwarding), and `vant relay status` prints the
-posture truth. The origin policy (docs/operations/relay.md): https-only
-by default; `relay.intranetOrigins true` — the recommended LAN-scope
-posture — admits plain http ONLY for loopback/RFC1918 hop targets while
-cloud metadata (169.254/16) stays refused in EVERY posture;
-`relay.allowPrivateOrigins` is the full lab escape, never a default.
-Group-track runs prove the lane on real pods:
-`npm run pilot:relay` (16 P3 lane pins + the intranet posture pin),
-`npm run pilot:pods` (raster across keyed doors) and
-`npm run pilot:mfg` (the carrier line).
+With a posture armed (`vant config set relay.enabled true`, then `vant relay gate` + `vant relay channel`), every server boot mounts the relay face onto the webhook transport: the pod serves the HMAC-gated `POST /relay` route (sealed `relay.ride` inside e2e envelopes + blind `relay.hop` ciphertext forwarding), and `vant relay status` prints the posture truth. The origin policy (docs/operations/relay.md): https-only by default; `relay.intranetOrigins true` — the recommended LAN-scope posture — admits plain http ONLY for loopback/RFC1918 hop targets while cloud metadata (169.254/16) stays refused in EVERY posture; `relay.allowPrivateOrigins` is the full lab escape, never a default. Group-track runs prove the lane on real pods: `npm run pilot:relay` (16 P3 lane pins + the intranet posture pin), `npm run pilot:pods` (raster across keyed doors) and `npm run pilot:mfg` (the carrier line).
 
 ## 5. Brain Sync (Git Providers)
 
@@ -389,21 +371,11 @@ node -e "console.log(require('./lib/sandbox').canRead())"   # Direct sandbox pro
 
 ## 12. Frontends on Cloudflare Pages (set up YOUR dashboard now)
 
-The web frontends (see `labs/prd-web.md`) deploy to Cloudflare Pages.
-Each frontend is its OWN Pages project with its OWN subdomain. Three of
-them exist: the home site (`vant.creadev.org`, source in `web/home/` as a
-React + prestruct app — build with `npm run build:home`, artifact
-`web/home/dist/` (gitignored by the `web/*/dist/` rule); the old checked-in
-lander survives as the design reference `web/home/index.bak.html`), the dashboard
-(`brain.creadev.org`, this section), and the relay (its own P6 project).
+The web frontends (see `labs/prd-web.md`) deploy to Cloudflare Pages. Each frontend is its OWN Pages project with its OWN subdomain. Three of them exist: the home site (`vant.creadev.org`, source in `web/home/` as a React + prestruct app — build with `npm run build:home`, artifact `web/home/dist/` (gitignored by the `web/*/dist/` rule); the old checked-in lander survives as the design reference `web/home/index.bak.html`), the dashboard (`brain.creadev.org`, this section), and the relay (its own P6 project).
 
 ### 12.0 The home site setup (vant.creadev.org — the self-contained easy one)
 
-The project to create in the CF dashboard: connect this repo, production
-branch `axolotl` (or `main` after merge), then point the build at the
-frontend dir — no framework guessing. The static artifact ships itself;
-the bindings in step 2 below (the /status monitor's D1 + env surface)
-are the only other panel work:
+The project to create in the CF dashboard: connect this repo, production branch `axolotl` (or `main` after merge), then point the build at the frontend dir — no framework guessing. The static artifact ships itself; the bindings in step 2 below (the /status monitor's D1 + env surface) are the only other panel work:
 
 | Setting | Value | Why |
 |---------|-------|-----|
@@ -415,18 +387,9 @@ are the only other panel work:
 | Node version | 20+ (`NODE_VERSION=20` if the panel asks) | matches the `web/home` engines; the build is plain node tooling |
 | Functions | deploy automatically with the project | `web/home/functions/` = the `/status` monitor API (`GET /api/status/summary`, the x-admin-key admin door, the `onScheduled` cron sweep). Zero wrangler strings — same law as the dashboard project |
 
-`ssr.config.js` is committed with the fixed URLs, so unlike the dashboard
-project below there is no `VANT_*` variable to define. The bindings below
-are owned by the /status monitor (full route map + honest postures:
-`web/home/functions/README.md`) — all in Pages settings, never code.
+`ssr.config.js` is committed with the fixed URLs, so unlike the dashboard project below there is no `VANT_*` variable to define. The bindings below are owned by the /status monitor (full route map + honest postures: `web/home/functions/README.md`) — all in Pages settings, never code.
 
-**The type rule, so the panel question always has one answer:** if you
-could not happily print the value in a README or a support ticket, add it
-as type **Secret** (encrypted, write-once: the panel never shows the
-value again). Knobs, flags, and URLs are plain **Text**. One more trap:
-Vite bakes every `VITE_*` BUILD variable straight into the shipped
-JavaScript bundle that every visitor downloads, so a `VITE_` name must
-never carry a private value anywhere in this repo's projects.
+**The type rule, so the panel question always has one answer:** if you could not happily print the value in a README or a support ticket, add it as type **Secret** (encrypted, write-once: the panel never shows the value again). Knobs, flags, and URLs are plain **Text**. One more trap: Vite bakes every `VITE_*` BUILD variable straight into the shipped JavaScript bundle that every visitor downloads, so a `VITE_` name must never carry a private value anywhere in this repo's projects.
 
 | Binding / var | Where | Value | Notes |
 |----------|-------|-------|-------|
@@ -437,43 +400,20 @@ never carry a private value anywhere in this repo's projects.
 | Sweep cadence | external (optional) | point any scheduler at `GET /api/status/summary` | Pages projects have NO cron triggers (Cloudflare ships them on Workers only; the current Pages dashboard has no such section). History stays honest anyway: every public GET runs the throttled sweep on cold data, and unswept days render "no data", never downtime |
 | `VITE_STATUS_LIVE` | Settings → Build variables (Production), PLAIN TEXT by design | set to `1` ONLY after `DB` + `STATUS_ADMIN_KEY` above are live and `/api/status/summary` answers 200 | the deploy gate: until it is set, the built site hides the whole status surface (no nav entry, no walk hops, the board mounts nothing). No fallback fiction. Vite bakes it into the public bundle, so this name is permanent public surface - even after the flip |
 
-Until the bindings are on and `VITE_STATUS_LIVE=1` is set in the build,
-every status route answers 503 with the exact fix and the site simply
-does not advertise status (owner direction: the surface stays out of the
-menu, the walk, and the page until the monitor is real, and /status reads
-the maintenance line instead).
+Until the bindings are on and `VITE_STATUS_LIVE=1` is set in the build, every status route answers 503 with the exact fix and the site simply does not advertise status (owner direction: the surface stays out of the menu, the walk, and the page until the monitor is real, and /status reads the maintenance line instead).
 
 The full flip, in order:
 
-1. Settings → Bindings: bind the D1 database as `DB`; Settings →
-   Variables and Secrets: set production `STATUS_ADMIN_KEY` **as a
-   Secret** (encrypted, write-once). Redeploy.
-2. Confirm the monitor answers for real: `GET /api/status/summary`
-   returns 200 (not the 503 fix line).
-3. Settings → Build → Build environment variables: set
-   `VITE_STATUS_LIVE=1`. Redeploy again: the status stop joins the menu,
-   the walk hops include it, and the D1 board replaces the maintenance
-   line on /status.
+1. Settings → Bindings: bind the D1 database as `DB`; Settings → Variables and Secrets: set production `STATUS_ADMIN_KEY` **as a Secret** (encrypted, write-once). Redeploy.
+2. Confirm the monitor answers for real: `GET /api/status/summary` returns 200 (not the 503 fix line).
+3. Settings → Build → Build environment variables: set `VITE_STATUS_LIVE=1`. Redeploy again: the status stop joins the menu, the walk hops include it, and the D1 board replaces the maintenance line on /status.
 
-Whatever lands ships pre-gated: `web/home/test/config.test.mjs`
-(rides test.yml) pins the JSON-LD/route contract at source level,
-`src/walk.mjs`'s tour/footer contract stays pinned by `test/walk.test.mjs`
-(every walk stop must exist as a shipped route), and
-`test/status-math.test.mjs` pins the monitor's pure core (defaults, day
-buckets, uptime math, alert pick, admin-key compare - 35 tests total
-across the three suites). `npm run lint:home` sweeps every built page for
-link/fiction/stat truth.
+Whatever lands ships pre-gated: `web/home/test/config.test.mjs` (rides test.yml) pins the JSON-LD/route contract at source level, `src/walk.mjs`'s tour/footer contract stays pinned by `test/walk.test.mjs` (every walk stop must exist as a shipped route), and `test/status-math.test.mjs` pins the monitor's pure core (defaults, day buckets, uptime math, alert pick, admin-key compare - 35 tests total across the three suites). `npm run lint:home` sweeps every built page for link/fiction/stat truth.
 
 ### 12.1 Setup walkthrough (dashboard, do this while code lands)
 
-0. **Run the local half first:** `npm run pilot:pages`
-   (`scripts/pilot-pages-deploy.js`) proves everything certifiable from
-   this repo - both flavor builds, the checksummed kit, and the env-var
-   surface you are about to set reconciled against the vars the functions
-   actually read - and prints the checklist fresh. It exits 1 on any
-   drift; fix before touching the panel.
-1. **Create the Pages project** in the CF dashboard: connect this git
-   repo, production branch `axolotl` (or `main` after merge).
+0. **Run the local half first:** `npm run pilot:pages` (`scripts/pilot-pages-deploy.js`) proves everything certifiable from this repo - both flavor builds, the checksummed kit, and the env-var surface you are about to set reconciled against the vars the functions actually read - and prints the checklist fresh. It exits 1 on any drift; fix before touching the panel.
+1. **Create the Pages project** in the CF dashboard: connect this git repo, production branch `axolotl` (or `main` after merge).
 2. **Configure the build** in project settings:
 
    | Setting | Value |
@@ -484,11 +424,8 @@ link/fiction/stat truth.
    | Build output directory | `dist` |
    | Node version | 22 (env var `NODE_VERSION=22` if the panel asks; repo root `.nvmrc` says 22 — pass 338: 20.20.0 is EOL in the CF log and npm 10.9.2 on node 20 carries the npm/cli#9787 arborist crash, reproduced verbatim on this graph) |
 
-   Functions under `web/dashboard/functions/` deploy AUTOMATICALLY with
-   the project - no wrangler config anywhere (prd-web.md 3.7).
-3. **Set the Pages variables** (Settings → Variables and Secrets, both
-   Production and Preview; the type rule below the vant-home table applies
-   here too - plain Text unless the row says **Secret**):
+   Functions under `web/dashboard/functions/` deploy AUTOMATICALLY with the project - no wrangler config anywhere (prd-web.md 3.7).
+3. **Set the Pages variables** (Settings → Variables and Secrets, both Production and Preview; the type rule below the vant-home table applies here too - plain Text unless the row says **Secret**):
 
    | Variable | Value | Notes |
    |----------|-------|-------|
@@ -499,12 +436,7 @@ link/fiction/stat truth.
    | `VANT_RELAY_GATE_KEY` | 256-bit hex (mint with `vant relay gate`) | **PRIVATE: add as type Secret.** REQUIRED when the relay posture is on; hops MUST present it as `x-relay-gate` (timing-safe). No key set = the surface serves NOTHING (fail-closed). Hop bodies are encrypted envelopes only - plaintext refuses; the edge holds no channel keys |
    | `VANT_RELAY_POD_ORIGIN` | (declared, unread today) | Contract-declared reserve key: the vendored kit's `EDGE_ENV_KEYS` names it, and NO edge face reads it - the solo relay forwards to the hop frame's client-declared origin, and the piggyback face resolves pods through the `VANT_PROPERTY_<ID>_ORIGIN` pairs above. Documented for surface completeness; removing it is kit surgery, not a settings tweak |
 
-   **Email-OTP accounts (P2) - the KV binding:** create a KV namespace
-   (Workers & Pages -> KV -> create, any name; then the Pages project
-   -> Settings -> Functions -> KV namespace bindings) and bind it as
-   `BOLETE_KV`. Until the binding exists, email sign-in answers a
-   typed `E_STORE_UNCONFIGURED` and the paste-token gate stays the
-   fallback - honest by design.
+   **Email-OTP accounts (P2) - the KV binding:** create a KV namespace (Workers & Pages -> KV -> create, any name; then the Pages project -> Settings -> Functions -> KV namespace bindings) and bind it as `BOLETE_KV`. Until the binding exists, email sign-in answers a typed `E_STORE_UNCONFIGURED` and the paste-token gate stays the fallback - honest by design.
 
    The email vars (all PAGES SETTINGS, never code):
 
@@ -516,11 +448,7 @@ link/fiction/stat truth.
    | `EMAIL_WEBHOOK_TOKEN` | Bearer secret for the webhook | **PRIVATE: add as type Secret**, optional |
    | `VANT_EMAIL_SALT` | a long random string | **PRIVATE: add as type Secret.** RECOMMENDED either way: hashes the email (and codes' key hashing); unset = unsalted hash |
 
-   The property ID for this first install is **`local`** (the URL its
-   views ride is `?p=local`;   the resolver reads `VANT_PROPERTY_<ID>_ORIGIN` upper-cased). This
-   is a ONE dashboard -> N installs model: each attached Vant install
-   gets its OWN pair of vars in THIS SAME Pages project. The vars take
-   multiple definitions - one pair per install:
+   The property ID for this first install is **`local`** (the URL its views ride is `?p=local`;   the resolver reads `VANT_PROPERTY_<ID>_ORIGIN` upper-cased). This is a ONE dashboard -> N installs model: each attached Vant install gets its OWN pair of vars in THIS SAME Pages project. The vars take multiple definitions - one pair per install:
 
    ```ini
    VANT_PROPERTY_LOCAL_ORIGIN=https://home-pod.example.com   # install 1
@@ -533,35 +461,15 @@ link/fiction/stat truth.
    VANT_PROPERTY_LAB_NAME=lab test pod
    ```
 
-   Each new pair appears in the dashboard's property switcher (4 above,
-   4 entries) without redeploying app code. Switching keeps your route,
-   module, and filters; everything data-side re-keys to the chosen pod
-   and the SSE stream reconnects (prd-web.md 3.4).
-4. **Make the pod reachable from the edge** - pick ONE:
-   - **Tunnel (recommended for home/VPS pods):** `cloudflared tunnel
-     create vant-pod`, route a hostname like
-     `pod-<murmur>.<your-domain>.com` to `http://localhost:3457`, run
-     the connector on the pod host. Stable egress identity, no ports
-     opened, no allowlist churn - this is the prd-web.md 8.3 fallback
-     path and it dodges the IP-allowlist refresh problem entirely.
-   - **IP allowlist path:** let pages origin fetches hit the door
-     (fetch egress comes from Cloudflare IP ranges,
-     https://www.cloudflare.com/ips/) and allowlist those ranges at the
-     pod's firewall with a scheduled refresh - broad by nature, and
-     refreshes are the owner-posture requirement (prd-web.md 8.3).
-5. **Mint an identity** on the pod:
-   `vant guest issue --name <seat>` and copy the `vguest_` token.
-6. **Log in**: open the dashboard's subdomain, paste the token at the
-   gate. The status page will name anything still missing (functions,
-   origin var, bridge), exactly as built.
-7. **Point the lander's "Dashboard" link** at the new subdomain when
-   satisfied.
+   Each new pair appears in the dashboard's property switcher (4 above, 4 entries) without redeploying app code. Switching keeps your route, module, and filters; everything data-side re-keys to the chosen pod and the SSE stream reconnects (prd-web.md 3.4).
+4. **Make the pod reachable from the edge** - pick ONE: - **Tunnel (recommended for home/VPS pods):** `cloudflared tunnel create vant-pod`, route a hostname like `pod-<murmur>.<your-domain>.com` to `http://localhost:3457`, run the connector on the pod host. Stable egress identity, no ports opened, no allowlist churn - this is the prd-web.md 8.3 fallback path and it dodges the IP-allowlist refresh problem entirely. - **IP allowlist path:** let pages origin fetches hit the door (fetch egress comes from Cloudflare IP ranges, https://www.cloudflare.com/ips/) and allowlist those ranges at the pod's firewall with a scheduled refresh - broad by nature, and refreshes are the owner-posture requirement (prd-web.md 8.3).
+5. **Mint an identity** on the pod: `vant guest issue --name <seat>` and copy the `vguest_` token.
+6. **Log in**: open the dashboard's subdomain, paste the token at the gate. The status page will name anything still missing (functions, origin var, bridge), exactly as built.
+7. **Point the lander's "Dashboard" link** at the new subdomain when satisfied.
 
 ### 12.2 Mode B — pod same-origin (the local-ops fallback, OFF by default)
 
-When a Pages deployment is not answering (or a workstation cannot reach
-the tunnel), the pod can serve a frontend bundle itself: the browser
-calls `/mcp/*` directly, same origin, zero CORS, zero Worker hop.
+When a Pages deployment is not answering (or a workstation cannot reach the tunnel), the pod can serve a frontend bundle itself: the browser calls `/mcp/*` directly, same origin, zero CORS, zero Worker hop.
 
 ```bash
 vant config set mcp.serveWeb web/dashboard   # or env VANT_MCP_SERVE_WEB
@@ -569,25 +477,11 @@ vant config set mcp.serveWeb web/dashboard   # or env VANT_MCP_SERVE_WEB
 
 Honest mechanics (pins: `test/pod-serve-web.test.js`):
 
-- The value is a frontend DIRECTORY (e.g. `web/dashboard`) whose `dist/`
-  build stays OFF with a loud warning - the door serves nothing it did
-  not build. (Example: `VANT_MCP_SERVE_WEB=web/dashboard` serves the
-  dashboard build. The home frontend ships its static index.html
-  checked in with no build, so the door never serves it - point
-  serveWeb at a built frontend.)
-- The MCP door keeps every owned route: `/mcp/exec`, `/mcp/events`,
-  `/mcp/tools`, `/health`, and tool routes all answer first. Static GETs
-  only; POSTs unknown to the door keep the same 404 JSON as before.
-- Static GETs ride the door's OWN deny chain: the DNS-rebinding Host
-  guard, the cross-origin POST/origin guard, and the EW4 per-client rate
-  budget all apply - serving is not a second, weaker surface. Auth on
-  `/mcp/exec` is UNCHANGED: requireKey and guest tokens gate exec exactly
-  as they do in Mode A.
-- Path guards: dot-led segments (`.env`, `.git`) and anything that would
-  resolve outside the bundle are refused 403; client-side routes fall
-  back to `index.html` (the dashboard router owns its own 404 pages).
-- One door serves one frontend bundle. A second attached install goes
-  through Pages vars per the main table above.
+- The value is a frontend DIRECTORY (e.g. `web/dashboard`) whose `dist/` build stays OFF with a loud warning - the door serves nothing it did not build. (Example: `VANT_MCP_SERVE_WEB=web/dashboard` serves the dashboard build. The home frontend ships its static index.html checked in with no build, so the door never serves it - point serveWeb at a built frontend.)
+- The MCP door keeps every owned route: `/mcp/exec`, `/mcp/events`, `/mcp/tools`, `/health`, and tool routes all answer first. Static GETs only; POSTs unknown to the door keep the same 404 JSON as before.
+- Static GETs ride the door's OWN deny chain: the DNS-rebinding Host guard, the cross-origin POST/origin guard, and the EW4 per-client rate budget all apply - serving is not a second, weaker surface. Auth on `/mcp/exec` is UNCHANGED: requireKey and guest tokens gate exec exactly as they do in Mode A.
+- Path guards: dot-led segments (`.env`, `.git`) and anything that would resolve outside the bundle are refused 403; client-side routes fall back to `index.html` (the dashboard router owns its own 404 pages).
+- One door serves one frontend bundle. A second attached install goes through Pages vars per the main table above.
 
 ### 12.3 The contract (unchanged)
 
@@ -601,8 +495,7 @@ Honest mechanics (pins: `test/pod-serve-web.test.js`):
 | Auth | MVP: paste a guest token (HttpOnly session cookie set by the bridge drives the SSE stream); P2: email-OTP accounts + server-side session binding |
 | Multi-install | the `VANT_PROPERTY_<ID>_*` env registry = one deployment, N installs, view state preserved on switch |
 
-Everything in sections 1-11 remains the POD guide; frontends never
-change the pod's deployment face.
+Everything in sections 1-11 remains the POD guide; frontends never change the pod's deployment face.
 
 ### 12.4 The relay postures (prd-relay.md; the two sides never blur)
 
@@ -615,32 +508,15 @@ Four honest postures, each fully supported, off by default:
 | DASHBOARD PIGGYBACK (dashboard-relay flavor) | Pages settings: `VANT_RELAY_ENABLED=1` + `VANT_RELAY_GATE_KEY=<256-bit hex, mint with `vant relay gate`>` | the dashboard's OWN functions serve the same gated Mode R contract (vendored kit, parity-pinned - no separate Pages project; it rides this deploy) |
 | SOLO relay (solo-relay flavor) | its OWN Pages project rooted at `web/relay/` (same two env keys, read at request time) | the PURE live endpoint: chain hops only, no admin surfaces by construction, no default profile pin; exec + the R1 SSE stream-through (`GET /api/r/events`) |
 
-Fail-closed in every posture: enabled without a gate key serves NOTHING
-(hops answer `E_RELAY_GATE_REQUIRED`); hop bodies are encrypted
-envelopes ONLY (plaintext refuses, no downgrade); the gate header is
-spent at the gate, never forwarded.
+Fail-closed in every posture: enabled without a gate key serves NOTHING (hops answer `E_RELAY_GATE_REQUIRED`); hop bodies are encrypted envelopes ONLY (plaintext refuses, no downgrade); the gate header is spent at the gate, never forwarded.
 
-**Using relays is the USER'S side** and never env-side: dashboard
-Settings #4 carries a **Use relays** toggle (reach pod through relay
-hops / direct, persisted) plus the operator's run-a-relay posture card
-that reads `/api/r/capabilities` and states the truth. Under the
-corrected arc (pass 233) the dashboard also RUNS WITH a relay as a
-setting: **Run with a relay (web/relay endpoint)** takes the relay's
-origin and verifies it live against that relay's public caps page. The full
-operational walkthrough lives in the [relay playbook](/vant/operations/relay-playbook)
-(serving, hosting the solo flavor, piggybacking, using, verifying); the mechanism spec is
-[labs/prd-relay.md](labs/prd-relay.md) and the operations page is
-[docs/operations/relay.md](docs/operations/relay.md).
+**Using relays is the USER'S side** and never env-side: dashboard Settings #4 carries a **Use relays** toggle (reach pod through relay hops / direct, persisted) plus the operator's run-a-relay posture card that reads `/api/r/capabilities` and states the truth. Under the corrected arc (pass 233) the dashboard also RUNS WITH a relay as a setting: **Run with a relay (web/relay endpoint)** takes the relay's origin and verifies it live against that relay's public caps page. The full operational walkthrough lives in the [relay playbook](/vant/operations/relay-playbook) (serving, hosting the solo flavor, piggybacking, using, verifying); the mechanism spec is [labs/prd-relay.md](labs/prd-relay.md) and the operations page is [docs/operations/relay.md](docs/operations/relay.md).
 
 ---
 
 ## 13. The Docs Site (docs.creadev.org — CI-owned, zero panel work)
 
-The docs hub is the one Vant surface you never deploy by hand: every
-push to `main` runs `.github/workflows/docs.yml`, and the artifact
-publishes to GitHub Pages (which serves the docs.creadev.org domain).
-`workflow_dispatch` re-runs it on demand. Nothing to bind, no secrets to
-mint, no dashboard walk.
+The docs hub is the one Vant surface you never deploy by hand: every push to `main` runs `.github/workflows/docs.yml`, and the artifact publishes to GitHub Pages (which serves the docs.creadev.org domain). `workflow_dispatch` re-runs it on demand. Nothing to bind, no secrets to mint, no dashboard walk.
 
 ### The pipeline (the proven order — order matters)
 
@@ -651,15 +527,7 @@ mint, no dashboard walk.
 | 3. `npx pagefind --site _site` | the search index is built AFTER freestruct | the engine rewrites the HTML, so the index must match what actually ships |
 | 4. upload artifact + deploy-pages | `docs/_site` goes live | the whole site lands as one GitHub Pages deployment |
 
-What the freestruct layer generates over the Jekyll output (config:
-`docs/freestruct.config.yml`, engine pinned `freestruct@1.0.0` exact in
-`docs/package.json` alongside `pagefind@^1.5.2`): per-page canonical/OG
-metas (missing-only — the hand-written tags in `_layouts/default.html`
-are never touched), a full `sitemap.xml` with real lastmod, a
-basePath-aware `robots.txt` pointer, `feed.xml`, a noindex `404.html`,
-and the broken-link check. Search stays with Pagefind (`searchIndex:
-false` — same owner call as the freestruct docs site itself);
-`basePath: /vant` is trusted, never doubled.
+What the freestruct layer generates over the Jekyll output (config: `docs/freestruct.config.yml`, engine pinned `freestruct@1.0.0` exact in `docs/package.json` alongside `pagefind@^1.5.2`): per-page canonical/OG metas (missing-only — the hand-written tags in `_layouts/default.html` are never touched), a full `sitemap.xml` with real lastmod, a basePath-aware `robots.txt` pointer, `feed.xml`, a noindex `404.html`, and the broken-link check. Search stays with Pagefind (`searchIndex: false` — same owner call as the freestruct docs site itself); `basePath: /vant` is trusted, never doubled.
 
 ### Release stamping + local preview
 
@@ -685,9 +553,7 @@ cd ..
 npm run lint:docs
 ```
 
-The **Freestruct docs site itself** (freestruct.creadev.org, crosslinked
-from the docs footer) is its own project — the flagship site of the same
-engine that post-renders this repo's docs. Nothing in this repo builds it.
+The **Freestruct docs site itself** (freestruct.creadev.org, crosslinked from the docs footer) is its own project — the flagship site of the same engine that post-renders this repo's docs. Nothing in this repo builds it.
 
 ---
 

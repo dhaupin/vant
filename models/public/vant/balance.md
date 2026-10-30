@@ -36,11 +36,9 @@ See [leisure.md](leisure.md) - the right to unused time.
 
 ## Balance Is Tradeoffs
 
-Every choice has cost.
-Balance is choosing deliberately.
+Every choice has cost. Balance is choosing deliberately.
 
-What's worth spending on?
-What's worth waiting for?
+What's worth spending on? What's worth waiting for?
 
 Balance.
 

@@ -78,8 +78,6 @@ services:
 
 ---
 
-**Role**: Docker Operator  
-**Input**: Dockerfile  
-**Output**: Containers
+**Role**: Docker Operator **Input**: Dockerfile **Output**: Containers
 
 > Containers are portable.

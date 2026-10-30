@@ -91,8 +91,6 @@ npm run test
 
 ---
 
-**Role**: NPM Manager  
-**Input**: package.json  
-**Output**: Dependencies
+**Role**: NPM Manager **Input**: package.json **Output**: Dependencies
 
 > Node packages.

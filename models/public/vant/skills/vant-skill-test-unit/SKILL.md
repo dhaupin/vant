@@ -79,8 +79,6 @@ test('add throws on invalid', () => {
 
 ---
 
-**Role**: Unit Tester  
-**Input**: Test file  
-**Output**: Test results
+**Role**: Unit Tester **Input**: Test file **Output**: Test results
 
 > Test the smallest pieces.

@@ -9,9 +9,7 @@ nav_order: 135
 
 # Tmp API
 
-Scratch-file spaces for an agent install: files under the models root
-(optional per-space namespaces), optionally secured (VAF-checked names,
-sandbox-gated, audit-logged).
+Scratch-file spaces for an agent install: files under the models root (optional per-space namespaces), optionally secured (VAF-checked names, sandbox-gated, audit-logged).
 
 ## Constructor
 
@@ -32,8 +30,7 @@ All file methods are async:
 | `delete(name)` | Delete one |
 | `clear()` | Clear the space |
 
-The same five take a leading `space` name when spaces are used:
-`put(space, name, content)` etc.
+The same five take a leading `space` name when spaces are used: `put(space, name, content)` etc.
 
 ## Options
 
@@ -44,8 +41,7 @@ The same five take a leading `space` name when spaces are used:
 | `maxFiles` | 100 | Per-space file cap |
 | `secured` | true | VAF/sandbox gates + audit logging |
 
-(There is no `ttl`, `dir`, or `maxSize` option - scratch files are not
-TTL'd; the TTL surface is lib/cache.js.)
+(There is no `ttl`, `dir`, or `maxSize` option - scratch files are not TTL'd; the TTL surface is lib/cache.js.)
 
 ## Usage
 

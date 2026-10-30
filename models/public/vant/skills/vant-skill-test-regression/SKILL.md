@@ -55,6 +55,4 @@ npm test -- --compare baseline.json
 - [list]
 ```
 
-**Role**: Regression Tester  
-**Input**: Changes  
-**Output**: Pass/Fail
+**Role**: Regression Tester **Input**: Changes **Output**: Pass/Fail

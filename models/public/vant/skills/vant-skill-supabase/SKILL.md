@@ -86,8 +86,6 @@ supabase functions deploy my-function
 
 ---
 
-**Role**: Supabase Backend  
-**Input**: Tables, functions  
-**Output**: Working backend
+**Role**: Supabase Backend **Input**: Tables, functions **Output**: Working backend
 
 > Backend as a service.

@@ -11,10 +11,7 @@ description: Semantic retrieval over the brain corpus - modes, hybrid search, re
 
 > Ask the corpus a question, get the brain files that answer it.
 
-Brain search is semantic retrieval over everything the brain holds. It is
-how an agent finds the lesson from three weeks ago without remembering
-which file it lives in. All modes - basic, hybrid, HyDE, and RAG - run
-through one module, `lib/search.js`.
+Brain search is semantic retrieval over everything the brain holds. It is how an agent finds the lesson from three weeks ago without remembering which file it lives in. All modes - basic, hybrid, HyDE, and RAG - run through one module, `lib/search.js`.
 
 ## CLI
 
@@ -42,8 +39,7 @@ vant search "lessons" -r           # search, then rerank
 vant search "lessons" -r -t 4000   # rerank, compressed to 4000 tokens
 ```
 
-`-t, --max-tokens` defaults to 2000. This is the command an agent calls
-when context is missing and the answer probably exists in memory already.
+`-t, --max-tokens` defaults to 2000. This is the command an agent calls when context is missing and the answer probably exists in memory already.
 
 ## Code
 
@@ -70,9 +66,7 @@ const fused = await vant.search.hybrid('authentication');
 const hyde = await vant.search.hyde('herbalism plants');
 ```
 
-LTC helpers: `search.getLTC()` (cached) and `search.freshLTC()` (bypasses
-the cache); `search.getSummary()` reports whether LTC exists and what it
-holds. Query length is capped at 500 characters.
+LTC helpers: `search.getLTC()` (cached) and `search.freshLTC()` (bypasses the cache); `search.getSummary()` reports whether LTC exists and what it holds. Query length is capped at 500 characters.
 
 Embeddings power the scoring. The provider is pluggable:
 
@@ -96,8 +90,7 @@ vant embed generate "the sentence to embed"
 
 ## MCP tools
 
-Search is exposed to agents as separate MCP tools - one per mode, no
-mode parameter:
+Search is exposed to agents as separate MCP tools - one per mode, no mode parameter:
 
 | Tool | Args | What it does |
 |------|------|--------------|
@@ -115,16 +108,7 @@ The full list lives in [MCP Tools Reference](/vant/reference/mcp-tools).
 
 ## RAG mode and rehydration
 
-RAG mode searches the LTC index - the distilled core pruning generates at
-`<version>/_core.json` - then rehydrates full matching content from git
-history. The tuning keys (`REHYDRATE_MAX_SIZE`, `COMPRESSION_THRESHOLD`,
-`RAG_LIMIT_MAX`) are LIVE as of pass 194: `lib/config.js` exposes
-`ragRehydrateMaxSize`/`ragCompressionThreshold`/`ragLimitMax` and
-`lib/search.js` enforces them (a hard rehydrate bound, compress default
-budget, limit clamps in `queryBrain`/`semanticSearch`, and bin/search.js's
-limit ceiling). Bare names are accepted legacy env aliases; canonical env
-vars are `VANT_RAG_REHYDRATE_MAX_SIZE`, `VANT_RAG_COMPRESSION_THRESHOLD`,
-`VANT_RAG_LIMIT_MAX`, brain-config keys `rag.rehydrateMaxSize` etc.
+RAG mode searches the LTC index - the distilled core pruning generates at `<version>/_core.json` - then rehydrates full matching content from git history. The tuning keys (`REHYDRATE_MAX_SIZE`, `COMPRESSION_THRESHOLD`, `RAG_LIMIT_MAX`) are LIVE as of pass 194: `lib/config.js` exposes `ragRehydrateMaxSize`/`ragCompressionThreshold`/`ragLimitMax` and `lib/search.js` enforces them (a hard rehydrate bound, compress default budget, limit clamps in `queryBrain`/`semanticSearch`, and bin/search.js's limit ceiling). Bare names are accepted legacy env aliases; canonical env vars are `VANT_RAG_REHYDRATE_MAX_SIZE`, `VANT_RAG_COMPRESSION_THRESHOLD`, `VANT_RAG_LIMIT_MAX`, brain-config keys `rag.rehydrateMaxSize` etc.
 
 | Setting | Example default | Purpose |
 |---------|-----------------|---------|
@@ -132,9 +116,7 @@ vars are `VANT_RAG_REHYDRATE_MAX_SIZE`, `VANT_RAG_COMPRESSION_THRESHOLD`,
 | `COMPRESSION_THRESHOLD` | 5120 (5KB) | compress() default token budget |
 | `RAG_LIMIT_MAX` | 20 | max results a search call may return |
 
-The module's code defaults live in `search.getSettings()` and can differ
-from the example file - call it if you need the exact values a given
-install enforces:
+The module's code defaults live in `search.getSettings()` and can differ from the example file - call it if you need the exact values a given install enforces:
 
 ```javascript
 search.getSettings();
@@ -150,26 +132,21 @@ search.getSettings();
 | Input | Query | Query + candidate memories |
 | Output | Ranked candidates | Ranked + compressed text |
 
-Use search to find candidates, rerank to optimize for LLM context. The
-full pipeline is in [Rerank](/vant/advanced/rerank).
+Use search to find candidates, rerank to optimize for LLM context. The full pipeline is in [Rerank](/vant/advanced/rerank).
 
 ## Rerank
 
-Retrieval quality improves when a second pass reorders the first pass
-results against the query:
+Retrieval quality improves when a second pass reorders the first pass results against the query:
 
 ```bash
 vant rerank "query"
 ```
 
-The rerank module (`Rerank`, `Hybrid`, `Hyde` in `lib/search.js`)
-implements relevance second-stage scoring. Use it when the corpus is
-large enough that top-5 by embedding alone starts missing.
+The rerank module (`Rerank`, `Hybrid`, `Hyde` in `lib/search.js`) implements relevance second-stage scoring. Use it when the corpus is large enough that top-5 by embedding alone starts missing.
 
 ## Citations
 
-Answers grounded in brain files can carry git-backed receipts. The
-citations module records sources and renders them as a commit footer:
+Answers grounded in brain files can carry git-backed receipts. The citations module records sources and renders them as a commit footer:
 
 ```javascript
 const citations = require('./lib/citations');
@@ -181,9 +158,7 @@ Details and the verification flow are in [Citations](/vant/memory/citations).
 
 ## Internals
 
-The architecture, LTC freshness, and the settlement model behind the
-search index are documented in [Search Architecture](/vant/advanced/search-architecture).
-A worked RAG example is in [RAG with Vant](/vant/memory/rag).
+The architecture, LTC freshness, and the settlement model behind the search index are documented in [Search Architecture](/vant/advanced/search-architecture). A worked RAG example is in [RAG with Vant](/vant/memory/rag).
 
 ## Related
 

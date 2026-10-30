@@ -11,24 +11,17 @@ description: Wake, work, and sleep sequences for an AI agent inheriting a Vant b
 
 > The loop an agent runs on a repo with a Vant brain. No human required.
 
-This page is written for you, the agent. It assumes the repo you woke up in
-has a Vant layout: `models/public/<brain>/` and `models/private/<brain>/`
-with the active stack in `models/state.json`. If the layout looks different,
-step one tells you how to check, and the [migration guide](/vant/getting-started/migration) has the
-details.
+This page is written for you, the agent. It assumes the repo you woke up in has a Vant layout: `models/public/<brain>/` and `models/private/<brain>/` with the active stack in `models/state.json`. If the layout looks different, step one tells you how to check, and the [migration guide](/vant/getting-started/migration) has the details.
 
 ## Step 1: Check the layout
 
-Run the migration status check before reading anything. It tells you whether
-the brain is in the current multi-brain layout or a legacy import is pending.
+Run the migration status check before reading anything. It tells you whether the brain is in the current multi-brain layout or a legacy import is pending.
 
 ```bash
 vant migrate --status
 ```
 
-Output you want: `up to date`. If it instead prints an old-style-brain
-warning, run the import. The default brain name is `vant`; pass a name if
-the repo documents one:
+Output you want: `up to date`. If it instead prints an old-style-brain warning, run the import. The default brain name is `vant`; pass a name if the repo documents one:
 
 ```bash
 vant migrate --dry-run
@@ -42,31 +35,26 @@ vant migrate
 
 ## Step 2: Wake
 
-Load your brain files. The wake sequence is: identity first, then goals,
-then lessons and errors from previous sessions.
+Load your brain files. The wake sequence is: identity first, then goals, then lessons and errors from previous sessions.
 
 ```bash
 vant onboard
 ```
 
-Opens an interactive browser over every brain file. In a non-interactive
-session, read the files directly:
+Opens an interactive browser over every brain file. In a non-interactive session, read the files directly:
 
 ```bash
 cat models/private/vant/identity.md
 ```
 
-Adjust the path to your brain name and to `models/public/<brain>/` for the
-shared template files. A programmatic wake looks like:
+Adjust the path to your brain name and to `models/public/<brain>/` for the shared template files. A programmatic wake looks like:
 
 ```javascript
 const brain = require('./lib/brain');
 const identity = await brain.read('identity');
 ```
 
-`brain.read` checks your private brain first, then falls back to the public
-template. Files may be markdown, JSON, YAML, or plain text; `read` detects
-the format and returns parsed data for structured files.
+`brain.read` checks your private brain first, then falls back to the public template. Files may be markdown, JSON, YAML, or plain text; `read` detects the format and returns parsed data for structured files.
 
 ## Step 3: Work with memory
 
@@ -91,9 +79,7 @@ vant search "migration failure recovery"
 
 ## Step 4: Sleep
 
-Before the session ends, write what the next session needs. Append to the
-lessons file through the memory surface, not with raw shell redirects to
-arbitrary paths, so the security chain and atomic writes stay in the loop:
+Before the session ends, write what the next session needs. Append to the lessons file through the memory surface, not with raw shell redirects to arbitrary paths, so the security chain and atomic writes stay in the loop:
 
 ```bash
 vant memory learn lessons "2026-09-23: Found and fixed a race in the sync pull path."
@@ -119,17 +105,13 @@ git push
 
 ## The MCP equivalent
 
-If you reach Vant over MCP instead of the CLI, the same loop maps to tools.
-The server auto-wires the module surface, so tool names follow the modules.
-Connect a client to the server first:
+If you reach Vant over MCP instead of the CLI, the same loop maps to tools. The server auto-wires the module surface, so tool names follow the modules. Connect a client to the server first:
 
 ```bash
 vant mcp
 ```
 
-Default endpoint is `127.0.0.1:3457`. Then call the brain read tool from
-your MCP client with the file you need, check `brain_migration_status` at
-wake, and write through the memory tools before sleep. Tool discovery:
+Default endpoint is `127.0.0.1:3457`. Then call the brain read tool from your MCP client with the file you need, check `brain_migration_status` at wake, and write through the memory tools before sleep. Tool discovery:
 
 ```bash
 curl -s http://localhost:3457/mcp/tools
@@ -139,26 +121,18 @@ Returns the live tool list. The full contract is in [MCP](/vant/runtime/mcp).
 
 ## Scopes and the operator grant
 
-Memory reads work out of the box. Writes to teams, agents, and org
-records are gated by sandbox capabilities. There are two grant layers:
+Memory reads work out of the box. Writes to teams, agents, and org records are gated by sandbox capabilities. There are two grant layers:
 
-**Persisted grant (the usual path).** `vant org grant` writes operator
-scopes + capabilities into the active brain's config (`--session-only`
-skips persistence), and boot hydrates the persisted capabilities into
-every fresh process (widen-only, so a grant can never narrow a host's
-authority). Grant once, and later CLI invocations just work:
+**Persisted grant (the usual path).** `vant org grant` writes operator scopes + capabilities into the active brain's config (`--session-only` skips persistence), and boot hydrates the persisted capabilities into every fresh process (widen-only, so a grant can never narrow a host's authority). Grant once, and later CLI invocations just work:
 
 ```bash
 vant org grant --scopes read,write,spawn,execute --capabilities canWrite,canSpawn
 vant org status   # verify what is persisted for this brain
 ```
 
-The grant lands in the VANT_BRAIN-active brain (a scoped agent's own
-brain), not a shared default. Use `--session-only` for a throwaway
-session so nothing outlives the process.
+The grant lands in the VANT_BRAIN-active brain (a scoped agent's own brain), not a shared default. Use `--session-only` for a throwaway session so nothing outlives the process.
 
-**In-process grant (library code).** For code running inside your own
-process, grant the sandbox directly (no CLI, nothing persisted):
+**In-process grant (library code).** For code running inside your own process, grant the sandbox directly (no CLI, nothing persisted):
 
 ```javascript
 const sandbox = require('./lib/sandbox');
@@ -168,10 +142,7 @@ sandbox.defaultSandbox.setCapabilities({ canRead: true, canWrite: true, canSpawn
 const org = teams.createOrg('MyOrg');
 ```
 
-The layered model is deliberate: capabilities are part of the keeper
-layer, so they come from an explicit operator grant (or the host that
-configured the sandbox) - never silently at boot. Bare `vant org` is
-read-only `status`; granting is always an explicit subcommand.
+The layered model is deliberate: capabilities are part of the keeper layer, so they come from an explicit operator grant (or the host that configured the sandbox) - never silently at boot. Bare `vant org` is read-only `status`; granting is always an explicit subcommand.
 
 ## Rules worth keeping
 

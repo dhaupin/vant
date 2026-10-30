@@ -62,8 +62,6 @@ module.exports = {
 
 ---
 
-**Role**: Tailwind Developer  
-**Input**: HTML  
-**Output**: Styled
+**Role**: Tailwind Developer **Input**: HTML **Output**: Styled
 
 > Utility CSS.

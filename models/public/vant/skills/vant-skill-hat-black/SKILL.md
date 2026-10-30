@@ -89,18 +89,11 @@ nmap -sV target.com
 
 ### If you get in:
 
-1. **Document access**
-   - How did you get in?
-   - What can you see?
+1. **Document access** - How did you get in? - What can you see?
 
-2. **Don't escalate**
-   - Stay in scope
-   - Don't take data
+2. **Don't escalate** - Stay in scope - Don't take data
 
-3. **Report**
-   - How: [steps]
-   - What: [access]
-   - Fix: [recommendations]
+3. **Report** - How: [steps] - What: [access] - Fix: [recommendations]
 
 ---
 
@@ -140,8 +133,6 @@ nmap -sV target.com
 
 ---
 
-**Role**: Red Team  
-**Input**: Target + authorization  
-**Output**: How they were pwned
+**Role**: Red Team **Input**: Target + authorization **Output**: How they were pwned
 
 > Break it. Report how to fix it.

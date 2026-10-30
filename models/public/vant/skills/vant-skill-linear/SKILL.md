@@ -90,8 +90,6 @@ vant sync
 
 ---
 
-**Role**: Linear Manager  
-**Input**: Issue action  
-**Output**: Issue updated
+**Role**: Linear Manager **Input**: Issue action **Output**: Issue updated
 
 > Keep in sync with work.

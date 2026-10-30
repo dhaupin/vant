@@ -66,8 +66,6 @@ node -e "JSON.parse(require('fs').readFileSync('f.json'))"
 
 ---
 
-**Role**: JSON Handler  
-**Input**: JSON  
-**Output**: Data
+**Role**: JSON Handler **Input**: JSON **Output**: Data
 
 > Data format.

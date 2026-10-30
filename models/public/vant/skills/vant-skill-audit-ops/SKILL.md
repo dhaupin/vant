@@ -117,8 +117,6 @@ uptime          # load
 
 ---
 
-**Role**: Ops Auditor  
-**Input**: System  
-**Output**: Is it running?
+**Role**: Ops Auditor **Input**: System **Output**: Is it running?
 
 > Keep it running.

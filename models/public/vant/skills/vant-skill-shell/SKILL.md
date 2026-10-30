@@ -59,8 +59,6 @@ chmod 755 script.sh
 
 ---
 
-**Role**: Shell User  
-**Input**: Commands  
-**Output**: Results
+**Role**: Shell User **Input**: Commands **Output**: Results
 
 > CLI.

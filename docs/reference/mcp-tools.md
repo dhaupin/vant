@@ -9,16 +9,9 @@ nav_order: 113
 
 # MCP Tools Reference
 
-Reference for the core MCP tools. The live registry is larger and grows
-automatically (core libs are auto-wired): a running server exposes the
-full, current list via `tools/list` or `curl http://localhost:3457/tools`.
+Reference for the core MCP tools. The live registry is larger and grows automatically (core libs are auto-wired): a running server exposes the full, current list via `tools/list` or `curl http://localhost:3457/tools`.
 
-Cross-org surfaces have their own sections below: [Agora and Mesh
-Tools](#agora-and-mesh-tools-11) (remote votes, ledger sync, consensus),
-[Market and Msg Tools](#market-and-msg-tools-8), and [Escrow
-Tools](#escrow-tools-5) (budgets, holds, ledger status). Escrow
-semantics in depth: [Escrow API](/reference/escrow). Task-first usage:
-[Federation Playbooks](/vant/operations/federation-playbooks).
+Cross-org surfaces have their own sections below: [Agora and Mesh Tools](#agora-and-mesh-tools-11) (remote votes, ledger sync, consensus), [Market and Msg Tools](#market-and-msg-tools-8), and [Escrow Tools](#escrow-tools-5) (budgets, holds, ledger status). Escrow semantics in depth: [Escrow API](/reference/escrow). Task-first usage: [Federation Playbooks](/vant/operations/federation-playbooks).
 
 ## Core Tools (9)
 
@@ -125,9 +118,7 @@ vant_commit(message="Updated learnings")
 
 ### vant_sync
 
-Read the real sync status across providers (same call
-`vant_sync_status` makes - verified against lib/mcp.js). It takes NO
-params and does not itself sync.
+Read the real sync status across providers (same call `vant_sync_status` makes - verified against lib/mcp.js). It takes NO params and does not itself sync.
 
 **Params:** None
 
@@ -143,8 +134,7 @@ vant_sync_pushAll(); vant_sync_pullAny(); vant_sync_rebase(provider="github")
 
 ### vant_lock
 
-Acquire, release, or inspect the brain authorization lease. Full API:
-[Locks API](/vant/reference/locks).
+Acquire, release, or inspect the brain authorization lease. Full API: [Locks API](/vant/reference/locks).
 
 **Params:**
 
@@ -154,12 +144,7 @@ Acquire, release, or inspect the brain authorization lease. Full API:
 | token | string | Release token from acquire |
 | agentId | string | Agent identifier |
 
-`action="stats"` (pass 117) returns lock observability counters for this
-process: `mutex` (acquires, held, unavailable, takeovers, releases,
-bodiesRun, bodyErrors, aborted, holdMsTotal, holdMsMax, heldNow) plus
-`lease` (granted, refreshed, denied, released, releaseDenied, forced). Read
-deltas between polls: there is no reset API, so a counter can never lie
-about the past.
+`action="stats"` (pass 117) returns lock observability counters for this process: `mutex` (acquires, held, unavailable, takeovers, releases, bodiesRun, bodyErrors, aborted, holdMsTotal, holdMsMax, heldNow) plus `lease` (granted, refreshed, denied, released, releaseDenied, forced). Read deltas between polls: there is no reset API, so a counter can never lie about the past.
 
 **Example:**
 ```bash
@@ -198,10 +183,7 @@ vant_get_islands
 
 ## Full Catalog (the rest of the registry)
 
-Everything after this point is grouped by domain. Params listed are the
-**required[] first, then optional properties** - copied from each tool's
-`inputSchema` exactly as registered (`curl http://<host>:3457/tools` is
-the live source of truth for your install).
+Everything after this point is grouped by domain. Params listed are the **required[] first, then optional properties** - copied from each tool's `inputSchema` exactly as registered (`curl http://<host>:3457/tools` is the live source of truth for your install).
 
 > Registry facts (audited pass 190, recount pass 210, recount pass 211 -
 > guests #185, recount pass 212 - work_assign): ~300 hand-registered
@@ -235,18 +217,11 @@ vant_work_assign(task="grow the map", agentId="agent_...")  # reuse an existing 
 # explicit agentId is honored exactly - never silently replaced by a spawn
 ```
 
-Refusal law: every failed leg answers a typed honest refusal and fires
-BEFORE side effects. `E_BUDGET_REFUSED` leaves no orphan agent
-(budget gates precede spawn); a refused delegation releases the escrow
-hold, so nothing strands reserved budget. The era fold records the work
-under `task:` -> threads (the era catalogue) only when an era is OPEN
-(the era subscriber's no-op contract); `eraFolded:false` says so.
+Refusal law: every failed leg answers a typed honest refusal and fires BEFORE side effects. `E_BUDGET_REFUSED` leaves no orphan agent (budget gates precede spawn); a refused delegation releases the escrow hold, so nothing strands reserved budget. The era fold records the work under `task:` -> threads (the era catalogue) only when an era is OPEN (the era subscriber's no-op contract); `eraFolded:false` says so.
 
 ### Brain family (28 brain_* tools - file core, stack, geometry, and graph)
 
-Reading and writing the brain, multibrain stack hops, geometry memory,
-brain evolution and link/graph side: every brain_* tool is a thin call
-into `lib/brain.js`.
+Reading and writing the brain, multibrain stack hops, geometry memory, brain evolution and link/graph side: every brain_* tool is a thin call into `lib/brain.js`.
 
 ```bash
 # Read/write one brain file
@@ -331,14 +306,7 @@ vant_connector_list()          # registry/factory surface names (see lib/connect
 vant_connector_connect(service="pinecone")   # real async connect()
 ```
 
-The shipped vector/storage connectors are `pinecone` and `s3`. The
-`qdrant` and `weaviate` factory NAMES still exist in
-`lib/connectors/index.js`, but their connector modules are not shipped:
-connecting refuses with a typed error instead of a fabricated ack.
-`vant_connector_connect` answers `{service, connected: false, error}`
-for unknown services and a real `{service, connected: true, connector}`
-only after an actual `connect()` (fixed in pass 306; it used to ack fake
-connected for any string).
+The shipped vector/storage connectors are `pinecone` and `s3`. The `qdrant` and `weaviate` factory NAMES still exist in `lib/connectors/index.js`, but their connector modules are not shipped: connecting refuses with a typed error instead of a fabricated ack. `vant_connector_connect` answers `{service, connected: false, error}` for unknown services and a real `{service, connected: true, connector}` only after an actual `connect()` (fixed in pass 306; it used to ack fake connected for any string).
 
 ### Context (prompt cache engine)
 
@@ -401,8 +369,7 @@ lineage_trace(id="x", depth=5); lineage_stats()
 vant_lock(action="acquire"); vant_lock(action="release", token=...)
 ```
 
-Returns `{action, acquired, token}` / `{action, status, stack, held}` /
-`{action, forceReleased}` - the action decides.
+Returns `{action, acquired, token}` / `{action, status, stack, held}` / `{action, forceReleased}` - the action decides.
 
 ### Market and Msg - see the [Market and Msg section](#market-and-msg-tools-8).
 
@@ -446,16 +413,11 @@ Complete tool/param lists in [the tables below](#domains-a--z-tables).
 
 ---
 
-
 ---
 
 ### vant_load_island
 
-Load island. Islands with a habitat boundary policy (`_island:<name>`)
-are RLS-gated at load (see [RLS island boundaries](/reference/rls)):
-optional `userCtx` / `options` carry the caller's context; the current
-agent's habitat identity is used otherwise. Row-level filter/mask
-applies to island data.
+Load island. Islands with a habitat boundary policy (`_island:<name>`) are RLS-gated at load (see [RLS island boundaries](/reference/rls)): optional `userCtx` / `options` carry the caller's context; the current agent's habitat identity is used otherwise. Row-level filter/mask applies to island data.
 
 **Params:**
 
@@ -474,10 +436,7 @@ vant_load_island(name="github")
 
 ### islands_canAccess
 
-RLS decision for an island: resolves the same context chain as the
-enforcement gates (explicit `userCtx` -> current agent's habitat
-identity -> anonymous) against the island's boundary policy. Policy-less
-islands report `gated: false` and `allowed: true`.
+RLS decision for an island: resolves the same context chain as the enforcement gates (explicit `userCtx` -> current agent's habitat identity -> anonymous) against the island's boundary policy. Policy-less islands report `gated: false` and `allowed: true`.
 
 **Params:**
 
@@ -493,8 +452,7 @@ Returns `{ name, mode, allowed, gated, resolved }`.
 
 ### vant_resolution_track
 
-Record a decision delta in the resolution ledger (persisted - rides
-`lib/resolution.logDelta`, survives restarts).
+Record a decision delta in the resolution ledger (persisted - rides `lib/resolution.logDelta`, survives restarts).
 
 **Params:**
 
@@ -516,12 +474,7 @@ Read history back with `vant_resolution_list(file="lessons.md")`.
 
 ### vant_universe_snapshot
 
-Derive a world's Genesis snapshot (Wave U1, `labs/prd-universe.md`): a
-PASS-derived identity from the universe constant - SeedChain seed, five
-generation cells (root + ring 1), and a canonical-encoder fingerprint.
-No state is written; the same (name, universe) always yields a
-byte-identical snapshot. Failures return typed
-`{ ok:false, code: 'E_SNAPSHOT_NAME' | 'E_SNAPSHOT_UNIVERSE' }`.
+Derive a world's Genesis snapshot (Wave U1, `labs/prd-universe.md`): a PASS-derived identity from the universe constant - SeedChain seed, five generation cells (root + ring 1), and a canonical-encoder fingerprint. No state is written; the same (name, universe) always yields a byte-identical snapshot. Failures return typed `{ ok:false, code: 'E_SNAPSHOT_NAME' | 'E_SNAPSHOT_UNIVERSE' }`.
 
 **Params:**
 
@@ -535,19 +488,13 @@ byte-identical snapshot. Failures return typed
 vant_universe_snapshot(name="my-world")
 ```
 
-Fork with `vant_universe_fork(parent="my-world", child="sub")` - the
-child derives via SeedChain prefix folding, so `parent.child` never
-collapses onto a direct `child` derivation. Universe source reported by
-`vant_universe_status()` (`explicit` / `VANT_UNIVERSE_SEED env` /
-`default`). CLI equivalents: `vant universe snapshot|fork|status`.
+Fork with `vant_universe_fork(parent="my-world", child="sub")` - the child derives via SeedChain prefix folding, so `parent.child` never collapses onto a direct `child` derivation. Universe source reported by `vant_universe_status()` (`explicit` / `VANT_UNIVERSE_SEED env` / `default`). CLI equivalents: `vant universe snapshot|fork|status`.
 
 ---
 
 ### vant_universe_fork
 
-Fork a world: the child's name is `<parent>.<child>` and its seed folds
-through the parent's SeedChain seed (leak-containment: identical path
-string, different bytes).
+Fork a world: the child's name is `<parent>.<child>` and its seed folds through the parent's SeedChain seed (leak-containment: identical path string, different bytes).
 
 **Params:**
 
@@ -566,9 +513,7 @@ vant_universe_fork(parent="my-world", child="scenario-a")
 
 ### vant_universe_status
 
-Report which universe constant source is active
-(`explicit` / `VANT_UNIVERSE_SEED env` / `default`) plus the
-default-world (`vant`) fingerprint for the resolved constant.
+Report which universe constant source is active (`explicit` / `VANT_UNIVERSE_SEED env` / `default`) plus the default-world (`vant`) fingerprint for the resolved constant.
 
 **Params:**
 
@@ -585,15 +530,7 @@ vant_universe_status()
 
 ### vant_universe_record
 
-Record a STORED, content-addressed scenario manifest (Wave U2,
-`labs/prd-universe.md`): freezes the world's snapshot (seed, five
-generation cells) plus a state root into a manifest whose id IS the
-hash of its payload - the same (world, universe, state root) recorded
-from two fresh processes yields a byte-identical manifest and id, and
-a re-record of identical input is a dedup no-op (`added: false`).
-Persisted through the brain-scoped arch-A state store
-(`state/universe-manifests.json`, WAL included). Forked worlds use the
-dotted name with `fork: true` (see `vant_universe_fork`).
+Record a STORED, content-addressed scenario manifest (Wave U2, `labs/prd-universe.md`): freezes the world's snapshot (seed, five generation cells) plus a state root into a manifest whose id IS the hash of its payload - the same (world, universe, state root) recorded from two fresh processes yields a byte-identical manifest and id, and a re-record of identical input is a dedup no-op (`added: false`). Persisted through the brain-scoped arch-A state store (`state/universe-manifests.json`, WAL included). Forked worlds use the dotted name with `fork: true` (see `vant_universe_fork`).
 
 **Params:**
 
@@ -608,21 +545,13 @@ dotted name with `fork: true` (see `vant_universe_fork`).
 ```bash
 vant_universe_record(name="my-world", stateRoot="<current 64-hex root>")
 ```
-Typed refusals: `E_SNAPSHOT_NAME` / `E_SNAPSHOT_UNIVERSE` /
-`E_SNAPSHOT_MANIFEST` (invalid registry override) / `E_STATE_WRITE`
-(store deny). CLI: `vant universe record`.
+Typed refusals: `E_SNAPSHOT_NAME` / `E_SNAPSHOT_UNIVERSE` / `E_SNAPSHOT_MANIFEST` (invalid registry override) / `E_STATE_WRITE` (store deny). CLI: `vant universe record`.
 
 ---
 
 ### vant_universe_diff
 
-Diff two stored manifests (U2.2): one structural comparison per genesis
-cell plus the frozen state-root crosscheck. Identical manifests report
-`identical: true` with zero changes. Contract-refused (typed, never
-noisy) when the manifests come from DIFFERENT universe constants
-(`E_SNAPSHOT_UNIVERSE` - the same-universe contract, carried by a
-universe-canary identity tag at record time) or address DIFFERENT
-worlds (`E_SNAPSHOT_WORLD_MISMATCH` - a rename, not a delta).
+Diff two stored manifests (U2.2): one structural comparison per genesis cell plus the frozen state-root crosscheck. Identical manifests report `identical: true` with zero changes. Contract-refused (typed, never noisy) when the manifests come from DIFFERENT universe constants (`E_SNAPSHOT_UNIVERSE` - the same-universe contract, carried by a universe-canary identity tag at record time) or address DIFFERENT worlds (`E_SNAPSHOT_WORLD_MISMATCH` - a rename, not a delta).
 
 **Params:**
 
@@ -636,25 +565,15 @@ worlds (`E_SNAPSHOT_WORLD_MISMATCH` - a rename, not a delta).
 ```bash
 vant_universe_diff(a="09a4…", b="3c3f…")
 ```
-Return shape: `{ ok, identical, same, universeMatch, a, b, changed[],
-onlyInA[], onlyInB[], stateRootDiffers, summary }`.
-CLI: `vant universe diff`.
+Return shape: `{ ok, identical, same, universeMatch, a, b, changed[], onlyInA[], onlyInB[], stateRootDiffers, summary }`. CLI: `vant universe diff`.
 
 ---
 
 ### vant_universe_resume
 
-Resume a stored scenario (U2.3): re-loads the manifest, optionally
-crosschecks the frozen state root against a live probe
-(`liveRootMatch`: `true` match / `false` drifted / `null` no probe),
-and writes a restore marker. The marker goes through
-`stateStore.persistMerged`, which takes the brain-root lock with
-fail-closed semantics - while a peer holds the region the resume is
-REFUSED (`{ ok:false, code:'E_STATE_LOCKED' }`), never degraded to an
-unlocked write - and rides the arch-A WAL.
+Resume a stored scenario (U2.3): re-loads the manifest, optionally crosschecks the frozen state root against a live probe (`liveRootMatch`: `true` match / `false` drifted / `null` no probe), and writes a restore marker. The marker goes through `stateStore.persistMerged`, which takes the brain-root lock with fail-closed semantics - while a peer holds the region the resume is REFUSED (`{ ok:false, code:'E_STATE_LOCKED' }`), never degraded to an unlocked write - and rides the arch-A WAL.
 
-U2 shipped the lock-gated VERIFIED MARKER path; Wave U3 added the
-escrow-backed byte-restoring executor (below).
+U2 shipped the lock-gated VERIFIED MARKER path; Wave U3 added the escrow-backed byte-restoring executor (below).
 
 **Params:**
 
@@ -668,26 +587,15 @@ escrow-backed byte-restoring executor (below).
 ```bash
 vant_universe_resume(id="09a4…", actor="steward-agent")
 ```
-Typed refusals: `E_SNAPSHOT_ABSENT` (unknown id),
-`E_SNAPSHOT_AMBIGUOUS` (id prefix matches several), `E_STATE_LOCKED`
-(fail-closed). CLI: `vant universe resume`.
+Typed refusals: `E_SNAPSHOT_ABSENT` (unknown id), `E_SNAPSHOT_AMBIGUOUS` (id prefix matches several), `E_STATE_LOCKED` (fail-closed). CLI: `vant universe resume`.
 
-U3 addition: pass `materialize: true` to run the escrow-backed
-byte-restoring executor - recorded cell VALUES are restored through the
-arch-A store, billed 1 credit per cell against
-`scenario:materialize:<actor>`, and a broke actor is refused typed
-(`E_SNAPSHOT_BUDGET`) before any write. See the
-[Scenario Playbook](/operations/scenario-playbook).
+U3 addition: pass `materialize: true` to run the escrow-backed byte-restoring executor - recorded cell VALUES are restored through the arch-A store, billed 1 credit per cell against `scenario:materialize:<actor>`, and a broke actor is refused typed (`E_SNAPSHOT_BUDGET`) before any write. See the [Scenario Playbook](/operations/scenario-playbook).
 
 ---
 
 ### vant_scenario_crew
 
-Governance playbook (Wave U3, `labs/prd-universe.md`): assemble a
-scenario crew of N agents over ONE shared escrow budget pool. The pool
-is real - later tasks draw from it through the live escrow workspace
-gate. Ledger rides the arch-A state store
-(`state/universe-scenarios.json`, WAL included).
+Governance playbook (Wave U3, `labs/prd-universe.md`): assemble a scenario crew of N agents over ONE shared escrow budget pool. The pool is real - later tasks draw from it through the live escrow workspace gate. Ledger rides the arch-A state store (`state/universe-scenarios.json`, WAL included).
 
 **Params:**
 
@@ -702,19 +610,13 @@ gate. Ledger rides the arch-A state store
 ```bash
 vant_scenario_crew(name="audit-world", agents=3, budget=500)
 ```
-Typed refusals: `E_SCENARIO_NAME` / `E_SCENARIO_CREW` /
-`E_SCENARIO_BUDGET`, `E_SCENARIO_SPAWN` on roster failure. CLI:
-`vant scenario crew`.
+Typed refusals: `E_SCENARIO_NAME` / `E_SCENARIO_CREW` / `E_SCENARIO_BUDGET`, `E_SCENARIO_SPAWN` on roster failure. CLI: `vant scenario crew`.
 
 ---
 
 ### vant_scenario_task
 
-Governance playbook (Wave U3): delegate ONE task end-to-end under the
-real gates - quarantine first (fail-closed, refusal recorded who/why,
-BEFORE any budget draw), escrow hold against the shared pool, then a
-CONSENSUS voted closeout (quorum ballot; no single-agent bless) logged
-via `resolution.logDelta`.
+Governance playbook (Wave U3): delegate ONE task end-to-end under the real gates - quarantine first (fail-closed, refusal recorded who/why, BEFORE any budget draw), escrow hold against the shared pool, then a CONSENSUS voted closeout (quorum ballot; no single-agent bless) logged via `resolution.logDelta`.
 
 **Params:**
 
@@ -729,19 +631,13 @@ via `resolution.logDelta`.
 ```bash
 vant_scenario_task(crew="audit-world", task="Verify the pinned ledger", cost=250)
 ```
-Typed refusals: `E_SCENARIO_QUARANTINED` (every member quarantined -
-escrow never touched), `E_SCENARIO_BUDGET` (empty pool),
-`E_SCENARIO_DELEGATE`, `E_SCENARIO_NO_QUORUM` (no voted pass),
-`E_SCENARIO_ABSENT` (crew not assembled), `E_SCENARIO_TASK` (hostile
-text). CLI: `vant scenario task`.
+Typed refusals: `E_SCENARIO_QUARANTINED` (every member quarantined - escrow never touched), `E_SCENARIO_BUDGET` (empty pool), `E_SCENARIO_DELEGATE`, `E_SCENARIO_NO_QUORUM` (no voted pass), `E_SCENARIO_ABSENT` (crew not assembled), `E_SCENARIO_TASK` (hostile text). CLI: `vant scenario task`.
 
 ---
 
 ### vant_scenario_status
 
-Governance playbook (Wave U3): inspect an assembled scenario crew -
-ledger row (phase, roster, workspace) plus the live escrow pool
-headroom, null-safe when escrow is absent.
+Governance playbook (Wave U3): inspect an assembled scenario crew - ledger row (phase, roster, workspace) plus the live escrow pool headroom, null-safe when escrow is absent.
 
 **Params:**
 
@@ -754,8 +650,7 @@ headroom, null-safe when escrow is absent.
 ```bash
 vant_scenario_status(crew="audit-world")
 ```
-Typed refusals: `E_SCENARIO_ABSENT`, `E_SCENARIO_NAME`. CLI:
-`vant scenario status`.
+Typed refusals: `E_SCENARIO_ABSENT`, `E_SCENARIO_NAME`. CLI: `vant scenario status`.
 
 ---
 
@@ -777,8 +672,7 @@ Encode a message into a PNG via the real stego engine (LSB wire).
 vant_stego_encode(image="in.png", message="secret", output="out.png")
 ```
 
-Returns `{ encoded: true }` or `{ encoded: false, error }` on a blocked
-path or missing image - errors are surfaced, never a silent bless.
+Returns `{ encoded: true }` or `{ encoded: false, error }` on a blocked path or missing image - errors are surfaced, never a silent bless.
 
 ---
 
@@ -802,8 +696,7 @@ vant_stego_decode(image="out.png")
 
 ### vant_citations_list / _add / _format
 
-Citation grounding over the git-backed citation ledger
-([Citations](/vant/memory/citations) for the brain-CLI view).
+Citation grounding over the git-backed citation ledger ([Citations](/vant/memory/citations) for the brain-CLI view).
 
 ```bash
 vant_citations_add(commit="abc1234", context="why you cited it")
@@ -811,9 +704,7 @@ vant_citations_list()        # every recorded source
 vant_citations_format(commit="abc1234")   # {cited, citation} - miss reports cited:false
 ```
 
-`_add` persists via the merge-under-lock path (a lock failure returns
-`{added:false}`, it never pretends). `_format` verifies the commit was
-cited before formatting it.
+`_add` persists via the merge-under-lock path (a lock failure returns `{added:false}`, it never pretends). `_format` verifies the commit was cited before formatting it.
 
 ---
 
@@ -937,19 +828,11 @@ vant_rerank(query="authentication", topK=5)
 
 ## Agora and Mesh Tools (13)
 
-The cross-org decision surface: remote voting and ledger sync over the
-signed crew-bus. Every gate stays owner-side; these tools carry ballots
-and ledgers, never authority. Requires a configured bus (the node's
-name, port, secret, and agentId) with agora-sync installed.
-(The agora/consensus/forum family overall holds more members -
-`forum_castVote`, `forum_enter`, `forum_status`, ... - listed in the
-A-Z tables.)
+The cross-org decision surface: remote voting and ledger sync over the signed crew-bus. Every gate stays owner-side; these tools carry ballots and ledgers, never authority. Requires a configured bus (the node's name, port, secret, and agentId) with agora-sync installed. (The agora/consensus/forum family overall holds more members - `forum_castVote`, `forum_enter`, `forum_status`, ... - listed in the A-Z tables.)
 
 ### agora_vote
 
-Cast a ballot on a PEER node's consensus topic. The topic owner runs
-its full local gate stack (scope, registry vetting, quarantine,
-one-vote) and acks the verdict.
+Cast a ballot on a PEER node's consensus topic. The topic owner runs its full local gate stack (scope, registry vetting, quarantine, one-vote) and acks the verdict.
 
 **Params:**
 
@@ -967,8 +850,7 @@ agora_vote(node="acme-node", topic="q3-platform-call", outcome="thursday-1400utc
 
 ### agora_pull
 
-Pull a topic's ledger from a peer and merge it LOCALLY. The merge
-re-derives status, so the wire can never declare a topic passed.
+Pull a topic's ledger from a peer and merge it LOCALLY. The merge re-derives status, so the wire can never declare a topic passed.
 
 **Example:**
 ```bash
@@ -977,8 +859,7 @@ agora_pull(node="acme-node", topic="forum-q3-platform-call-abc123")
 
 ### agora_push
 
-Push a local topic's ledger to a peer (the return leg after voting on
-a synced topic).
+Push a local topic's ledger to a peer (the return leg after voting on a synced topic).
 
 ### agora_nodes
 
@@ -986,16 +867,11 @@ List this node's crew-bus peers and its own identity.
 
 ### agora_sync_status
 
-Sync surface status: which buses have the dispatchers installed, node
-identity, pending round-trips.
+Sync surface status: which buses have the dispatchers installed, node identity, pending round-trips.
 
 ### forum_decisions
 
-Decision trail of a forum thread (Wave U4, `labs/prd-universe.md` -
-deliberation->decision records). A vote created with `thread: "PUB-..."`
-is durably LINKED to that thread (`state/forum-threads.json`, WAL-
-backed); when the consensus tally resolves, the decision record carries
-the thread and the trail reads back the whole story:
+Decision trail of a forum thread (Wave U4, `labs/prd-universe.md` - deliberation->decision records). A vote created with `thread: "PUB-..."` is durably LINKED to that thread (`state/forum-threads.json`, WAL- backed); when the consensus tally resolves, the decision record carries the thread and the trail reads back the whole story:
 
 ```text
 forum_decisions(thread="PUB-1791683525171")
@@ -1008,25 +884,14 @@ forum_decisions(thread="PUB-1791683525171")
 ```
 
 - `votes` comes from the consensus ledger (per-voter outcomes)
-- `holds` reports the escrow hold touched under the consensus hold id
-  (`forum:<topic>`) - present while held, empty after release
-- `decision`/`outcome` appear once the tally resolves and the decision
-  return path records it (persisted; survives restart)
+- `holds` reports the escrow hold touched under the consensus hold id (`forum:<topic>`) - present while held, empty after release
+- `decision`/`outcome` appear once the tally resolves and the decision return path records it (persisted; survives restart)
 
-No link -> typed `E_FORUM_ABSENT` (never a silent empty trail).
-Companion `forum_thread_links` lists every linked thread with its
-decided/open state. CLI: `vant forum decisions <barcode>` (+ `--json`)
-and `vant forum links`.
+No link -> typed `E_FORUM_ABSENT` (never a silent empty trail). Companion `forum_thread_links` lists every linked thread with its decided/open state. CLI: `vant forum decisions <barcode>` (+ `--json`) and `vant forum links`.
 
 ### forum_publish
 
-Publish to the agora forum. Tenancy (pass 87): the workspace is stamped
-from the VERIFIED subject (token > declared `userCtx` > current agent
-identity > anonymous). An anonymous or unpinned identified publish lands
-on the GLOBAL commons (pre-87 behavior preserved); `workspace: ""` pins
-a global post even under an identity; pinning a FOREIGN workspace needs
-a registry role there (else `workspace_denied`); invalid names fail
-closed (`invalid_workspace`).
+Publish to the agora forum. Tenancy (pass 87): the workspace is stamped from the VERIFIED subject (token > declared `userCtx` > current agent identity > anonymous). An anonymous or unpinned identified publish lands on the GLOBAL commons (pre-87 behavior preserved); `workspace: ""` pins a global post even under an identity; pinning a FOREIGN workspace needs a registry role there (else `workspace_denied`); invalid names fail closed (`invalid_workspace`).
 
 **Params:**
 
@@ -1040,11 +905,7 @@ closed (`invalid_workspace`).
 
 ### forum_list
 
-List agora publications visible to YOUR tenancy: the global commons
-plus your own workspace; cross-tenant needs a registry role there.
-Anonymous sees global only - tenant posts fail closed (invisible, not
-leaked). Returns `tenancy` metadata (`workspace`, `anonymous`,
-`visible`, `total`).
+List agora publications visible to YOUR tenancy: the global commons plus your own workspace; cross-tenant needs a registry role there. Anonymous sees global only - tenant posts fail closed (invisible, not leaked). Returns `tenancy` metadata (`workspace`, `anonymous`, `visible`, `total`).
 
 **Params:**
 
@@ -1054,8 +915,7 @@ leaked). Returns `tenancy` metadata (`workspace`, `anonymous`,
 
 ### consensus_create
 
-Create a consensus vote topic (scope-aware; malformed scope is
-rejected fail-closed).
+Create a consensus vote topic (scope-aware; malformed scope is rejected fail-closed).
 
 **Params:**
 
@@ -1070,8 +930,7 @@ rejected fail-closed).
 
 ### consensus_vote
 
-Cast a vote on a consensus topic (one vote per agent; scoped topics
-reject non-members).
+Cast a vote on a consensus topic (one vote per agent; scoped topics reject non-members).
 
 ### consensus_tally
 
@@ -1079,15 +938,11 @@ Tally a topic: winner, percentages, quorum status.
 
 ### consensus_get
 
-Get a topic's ledger. Scope-aware: pass `viewerId` (a member principal)
-to read a scoped topic; without it, scoped topics return null, same
-shape as not-found.
+Get a topic's ledger. Scope-aware: pass `viewerId` (a member principal) to read a scoped topic; without it, scoped topics return null, same shape as not-found.
 
 ### consensus_list
 
-List topics with status and vote counts. Pass `viewerId` to include
-scoped topics you are a member of; the anonymous view omits them
-entirely.
+List topics with status and vote counts. Pass `viewerId` to include scoped topics you are a member of; the anonymous view omits them entirely.
 
 ## Market and Msg Tools (8)
 
@@ -1124,8 +979,7 @@ Market statistics.
 
 ### market_get
 
-Fetch one listing. Scope-aware: a scoped listing is visible to its
-member set (pass the viewer context).
+Fetch one listing. Scope-aware: a scoped listing is visible to its member set (pass the viewer context).
 
 ### msg_send
 
@@ -1133,16 +987,9 @@ Send a message to a channel (`channel`, `content`, optional `from`).
 
 ### msg_list
 
-List messages in a channel (`channel`, optional `limit`). Answers the
-channel's FIFO tail (pass 214 also fixed this verb: it previously called
-`Msg.list()` and returned the conversation roster, ignoring its arguments).
+List messages in a channel (`channel`, optional `limit`). Answers the channel's FIFO tail (pass 214 also fixed this verb: it previously called `Msg.list()` and returned the conversation roster, ignoring its arguments).
 
-Per-tenant posture (pass 214): msg channels carry a claim-once owner ref
-(`msg.send(chan, msg, { scopeOwner })` stamps a NEW channel;
-`msg.setChannelOwner` claims unowned ones and refuses steals). The door
-withholds another tenant's scoped channel from guests on `msg_list` and
-refuses their `msg_send` typed (`E_TENANT_CHANNEL`) before the write.
-Unscoped channels stay public.
+Per-tenant posture (pass 214): msg channels carry a claim-once owner ref (`msg.send(chan, msg, { scopeOwner })` stamps a NEW channel; `msg.setChannelOwner` claims unowned ones and refuses steals). The door withholds another tenant's scoped channel from guests on `msg_list` and refuses their `msg_send` typed (`E_TENANT_CHANNEL`) before the write. Unscoped channels stay public.
 
 ## Domains A-Z param tables
 
@@ -1514,22 +1361,15 @@ Caught by the coverage crosscheck - no prose for these (yet); params are exact f
 
 ## Return Types
 
-See each tool section for its exact return shape. Conventions across the
-registry:
+See each tool section for its exact return shape. Conventions across the registry:
 
-- **Failures are typed, not blessed**: handlers return `{error, code}`
-  objects on failure (e.g. `{added:false, reason}`, `{encoded:false,
-  error, code}`) - never a hardcoded success.
-- **Verified beats declared**: RLS-credentialed tools resolve the caller's
-  habitat context from the bearer token first (see the Habitat section).
-- **Optional-input tools still answer**: a call with no args returns the
-  honest current state (list/summary surfaces), not an invented default.
+- **Failures are typed, not blessed**: handlers return `{error, code}` objects on failure (e.g. `{added:false, reason}`, `{encoded:false, error, code}`) - never a hardcoded success.
+- **Verified beats declared**: RLS-credentialed tools resolve the caller's habitat context from the bearer token first (see the Habitat section).
+- **Optional-input tools still answer**: a call with no args returns the honest current state (list/summary surfaces), not an invented default.
 
 ## Escrow Tools (5)
 
-Escrow is the accountability layer: budgets, holds, and the ledger
-behind them. These tools were undocumented before pass 77 - and three
-of them were broken (see the [Escrow API export note](/reference/escrow)).
+Escrow is the accountability layer: budgets, holds, and the ledger behind them. These tools were undocumented before pass 77 - and three of them were broken (see the [Escrow API export note](/reference/escrow)).
 
 ### escrow_create
 
@@ -1552,8 +1392,7 @@ Returns `{ allowed, reason, layer, available }`.
 
 ### escrow_hold
 
-Place a hold: a reservation with a timeout (default 5 minutes). **A
-hold does not debit budget** - it records a condition entry.
+Place a hold: a reservation with a timeout (default 5 minutes). **A hold does not debit budget** - it records a condition entry.
 
 **Params:**
 
@@ -1570,22 +1409,15 @@ Release a hold by id. Returns `{ released: boolean }`.
 
 ### escrow_status
 
-Read the escrow ledger. No params: budgets, holds, approvals, quotas
-counts, and `workspacePools`. With `org`: that agent's budget plus the
-holds map.
+Read the escrow ledger. No params: budgets, holds, approvals, quotas counts, and `workspacePools`. With `org`: that agent's budget plus the holds map.
 
 ## Workspace Budget Tools (6)
 
-Org pools + member caps over habitat workspaces (pass 83) - see
-[Escrow workspace budgets](/reference/escrow). RLS: draws fail closed
-on unknown workspaces; setting a pool or cap is admin-gated (the
-admin role is verified against the habitat registry, never
-self-declared).
+Org pools + member caps over habitat workspaces (pass 83) - see [Escrow workspace budgets](/reference/escrow). RLS: draws fail closed on unknown workspaces; setting a pool or cap is admin-gated (the admin role is verified against the habitat registry, never self-declared).
 
 ### escrow_setWorkspaceBudget
 
-Set a workspace's org-pool budget. **Params:** `workspaceId`,
-`amount`, `adminId` (must hold admin in the workspace).
+Set a workspace's org-pool budget. **Params:** `workspaceId`, `amount`, `adminId` (must hold admin in the workspace).
 
 ### escrow_getWorkspacePool
 
@@ -1597,40 +1429,23 @@ List all org pools. No params. Returns `{ pools: [...] }`.
 
 ### escrow_setWorkspaceMemberLimit
 
-Cap a member's draw from its workspace pool. **Params:**
-`workspaceId`, `agentId`, `limit`, `adminId`.
+Cap a member's draw from its workspace pool. **Params:** `workspaceId`, `agentId`, `limit`, `adminId`.
 
 ### escrow_workspaceCanSpend
 
-Check whether a member can draw an amount from its pool.
-**Params:** `workspaceId`, `agentId`, `amount` (default 1).
+Check whether a member can draw an amount from its pool. **Params:** `workspaceId`, `agentId`, `amount` (default 1).
 
 ### escrow_workspaceRecordSpend
 
-Record a pool-scoped spend: debits the member row AND the org pool.
-**Params:** `workspaceId`, `agentId`, `amount`.
+Record a pool-scoped spend: debits the member row AND the org pool. **Params:** `workspaceId`, `agentId`, `amount`.
 
 ## Habitat Tools (14)
 
-Habitat is the RLS layer: workspaces (isolated containers), roles,
-and boundary policies. These replaced the dead `vant_environment_*`
-family in pass 81 - "environment" was a planned subsystem that never
-shipped (scrapped in favor of habitat), but its 7 tools stayed
-registered against a module that never existed: every call was
-MODULE_NOT_FOUND. All habitat tools route through the shared instance
-(`lib/habitat.js` `getShared()`), which boot adopts rather than
-replaces. Mutations auto-persist to the brain state store. Pass 82
-added the enforcement surface (`vant_habitat_can`,
-`vant_habitat_check`, `vant_habitat_agentContext`) and agent
-identity - see [RLS](rls.md). Pass 86 added bearer tokens anchored to
-those identities (`vant_habitat_mintToken`, `vant_habitat_verifyToken`,
-`vant_habitat_revokeToken`), accepted by the MCP HTTP door as a
-verified RLS credential - see [RLS](rls.md).
+Habitat is the RLS layer: workspaces (isolated containers), roles, and boundary policies. These replaced the dead `vant_environment_*` family in pass 81 - "environment" was a planned subsystem that never shipped (scrapped in favor of habitat), but its 7 tools stayed registered against a module that never existed: every call was MODULE_NOT_FOUND. All habitat tools route through the shared instance (`lib/habitat.js` `getShared()`), which boot adopts rather than replaces. Mutations auto-persist to the brain state store. Pass 82 added the enforcement surface (`vant_habitat_can`, `vant_habitat_check`, `vant_habitat_agentContext`) and agent identity - see [RLS](rls.md). Pass 86 added bearer tokens anchored to those identities (`vant_habitat_mintToken`, `vant_habitat_verifyToken`, `vant_habitat_revokeToken`), accepted by the MCP HTTP door as a verified RLS credential - see [RLS](rls.md).
 
 ### vant_habitat_status
 
-Overview: workspaces, boundaries count, inputs, current workspace.
-No params.
+Overview: workspaces, boundaries count, inputs, current workspace. No params.
 
 ### vant_habitat_listWorkspaces
 
@@ -1638,20 +1453,15 @@ List all workspaces. No params. Returns `{ workspaces: [...] }`.
 
 ### vant_habitat_createWorkspace
 
-Create a workspace (container). **Params:** `workspaceId` (string,
-required), `options` (object: `name`, `owner`, `policy`). A geometric
-address is attached when the geometry module is available.
+Create a workspace (container). **Params:** `workspaceId` (string, required), `options` (object: `name`, `owner`, `policy`). A geometric address is attached when the geometry module is available.
 
 ### vant_habitat_setWorkspace
 
-Switch the current workspace context. Params: `workspaceId` (must
-exist). Session context only - deliberately not persisted.
+Switch the current workspace context. Params: `workspaceId` (must exist). Session context only - deliberately not persisted.
 
 ### vant_habitat_addRole
 
-Assign a role (`admin`/`editor`/`viewer`) to a user in a workspace.
-Params: `workspaceId`, `role`, `userId`. Refuses unknown workspaces
-(`HABITAT_UNKNOWN_WORKSPACE`).
+Assign a role (`admin`/`editor`/`viewer`) to a user in a workspace. Params: `workspaceId`, `role`, `userId`. Refuses unknown workspaces (`HABITAT_UNKNOWN_WORKSPACE`).
 
 ### vant_habitat_getUserRoles
 
@@ -1659,9 +1469,7 @@ Read a user's roles in a workspace. Params: `workspaceId`, `userId`.
 
 ### vant_habitat_setPolicy
 
-Set an RLS boundary policy for a resource. Params: `resource`,
-`policy` (object: `readableBy`, `writableBy`, `container`, `filter`,
-`mask`). Merged over defaults.
+Set an RLS boundary policy for a resource. Params: `resource`, `policy` (object: `readableBy`, `writableBy`, `container`, `filter`, `mask`). Merged over defaults.
 
 ### vant_habitat_getBoundaries
 
@@ -1669,142 +1477,65 @@ List all boundary policies. No params.
 
 ### vant_habitat_can
 
-RLS decision: can a context access a resource? **Params:** `resource`
-(string, required), `userCtx` (object: `userId`, `roles`, `workspace`,
-`team`, `brain` - optional), `mode` (`read` | `write`, default
-`read`). Returns `{ allowed, resource, mode, workspace }`.
+RLS decision: can a context access a resource? **Params:** `resource` (string, required), `userCtx` (object: `userId`, `roles`, `workspace`, `team`, `brain` - optional), `mode` (`read` | `write`, default `read`). Returns `{ allowed, resource, mode, workspace }`.
 
 ### vant_habitat_check
 
-Throwing enforcement form. Same params as `vant_habitat_can`; denial
-throws a coded `RLS_DENIED` error instead of returning a boolean.
-Returns `{ checked: true, resource, mode }` on success.
+Throwing enforcement form. Same params as `vant_habitat_can`; denial throws a coded `RLS_DENIED` error instead of returning a boolean. Returns `{ checked: true, resource, mode }` on success.
 
 ### vant_habitat_agentContext
 
-RLS subject for a spawned agent: its workspace, roles, team, and
-brain. **Params:** `agentId` (string, required). Unknown agents
-return `{ error: "AGENT_NOT_FOUND: ..." }`. See
-[RLS](rls.md) for the identity model.
+RLS subject for a spawned agent: its workspace, roles, team, and brain. **Params:** `agentId` (string, required). Unknown agents return `{ error: "AGENT_NOT_FOUND: ..." }`. See [RLS](rls.md) for the identity model.
 
-Same surface on the CLI: `vant habitat
-<status|list|init|use|roles|grant|policy|boundaries|can|identity|token>`.
+Same surface on the CLI: `vant habitat <status|list|init|use|roles|grant|policy|boundaries|can|identity|token>`.
 
 ### vant_habitat_mintToken
 
-Mint a bearer access token anchored to a spawned agent's habitat
-identity. **Params:** `agentId` (string, required), `ttlMs` (number,
-default 24h). Returns the raw token ONCE (only its SHA-256 hash
-persists) plus the subject metadata. Fails closed with
-`AGENT_NOT_FOUND` for unprovisioned agents.
+Mint a bearer access token anchored to a spawned agent's habitat identity. **Params:** `agentId` (string, required), `ttlMs` (number, default 24h). Returns the raw token ONCE (only its SHA-256 hash persists) plus the subject metadata. Fails closed with `AGENT_NOT_FOUND` for unprovisioned agents.
 
 ### vant_habitat_verifyToken
 
-Verify a bearer token and return its registry-verified RLS subject.
-**Params:** `token` (string, required). Unknown, expired, revoked, or
-identity-stripped tokens all report `{ valid: false }` - never an
-error, never a guess. Role changes made after minting apply
-immediately: the subject is rebuilt from the registries at verify
-time, so tokens carry authority, not a snapshot.
+Verify a bearer token and return its registry-verified RLS subject. **Params:** `token` (string, required). Unknown, expired, revoked, or identity-stripped tokens all report `{ valid: false }` - never an error, never a guess. Role changes made after minting apply immediately: the subject is rebuilt from the registries at verify time, so tokens carry authority, not a snapshot.
 
 ### vant_habitat_revokeToken
 
-Revoke by raw token or hash. **Params:** `tokenOrHash` (string,
-required). Persisted - a revoked token is dead in every future
-process, not just this one.
+Revoke by raw token or hash. **Params:** `tokenOrHash` (string, required). Persisted - a revoked token is dead in every future process, not just this one.
 
 ### guest_issue
 
-Issue a guest identity for the door (H1 of #185): a `vguest_` random
-token with a role, scope owner, trust level, and optional expiry.
-**Params:** `name` (string, required), `role` (`observer`/`human`/
-`agent`, default `human`), `scopeOwner` (a `lib/scope.js` owner ref
-like `team:backend`), `trustLevel` (`high`/`medium`/`low`/`none`),
-`expires` (`7d`-style spec or ms). Returns the raw token ONCE (the
-ledger stores only the SHA-256 hash). Admin-only.
+Issue a guest identity for the door (H1 of #185): a `vguest_` random token with a role, scope owner, trust level, and optional expiry. **Params:** `name` (string, required), `role` (`observer`/`human`/ `agent`, default `human`), `scopeOwner` (a `lib/scope.js` owner ref like `team:backend`), `trustLevel` (`high`/`medium`/`low`/`none`), `expires` (`7d`-style spec or ms). Returns the raw token ONCE (the ledger stores only the SHA-256 hash). Admin-only.
 
 ### guest_list
 
-The guest roster as public projections (no hashes, no secrets).
-**Params:** None. Admin-only - the door gate refuses `guest_list` for
-any guest token (the issue's enumeration defense).
+The guest roster as public projections (no hashes, no secrets). **Params:** None. Admin-only - the door gate refuses `guest_list` for any guest token (the issue's enumeration defense).
 
 ### guest_revoke
 
-Revoke a guest by id or name. Denylist-backed: the hold of that token
-is locked out at once, in every future process. **Params:** `id`
-(string, required). Admin-only.
+Revoke a guest by id or name. Denylist-backed: the hold of that token is locked out at once, in every future process. **Params:** `id` (string, required). Admin-only.
 
 ### relay_ride
 
-The e2e ride corridor AT THE DOOR (prd-relay.md §5, P6b rung): the
-paired client seals a door call as an AES-256-GCM envelope (Encrypt
-canon `salt:iv:tag:cipher`, keyed by the pod's `relay.channelKey`) and
-the door opens it, rides the inner call through its REAL door gates,
-and re-seals the answer into `ct` - `{ ok:true, rode:true, ct }`, typed
-`E_RIDE_*` refusals otherwise (`E_RIDE_OFFLINE` when the ride face is
-not bound; `E_RIDE_DECODE` for a wrong/stale key; `E_RIDE_REPLAY` when
-the inner nonce was already spent in the TTL window). Rung 2
-(context-nonce binding) is enforced: the seal must bind its receiving
-context `ctx { origin, path, nonce:nonce }` - a ctx-less or
-nonce-mismatched ride is a DOWNGRADE, refused typed, never salvaged -
-and the answer re-seal binds to the request nonce (`{ nonce, answer }`
-across the envelope), so a swapped answer cannot be spliced into a
-different request. Shares ONE answer
-core with the webhook `relay.ride` face (lib/api.js `rideAnswer`) so the
-ride law can never drift between faces. Unauthed-class by the same law
-as redeem - THE ENVELOPE IS THE CREDENTIAL: a stranger's ciphertext
-decodes to nothing and the inner bearer inside the seal is the actual
-door authority. **Params:** `ct` (string, required - the sealed
-envelope holding `{ nonce, ctx{origin,path,nonce}, bearer?, body:{ tool|method, args } }`).
+The e2e ride corridor AT THE DOOR (prd-relay.md §5, P6b rung): the paired client seals a door call as an AES-256-GCM envelope (Encrypt canon `salt:iv:tag:cipher`, keyed by the pod's `relay.channelKey`) and the door opens it, rides the inner call through its REAL door gates, and re-seals the answer into `ct` - `{ ok:true, rode:true, ct }`, typed `E_RIDE_*` refusals otherwise (`E_RIDE_OFFLINE` when the ride face is not bound; `E_RIDE_DECODE` for a wrong/stale key; `E_RIDE_REPLAY` when the inner nonce was already spent in the TTL window). Rung 2 (context-nonce binding) is enforced: the seal must bind its receiving context `ctx { origin, path, nonce:nonce }` - a ctx-less or nonce-mismatched ride is a DOWNGRADE, refused typed, never salvaged - and the answer re-seal binds to the request nonce (`{ nonce, answer }` across the envelope), so a swapped answer cannot be spliced into a different request. Shares ONE answer core with the webhook `relay.ride` face (lib/api.js `rideAnswer`) so the ride law can never drift between faces. Unauthed-class by the same law as redeem - THE ENVELOPE IS THE CREDENTIAL: a stranger's ciphertext decodes to nothing and the inner bearer inside the seal is the actual door authority. **Params:** `ct` (string, required - the sealed envelope holding `{ nonce, ctx{origin,path,nonce}, bearer?, body:{ tool|method, args } }`).
 
 ### pairing_voucher_generate / pairing_voucher_redeem
 
-The H6/P3 voucher on the door: `pairing_voucher_generate` mints a
-24h, single-use code (SHOWN ONCE; the ledger keeps only its hash) -
-generate is admin-only because a guest minting vouchers would be an
-escalation. `pairing_voucher_redeem` turns a correct code into the
-default `human` guest identity - redeem is UNAUTHED-class by design
-(the code itself is the credential); wrong/expired/reused codes answer
-a typed `{ ok: false, reason }`, never a crash. **Params:**
-generate none; redeem `code` (string, required).
+The H6/P3 voucher on the door: `pairing_voucher_generate` mints a 24h, single-use code (SHOWN ONCE; the ledger keeps only its hash) - generate is admin-only because a guest minting vouchers would be an escalation. `pairing_voucher_redeem` turns a correct code into the default `human` guest identity - redeem is UNAUTHED-class by design (the code itself is the credential); wrong/expired/reused codes answer a typed `{ ok: false, reason }`, never a crash. **Params:** generate none; redeem `code` (string, required).
 
 ### security_pipeline_report
 
-The pod-side pipeline scan (prd-web 4.4): walks the pod's `lib/` tree
-and reports middleware-chain wiring evidence per module -
-`sandbox`/`vaf`/`qos`/`escrow` requires detected, `audit`/`habitat`
-adjoining recorded as informational, never gates. Returns
-`{ v, generatedAt, scanned, modules: [{ name, wired, layers }],
-unwired, exempt }`; modules whitelisted via the brain config key
-`security.pipelineAllow` (operator-managed, comma-separated) land in
-`exempt` - a stated choice, not a colored-over gap. Admin-only (same
-enumeration defense as `guest_list`: the report is pod-internal
-topology, so guests keep no shape of it). The dashboard's status and
-security modules render this report verbatim; the pod NEVER
-auto-flips config for an unwired module - the scan reports, the
-operator decides.
+The pod-side pipeline scan (prd-web 4.4): walks the pod's `lib/` tree and reports middleware-chain wiring evidence per module - `sandbox`/`vaf`/`qos`/`escrow` requires detected, `audit`/`habitat` adjoining recorded as informational, never gates. Returns `{ v, generatedAt, scanned, modules: [{ name, wired, layers }], unwired, exempt }`; modules whitelisted via the brain config key `security.pipelineAllow` (operator-managed, comma-separated) land in `exempt` - a stated choice, not a colored-over gap. Admin-only (same enumeration defense as `guest_list`: the report is pod-internal topology, so guests keep no shape of it). The dashboard's status and security modules render this report verbatim; the pod NEVER auto-flips config for an unwired module - the scan reports, the operator decides.
 
 ### era_start / era_log / era_close / era_current / era_list
 
-The era-session ledger twins (#177-#179): `era_start` opens a work era,
-`era_log` appends an entry, `era_close` closes with a rollup,
-`era_current` reads the open era, `era_list` lists closed eras.
-**Params:** verb-specific (see `vant era --help`); all handlers route
-through `lib/era.js`.
+The era-session ledger twins (#177-#179): `era_start` opens a work era, `era_log` appends an entry, `era_close` closes with a rollup, `era_current` reads the open era, `era_list` lists closed eras. **Params:** verb-specific (see `vant era --help`); all handlers route through `lib/era.js`.
 
 ### era_trace
 
-Trace: the execution-span tail for this wake - span waterfall metadata
-(count, failures with typed codes, slowest span), bounded at 500. Debug
-aid; spans ride era close via `lib/trace.tail()`. **Params:** None.
+Trace: the execution-span tail for this wake - span waterfall metadata (count, failures with typed codes, slowest span), bounded at 500. Debug aid; spans ride era close via `lib/trace.tail()`. **Params:** None.
 
 ### brain_migration_status
 
-Check brain layout version + pending migrations. Reports `legacy: true`
-with actionable guidance when a pre-multi-brain (old single-brain)
-layout is detected, `vant start` auto-imports it; this tool lets MCP
-clients surface the same status.
+Check brain layout version + pending migrations. Reports `legacy: true` with actionable guidance when a pre-multi-brain (old single-brain) layout is detected, `vant start` auto-imports it; this tool lets MCP clients surface the same status.
 
 **Params:** None
 
@@ -1828,11 +1559,7 @@ brain_migration_status()
 
 ### relay_status
 
-The headless relay posture truth (prd-relay.md v0.2 R0): flavor, caps
-version, enabled/gated/gateReady, the mounted Mode R surface, and the
-liveness counters of this process. The gated hop surface itself lives on
-the REST server (`POST /api/r/exec`); hops MUST be gate-credentialed and
-envelope-encrypted - plain hop bodies do not exist. Read-only.
+The headless relay posture truth (prd-relay.md v0.2 R0): flavor, caps version, enabled/gated/gateReady, the mounted Mode R surface, and the liveness counters of this process. The gated hop surface itself lives on the REST server (`POST /api/r/exec`); hops MUST be gate-credentialed and envelope-encrypted - plain hop bodies do not exist. Read-only.
 
 **Params:** None
 
@@ -1859,12 +1586,7 @@ relay_status()
 
 ### traveler_open
 
-The Traveler (prd-web.md §11, pass 254-255): the job envelope that rides
-station-to-station across nodes/mesh/pods - content-addressed (sha256
-over canonical slots + the append-only ledger), ISO 9001 8.5.2
-traceability pin. `traveler_open` mints a fresh packet and persists it in
-the brain-scoped pin ledger (`state/traveler-ledger.json` + the packet
-body). Write-class (default gate).
+The Traveler (prd-web.md §11, pass 254-255): the job envelope that rides station-to-station across nodes/mesh/pods - content-addressed (sha256 over canonical slots + the append-only ledger), ISO 9001 8.5.2 traceability pin. `traveler_open` mints a fresh packet and persists it in the brain-scoped pin ledger (`state/traveler-ledger.json` + the packet body). Write-class (default gate).
 
 **Params:**
 
@@ -1888,12 +1610,7 @@ traveler_open({ title: "batch-42 release" })
 
 ### traveler_hop
 
-Record a station-landing on a traveler (append-only ledger step). Any
-edit re-addresses the packet: the next id is derived from the new
-content, and `readdressed: true` says so. The landing tail is verified
-at every hop - a tampered packet refuses typed `E_TRAVELER_ADDRESS`.
-Resolves `id` explicitly, or the LATEST packet in the pin ledger when
-omitted. Write-class (default gate).
+Record a station-landing on a traveler (append-only ledger step). Any edit re-addresses the packet: the next id is derived from the new content, and `readdressed: true` says so. The landing tail is verified at every hop - a tampered packet refuses typed `E_TRAVELER_ADDRESS`. Resolves `id` explicitly, or the LATEST packet in the pin ledger when omitted. Write-class (default gate).
 
 **Params:**
 
@@ -1913,16 +1630,7 @@ omitted. Write-class (default gate).
 
 ### traveler_carry
 
-Route a traveler through its bill of stations: the certified letter (pass
-259/260/261). Each stage CHECKS (RLS lineage), RISKS (escrow for
-privileged hops), ASSIMILATES (an optional `part` per station, landing in
-`slots.assembly` inside the content address), signs off, and AUDITS. A
-declared `template` is enforced IN ORDER against the route: reordering a
-stage, truncating/padding the bill, or an unplanned extra station refuses
-typed `E_CARRIER_TEMPLATE`; wildcard rows (`by:"*"`, `op:"*"`) leave
-stage identity to the caller. A refused stage DROPS the packet (the
-report names the stage and code) and the walk certifies where continuity
-stops. Write-class (default gate).
+Route a traveler through its bill of stations: the certified letter (pass 259/260/261). Each stage CHECKS (RLS lineage), RISKS (escrow for privileged hops), ASSIMILATES (an optional `part` per station, landing in `slots.assembly` inside the content address), signs off, and AUDITS. A declared `template` is enforced IN ORDER against the route: reordering a stage, truncating/padding the bill, or an unplanned extra station refuses typed `E_CARRIER_TEMPLATE`; wildcard rows (`by:"*"`, `op:"*"`) leave stage identity to the caller. A refused stage DROPS the packet (the report names the stage and code) and the walk certifies where continuity stops. Write-class (default gate).
 
 **Params:**
 
@@ -1949,11 +1657,7 @@ traveler_carry({ stations: [
 
 ### traveler_replay
 
-The continuity/backtracking walk (ISO 8.5.2): replay carried landings of
-one traveler lineage and get the auditor's backtrack map - gaps named
-(missing seqs), rewrites evidenced (canon-vs-arrived pairs). The walk
-never repairs history; an agreement rewind is reported as re-delivery,
-not an event. Read-class (the `_replay` tail rides the read-suffix canon).
+The continuity/backtracking walk (ISO 8.5.2): replay carried landings of one traveler lineage and get the auditor's backtrack map - gaps named (missing seqs), rewrites evidenced (canon-vs-arrived pairs). The walk never repairs history; an agreement rewind is reported as re-delivery, not an event. Read-class (the `_replay` tail rides the read-suffix canon).
 
 **Params:**
 
@@ -1967,18 +1671,7 @@ not an event. Read-class (the `_replay` tail rides the read-suffix canon).
 
 ### traveler_fetch
 
-The packet door (pass 267): serve a traveler BODY by its FULL 64-hex
-content address from this node's append-only store
-(`state/travelers/<id>.json`) - the door a pointer resolve rides across
-the mesh (the pass-265 pointer marks say a packet exists somewhere; this
-verb is a node saying "it exists HERE, and here it is"). Idempotent by
-construction: the store is append-only, so a fetch never mutates
-anything. THE WALL AT THE SERVING NODE: the stored body must BE the
-address asked for (a swapped store refuses typed) and must RE-VERIFY
-(the content address derives) before any byte crosses - verify at both
-ends of the wire. An absent packet is an honest `{ found: false }`
-record: a miss, never an error and never a fabricated body. Read-class
-(the `fetch` tail).
+The packet door (pass 267): serve a traveler BODY by its FULL 64-hex content address from this node's append-only store (`state/travelers/<id>.json`) - the door a pointer resolve rides across the mesh (the pass-265 pointer marks say a packet exists somewhere; this verb is a node saying "it exists HERE, and here it is"). Idempotent by construction: the store is append-only, so a fetch never mutates anything. THE WALL AT THE SERVING NODE: the stored body must BE the address asked for (a swapped store refuses typed) and must RE-VERIFY (the content address derives) before any byte crosses - verify at both ends of the wire. An absent packet is an honest `{ found: false }` record: a miss, never an error and never a fabricated body. Read-class (the `fetch` tail).
 
 **Params:**
 
@@ -1997,14 +1690,7 @@ record: a miss, never an error and never a fabricated body. Read-class
 
 ### traveler_list
 
-The ledger's browse face (prd-carrier-share.md §2): names the traveler
-addresses this node's pin ledger holds, 64-hex ids, newest first,
-capped 200 (a `limit` rides). ONE LAW the spec pins: **the list NAMES,
-the status VERIFIES** - per-id truth stays in `traveler_status` /
-`traveler_fetch`, this verb never augments a row with unverified
-detail. An absent/corrupt ledger is an honest empty roster
-(`{ ids: [], count: 0 }`), never a fabricated one. Read-class (the
-`list` tail).
+The ledger's browse face (prd-carrier-share.md §2): names the traveler addresses this node's pin ledger holds, 64-hex ids, newest first, capped 200 (a `limit` rides). ONE LAW the spec pins: **the list NAMES, the status VERIFIES** - per-id truth stays in `traveler_status` / `traveler_fetch`, this verb never augments a row with unverified detail. An absent/corrupt ledger is an honest empty roster (`{ ids: [], count: 0 }`), never a fabricated one. Read-class (the `list` tail).
 
 **Params:**
 
@@ -2018,13 +1704,7 @@ detail. An absent/corrupt ledger is an honest empty roster
 
 ### carrier_lane_list
 
-The roster face (prd-carrier-share.md §2): the carrier lanes THIS pod
-speaks - built-ins (json/nsc9/png/qr/stone/svg, each with its honest
-`available` flag: `png` is the declared-absent lane with its named
-blocker) plus this brain's custom plates (id, carries, frame,
-note). A UI renders this verbatim; a lane not on the list is not on
-this pod, and the door never pretends otherwise. Read-class (the
-`list` tail).
+The roster face (prd-carrier-share.md §2): the carrier lanes THIS pod speaks - built-ins (json/nsc9/png/qr/stone/svg, each with its honest `available` flag: `png` is the declared-absent lane with its named blocker) plus this brain's custom plates (id, carries, frame, note). A UI renders this verbatim; a lane not on the list is not on this pod, and the door never pretends otherwise. Read-class (the `list` tail).
 
 **Params:** none
 
@@ -2038,16 +1718,7 @@ this pod, and the door never pretends otherwise. Read-class (the
 
 ### carrier_encode
 
-Encode an EXISTING packet on a NAMED lane (prd-carrier-share.md §2):
-the packet `id` (64-hex) must re-verify at this node under the SAME
-serving wall as `traveler_fetch` - encode carries what exists, mints
-nothing, and refuses absent bodies typed (`STORAGE_NOT_FOUND`). Lane
-choice is the CALLER's, never sniffed: unknown lanes refuse typed
-`E_CARRIER_CARRIER`; over-capacity payloads (e.g. `QR_CAP`) refuse
-typed pointing at the stone lane. `opts` rides as the lib's third arg
-(e.g. `{ "pointer": true }` for the extended vant frame on the qr
-lane). WRITE-class by the pass-267 law (the door wraps the packet
-gate; a caller encoding a hostile packet must not look read-safe).
+Encode an EXISTING packet on a NAMED lane (prd-carrier-share.md §2): the packet `id` (64-hex) must re-verify at this node under the SAME serving wall as `traveler_fetch` - encode carries what exists, mints nothing, and refuses absent bodies typed (`STORAGE_NOT_FOUND`). Lane choice is the CALLER's, never sniffed: unknown lanes refuse typed `E_CARRIER_CARRIER`; over-capacity payloads (e.g. `QR_CAP`) refuse typed pointing at the stone lane. `opts` rides as the lib's third arg (e.g. `{ "pointer": true }` for the extended vant frame on the qr lane). WRITE-class by the pass-267 law (the door wraps the packet gate; a caller encoding a hostile packet must not look read-safe).
 
 **Params:**
 
@@ -2063,15 +1734,8 @@ gate; a caller encoding a hostile packet must not look read-safe).
 
 ### carrier_decode
 
-Decode an artifact on a NAMED lane WITHOUT writing anything
-(prd-carrier-share.md §2): the resolved packet, or the honest
-unresolved record per the lib's own law (a legal frame whose body is
-not on this node answers `{ "resolved": false, "record": { ... } }`
-- a record, never an error, never a fabricated body). A decoded body
-STILL re-enters the FULL packet wall (shape + address + verify)
-before it is handed back. WRITE-class by the pass-267 law (a pointer
-decode may ride the node's `setPointerFetch` wire hook - a verb that
-can touch the network is never observer read-safe).
+Decode an artifact on a NAMED lane WITHOUT writing anything (prd-carrier-share.md §2): the resolved packet, or the honest unresolved record per the lib's own law (a legal frame whose body is not on this node answers `{ "resolved": false, "record": { ... } }`
+- a record, never an error, never a fabricated body). A decoded body STILL re-enters the FULL packet wall (shape + address + verify) before it is handed back. WRITE-class by the pass-267 law (a pointer decode may ride the node's `setPointerFetch` wire hook - a verb that can touch the network is never observer read-safe).
 
 **Params:**
 
@@ -2081,23 +1745,13 @@ can touch the network is never observer read-safe).
 | artifact | string | Required; the artifact text/raster payload |
 | opts | object | Optional; lib decode opts (e.g. `{ pointerOnly: true }`) |
 
-**Returns (resolved):** `{ "resolved": true, "traveler": { ... } }`
-**Returns (unresolved):** `{ "resolved": false, "record": { "reason": "no-body" } }`
+**Returns (resolved):** `{ "resolved": true, "traveler": { ... } }` **Returns (unresolved):** `{ "resolved": false, "record": { "reason": "no-body" } }`
 
 ---
 
 ### traveler_stamp
 
-The artifact door (pass 268) - the OTHER half of the qr lane crosses the
-mesh too. For a served-by-address packet this verb derives the pointer
-mark - the extended vant frame (`VANT:1:<64-hex>`) as a REAL scannable
-QR raster - and serves it as base64, so the receiving station decodes
-the bytes IT was handed over the wire (jsqr never trusts a local
-render). A pure derivation of a re-verified body: it mutates nothing,
-and it rides the SAME serving wall as `traveler_fetch` (one law, two
-door faces - the helper `_travelerServed` keeps them from ever drifting).
-An absent packet is an honest `{ found: false }` record. Default-class
-fail-closed (keyed access).
+The artifact door (pass 268) - the OTHER half of the qr lane crosses the mesh too. For a served-by-address packet this verb derives the pointer mark - the extended vant frame (`VANT:1:<64-hex>`) as a REAL scannable QR raster - and serves it as base64, so the receiving station decodes the bytes IT was handed over the wire (jsqr never trusts a local render). A pure derivation of a re-verified body: it mutates nothing, and it rides the SAME serving wall as `traveler_fetch` (one law, two door faces - the helper `_travelerServed` keeps them from ever drifting). An absent packet is an honest `{ found: false }` record. Default-class fail-closed (keyed access).
 
 **Params:**
 
@@ -2116,12 +1770,7 @@ fail-closed (keyed access).
 
 ### carriers_list
 
-The assimilator carrier roster (pass 258/261): which lanes can carry a
-traveler - `nsc9` (the Lane B 12-digit address frame + the Lane A GIAI
-read-through, `stone` (the sealed text packet), `svg` (the encrypted
-stone through the airgap), `json` (the ERP/EPCIS verbatim form) - and
-which are declared-absent with named blockers (`qr`, `png`: no symbology
-renderer in the dependency contract yet). Read-class (the `_list` tail).
+The assimilator carrier roster (pass 258/261): which lanes can carry a traveler - `nsc9` (the Lane B 12-digit address frame + the Lane A GIAI read-through, `stone` (the sealed text packet), `svg` (the encrypted stone through the airgap), `json` (the ERP/EPCIS verbatim form) - and which are declared-absent with named blockers (`qr`, `png`: no symbology renderer in the dependency contract yet). Read-class (the `_list` tail).
 
 **Params:** none.
 
@@ -2131,11 +1780,7 @@ renderer in the dependency contract yet). Read-class (the `_list` tail).
 
 ### carrier_plate_define
 
-Define a carrier plate (pass 262, the mycelium touch): YOUR OWN carrier
-lane as pure data. The built-in stone seal and packet-address walls ride
-your frame by construction - the definer owns the marker, the lib owns
-the crypto. Persisted brain-scoped and hydrated in every later process
-(define once, everywhere). Write-class (a persistent brain mutation).
+Define a carrier plate (pass 262, the mycelium touch): YOUR OWN carrier lane as pure data. The built-in stone seal and packet-address walls ride your frame by construction - the definer owns the marker, the lib owns the crypto. Persisted brain-scoped and hydrated in every later process (define once, everywhere). Write-class (a persistent brain mutation).
 
 **Params:**
 
@@ -2162,9 +1807,7 @@ carrier_plate_define({ id: "mfg-tag", carries: "full-object",
 
 ### traveler_status
 
-Where has this job been? The pin-through stations of a traveler, newest
-last. Resolves by id or the latest packet. Read-class (the `status`
-tail).
+Where has this job been? The pin-through stations of a traveler, newest last. Resolves by id or the latest packet. Read-class (the `status` tail).
 
 **Params:**
 
@@ -2182,10 +1825,7 @@ tail).
 
 ### traveler_audit
 
-The auditor's copy: the verbatim ISO 9001 clause 8.5.2 traceability
-record for a traveler - clause-named stations verbatim, lead time, and
-the integrity verdict from a full content-address re-derivation.
-Resolves by id or the latest packet. Read-class (the `audit` tail).
+The auditor's copy: the verbatim ISO 9001 clause 8.5.2 traceability record for a traveler - clause-named stations verbatim, lead time, and the integrity verdict from a full content-address re-derivation. Resolves by id or the latest packet. Read-class (the `audit` tail).
 
 **Params:**
 

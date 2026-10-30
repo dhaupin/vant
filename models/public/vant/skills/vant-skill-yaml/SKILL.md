@@ -65,8 +65,6 @@ python -c "import yaml; yaml.safe_load(open('f.yml'))"
 
 ---
 
-**Role**: YAML Writer  
-**Input**: Data  
-**Output**: Config
+**Role**: YAML Writer **Input**: Data **Output**: Config
 
 > Config files.

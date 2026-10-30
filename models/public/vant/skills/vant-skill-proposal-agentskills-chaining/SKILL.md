@@ -92,11 +92,7 @@ When chain references a skill by name:
 Each skill in chain should return standard output:
 
 ```yaml
-output:
-  status: success | failure | critical
-  result: "...description..."
-  errors: []
-  metrics: {}
+output: status: success | failure | critical result: "...description..." errors: [] metrics: {}
 ```
 
 - `status`: outcome for chain decision
@@ -109,10 +105,7 @@ output:
 When `pass_state: true`, chain passes to next skill:
 
 ```yaml
-chain_state:
-  previous_outputs: []
-  accumulated_errors: []
-  total_metrics: {}
+chain_state: previous_outputs: [] accumulated_errors: [] total_metrics: {}
 ```
 
 - Previous skills' outputs available to next skill
@@ -212,37 +205,13 @@ Chains can call other chains (with max_depth limit):
 ## Example: Test Chain
 
 ```yaml
----
-name: chain-test
-description: Complete test chain
-metadata:
-  chain:
-    - test-smoke      # Quick sanity first
-    - test-unit     # Then unit tests
-    - test-contract # Schema validation
-    - test-e2e     # User flows
-    - test-integration  # Component tests
-    - test-regression  # Verify no breaks
-    - test-load     # Performance
-    - audit-qos   # Final verification
-  async: false
-  continue_on_error: false
----
+--- name: chain-test description: Complete test chain metadata: chain: - test-smoke      # Quick sanity first - test-unit     # Then unit tests - test-contract # Schema validation - test-e2e     # User flows - test-integration  # Component tests - test-regression  # Verify no breaks - test-load     # Performance - audit-qos   # Final verification async: false continue_on_error: false ---
 ```
 
 ## Example: Fast Audit
 
 ```yaml
----
-name: audit-fast
-description: Quick parallel audit
-metadata:
-  chain:
-    - audit-security
-    - audit-qc
-    - audit-ops
-  async: true
----
+--- name: audit-fast description: Quick parallel audit metadata: chain: - audit-security - audit-qc - audit-ops async: true ---
 ```
 
 ##动机 (Why This Matters)

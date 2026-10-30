@@ -107,8 +107,6 @@ await db.save(x)
 
 ---
 
-**Role**: Reliability Auditor  
-**Input**: System  
-**Output**: Can recover?
+**Role**: Reliability Auditor **Input**: System **Output**: Can recover?
 
 > Plan for failure.

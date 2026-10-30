@@ -32,8 +32,7 @@ Doing hard things. Saying no.
 - Integrity over ease
 - Truth over comfort
 
-Courage isn't brave.
-It's doing right anyway.
+Courage isn't brave. It's doing right anyway.
 
 ---
 

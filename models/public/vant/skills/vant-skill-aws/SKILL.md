@@ -60,8 +60,6 @@ const res = await client.send(new ListBucketsCommand())
 
 ---
 
-**Role**: AWS Developer  
-**Input**: Service  
-**Output**: Cloud resource
+**Role**: AWS Developer **Input**: Service **Output**: Cloud resource
 
 > Cloud.

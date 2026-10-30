@@ -60,8 +60,6 @@ os.environ['API_KEY']
 
 ---
 
-**Role**: Environment Manager  
-**Input**: .env files  
-**Output**: Config
+**Role**: Environment Manager **Input**: .env files **Output**: Config
 
 > Secrets.

@@ -18,21 +18,16 @@ Audit logging for compliance - two real surfaces, both always on.
 
 ### Enable Audit
 
-Nothing to flip: logging is on by default (verified against
-`lib/audit.js`).
+Nothing to flip: logging is on by default (verified against `lib/audit.js`).
 
-- **Logger** (`lib/audit.js`) writes `[LEVEL] message {details}` lines
-to stdout and mirrors them into the event system as `audit:info`,
-`audit:warn`, and `audit:error`. Want a file? Route it yourself:
+- **Logger** (`lib/audit.js`) writes `[LEVEL] message {details}` lines to stdout and mirrors them into the event system as `audit:info`, `audit:warn`, and `audit:error`. Want a file? Route it yourself:
 
 ```javascript
 const audit = require('./lib/audit');
 audit.setOutput(fs.createWriteStream('.log/my-audit.log'));
 ```
 
-- **Audit ledger** - the append-only, hash-chained `.audit.json` under
-the models path (see [Audit Ledger](#audit-ledger-v086) below). All
-service actions log there via `audit.log()`.
+- **Audit ledger** - the append-only, hash-chained `.audit.json` under the models path (see [Audit Ledger](#audit-ledger-v086) below). All service actions log there via `audit.log()`.
 
 ## Events Logged
 
@@ -57,11 +52,7 @@ Meet compliance requirements with audit logs.
 
 ### Access Control
 
-Who may approve what is governed by the succession trust levels
-(`high` / `medium` / `low` / `none` - see
-[Trust & Succession](/vant/multi-agent/succession)), not by a
-role table. Agent autonomy scales with trust; `none` waits for
-instructions before anything acts.
+Who may approve what is governed by the succession trust levels (`high` / `medium` / `low` / `none` - see [Trust & Succession](/vant/multi-agent/succession)), not by a role table. Agent autonomy scales with trust; `none` waits for instructions before anything acts.
 
 ### Audit Trail
 

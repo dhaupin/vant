@@ -107,8 +107,6 @@ curl site.com/version
 
 ---
 
-**Role**: Deploy Auditor  
-**Input**: Deployment  
-**Output**: Does it work?
+**Role**: Deploy Auditor **Input**: Deployment **Output**: Does it work?
 
 > Ship it. Verify it. Keep it.

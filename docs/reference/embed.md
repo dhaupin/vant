@@ -25,9 +25,7 @@ Vector embeddings for brain search and similarity.
 | `listProviders()` | List available |
 | `getProviderInfo()` | Active provider info |
 
-Also exported: `project2d(vectors, options)` (the seeded Johnson-
-Lindenstrauss 2D projection the dashboard semantic map consumes) and
-the `EMBED_DIM: 384` constant.
+Also exported: `project2d(vectors, options)` (the seeded Johnson- Lindenstrauss 2D projection the dashboard semantic map consumes) and the `EMBED_DIM: 384` constant.
 
 ## Usage
 
@@ -45,9 +43,7 @@ const sim = embed.cosineSimilarity(vec1, vec2);
 const vecs = await embed.generateBatch(['query1', 'query2']);
 ```
 
-Providers (`hash`, `local`, `openai`) are managed with `setProvider` /
-`listProviders` - the CLI surface is `vant embed set/list/info/generate`
-(see the CLI Reference).
+Providers (`hash`, `local`, `openai`) are managed with `setProvider` / `listProviders` - the CLI surface is `vant embed set/list/info/generate` (see the CLI Reference).
 
 ## Events
 

@@ -54,6 +54,4 @@ psql -c "SELECT 1" || exit 1
 < 30 seconds
 ```
 
-**Role**: Smoke Tester  
-**Input**: Service  
-**Output**: Pass/Fail
+**Role**: Smoke Tester **Input**: Service **Output**: Pass/Fail

@@ -19,7 +19,7 @@ The icosahedron has 20 faces, 30 edges, 12 vertices.
 
 For addressing, we use the **dual** (dodecahedron) with:
 - 12 pentagonal faces
-- 30 edges  
+- 30 edges
 - 20 vertices
 
 Each unique (θ, φ, depth) triple maps to a unique position on the convex hull.
@@ -70,8 +70,7 @@ await geometry.store('1-31814-04200-8', { type: 'memory', content: '...' });
 const recovered = await geometry.retrieve('1-31814-04200-8');
 ```
 
-The lower-level `geometry.quasicrystal()` module is also exposed
-(init-storage pattern), but the wrappers above are the intended API.
+The lower-level `geometry.quasicrystal()` module is also exposed (init-storage pattern), but the wrappers above are the intended API.
 
 ## Security Properties
 
@@ -81,5 +80,4 @@ The lower-level `geometry.quasicrystal()` module is also exposed
 
 ## Version
 
-Experimental: 0.8.6-exp
-Reference: Penrose 1974, Shechtman 1984, de Bruijn 1981
+Experimental: 0.8.6-exp Reference: Penrose 1974, Shechtman 1984, de Bruijn 1981

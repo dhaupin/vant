@@ -8,9 +8,7 @@ description: Mark brain entries resolved, deprecated, or rejected, with reasons,
 ---
 # Thought Resolution
 
-Track thought status: resolved, deprecated, or rejected. A status change
-lands in the ledger, is stamped into the brain file's frontmatter, and emits
-a `resolution:changed` event.
+Track thought status: resolved, deprecated, or rejected. A status change lands in the ledger, is stamped into the brain file's frontmatter, and emits a `resolution:changed` event.
 
 ## Statuses
 
@@ -54,10 +52,7 @@ vant resolution resolve fears "fear of failure" overcame via repetition
 vant resolution resolve fears "fear of X" --ttl 86400000
 ```
 
-The target file must exist in the public brain (the resolver validates
-first and throws `FILE_NOT_FOUND` otherwise). The `resolved_by` stamp comes
-from `VANT_AGENT_ID` (default `unknown`); `branch` from `VANT_BRANCH`
-(default `main`).
+The target file must exist in the public brain (the resolver validates first and throws `FILE_NOT_FOUND` otherwise). The `resolved_by` stamp comes from `VANT_AGENT_ID` (default `unknown`); `branch` from `VANT_BRANCH` (default `main`).
 
 ## TTL (time-to-live)
 
@@ -72,8 +67,7 @@ from `VANT_AGENT_ID` (default `unknown`); `branch` from `VANT_BRANCH`
 Behavior:
 
 - The TTL is stamped as `expiresAt`; a null `expiresAt` never expires
-- An expired resolution reads as ACTIVE again, like it never happened
-  (`is-active` reports this)
+- An expired resolution reads as ACTIVE again, like it never happened (`is-active` reports this)
 - `vant resolution evict` permanently drops expired entries from the ledger
 - Without a TTL, a resolution persists
 
@@ -81,8 +75,7 @@ Behavior:
 
 One file holds everything:
 
-- `models/public/.resolution.json` - the ledger, under the active brain's
-  public root (multibrain-aware; it resolves through the brain stack)
+- `models/public/.resolution.json` - the ledger, under the active brain's public root (multibrain-aware; it resolves through the brain stack)
 
 Each resolution is recorded twice:
 
@@ -112,13 +105,11 @@ The ledger is a plain JSON file, not a distributed anything:
 }
 ```
 
-Every resolve, deprecate, and reject appends a delta (file, change, who,
-when); the ledger keeps the last 100.
+Every resolve, deprecate, and reject appends a delta (file, change, who, when); the ledger keeps the last 100.
 
 ## Programming API
 
-`lib/resolution.js` exports the sync core plus pipeline-backed variants
-(the same operations routed through sandbox, vaf, qos, and escrow):
+`lib/resolution.js` exports the sync core plus pipeline-backed variants (the same operations routed through sandbox, vaf, qos, and escrow):
 
 | Function | What |
 |----------|------|

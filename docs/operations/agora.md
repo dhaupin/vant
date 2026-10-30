@@ -25,17 +25,10 @@ description: Cross-node agora operations - remote votes, ledger sync, and scoped
 
 Two layers share the name, and they connect:
 
-- **The decision layer** (lib/consensus, lib/forum): topics, ballots,
-  tallies, deadlines. Topics are created on the node whose org model
-  their scope points into.
-- **The sync layer** (lib/agora-sync): the wire legs that carry ballots
-  and ledgers between nodes over the signed crew-bus, plus ledger
-  hygiene (the reaper) and gossip.
+- **The decision layer** (lib/consensus, lib/forum): topics, ballots, tallies, deadlines. Topics are created on the node whose org model their scope points into.
+- **The sync layer** (lib/agora-sync): the wire legs that carry ballots and ledgers between nodes over the signed crew-bus, plus ledger hygiene (the reaper) and gossip.
 
-`vant agora` operates the sync layer. Your node votes on a PEER's
-topic; the owner's gate stack decides. You pull a peer's ledger to
-read it locally; the merge re-derives status, so the wire can never
-declare a topic passed.
+`vant agora` operates the sync layer. Your node votes on a PEER's topic; the owner's gate stack decides. You pull a peer's ledger to read it locally; the merge re-derives status, so the wire can never declare a topic passed.
 
 ## CLI reference
 
@@ -47,8 +40,7 @@ declare a topic passed.
 | `vant agora pull <node> <topic>` | Pull + merge a peer's ledger |
 | `vant agora push <node> <topic>` | Push a local ledger to a peer |
 
-Common options: `--agent <id>` votes as a specific pre-registered
-principal; `--timeout <ms>` bounds the round-trip.
+Common options: `--agent <id>` votes as a specific pre-registered principal; `--timeout <ms>` bounds the round-trip.
 
 ```bash
 # Who can I reach, and who am I on the wire?
@@ -66,8 +58,7 @@ vant agora push beta-node my-local-topic
 
 ## MCP equivalents
 
-The same legs as tools, for agent-driven flows (full schemas in the
-[MCP Tools Reference](/vant/reference/mcp-tools)):
+The same legs as tools, for agent-driven flows (full schemas in the [MCP Tools Reference](/vant/reference/mcp-tools)):
 
 | Tool | Matches |
 |------|---------|
@@ -81,15 +72,10 @@ Task-shaped examples: [Federation Playbooks](/vant/operations/federation-playboo
 
 ## Scoped reads
 
-A scoped topic's ledger is only readable by its member set. Two ways
-that check runs:
+A scoped topic's ledger is only readable by its member set. Two ways that check runs:
 
-- **On the owner:** `consensus_get(topic, viewerId)` admits members,
-  returns null for everyone else (same shape as not-found: an
-  outsider cannot even distinguish exists from missing).
-- **On your node after a pull:** the group's org model arrives as a
-  replica (org-sync), so your local scope check admits group members
-  without a round-trip. Non-members stay denied, fail-closed.
+- **On the owner:** `consensus_get(topic, viewerId)` admits members, returns null for everyone else (same shape as not-found: an outsider cannot even distinguish exists from missing).
+- **On your node after a pull:** the group's org model arrives as a replica (org-sync), so your local scope check admits group members without a round-trip. Non-members stay denied, fail-closed.
 
 ```js
 const consensus = require('./lib/consensus');
@@ -99,15 +85,12 @@ const ledger = consensus.get('forum-q3-platform-call-abc123', 'beta-1');
 
 ## The trust model
 
-Everything `vant agora` does rides the signed crew-bus (HMAC envelopes
-against your registered peers). On top of the transport:
+Everything `vant agora` does rides the signed crew-bus (HMAC envelopes against your registered peers). On top of the transport:
 
 - Registered peers only: an unknown origin gets no ballot door
 - Sender binding: replies resolve only the request they were sent for
-- Owner-side gates: scope, registry vetting, quarantine, one-vote, and
-  deadline all run where the topic lives
-- Merge-only adoption: local votes are never overwritten; status is
-  re-derived locally
+- Owner-side gates: scope, registry vetting, quarantine, one-vote, and deadline all run where the topic lives
+- Merge-only adoption: local votes are never overwritten; status is re-derived locally
 
 ## Related
 

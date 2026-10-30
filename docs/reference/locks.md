@@ -14,8 +14,7 @@ description: API reference for lib/brain-lock.js (authorization lease) and lib/l
 
 ## lib/brain-lock.js - authorization lease
 
-Token- and agent-scoped lease answering "who may write to this brain".
-TTL default `DEFAULT_TIMEOUT_MS` (1 hour). Emits `brain-lock:*` events.
+Token- and agent-scoped lease answering "who may write to this brain". TTL default `DEFAULT_TIMEOUT_MS` (1 hour). Emits `brain-lock:*` events.
 
 | Export | Signature | Returns |
 |--------|-----------|---------|
@@ -33,20 +32,14 @@ TTL default `DEFAULT_TIMEOUT_MS` (1 hour). Emits `brain-lock:*` events.
 
 Notes:
 
-- Same-agent re-acquire **refreshes** the lease (TTL extended, file token kept
-  stable) and emits `brain-lock:refreshed` instead of failing.
-- Release verifies agent AND token; a wrong token returns
-  `{ success: false, message: 'Invalid token - release denied' }` and keeps
-  the lock file.
-- Acquire with exponential backoff (`BRAIN_LOCK_CONFIG`), stale takeover via
-  create-or-fail CAS (O_EXCL), symlink sweep on takeover.
-- Stack helpers read per-brain status explicitly; they never mutate the
-  process-active brain.
+- Same-agent re-acquire **refreshes** the lease (TTL extended, file token kept stable) and emits `brain-lock:refreshed` instead of failing.
+- Release verifies agent AND token; a wrong token returns `{ success: false, message: 'Invalid token - release denied' }` and keeps the lock file.
+- Acquire with exponential backoff (`BRAIN_LOCK_CONFIG`), stale takeover via create-or-fail CAS (O_EXCL), symlink sweep on takeover.
+- Stack helpers read per-brain status explicitly; they never mutate the process-active brain.
 
 ## lib/lock.js - cross-process mutex
 
-Short-lived advisory lockfile serializing one whole-snapshot write across
-processes. No identity, no TTL semantics; stale takeover is mtime-based.
+Short-lived advisory lockfile serializing one whole-snapshot write across processes. No identity, no TTL semantics; stale takeover is mtime-based.
 
 | Export | Signature | Returns |
 |--------|-----------|---------|
@@ -63,35 +56,17 @@ processes. No identity, no TTL semantics; stale takeover is mtime-based.
 
 Notes:
 
-- `withLock` ALWAYS returns a Promise. A synchronous `fn` runs and is
-  released synchronously; an async `fn` is released on settle (the exit hook
-  also covers process death between them).
-- `withLockSync` (pass 115) is the sync twin: the outcome comes back as a
-  plain value instead of a Promise, so callers that must stay synchronous
-  read the fail-closed refusal directly instead of through a wrapper that
-  can hide it. A thrown `fn` error is re-thrown after release; use `withLock`
-  for async bodies.
-- `failMode: 'closed'` (default) never runs `fn` without the lock.
-  `failMode: 'open'` runs `fn(result)` anyway and passes the return through.
-- `held` = a live peer owns the file; `unavailable` = the filesystem is
-  unusable (for example a regular file sits at the lock root). Posture
-  guidance: [Locks](/vant/operations/locks).
-- Takeover retries are bounded (>100 attempts reports `held`) so a hostile
-  symlink replant loop cannot spin forever.
-- `mutex()` serializes within one process only (cache, canvas, consensus use
-  it) and never lets a rejection poison the chain.
-- `stats()` (pass 117) is process-local by design: cross-process
-  aggregation would need a shared sink (the audit ledger is the durable
-  trail). Read deltas between polls; there is no reset API. The lease side
-  exposes the same idea via `brain-lock.leaseStats()` (granted, refreshed,
-  denied, released, releaseDenied, forced). Both are surfaced in
-  `vant health`, `health.getStackHealthStatus()`, and MCP `vant_lock
-  action="stats"`.
+- `withLock` ALWAYS returns a Promise. A synchronous `fn` runs and is released synchronously; an async `fn` is released on settle (the exit hook also covers process death between them).
+- `withLockSync` (pass 115) is the sync twin: the outcome comes back as a plain value instead of a Promise, so callers that must stay synchronous read the fail-closed refusal directly instead of through a wrapper that can hide it. A thrown `fn` error is re-thrown after release; use `withLock` for async bodies.
+- `failMode: 'closed'` (default) never runs `fn` without the lock. `failMode: 'open'` runs `fn(result)` anyway and passes the return through.
+- `held` = a live peer owns the file; `unavailable` = the filesystem is unusable (for example a regular file sits at the lock root). Posture guidance: [Locks](/vant/operations/locks).
+- Takeover retries are bounded (>100 attempts reports `held`) so a hostile symlink replant loop cannot spin forever.
+- `mutex()` serializes within one process only (cache, canvas, consensus use it) and never lets a rejection poison the chain.
+- `stats()` (pass 117) is process-local by design: cross-process aggregation would need a shared sink (the audit ledger is the durable trail). Read deltas between polls; there is no reset API. The lease side exposes the same idea via `brain-lock.leaseStats()` (granted, refreshed, denied, released, releaseDenied, forced). Both are surfaced in `vant health`, `health.getStackHealthStatus()`, and MCP `vant_lock action="stats"`.
 
 ## CLI: `vant lock`
 
-Drives the **lease** (`lib/brain-lock.js`). The token from `acquire` is saved
-to `.lock-brain-token` for cross-process release.
+Drives the **lease** (`lib/brain-lock.js`). The token from `acquire` is saved to `.lock-brain-token` for cross-process release.
 
 | Command | Description |
 |---------|-------------|
@@ -100,8 +75,7 @@ to `.lock-brain-token` for cross-process release.
 | `vant lock status` | Current brain + whole-stack lease status |
 | `vant lock force` | Force release (admin): deletes the lock file unconditionally |
 
-(Short forms `acq`, `rel`, `stat` work. The MCP tool has a separate
-`stack` action returning the same whole-stack view `status` prints.)
+(Short forms `acq`, `rel`, `stat` work. The MCP tool has a separate `stack` action returning the same whole-stack view `status` prints.)
 
 ## MCP tool: `vant_lock`
 
@@ -119,10 +93,7 @@ vant_lock(action="stack")
 vant_lock(action="force")
 ```
 
-Returns `{ action, acquired, token }` on acquire, `{ action, success, message }`
-on release, `{ action, status, stack, held }` on status/stack, and
-`{ action, forceReleased }` (boolean) on force. This tool manages the lease;
-the mutex is a library-level primitive and has no MCP surface.
+Returns `{ action, acquired, token }` on acquire, `{ action, success, message }` on release, `{ action, status, stack, held }` on status/stack, and `{ action, forceReleased }` (boolean) on force. This tool manages the lease; the mutex is a library-level primitive and has no MCP surface.
 
 ## Where locks live on disk
 
@@ -132,10 +103,7 @@ the mutex is a library-level primitive and has no MCP surface.
 | `models/private/<brain>/.locks/<kind>[__<id>].lock` | mutex (per-brain) | yes |
 | `models/.locks-global/<kind>[__<id>].lock` | mutex (repo-scoped) | yes |
 
-Leaked lockfiles are scanned by `npm run lint:locks`
-(`scripts/audit-locks.js`), which also asserts the two roots, the no
-cross-require rule between the modules, and the fail-closed wiring of the
-guarded writers.
+Leaked lockfiles are scanned by `npm run lint:locks` (`scripts/audit-locks.js`), which also asserts the two roots, the no cross-require rule between the modules, and the fail-closed wiring of the guarded writers.
 
 ---
 

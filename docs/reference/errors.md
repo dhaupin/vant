@@ -16,8 +16,7 @@ Reference for all Vant error codes.
 |-------|-------------|
 | `VantError` | Base error class (code + retryable flag) |
 
-There is no `VantRetryableError` class - retryability is the `retryable`
-option on a `VantError`, checked as `error.retryable`.
+There is no `VantRetryableError` class - retryability is the `retryable` option on a `VantError`, checked as `error.retryable`.
 
 ## Error Codes
 
@@ -82,8 +81,7 @@ Error codes and troubleshooting.
 
 ### Throw an Error
 
-Errors live in lib/error.js (there is no `vant.errors` getter - require
-the module directly):
+Errors live in lib/error.js (there is no `vant.errors` getter - require the module directly):
 
 ```javascript
 const errors = require('./lib/error');

@@ -62,8 +62,6 @@ const valid = /^\S+@\S+\.\S+$/.test(email)
 
 ---
 
-**Role**: Regex Developer  
-**Input**: String + pattern  
-**Output**: Match
+**Role**: Regex Developer **Input**: String + pattern **Output**: Match
 
 > Patterns.

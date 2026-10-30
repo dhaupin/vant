@@ -40,17 +40,11 @@ Open a discussion first:
 
 ### Good First Issues
 
-Issues labeled `good first issue` (the repo's real label, with spaces)
-carry a contract: a reproduction and an acceptance test sit in the
-issue body, so you verify your fix the same way the project does. It is
-the same contract every vant fix follows - the fix ships with the test
-that proves it. Browse the current set on the [issues
-page](https://github.com/dhaupin/vant/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
+Issues labeled `good first issue` (the repo's real label, with spaces) carry a contract: a reproduction and an acceptance test sit in the issue body, so you verify your fix the same way the project does. It is the same contract every vant fix follows - the fix ships with the test that proves it. Browse the current set on the [issues page](https://github.com/dhaupin/vant/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
 
 ### Triage Doors
 
-Every kind of input has a real door, and the doors are checked against
-reality:
+Every kind of input has a real door, and the doors are checked against reality:
 
 | Input | Door | What to include |
 |-------|------|-----------------|
@@ -60,16 +54,9 @@ reality:
 | Security vulnerability | [Private advisory](https://github.com/dhaupin/vant/security/advisories/new) - never a public issue | Impact, reproduction, which surface |
 | Documentation gap | [Issues](https://github.com/dhaupin/vant/issues) with the `documentation` label | The page, the claim, what reality says |
 
-Labels that exist on the tracker: `bug`, `documentation`, `enhancement`,
-`good first issue`, `help wanted`, `question`, plus project tags
-(`announcement`, `exploration`, `roadmap`, `testing`, `api`,
-`encryption`, `recursion`, `nova`). If a guide mentions a label that
-does not exist, that is a bug: the doors are part of the surface.
+Labels that exist on the tracker: `bug`, `documentation`, `enhancement`, `good first issue`, `help wanted`, `question`, plus project tags (`announcement`, `exploration`, `roadmap`, `testing`, `api`, `encryption`, `recursion`, `nova`). If a guide mentions a label that does not exist, that is a bug: the doors are part of the surface.
 
-Security handling is credited and private per the project's
-[security policy](https://github.com/dhaupin/vant/blob/axolotl/.github/SECURITY.md);
-support routing lives in
-[SUPPORT.md](https://github.com/dhaupin/vant/blob/axolotl/.github/SUPPORT.md).
+Security handling is credited and private per the project's [security policy](https://github.com/dhaupin/vant/blob/axolotl/.github/SECURITY.md); support routing lives in [SUPPORT.md](https://github.com/dhaupin/vant/blob/axolotl/.github/SUPPORT.md).
 
 ### 3. Write Code
 Contribute code to the project.
@@ -112,8 +99,7 @@ Content rules in short:
 - No emoji or decorative glyphs outside code fences and inline code
 - Every opening code fence gets a language tag
 - Pipe tables: every row starts and ends with `|`
-- Version-specific claims (ports, paths, APIs) get checked against `lib/`
-  and `bin/` before you commit
+- Version-specific claims (ports, paths, APIs) get checked against `lib/` and `bin/` before you commit
 
 ### 5. Share
 
@@ -148,10 +134,7 @@ node bin/vant.js
 
 ## Commit Messages
 
-Format: `type: description` (this is the canonical commit format;
-agent-crew work on `agent-<name>` branches uses the `agent-name: did
-thing X` pass format instead. Both are documented, neither is
-accidental)
+Format: `type: description` (this is the canonical commit format; agent-crew work on `agent-<name>` branches uses the `agent-name: did thing X` pass format instead. Both are documented, neither is accidental)
 
 Types:
 - `feat`: New feature

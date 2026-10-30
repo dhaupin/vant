@@ -26,13 +26,7 @@ description: Install Vant, run setup, and get an agent wake-sleep loop working i
 
 ## The path
 
-Humans: [Install](/vant/getting-started/install), then
-[Quick Start](/vant/getting-started/quick-start). Just vibing on a
-weekend project: [Vibe Coding with Vant](/vant/getting-started/vibe-coders)
-has the one-liners. Agents (or humans onboarding agents):
-[Agent Onboarding](/vant/getting-started/agent-onboarding), then the
-[Migration Guide](/vant/getting-started/migration) if an old install
-is involved.
+Humans: [Install](/vant/getting-started/install), then [Quick Start](/vant/getting-started/quick-start). Just vibing on a weekend project: [Vibe Coding with Vant](/vant/getting-started/vibe-coders) has the one-liners. Agents (or humans onboarding agents): [Agent Onboarding](/vant/getting-started/agent-onboarding), then the [Migration Guide](/vant/getting-started/migration) if an old install is involved.
 
 ## One command to remember
 

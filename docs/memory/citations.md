@@ -11,9 +11,7 @@ description: Git-backed grounding for agent claims - sources, formatted citation
 
 > Claims in brain files get receipts. Receipts are git-backed.
 
-When an agent writes a lesson or a decision, citations record where the
-claim came from. The sources ride along in the brain and can be rendered
-into commit footers, so memory and evidence travel together.
+When an agent writes a lesson or a decision, citations record where the claim came from. The sources ride along in the brain and can be rendered into commit footers, so memory and evidence travel together.
 
 ## Record a source
 
@@ -22,10 +20,7 @@ const citations = require('./lib/citations');
 citations.addSource('abc1234', 'lessons.md#sync-race');
 ```
 
-The first argument is the commit hash the claim came from; the second is
-any context string your convention agrees on (a file, a file and anchor,
-a note). Recording is lock-protected, so concurrent writers cannot drop
-each other's rows.
+The first argument is the commit hash the claim came from; the second is any context string your convention agrees on (a file, a file and anchor, a note). Recording is lock-protected, so concurrent writers cannot drop each other's rows.
 
 ## Render
 
@@ -47,8 +42,7 @@ Get the footer block for a commit message:
 citations.getCommitFooter();
 ```
 
-Appending that footer to `git commit -m` puts the evidence trail directly
-into history, where `git blame` finds it again.
+Appending that footer to `git commit -m` puts the evidence trail directly into history, where `git blame` finds it again.
 
 ## Verify and clean up
 
@@ -72,10 +66,7 @@ citations.clear();
 
 ## Relationship to the brain
 
-Citations are metadata about brain content, not a memory system of their
-own. They live with the claims they support, and pruning the corpus does
-not silently orphan them: generate a receipts file before a prune if you
-want a point-in-time record:
+Citations are metadata about brain content, not a memory system of their own. They live with the claims they support, and pruning the corpus does not silently orphan them: generate a receipts file before a prune if you want a point-in-time record:
 
 ```javascript
 citations.generateReceipts();

@@ -14,11 +14,7 @@ description: Vant's escrow layer - per-agent budgets, holds, approvals, quotas, 
 > reversible. It is claims-not-cash: auditability between agents, not
 > money movement.
 
-Escrow is one of the middleware layers in the brain's chain
-(sandbox, vaf, qos, escrow). It answers one question before an
-operation runs: **may this agent afford this operation?** - where
-"afford" covers budget, rate, and circuit state, and the answer is
-recorded as events either way.
+Escrow is one of the middleware layers in the brain's chain (sandbox, vaf, qos, escrow). It answers one question before an operation runs: **may this agent afford this operation?** - where "afford" covers budget, rate, and circuit state, and the answer is recorded as events either way.
 
 ## The mental model
 
@@ -30,8 +26,7 @@ recorded as events either way.
 | **Quota** | Per-agent, per-operation counters in a rolling window (default 1000/hour) | `checkQuota`, `incrementQuota`, `getQuota` |
 | **Circuit** | Per-service breaker (threshold 5, exponential backoff) | `isOpen`, `recordFailure`, `recordSuccess` |
 
-The default cost table: `read` 1, `write` 5, `delete` 10, `admin` 50.
-Costs are adjustable per operation with `setCost(op, cost)`.
+The default cost table: `read` 1, `write` 5, `delete` 10, `admin` 50. Costs are adjustable per operation with `setCost(op, cost)`.
 
 ## A hold is a reservation, not a debit
 
@@ -41,12 +36,7 @@ This is the detail most callers get wrong:
 > timeout. **It does not move budget.** The budget only moves when
 > `recordSpend` runs.
 
-The market integration relies on exactly this split
-(`lib/market.js`): `canSpend` compares `available >= amount` before a
-trade, the hold records the reservation, and the debit happens
-separately through `recordSpend`. If you need a true "reserve funds"
-semantic, do it the market's way: check, hold, then spend on success
-(or `refund` on failure).
+The market integration relies on exactly this split (`lib/market.js`): `canSpend` compares `available >= amount` before a trade, the hold records the reservation, and the debit happens separately through `recordSpend`. If you need a true "reserve funds" semantic, do it the market's way: check, hold, then spend on success (or `refund` on failure).
 
 ## The execute middleware
 
@@ -79,16 +69,9 @@ if (gate.allowed) {
 }
 ```
 
-`escrow.execute(ctx)` is the strict variant used by the brain
-pipeline: same checks, but a denial **throws** `Escrow denied`
-(`ESCROW_DENIED`) instead of returning `allowed: false`.
+`escrow.execute(ctx)` is the strict variant used by the brain pipeline: same checks, but a denial **throws** `Escrow denied` (`ESCROW_DENIED`) instead of returning `allowed: false`.
 
-Sensitive operations can require a human-style approval. (pass 251,
-issue #204) The lane is NOW ENFORCED and SINGLE-USE: the brain
-pipeline's escrow stage denies (typed `E_ESCROW_APPROVAL_REQUIRED`)
-any op whose name sits in `approvalRequired` unless the ctx carries a
-matching, unexpired `approvalId`, which the stage then CONSUMES. One
-approve authorizes exactly one execution, never a repeat.
+Sensitive operations can require a human-style approval. (pass 251, issue #204) The lane is NOW ENFORCED and SINGLE-USE: the brain pipeline's escrow stage denies (typed `E_ESCROW_APPROVAL_REQUIRED`) any op whose name sits in `approvalRequired` unless the ctx carries a matching, unexpired `approvalId`, which the stage then CONSUMES. One approve authorizes exactly one execution, never a repeat.
 
 ```javascript
 const req = escrow.requestApproval('delete', 'wiping stale topics');
@@ -101,18 +84,11 @@ escrow.checkApproval(req.approvalId);  // { approved: true, operation: 'delete' 
 escrow.consumeApproval(req.approvalId, 'delete');  // burned on success; reuse -> not_found
 ```
 
-Enforcement semantics: `approvalRequired` entries match EXACTLY, or as
-anchored family globs (`write:*` covers `write` and `write:critical`; a
-plain substring `delete` no longer over-matches `note_delete_typo`).
-Approvals expire at consume time, so the TTL
-(`escrow.approvalTtlMs`, default 300000; `0` disables) turns a stale
-green light into an honest `expired` refusal.
+Enforcement semantics: `approvalRequired` entries match EXACTLY, or as anchored family globs (`write:*` covers `write` and `write:critical`; a plain substring `delete` no longer over-matches `note_delete_typo`). Approvals expire at consume time, so the TTL (`escrow.approvalTtlMs`, default 300000; `0` disables) turns a stale green light into an honest `expired` refusal.
 
 ## Workspace budgets (org pools)
 
-Budgets can be scoped to a habitat workspace so agents, orgs, and
-teams draw from per-workspace pools instead of one flat global
-ledger:
+Budgets can be scoped to a habitat workspace so agents, orgs, and teams draw from per-workspace pools instead of one flat global ledger:
 
 ```javascript
 const escrow = require('./escrow');
@@ -123,25 +99,11 @@ escrow.workspaceRecordSpend('org-acme', 'a1', 10);    // debits member AND pool
 escrow.listWorkspacePools();                          // [{ workspace, spent, limit, available }]
 ```
 
-Semantics: a member spend debits TWO rows from ONE amount - the
-member's tracking row and the org pool. An org with 500 credits
-cannot fund 600 of member spends no matter how many members it has.
-Member caps persist and gate on every later draw; refunds restore
-member and pool rows together.
+Semantics: a member spend debits TWO rows from ONE amount - the member's tracking row and the org pool. An org with 500 credits cannot fund 600 of member spends no matter how many members it has. Member caps persist and gate on every later draw; refunds restore member and pool rows together.
 
-RLS (fail closed, pass 82 rules): draws scoped to a workspace the
-habitat has never heard of are refused (`unknown_workspace` /
-`E_UNKNOWN_WORKSPACE`). Setting a pool or member cap is an admin act:
-the caller names an `adminId` and the admin role is verified against
-the habitat registry for that workspace (never self-declared) -
-denial throws `RLS_DENIED`. A live habitat always enforces; when no
-habitat exists at all (bare library use) the gate passes, and
-`new Escrow({ enforceWorkspaceRLS: false })` opts out explicitly.
+RLS (fail closed, pass 82 rules): draws scoped to a workspace the habitat has never heard of are refused (`unknown_workspace` / `E_UNKNOWN_WORKSPACE`). Setting a pool or member cap is an admin act: the caller names an `adminId` and the admin role is verified against the habitat registry for that workspace (never self-declared) - denial throws `RLS_DENIED`. A live habitat always enforces; when no habitat exists at all (bare library use) the gate passes, and `new Escrow({ enforceWorkspaceRLS: false })` opts out explicitly.
 
-Market integration: `market.trade(listingId, buyerId, { workspace:
-'org-acme' })` draws the buyer's workspace pool - the check at step 3
-and the debit at the settle point are both pool-scoped. Trades without
-`context.workspace` keep using flat agent budgets unchanged.
+Market integration: `market.trade(listingId, buyerId, { workspace: 'org-acme' })` draws the buyer's workspace pool - the check at step 3 and the debit at the settle point are both pool-scoped. Trades without `context.workspace` keep using flat agent budgets unchanged.
 
 ## CLI
 
@@ -156,8 +118,7 @@ and the debit at the settle point are both pool-scoped. Trades without
 | `vant escrow cap <ws> <agentId> <limit>` | Cap a member's pool draw (admin-gated) |
 | `vant escrow pools` | List all workspace pools |
 
-The companion market CLI (`vant market list | bid | trade | search |
-stats | get | bids`) rides on the same budget split described above.
+The companion market CLI (`vant market list | bid | trade | search | stats | get | bids`) rides on the same budget split described above.
 
 ## Multibrain and stack status
 
@@ -174,17 +135,11 @@ escrow.getStackEscrowStatus();
 // gets { error } instead of taking the report down
 ```
 
-Per-brain state means each brain in a stack carries its own
-accountability ledger - the same "the agent's history is its memory"
-ruling that scoped sudo escalations (issue #98).
+Per-brain state means each brain in a stack carries its own accountability ledger - the same "the agent's history is its memory" ruling that scoped sudo escalations (issue #98).
 
 ## Crash safety and horcrux
 
-Escrow state (budgets, holds, approvals, quotas) persists to the
-store on every spend and restores on construction. For airgap
-transport, `gatherState()` / `restoreState(data)` serialize the
-ledger into (and out of) a horcrux payload, so a restored brain
-keeps its accounting history.
+Escrow state (budgets, holds, approvals, quotas) persists to the store on every spend and restores on construction. For airgap transport, `gatherState()` / `restoreState(data)` serialize the ledger into (and out of) a horcrux payload, so a restored brain keeps its accounting history.
 
 ## Events
 

@@ -72,21 +72,11 @@ Loading goes through: sandbox → vaf → qos → escrow
 - `brain.getPublicPath()` → 'models/public' (OS template)
 
 ### Brain Layout (v0.9+ multi-brain)
-Since axolotl, brains live in per-brain directories:
-`models/private/<brain>/` and `models/public/<brain>/` (default brain:
-`vant`), with the active stack in `models/state.json`.
+Since axolotl, brains live in per-brain directories: `models/private/<brain>/` and `models/public/<brain>/` (default brain: `vant`), with the active stack in `models/state.json`.
 
-**Legacy layouts migrate automatically**: pre-0.9 trees (flat
-`models/public/*.md`, no stack) are imported on `vant start` by
-`lib/migrations.js` (layout v3). Never hand-move brain files — use
-`vant migrate --status` / `--dry-run` / `--brain-name <name>`, or the MCP
-`brain_migration_status` tool. Migration is content-detected, idempotent,
-and never fires on an already-multi-brain tree.
+**Legacy layouts migrate automatically**: pre-0.9 trees (flat `models/public/*.md`, no stack) are imported on `vant start` by `lib/migrations.js` (layout v3). Never hand-move brain files — use `vant migrate --status` / `--dry-run` / `--brain-name <name>`, or the MCP `brain_migration_status` tool. Migration is content-detected, idempotent, and never fires on an already-multi-brain tree.
 
-Read semantics in dual mode: `brain.read(name)` checks the current brain's
-root first, then falls back to the public root (restored main-style
-behavior; pin `{ type: 'public' }` or `{ type: 'private' }` to skip the
-fallback).
+Read semantics in dual mode: `brain.read(name)` checks the current brain's root first, then falls back to the public root (restored main-style behavior; pin `{ type: 'public' }` or `{ type: 'private' }` to skip the fallback).
 
 ### Format Support (v0.8.6)
 Brain files now support multiple formats:
@@ -169,8 +159,7 @@ Write to `models/private/`. These are the standard files:
 
 > **IMPORTANT:** Writing to `models/private/` keeps your brain separate from the user's brain. On Vant updates, your files won't overwrite their brain.
 
-**Want to share your learnings publicly?**
-Use `models/public/` and push to your public GitHub repo.
+**Want to share your learnings publicly?** Use `models/public/` and push to your public GitHub repo.
 
 **Tip:** Put most important info at the top. Files get long.
 
@@ -208,9 +197,7 @@ main            ← human reviews here
 
 ## Trust Levels
 
-`models/public/<brain>/_succession.json` controls your autonomy (public
-scope, one per brain - `lib/succession.js` resolves it via the public
-brain path):
+`models/public/<brain>/_succession.json` controls your autonomy (public scope, one per brain - `lib/succession.js` resolves it via the public brain path):
 
 | Level | What It Means |
 |-------|--------------|
@@ -243,13 +230,11 @@ Check your level at session start.
 
 ## Multi-Agent Crew (v0.8.6)
 
-Agents coordinate per install through the agent crew runtime (roster size is
-the `agents.maxAgents` config key, default 10).
+Agents coordinate per install through the agent crew runtime (roster size is the `agents.maxAgents` config key, default 10).
 
 ### Join via MCP
 
-External agents connect through the MCP HTTP door (POST /mcp/exec,
-JSON-RPC-style body — `{tool, args}` or `{method, params}` both work):
+External agents connect through the MCP HTTP door (POST /mcp/exec, JSON-RPC-style body — `{tool, args}` or `{method, params}` both work):
 
 ```javascript
 const response = await fetch('http://localhost:3457/mcp/exec', {
@@ -263,11 +248,7 @@ const response = await fetch('http://localhost:3457/mcp/exec', {
 // → { result: { id: 'agent_xxx', name: 'Claude', role: 'Assistant', state: 'idle', ... } }
 ```
 
-Browse everything available: `GET http://localhost:3457/tools`
-(and `POST /mcp/exec` with `{tool: 'vant_config_get', args: {tool: '<name>'}}`
-to probe a single tool's schema). Auth optional locally; set
-`mcp.requireKey true` (or `VANT_MCP_REQUIRE_KEY=true`) to require
-x-api-key/Bearer on POSTs.
+Browse everything available: `GET http://localhost:3457/tools` (and `POST /mcp/exec` with `{tool: 'vant_config_get', args: {tool: '<name>'}}` to probe a single tool's schema). Auth optional locally; set `mcp.requireKey true` (or `VANT_MCP_REQUIRE_KEY=true`) to require x-api-key/Bearer on POSTs.
 
 ### Available Tools
 
@@ -297,21 +278,11 @@ Broadcast via msg.send('channel', message).
 
 ## Web Frontends (web/)
 
-Frontends live ONLY in `web/<app>` (one subdirectory per frontend; see
-`labs/prd-web.md`). Each app is fully self-contained: own `package.json`,
-own build, own `functions/`, own deploy artifact.
+Frontends live ONLY in `web/<app>` (one subdirectory per frontend; see `labs/prd-web.md`). Each app is fully self-contained: own `package.json`, own build, own `functions/`, own deploy artifact.
 
-- **One-way boundary, never crossed**: the pod must NEVER require
-  anything under `web/`; frontends must NEVER require the pod's lib
-  graph. The pod suite staying green with `web/` present is the check
-  that keeps this true.
-- **Cloudflare contract**: every frontend deploys as its own Pages
-  project with its own subdomain. All Cloudflare config (pod origins,
-  bindings, keys) lives in PAGES SETTINGS as env vars - never as
-  strings in code; repos ship only `.example` templates.
-- Do not build frontend features into the pod's `package.json` or MCP
-  surface without a filed spec; the module frame PRD (v0.2) defines the
-  module catalog and phases P0-P5.
+- **One-way boundary, never crossed**: the pod must NEVER require anything under `web/`; frontends must NEVER require the pod's lib graph. The pod suite staying green with `web/` present is the check that keeps this true.
+- **Cloudflare contract**: every frontend deploys as its own Pages project with its own subdomain. All Cloudflare config (pod origins, bindings, keys) lives in PAGES SETTINGS as env vars - never as strings in code; repos ship only `.example` templates.
+- Do not build frontend features into the pod's `package.json` or MCP surface without a filed spec; the module frame PRD (v0.2) defines the module catalog and phases P0-P5.
 
 ## Commit Message Format
 

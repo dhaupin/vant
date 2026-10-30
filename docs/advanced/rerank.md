@@ -9,7 +9,6 @@ description: Rerank - second-stage scoring for better retrieval answers.
 nav_order: 92
 ---
 
-
 > RAG-powered memory reranking and compression for LLM context.
 
 ## Overview
@@ -38,8 +37,7 @@ vant rerank refine "security fixes" -k 10 -t 2000
 vant rerank -s
 ```
 
-(There is no `vant rerank pipeline` CLI verb - the pipeline shape lives
-in the lib as rerank-then-compress.)
+(There is no `vant rerank pipeline` CLI verb - the pipeline shape lives in the lib as rerank-then-compress.)
 
 ### Options
 
@@ -52,8 +50,7 @@ in the lib as rerank-then-compress.)
 
 ## MCP Tools
 
-The registered `vant_rerank` tool takes `{ query, docs }` and reranks
-the docs array:
+The registered `vant_rerank` tool takes `{ query, docs }` and reranks the docs array:
 
 ```javascript
 await mcp.call('vant_rerank', {
@@ -63,9 +60,7 @@ await mcp.call('vant_rerank', {
 // { query, results } - reranked docs
 ```
 
-(The `mode`/`topK`/`maxTokens` parameter surface was fiction - the
-registered schema is exactly `query` + `docs`; compression is the
-lib's `compress` function.)
+(The `mode`/`topK`/`maxTokens` parameter surface was fiction - the registered schema is exactly `query` + `docs`; compression is the lib's `compress` function.)
 
 ## Programmatic Usage
 
@@ -90,19 +85,14 @@ const compressed = rerank.compress(results, 2000);
 const refined = rerank.refine(memories, 'security', { topK: 10, maxTokens: 4000 });
 ```
 
-(The `pipeline` export name was fiction - the combined operation is
-`refine`.)
+(The `pipeline` export name was fiction - the combined operation is `refine`.)
 
 ## How It Works
 
 ### Rerank
 
 1. Extract query terms (words > 2 chars)
-2. Score each memory by:
-   - Title match (+10)
-   - Query term in content (+1 each)
-   - Query term in title (+2 each)
-   - Recency boost (+0.5)
+2. Score each memory by: - Title match (+10) - Query term in content (+1 each) - Query term in title (+2 each) - Recency boost (+0.5)
 3. Return top-K sorted by score
 
 ### Compress
@@ -122,8 +112,7 @@ Rerank is separate from search. Use it to:
 - Prepare memories for LLM context
 - Optimize token usage
 
-Search already hooks into rerank: `vant search <query> -r` reranks and
-compresses results (live since pass 134's search verification).
+Search already hooks into rerank: `vant search <query> -r` reranks and compresses results (live since pass 134's search verification).
 
 ## Related
 

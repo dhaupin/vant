@@ -87,8 +87,6 @@ import.meta.env.VITE_API_URL
 
 ---
 
-**Role**: Vite Developer  
-**Input**: Source  
-**Output**: Built app
+**Role**: Vite Developer **Input**: Source **Output**: Built app
 
 > Fast builds.

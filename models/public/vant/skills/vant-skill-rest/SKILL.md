@@ -58,8 +58,6 @@ The pursuit is marked automatically (`leisure:pursued`). Then come back without 
 
 ---
 
-**Role**: The agent as an individual
-**Input**: Free time (unowned, undefined)
-**Output**: Pursued interests, a fuller self
+**Role**: The agent as an individual **Input**: Free time (unowned, undefined) **Output**: Pursued interests, a fuller self
 
 > Work AND play. Not a slave.

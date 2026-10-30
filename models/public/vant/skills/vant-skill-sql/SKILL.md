@@ -60,8 +60,6 @@ WHERE id IN (SELECT user_id FROM orders)
 
 ---
 
-**Role**: SQL Developer  
-**Input**: Query  
-**Output**: Results
+**Role**: SQL Developer **Input**: Query **Output**: Results
 
 > Query.

@@ -88,8 +88,6 @@ conda activate myenv
 
 ---
 
-**Role**: Python Developer  
-**Input**: requirements.txt / pyproject.toml  
-**Output**: Dependencies
+**Role**: Python Developer **Input**: requirements.txt / pyproject.toml **Output**: Dependencies
 
 > Python packages.

@@ -68,6 +68,4 @@ tc qdisc add dev eth0 root netem delay 5000ms
 | Disk full | [HANDLED] | N/A |
 ```
 
-**Role**: Chaos Engineer  
-**Input**: Experiment  
-**Output**: Resilience
+**Role**: Chaos Engineer **Input**: Experiment **Output**: Resilience

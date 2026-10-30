@@ -11,15 +11,11 @@ description: Quasicrystal addressing for memory - collision-free spatial keys. E
 
 > Memory addressed by position in a quasicrystal instead of by name.
 
-Geometry stores data at geometric addresses derived from content. Keys
-spread across a quasicrystal projection, which means addresses do not
-collide the way hashed keys can, and neighbors in space tend to be related
-in content. **Experimental:** the format and spec may change.
+Geometry stores data at geometric addresses derived from content. Keys spread across a quasicrystal projection, which means addresses do not collide the way hashed keys can, and neighbors in space tend to be related in content. **Experimental:** the format and spec may change.
 
 ## Store and locate
 
-From code, the geometry module (`lib/geometry/`) exposes the NSC9
-projection and storage layer:
+From code, the geometry module (`lib/geometry/`) exposes the NSC9 projection and storage layer:
 
 ```javascript
 const geometry = require('./lib/geometry');
@@ -68,9 +64,7 @@ Reads it back.
 
 ## Spec
 
-The projection math, address space, and collision properties are specified
-in [NSC9-SPEC](/vant/advanced/nsc9-spec). Treat the spec as the source of
-truth for the format; this page only covers use.
+The projection math, address space, and collision properties are specified in [NSC9-SPEC](/vant/advanced/nsc9-spec). Treat the spec as the source of truth for the format; this page only covers use.
 
 ## Related
 

@@ -9,7 +9,6 @@ description: The search architecture - indexers, embeddings, and the hybrid rank
 nav_order: 91
 ---
 
-
 > **v0.8.6+**: How search connects your memory islands.
 
 ## The Problem
@@ -36,9 +35,7 @@ Query "python"
 
 ### Layer 1: The LTC Index
 
-Search hits the LTC (Long Term Core) index instead of scanning raw
-files. Rebuild or refresh it with `freshLTC()`; read it with `getLTC()`
-(both real exports of lib/search.js).
+Search hits the LTC (Long Term Core) index instead of scanning raw files. Rebuild or refresh it with `freshLTC()`; read it with `getLTC()` (both real exports of lib/search.js).
 
 ### Layer 2: Compact Mode
 
@@ -119,9 +116,7 @@ search.semantic('python', { limit: 10 });     // embedding-powered
 search.getSettings();  // { compressionThreshold: 2000, rehydrateMaxSize: 5000, ragLimitMax: 10, ragTokenLimit: 3000 }
 ```
 
-(The `getCacheStats`/`clearCache`/`searchLTC` surface was fiction -
-there is no query-result cache in lib/search.js and the text hop is
-`getLTC`.)
+(The `getCacheStats`/`clearCache`/`searchLTC` surface was fiction - there is no query-result cache in lib/search.js and the text hop is `getLTC`.)
 
 ```bash
 # CLI
@@ -129,9 +124,7 @@ vant search python -l 3
 vant search python --mode rag --compact
 ```
 
-**MCP tool available as `vant_search`** - call it with
-`{ "query": "python" }` (schema: `query` + `limit`; compact is a CLI
-option, not part of the registered tool schema).
+**MCP tool available as `vant_search`** - call it with `{ "query": "python" }` (schema: `query` + `limit`; compact is a CLI option, not part of the registered tool schema).
 
 ## Security
 

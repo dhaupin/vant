@@ -15,13 +15,7 @@ description: The content-addressed state tree, seed chain, anchors, and checkpoi
 
 ## The one-paragraph mental model
 
-Protocol state (who is trusted, who won the vote, where the org chart
-points) used to live in plain JSON blobs: correct but unverifiable -
-you could not tell tampered from stale from fresh. The state spine
-(`lib/state/`, 13 modules) gives every piece of protocol state a
-**root hash**: state files stay plain and human-readable on disk, but a
-content-addressed mirror lets anything compare, diff, snapshot, verify,
-and dedupe state with one hex string.
+Protocol state (who is trusted, who won the vote, where the org chart points) used to live in plain JSON blobs: correct but unverifiable - you could not tell tampered from stale from fresh. The state spine (`lib/state/`, 13 modules) gives every piece of protocol state a **root hash**: state files stay plain and human-readable on disk, but a content-addressed mirror lets anything compare, diff, snapshot, verify, and dedupe state with one hex string.
 
 The building blocks, in the order they stack:
 
@@ -39,24 +33,12 @@ The building blocks, in the order they stack:
 
 ## The tiers: where your state actually goes
 
-There are two tiers, matched to how much a module cares about
-verification (usage below shows both):
+There are two tiers, matched to how much a module cares about verification (usage below shows both):
 
-1. **File tier (always on)** - `stateStore.hydrate/persist/persistMerged`
-   read/writes plain JSON files at
-   `models/private/<brain>/<stateFile>` through FileStorage
-   (containment gates + atomic writes; WAL enabled by default since the
-   WAL-unification pass). Cross-process serialization uses a fail-closed
-   lock (`persistMerged` refuses an unlocked write; it never degrades).
-2. **Tree tier (opt-in)** - pass `{ tree: new StateTree() }` to
-   `persist`/`persistMerged`/`hydrate` and the snapshot mirrors into a
-   content-addressed `StateTree`. The tree's rootHash rides the
-   `state:saved` event and every `state:persist` audit entry automatically.
+1. **File tier (always on)** - `stateStore.hydrate/persist/persistMerged` read/writes plain JSON files at `models/private/<brain>/<stateFile>` through FileStorage (containment gates + atomic writes; WAL enabled by default since the WAL-unification pass). Cross-process serialization uses a fail-closed lock (`persistMerged` refuses an unlocked write; it never degrades).
+2. **Tree tier (opt-in)** - pass `{ tree: new StateTree() }` to `persist`/`persistMerged`/`hydrate` and the snapshot mirrors into a content-addressed `StateTree`. The tree's rootHash rides the `state:saved` event and every `state:persist` audit entry automatically.
 
-On every tree-tier persist the root is also **anchored** to
-`models/private/<brain>/.state-anchor.jsonl` (the #152 ledger) - a
-tampered or partially-written state file is detectable against the last
-known-good root, not just against an in-process mirror.
+On every tree-tier persist the root is also **anchored** to `models/private/<brain>/.state-anchor.jsonl` (the #152 ledger) - a tampered or partially-written state file is detectable against the last known-good root, not just against an in-process mirror.
 
 ## Usage
 
@@ -133,9 +115,7 @@ const v = stateStore.verifyStateRoot('state/trust.json');
 // loud `anchored:false`, never a silent bless.
 ```
 
-Health's brain-integrity pass and the ledger tooling use this. It is
-deliberately NOT run inside `hydrate()` - every restart would re-bless
-whatever is on disk.
+Health's brain-integrity pass and the ledger tooling use this. It is deliberately NOT run inside `hydrate()` - every restart would re-bless whatever is on disk.
 
 ### The seed chain - replace Math.random with a clock
 
@@ -149,11 +129,7 @@ chain.seedInt('lottery', 100, 'draw1') // int in [0,100), deterministic
 chain.deriveChild(parentSeed, 'nodeA') // prefix folding: != seed of child under universe directly
 ```
 
-The universe constant resolves in priority order: explicit `options.universe`
--> `VANT_UNIVERSE_SEED` env -> per-brain config key `universeSeed` (written by
-genesis `_writeTopology`, never clobbered, never overriding an explicit env) ->
-a fixed deterministic default. Two installs with different universes do not
-agree on seeds - by design; they are different universes.
+The universe constant resolves in priority order: explicit `options.universe` -> `VANT_UNIVERSE_SEED` env -> per-brain config key `universeSeed` (written by genesis `_writeTopology`, never clobbered, never overriding an explicit env) -> a fixed deterministic default. Two installs with different universes do not agree on seeds - by design; they are different universes.
 
 ### Mesh, RAID, geometry: the one spine
 
@@ -181,33 +157,16 @@ spine.writeSharedFact(cellStore, fact, ['/world/w1', '/raid/doc']);
 
 ## Design laws (the honest guarantees)
 
-- **Typed absence over silent default**: missing state file = fresh
-  clean state; parse failure = loud reset; read denial = throw
-  `E_STATE_READ` (error surfaces, never becomes an empty state).
-- **No schema Gson-like clobbering**: tree paths are strictly
-  normalized; `..`, leading `/` missing, trailing slashes and hostile
-  segments are refused (a crafted path escapes nothing).
-- **Determinism**: canonical encoder yields same bytes regardless of
-  key order / object identity / float representation source; the same
-  seed chain replays the same scenario.
-- **Corruption is detected, not guessed**: every tree-tier persist
-  anchors the root; `verifyStateRoot` compares disk vs ledger; mesh
-  checkpoints go through a verifiable SnapshottedLog.
-- **Dedup is structural**: the #150 rebate means the same fact in two
-  spaces costs one cell + one hash derivation from both sides.
-- **Caches never lie**: HotSet misses fall through; any disk change
-  (including external tamper) invalidates; eviction only touches the
-  cache.
+- **Typed absence over silent default**: missing state file = fresh clean state; parse failure = loud reset; read denial = throw `E_STATE_READ` (error surfaces, never becomes an empty state).
+- **No schema Gson-like clobbering**: tree paths are strictly normalized; `..`, leading `/` missing, trailing slashes and hostile segments are refused (a crafted path escapes nothing).
+- **Determinism**: canonical encoder yields same bytes regardless of key order / object identity / float representation source; the same seed chain replays the same scenario.
+- **Corruption is detected, not guessed**: every tree-tier persist anchors the root; `verifyStateRoot` compares disk vs ledger; mesh checkpoints go through a verifiable SnapshottedLog.
+- **Dedup is structural**: the #150 rebate means the same fact in two spaces costs one cell + one hash derivation from both sides.
+- **Caches never lie**: HotSet misses fall through; any disk change (including external tamper) invalidates; eviction only touches the cache.
 
 ## Status and pointers
 
-The tier-tracking ledger is `labs/WIRING.md` ("is it wired" is a status
-column, not a checklist); the engine-parity harness that pins these
-modules is `test/engine-parity-spine.test.js` (state core, world/clock,
-mesh, RAID + storage tier suites). Layered on top you will find:
-[hcom/federation](/vant/multi-agent/federation) uses the tree for
-cross-node presence/authority; [horcrux](/vant/memory/horcrux) rides
-brain-verify for its export/verify contract.
+The tier-tracking ledger is `labs/WIRING.md` ("is it wired" is a status column, not a checklist); the engine-parity harness that pins these modules is `test/engine-parity-spine.test.js` (state core, world/clock, mesh, RAID + storage tier suites). Layered on top you will find: [hcom/federation](/vant/multi-agent/federation) uses the tree for cross-node presence/authority; [horcrux](/vant/memory/horcrux) rides brain-verify for its export/verify contract.
 
 ## Related
 

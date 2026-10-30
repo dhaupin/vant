@@ -132,8 +132,7 @@ format = json
 
 ## CARGO (NOT VERSIONED)
 
-The brain files in models/public/ are NOT individually versioned.
-They travel as a unit - the whole brain is versioned via package.json.
+The brain files in models/public/ are NOT individually versioned. They travel as a unit - the whole brain is versioned via package.json.
 
 When a new agent loads:
 1. Clone/branch from GitHub (has version via commit)

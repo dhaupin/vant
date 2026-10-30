@@ -25,9 +25,7 @@ Peer discovery system for distributed Vant nodes.
 | `resolvePrincipal(id)` | Transport-id to principal mapping |
 | `getStats()` | Registry stats |
 
-Registration enforces a quarantine gate: a quarantined agent registers
-but their vote does not count (the consensus vetting anchor reads from
-here).
+Registration enforces a quarantine gate: a quarantined agent registers but their vote does not count (the consensus vetting anchor reads from here).
 
 ## Usage
 

@@ -23,7 +23,7 @@ metadata:
 **Pass-through. Direct access. No transformation.**
 
 - [ ] Bypass agent system
-- [ ] Bypass skill system  
+- [ ] Bypass skill system
 - [ ] Talk to brain directly
 - [ ] Pass data through unchanged
 

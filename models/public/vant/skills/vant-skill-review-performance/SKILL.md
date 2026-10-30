@@ -116,8 +116,6 @@ await more()
 
 ---
 
-**Role**: Performance Reviewer  
-**Input**: Code or endpoint  
-**Output**: Is fast?
+**Role**: Performance Reviewer **Input**: Code or endpoint **Output**: Is fast?
 
 > Measure it. Fix what matters.

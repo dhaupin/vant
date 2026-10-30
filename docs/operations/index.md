@@ -36,10 +36,7 @@ description: Running Vant day to day - storage, sync, cron, CI, events, networki
 
 ## Where to start
 
-Something feels slow or broken: [Storage](/vant/operations/storage) first,
-then [Cache](/vant/operations/cache). Brain changes not landing on the
-remote: [Sync](/vant/operations/sync). Wiring Vant into scheduled work:
-[Cron](/vant/operations/cron) and [Automation](/vant/operations/automation).
+Something feels slow or broken: [Storage](/vant/operations/storage) first, then [Cache](/vant/operations/cache). Brain changes not landing on the remote: [Sync](/vant/operations/sync). Wiring Vant into scheduled work: [Cron](/vant/operations/cron) and [Automation](/vant/operations/automation).
 
 ## One command to remember
 

@@ -46,11 +46,7 @@ const s = sandbox.create({
 
 ## Capabilities
 
-What an agent can do. The defaults below are the EXPLICIT-CONFIG
-defaults in `DEFAULT_CAPABILITIES` (lib/sandbox.js:304): the moment you
-pass a `capabilities` option, everything not granted is denied. An
-UNTOUCHED sandbox instead allows (with a one-time warning) so CLI
-commands work out of the box:
+What an agent can do. The defaults below are the EXPLICIT-CONFIG defaults in `DEFAULT_CAPABILITIES` (lib/sandbox.js:304): the moment you pass a `capabilities` option, everything not granted is denied. An UNTOUCHED sandbox instead allows (with a one-time warning) so CLI commands work out of the box:
 
 | Capability | Explicit default | What |
 |------------|-----------------|------|
@@ -92,14 +88,11 @@ s.can('canWrite');
 await s.write(() => brain.write('lessons', 'new', 'content'));
 ```
 
-Wrapper methods on the class: `read`, `write`, `network`, `spawn`,
-`commit` (each with its own escrow cost), plus raw `execute(op, ctx)`.
+Wrapper methods on the class: `read`, `write`, `network`, `spawn`, `commit` (each with its own escrow cost), plus raw `execute(op, ctx)`.
 
 ## Network Restrictions
 
-Restrict which domains an agent can call (empty allowlist = no domain
-filtering is applied by the sandbox itself; network.js enforces what is
-set):
+Restrict which domains an agent can call (empty allowlist = no domain filtering is applied by the sandbox itself; network.js enforces what is set):
 
 ```javascript
 const s = sandbox.create({
@@ -164,8 +157,7 @@ console.log(s.getBudgetStatus());
 await s.write(() => doWork());
 ```
 
-Budget exceeding throws `SANDBOX_BUDGET_EXCEEDED`. See
-[Escrow API](/vant/reference/escrow) for the spending API.
+Budget exceeding throws `SANDBOX_BUDGET_EXCEEDED`. See [Escrow API](/vant/reference/escrow) for the spending API.
 
 ## Multi-Agent
 
@@ -237,9 +229,7 @@ const s = sandbox.create({
 });
 ```
 
-There are no `canExecuteCode`/`canUseFilesystem` capabilities in the
-model - the declared set is what the gate checks (see
-DEFAULT_CAPABILITIES above).
+There are no `canExecuteCode`/`canUseFilesystem` capabilities in the model - the declared set is what the gate checks (see DEFAULT_CAPABILITIES above).
 
 ### Custom Scopes
 

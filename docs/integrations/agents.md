@@ -30,8 +30,7 @@ const agents = require('vant').agents;
 
 ## Spawn Agent
 
-Spawn a new agent (the roster cap applies - `agents.maxAgents`, default 10,
-configurable per install via `VANT_AGENTS_MAX`):
+Spawn a new agent (the roster cap applies - `agents.maxAgents`, default 10, configurable per install via `VANT_AGENTS_MAX`):
 
 ```javascript
 const agent = agents.spawn({
@@ -43,9 +42,7 @@ console.log(agent.id);   // "agent_abc123"
 console.log(agent.name); // "Agent1"
 ```
 
-`spawn` returns the agent record synchronously. Roster persistence is
-asynchronous - call `await agents.flush()` before your process exits so a
-fresh process sees the new agent.
+`spawn` returns the agent record synchronously. Roster persistence is asynchronous - call `await agents.flush()` before your process exits so a fresh process sees the new agent.
 
 ## List Agents
 

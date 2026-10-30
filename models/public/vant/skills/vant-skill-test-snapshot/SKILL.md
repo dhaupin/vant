@@ -48,6 +48,4 @@ expect(component).toMatchSnapshot()
 | Modal | [PASS/NEW/FAIL] |
 ```
 
-**Role**: Snap Tester  
-**Input**: UI  
-**Output**: Diff results
+**Role**: Snap Tester **Input**: UI **Output**: Diff results

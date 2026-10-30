@@ -103,8 +103,6 @@ curl -s URL | grep <title>
 
 ---
 
-**Role**: SEO Reviewer  
-**Input**: URL or page  
-**Output**: Findable?
+**Role**: SEO Reviewer **Input**: URL or page **Output**: Findable?
 
 > Make it findable.

@@ -55,8 +55,7 @@ The essentials you need to know.
 
 ### GitHub Terms
 
-- Automate politely - polling is fine but rate-limited (`vant watch`
-respects the API limits)
+- Automate politely - polling is fine but rate-limited (`vant watch` respects the API limits)
 - Don't use a repo as an unlimited raw database
 - API limits apply
 - Token can be revoked

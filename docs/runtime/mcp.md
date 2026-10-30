@@ -32,8 +32,7 @@ The MCP server runs on port **3457** by default:
 
 ### Connect a client
 
-Full MCP clients (Claude Desktop, Cursor, and similar) speak stdio. Point
-them at the command, not a URL:
+Full MCP clients (Claude Desktop, Cursor, and similar) speak stdio. Point them at the command, not a URL:
 
 ```json
 {
@@ -46,8 +45,7 @@ them at the command, not a URL:
 }
 ```
 
-Callers that prefer raw HTTP do not need an MCP client at all. Browse the
-catalog, then execute one tool:
+Callers that prefer raw HTTP do not need an MCP client at all. Browse the catalog, then execute one tool:
 
 ```bash
 curl -s http://127.0.0.1:3457/mcp/tools
@@ -57,9 +55,7 @@ curl -s -X POST http://127.0.0.1:3457/mcp/exec \
   -d '{"tool": "vant_get_memory", "args": {"category": "learnings", "filename": "lessons"}}'
 ```
 
-Responses are plain JSON: `{"result": ...}` on success, `{"error": ...}` on
-failure. The JSON-RPC 2.0 `tools/call` envelope is a REST-server thing
-(`POST /call` on port 3456), not an MCP-server thing.
+Responses are plain JSON: `{"result": ...}` on success, `{"error": ...}` on failure. The JSON-RPC 2.0 `tools/call` envelope is a REST-server thing (`POST /call` on port 3456), not an MCP-server thing.
 
 ### Port Configuration
 
@@ -90,9 +86,7 @@ vant mcp --server
 
 ### TLS / HTTPS
 
-The MCP door itself has no built-in TLS. For production remote access,
-front it with a reverse proxy. Caddy provisions certificates
-automatically:
+The MCP door itself has no built-in TLS. For production remote access, front it with a reverse proxy. Caddy provisions certificates automatically:
 
 ```bash
 # Caddyfile (place next to Caddyfile in project root)
@@ -106,10 +100,7 @@ Then run Caddy:
 caddy run
 ```
 
-If you would rather serve TLS natively on a Vant door, the REST sidecar
-does it: `vant server --cert /path/to/cert.pem --key /path/to/key.pem`
-(port 3456; VANT_SERVER_CERT/VANT_SERVER_KEY, see the REST API
-reference).
+If you would rather serve TLS natively on a Vant door, the REST sidecar does it: `vant server --cert /path/to/cert.pem --key /path/to/key.pem` (port 3456; VANT_SERVER_CERT/VANT_SERVER_KEY, see the REST API reference).
 
 ### Environment Variables
 
@@ -160,8 +151,7 @@ vant mcp
 
 ### Authentication
 
-Open on loopback by default. Require a key for POSTs, then send it in a
-header (never as a tool argument):
+Open on loopback by default. Require a key for POSTs, then send it in a header (never as a tool argument):
 
 ```bash
 # Require keys
@@ -176,16 +166,13 @@ curl -X POST http://localhost:3457/mcp/exec \
   -d '{"tool": "vant_health"}'
 ```
 
-After 5 failed auth attempts, access is locked for 60 seconds (lockouts
-persist across restarts). A valid habitat token (`vant_...`) also satisfies
-the gate.
+After 5 failed auth attempts, access is locked for 60 seconds (lockouts persist across restarts). A valid habitat token (`vant_...`) also satisfies the gate.
 
 ---
 
 ## HTTP Endpoints
 
-The MCP server also speaks plain HTTP: two real endpoints and two kept
-aliases.
+The MCP server also speaks plain HTTP: two real endpoints and two kept aliases.
 
 | Method | Path | What |
 |--------|------|------|
@@ -215,35 +202,23 @@ curl -X POST http://localhost:3457/mcp/exec \
   -d '{"method": "vant_get_memory", "params": {"file": "identity.md"}}'
 ```
 
-Responses are plain JSON: `{"result": ...}` on success, `{"error": ...}` on
-failure. There is no `tools/call` envelope and no `POST /call` route.
+Responses are plain JSON: `{"result": ...}` on success, `{"error": ...}` on failure. There is no `tools/call` envelope and no `POST /call` route.
 
 ### Authentication
 
-Open on loopback by default. `vant config set mcp.requireKey true` (or env
-`VANT_MCP_REQUIRE_KEY=true`) requires `x-api-key` or `Authorization: Bearer`
-on POSTs; habitat tokens (`vant_...`) are accepted too and anchor the
-request to its RLS subject:
+Open on loopback by default. `vant config set mcp.requireKey true` (or env `VANT_MCP_REQUIRE_KEY=true`) requires `x-api-key` or `Authorization: Bearer` on POSTs; habitat tokens (`vant_...`) are accepted too and anchor the request to its RLS subject:
 
 ```bash
 curl -H "Authorization: Bearer $VANT_API_KEY" http://localhost:3457/mcp/tools
 ```
 
-The curated REST route table (brain, streams, trust, market) is a separate
-embedder surface on port 3456: [REST API Reference](/vant/reference/rest-api),
-wire map in [RPC](/vant/advanced/rpc).
+The curated REST route table (brain, streams, trust, market) is a separate embedder surface on port 3456: [REST API Reference](/vant/reference/rest-api), wire map in [RPC](/vant/advanced/rpc).
 
 ---
 
 ## Tool Reference
 
-The complete, current catalog lives in
-[MCP Tools Reference](/vant/reference/mcp-tools), kept true to the
-registry (each entry lists its params and examples and matches
-`mcp.execute` behavior). The registry GROWS by design - every core
-library pass auto-wires new verbs - so this page never hard-codes a
-count: run `tools/list` against the live server (or GET /tools) for the
-authoritative number.
+The complete, current catalog lives in [MCP Tools Reference](/vant/reference/mcp-tools), kept true to the registry (each entry lists its params and examples and matches `mcp.execute` behavior). The registry GROWS by design - every core library pass auto-wires new verbs - so this page never hard-codes a count: run `tools/list` against the live server (or GET /tools) for the authoritative number.
 
 The nine core brain tools:
 
@@ -275,21 +250,14 @@ Sample of the wider surface (full list in the reference):
 
 ## Error Handling
 
-Failures cross the wire as JSON with a `result.error` payload (tool-level
-results) or a bare `{error: '...'}` (thrown handlers). Error codes follow
-[lib/error.js](https://github.com/dhaupin/vant/blob/main/lib/error.js) -
-the code's [Errors reference](/vant/reference/errors) is the catalog.
-Common ones:
+Failures cross the wire as JSON with a `result.error` payload (tool-level results) or a bare `{error: '...'}` (thrown handlers). Error codes follow [lib/error.js](https://github.com/dhaupin/vant/blob/main/lib/error.js) - the code's [Errors reference](/vant/reference/errors) is the catalog. Common ones:
 
 - `Security check failed` - input failed VAF validation
 - `Circuit open` - QoS circuit breaker open (too many failures); wait and retry
 - `Server busy` - max concurrent requests reached
 - `Unknown tool` - tool name not registered
 
-Handlers increasingly return typed not-blessed results, e.g.
-`{added:false, reason}` (citations lock unavailable) or
-`{encoded:false, error, code}` (stego path blocked) - check the flag,
-don't assume success.
+Handlers increasingly return typed not-blessed results, e.g. `{added:false, reason}` (citations lock unavailable) or `{encoded:false, error, code}` (stego path blocked) - check the flag, don't assume success.
 
 ## Running Modes
 
@@ -313,8 +281,7 @@ node bin/mcp.js --stdio
 ```
 
 ### With Configuration
-Set via environment variables (there is no config.ini reader in the
-MCP server - the `VANT_*` envs are the config surface):
+Set via environment variables (there is no config.ini reader in the MCP server - the `VANT_*` envs are the config surface):
 
 ```bash
 VANT_MCP_PORT=3457 vant mcp --server
@@ -325,13 +292,7 @@ export VANT_MCP_REQUIRE_KEY=true
 
 ## Available Tools
 
-The registry is hand-registered and auto-wired per module, so the count
-drifts by design (it passed 300 in pass 205 and grows with every
-library wave) - do not trust any number printed HERE; the authoritative,
-kept-true catalog (params + examples per tool) is
-[MCP Tools Reference](/vant/reference/mcp-tools), and `tools/list` on
-the live server is always exact. This page deliberately
-keeps only the nine core brain tools and the integration examples.
+The registry is hand-registered and auto-wired per module, so the count drifts by design (it passed 300 in pass 205 and grows with every library wave) - do not trust any number printed HERE; the authoritative, kept-true catalog (params + examples per tool) is [MCP Tools Reference](/vant/reference/mcp-tools), and `tools/list` on the live server is always exact. This page deliberately keeps only the nine core brain tools and the integration examples.
 
 ## API Examples
 
@@ -535,9 +496,7 @@ curl -X POST http://localhost:3457/mcp/exec \
   -d '{"tool": "vant_search_hybrid", "args": {"query": "authentication", "topK": 5}}'
 ```
 
-The other flavors (`vant_search_semantic`, `vant_search_multiquery`,
-`vant_search_hyde`) follow the same pattern. What each mode does and when
-to reach for it: [Brain Search](/vant/memory/search).
+The other flavors (`vant_search_semantic`, `vant_search_multiquery`, `vant_search_hyde`) follow the same pattern. What each mode does and when to reach for it: [Brain Search](/vant/memory/search).
 
 ## Error Handling
 

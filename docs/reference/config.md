@@ -12,8 +12,7 @@ All configuration files for Vant.
 
 ## Config precedence (the four surfaces)
 
-Every config key can come from four places. When several define the same
-key, the layers win in THIS order (highest first):
+Every config key can come from four places. When several define the same key, the layers win in THIS order (highest first):
 
 | # | Surface | Where it lives | Lifetime | Set via |
 |---|---------|----------------|----------|---------|
@@ -24,27 +23,14 @@ key, the layers win in THIS order (highest first):
 
 Resolution rules, as implemented in `config.get(key)`:
 
-1. **Runtime flag first.** `_flags` wins over everything - in-process
-   callers keep instant round-trips (`setFlag` then `get` returns it).
-2. **Brain config next** (when `options.brain` is given, or via the
-   dedicated accessors like `mcpRequireKey()`). `vant config set` persist
-   writes here, so cross-process callers see the value.
-3. **Global config last**: env-primed defaults overlaid by `vant.config.js`
-   (read via a bare `vm` sandbox - configs are data, not code; nothing can
-   `require` from it).
+1. **Runtime flag first.** `_flags` wins over everything - in-process callers keep instant round-trips (`setFlag` then `get` returns it).
+2. **Brain config next** (when `options.brain` is given, or via the dedicated accessors like `mcpRequireKey()`). `vant config set` persist writes here, so cross-process callers see the value.
+3. **Global config last**: env-primed defaults overlaid by `vant.config.js` (read via a bare `vm` sandbox - configs are data, not code; nothing can `require` from it).
 4. **Then the built-in default**, then the caller's `defaultValue`.
 
-Dedicated accessors (e.g. `mcpRequireKey()`, `mcpApiKey()`) follow the
-same ladder: flag -> env var -> brain config -> fallback. A key present at
-several layers resolves silently to the highest one; run
-`vant config list` to see the merged view.
+Dedicated accessors (e.g. `mcpRequireKey()`, `mcpApiKey()`) follow the same ladder: flag -> env var -> brain config -> fallback. A key present at several layers resolves silently to the highest one; run `vant config list` to see the merged view.
 
-Env-var inventory is a *registry*, not the resolution rule:
-`ENV_REGISTRY` (43 entries, pass 186) names every `VANT_*` var the
-general runtime consumes; `vant config list env` prints resolved values
-(masked secrets, unset keys visible with `includeUnset`). Per-domain
-families (spine seeds, genesis mesh, sudo, s3 `REMOTE_*`) are dialed by
-their own modules - those modules are the reader of record, not config.js.
+Env-var inventory is a *registry*, not the resolution rule: `ENV_REGISTRY` (43 entries, pass 186) names every `VANT_*` var the general runtime consumes; `vant config list env` prints resolved values (masked secrets, unset keys visible with `includeUnset`). Per-domain families (spine seeds, genesis mesh, sudo, s3 `REMOTE_*`) are dialed by their own modules - those modules are the reader of record, not config.js.
 
 ## Environment Variables (.env)
 
@@ -130,10 +116,7 @@ Configuration via environment.
 
 ### Relay posture (Mode R - brain config keys, NOT env vars)
 
-The r/2 relay face (COMPOSED of webhook transport + MCP door + lib/api
-face; there is NO lib/relay module, the no-legacy-bloat guard pins
-that) reads these brain-config keys (layer 2 - set with
-`vant config set`, per brain):
+The r/2 relay face (COMPOSED of webhook transport + MCP door + lib/api face; there is NO lib/relay module, the no-legacy-bloat guard pins that) reads these brain-config keys (layer 2 - set with `vant config set`, per brain):
 
 | Key | Required | Description |
 |-----|----------|-------------|
@@ -143,12 +126,7 @@ that) reads these brain-config keys (layer 2 - set with
 | `relay.intranetOrigins` | No | RECOMMENDED LAN-scope posture: plain-http hop origins admitted ONLY for loopback/RFC1918/IPv6-ULA scopes; the outbound fetch keeps a scoped SSRF wall (cloud metadata 169.254/16, multicast, 0.0.0.0 refuse in EVERY posture - see docs/operations/relay.md) |
 | `relay.allowPrivateOrigins` | No | LAB ESCAPE ONLY: http anywhere + the private fetch wall lifted (`skipDomainCheck`). Host posture, never a default |
 
-Recommended order: `vant config set relay.enabled true`, `vant relay
-gate`, `vant relay channel`, then start the pod (`vant server` / `all` /
-`headless`) - the boot mounts the face onto the webhook transport (port
-3467 default, loopback-bound like every listener; widen deliberately
-with `VANT_WEBHOOK_*`). OFF is first-class: no register, no server, no
-route. ON without a gate secret binds NOTHING (fail-closed).
+Recommended order: `vant config set relay.enabled true`, `vant relay gate`, `vant relay channel`, then start the pod (`vant server` / `all` / `headless`) - the boot mounts the face onto the webhook transport (port 3467 default, loopback-bound like every listener; widen deliberately with `VANT_WEBHOOK_*`). OFF is first-class: no register, no server, no route. ON without a gate secret binds NOTHING (fail-closed).
 
 ### Notifications
 
@@ -177,27 +155,16 @@ route. ON without a gate secret binds NOTHING (fail-closed).
 
 ## config.ini note (read this first)
 
-`lib/config.js` reads **no `.ini` file** - there is no ini reader in the
-config layer. Configuration resolves from two real layers:
+`lib/config.js` reads **no `.ini` file** - there is no ini reader in the config layer. Configuration resolves from two real layers:
 
-1. **Environment variables** (`VANT_*`, `MCP_*`, `GITHUB_*`, and the
-   security tunables below)
-2. **Per-brain runtime config** (`models/private/<brain>/config.json`,
-   read/written by `vant config get|set`)
+1. **Environment variables** (`VANT_*`, `MCP_*`, `GITHUB_*`, and the security tunables below)
+2. **Per-brain runtime config** (`models/private/<brain>/config.json`, read/written by `vant config get|set`)
 
-There IS one partial ini reader elsewhere: `bin/sync.js` parses
-`config.ini` (`CONFIG_PATH`, default `config.ini`) for `GITHUB_REPO`, and
-`vant setup` writes that file as the per-install record of your
-repo/branch/stegoframe choices. That file tells `vant sync` where to
-push your brain - nothing else. Every other setting (MCP keys, server
-ports, security tunables, notification webhooks) is env-var or
-brain-config only; no code reads a `settings.ini` or `mood.ini`.
+There IS one partial ini reader elsewhere: `bin/sync.js` parses `config.ini` (`CONFIG_PATH`, default `config.ini`) for `GITHUB_REPO`, and `vant setup` writes that file as the per-install record of your repo/branch/stegoframe choices. That file tells `vant sync` where to push your brain - nothing else. Every other setting (MCP keys, server ports, security tunables, notification webhooks) is env-var or brain-config only; no code reads a `settings.ini` or `mood.ini`.
 
-`config.example.ini` / `settings.example.ini` are name reference cards
-(their key names stay accepted as aliases in the config layer).
+`config.example.ini` / `settings.example.ini` are name reference cards (their key names stay accepted as aliases in the config layer).
 
-If you want to persist a setting, use the env var (shell profile, .env,
-or deployment env) or `vant config set <key> <value>`.
+If you want to persist a setting, use the env var (shell profile, .env, or deployment env) or `vant config set <key> <value>`.
 
 ## Environment variables (the real config surface)
 

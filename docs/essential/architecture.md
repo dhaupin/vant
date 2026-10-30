@@ -9,9 +9,7 @@ nav_order: 37
 
 # Architecture
 
-Vant is the memory-first agent OS, built on Git for the soul. Memory stays
-first: everything the OS does exists so the brain survives and agents live
-well inside it. The layers, each mapped to real modules below:
+Vant is the memory-first agent OS, built on Git for the soul. Memory stays first: everything the OS does exists so the brain survives and agents live well inside it. The layers, each mapped to real modules below:
 
 | Layer | What it does | Modules |
 |------|--------------|---------|
@@ -21,8 +19,7 @@ well inside it. The layers, each mapped to real modules below:
 | **Governance** | who may act, in what order, with what approvals | consensus, forum, governance, trust, succession, escrow, market |
 | **Surfaces** | the ways humans and agents touch it all | bin/ CLI, web/ dashboard and relays, docs |
 
-Memory is layer zero: the brain files every other layer reads when a
-session opens and writes before it closes.
+Memory is layer zero: the brain files every other layer reads when a session opens and writes before it closes.
 
 ```text
 ┌─────────────────────────────────────────────────────────────────┐
@@ -89,9 +86,7 @@ Start → Sync from GitHub → Load brain → Think/Learn → Commit → Push to
 
 ### Models Structure
 
-The multi-brain layout (the axolotl line, v0.8.6): per-brain directories plus the active
-stack in `models/state.json`. Legacy flat trees are imported by
-`vant migrate` (see the [Migration Guide](/vant/getting-started/migration)).
+The multi-brain layout (the axolotl line, v0.8.6): per-brain directories plus the active stack in `models/state.json`. Legacy flat trees are imported by `vant migrate` (see the [Migration Guide](/vant/getting-started/migration)).
 
 ```text
 models/
@@ -175,8 +170,7 @@ See [Sandbox](/vant/security/sandbox) and [VAF](/vant/security/vaf) for details.
 
 ## The API surface
 
-Everything above is served through one source of truth - `lib/vant.js` -
-with thin interfaces on top:
+Everything above is served through one source of truth - `lib/vant.js` - with thin interfaces on top:
 
 ```text
 lib/vant.js  <- SOURCE OF TRUTH (common calls)
@@ -197,18 +191,11 @@ lib/vant.js  <- SOURCE OF TRUTH (common calls)
 
 ### Ownership model
 
-The tool surface is split by ownership - shared calls live in `lib/vant.js`
-and are delegated to; interface-specific calls live at the edge:
+The tool surface is split by ownership - shared calls live in `lib/vant.js` and are delegated to; interface-specific calls live at the edge:
 
-- **Vant-owned (source of truth):** brain, branches, islands, citations,
-  connectors, framework status, config, audit, search, storage, stream,
-  network, tmp, boot, backup, embed.
-- **MCP-unique (agent tools):** agent spawn/list/kill, agent and skill
-  protos, delegation, sudo, shell, stego, resolution tracking.
-- **REST-unique (web tools):** file ops (drop/get/list/delete), execute,
-  hooks (onBeforeExecute/onAfterExecute/onError), auth
-  (setSecret/requireAuth/authenticate), mode detection, MCP start, tool
-  call.
+- **Vant-owned (source of truth):** brain, branches, islands, citations, connectors, framework status, config, audit, search, storage, stream, network, tmp, boot, backup, embed.
+- **MCP-unique (agent tools):** agent spawn/list/kill, agent and skill protos, delegation, sudo, shell, stego, resolution tracking.
+- **REST-unique (web tools):** file ops (drop/get/list/delete), execute, hooks (onBeforeExecute/onAfterExecute/onError), auth (setSecret/requireAuth/authenticate), mode detection, MCP start, tool call.
 
 ### Spec alignment
 
@@ -235,8 +222,7 @@ const islands = vant.islands();
 await islands.list();
 ```
 
-MCP and REST handlers currently import modules directly; the runtime
-object is the intended delegation target as the surface consolidates.
+MCP and REST handlers currently import modules directly; the runtime object is the intended delegation target as the surface consolidates.
 
 ## Related
 

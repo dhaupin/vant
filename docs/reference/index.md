@@ -42,9 +42,7 @@ description: Complete Vant reference - CLI, configuration, APIs, error codes, an
 
 ## Where to start
 
-Know the command, need the flags: [CLI](/vant/reference/cli). Chasing an
-error string: [Errors](/vant/reference/errors). Configuring behavior:
-[Configuration](/vant/reference/config).
+Know the command, need the flags: [CLI](/vant/reference/cli). Chasing an error string: [Errors](/vant/reference/errors). Configuring behavior: [Configuration](/vant/reference/config).
 
 ## One example
 

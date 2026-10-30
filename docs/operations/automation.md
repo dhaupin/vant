@@ -20,10 +20,7 @@ Automated workflows:
 
 ## Scheduling Model
 
-Vant's scheduler (`vant.cron`) is interval-based, not cron-expression
-based: `schedule({ id, interval, handler })` with interval in
-milliseconds (1000-86400000, 1 day max). For day-of-week style
-schedules, use your system crontab and invoke the CLI.
+Vant's scheduler (`vant.cron`) is interval-based, not cron-expression based: `schedule({ id, interval, handler })` with interval in milliseconds (1000-86400000, 1 day max). For day-of-week style schedules, use your system crontab and invoke the CLI.
 
 ## Basic Setup
 
@@ -53,8 +50,7 @@ Prune is a CLI verb - put it in your system crontab:
 cd /path/to/vant && vant prune --stale-days 14 --no-fluff
 ```
 
-(If you must schedule it in-process, `cron.schedule` a handler that
-spawns `vant prune`.)
+(If you must schedule it in-process, `cron.schedule` a handler that spawns `vant prune`.)
 
 ## Event Triggers
 

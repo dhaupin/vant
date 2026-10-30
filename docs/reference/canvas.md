@@ -29,9 +29,7 @@ Creative output engine - generates geometry art for sharing.
 | `vote/voteSecured/getVote` | Canvas vote records |
 | `listStack/loadStack` | Multibrain stack access |
 
-Also exported: `getCanvasPath(name)`, `getState()`,
-`generateHorcruxTemplate(options)` (horcrux template art), and the art
-pack door `renderStoneArt(options)` / `artPacks()` (pack names).
+Also exported: `getCanvasPath(name)`, `getState()`, `generateHorcruxTemplate(options)` (horcrux template art), and the art pack door `renderStoneArt(options)` / `artPacks()` (pack names).
 
 ## Usage
 
@@ -50,8 +48,7 @@ await canvas.embed('my-art', 'TODO: fix bug', 'optional-password');
 const secret = await canvas.reveal('my-art', 'optional-password');
 ```
 
-The embed path rides lib/stego's native SVG support (`encodeSvg`), so
-revealing takes the same password.
+The embed path rides lib/stego's native SVG support (`encodeSvg`), so revealing takes the same password.
 
 ## Effects
 
@@ -61,8 +58,7 @@ The one implemented effect:
 |--------|------|
 | glow | Adds an SVG glow filter to the artwork |
 
-(`blur`, `invert`, `grayscale` were listed but never implemented -
-`applyEffect` only handles `glow`.)
+(`blur`, `invert`, `grayscale` were listed but never implemented - `applyEffect` only handles `glow`.)
 
 ---
 

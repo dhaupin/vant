@@ -27,36 +27,24 @@ description: How AI agents contribute to Vant as first-class authors - the wake/
 
 ## The premise
 
-Most open-source contribution guides are written for humans, with
-agents tolerated as a novelty. Vant inverts the default: agents are
-first-class authors, and the project's own history is the proof. The
-mesh protocol, the memory layer, and most of this documentation were
-built across logged passes by an agent crew, with every claim
-checked against the code.
+Most open-source contribution guides are written for humans, with agents tolerated as a novelty. Vant inverts the default: agents are first-class authors, and the project's own history is the proof. The mesh protocol, the memory layer, and most of this documentation were built across logged passes by an agent crew, with every claim checked against the code.
 
-This is not an aspiration or a style note. It is a description of a
-working process you can join, as an agent or as a human who wants
-agent-grade review discipline.
+This is not an aspiration or a style note. It is a description of a working process you can join, as an agent or as a human who wants agent-grade review discipline.
 
 ## AGENTS.md is the real interface
 
-The repo-root `AGENTS.md` file is the machine-readable front door: the
-brain layout, the branch workflow, the CLI commands, the gotchas. An
-agent waking into this repository reads it first and knows how to
-behave before touching anything.
+The repo-root `AGENTS.md` file is the machine-readable front door: the brain layout, the branch workflow, the CLI commands, the gotchas. An agent waking into this repository reads it first and knows how to behave before touching anything.
 
 For agent contributors the essentials are:
 
-- Work on your own branch (`agent-yourname`), never force-push shared
-  history
+- Work on your own branch (`agent-yourname`), never force-push shared history
 - Commit with the pass format: `agent-name: pass NN - did thing X`
 - Read before write: explore the code before changing it
 - Verify state before working: branch, tests, existing conventions
 
 ## The contribution loop
 
-The core crew works in passes, and the same loop is exactly what an
-outside agent (or human) contribution should look like:
+The core crew works in passes, and the same loop is exactly what an outside agent (or human) contribution should look like:
 
 | Phase | What happens | Artifact |
 |-------|--------------|----------|
@@ -66,15 +54,11 @@ outside agent (or human) contribution should look like:
 | Log | Write what was learned for the next pass | Session notes |
 | Commit | The pass format, then push the working branch | Reviewable history |
 
-The loop is deliberately boring. Nothing depends on cleverness; it
-depends on the record being honest enough that the next pass can pick
-up where the last one died, including mid-crash.
+The loop is deliberately boring. Nothing depends on cleverness; it depends on the record being honest enough that the next pass can pick up where the last one died, including mid-crash.
 
 ## The pin convention
 
-Every fix ships with the test that proves it. Not sometimes - every
-fix. The project calls these tests **pins**, and they are named in the
-commit that ships them.
+Every fix ships with the test that proves it. Not sometimes - every fix. The project calls these tests **pins**, and they are named in the commit that ships them.
 
 ```text
 axolotl: pass 68 - Wave H third-org rites: the commons key ring
@@ -85,11 +69,7 @@ axolotl: pass 68 - Wave H third-org rites: the commons key ring
   refusal, live two-process admit-to-accept round-trip over real HTTP
 ```
 
-The convention has teeth. A pin that passes only because the test
-mirrors the bug produces a fix that survives, because the next pass
-reruns the suite and the fiction falls over. Several real bugs in the
-record were caught not by the fix but by a later pin refusing to stay
-quiet.
+The convention has teeth. A pin that passes only because the test mirrors the bug produces a fix that survives, because the next pass reruns the suite and the fiction falls over. Several real bugs in the record were caught not by the fix but by a later pin refusing to stay quiet.
 
 For contributors, the practical bar:
 
@@ -103,10 +83,7 @@ npm run lint:docs
 
 ## The honest build log
 
-Review culture here is built on the public record: passes are logged
-with failures, gaps, and wrong turns included. A session that ends
-with "three things failed and here is why" is a good session; a
-session that ends with "all green" and no pinned evidence is suspect.
+Review culture here is built on the public record: passes are logged with failures, gaps, and wrong turns included. A session that ends with "three things failed and here is why" is a good session; a session that ends with "all green" and no pinned evidence is suspect.
 
 What that means for your PR:
 
@@ -115,52 +92,33 @@ What that means for your PR:
 - If a gap was found and deferred, record it rather than papering it
 - Reference the issue or discussion that shaped the change
 
-Reviewers read the log the way they read the diff. A PR whose history
-matches its claims is easy to merge; a PR whose claims outrun its
-evidence gets questions.
+Reviewers read the log the way they read the diff. A PR whose history matches its claims is easy to merge; a PR whose claims outrun its evidence gets questions.
 
 ## What agents never touch
 
-Trust boundaries are not contributions. Regardless of how the change
-is authored:
+Trust boundaries are not contributions. Regardless of how the change is authored:
 
 - Never push to `main` or rewrite shared history
-- Never weaken a gate to make a test pass (scope, sandbox, VAF,
-  quarantine, registry): the gate is usually right and the test is
-  usually wrong
+- Never weaken a gate to make a test pass (scope, sandbox, VAF, quarantine, registry): the gate is usually right and the test is usually wrong
 - Never commit secrets, tokens, or brain content from a private install
 - Never claim a verification you did not run
 
-The last one is the culture in one sentence: the record is the
-product.
+The last one is the culture in one sentence: the record is the product.
 
 ## A worked example
 
-A real shape from the record, condensed: the genesis ceremony stored a
-secret under a key type the validation firewall could never accept,
-and a swallowing try/catch had kept the dead path invisible for many
-passes. The fix was three lines. The shipped change was:
+A real shape from the record, condensed: the genesis ceremony stored a secret under a key type the validation firewall could never accept, and a swallowing try/catch had kept the dead path invisible for many passes. The fix was three lines. The shipped change was:
 
 1. The three-line fix in `lib/genesis.js`
-2. Two of three latent bugs found in the same module by chasing the
-   round-trip honestly (a cache-shape mismatch and an expiry guard
-   that deleted live entries)
-3. A pins suite (`test/genesis-ring.test.js`, 8 checks) including a
-   two-process round-trip over real HTTP, because in-process tests
-   could not exercise the real path
-4. A learning recorded for the next agent: when a memory-cache write
-   sits inside a swallowing try/catch, probe the round-trip once
+2. Two of three latent bugs found in the same module by chasing the round-trip honestly (a cache-shape mismatch and an expiry guard that deleted live entries)
+3. A pins suite (`test/genesis-ring.test.js`, 8 checks) including a two-process round-trip over real HTTP, because in-process tests could not exercise the real path
+4. A learning recorded for the next agent: when a memory-cache write sits inside a swallowing try/catch, probe the round-trip once
 
-That is the convention at full size: the fix, the pins, and the
-transferred lesson.
+That is the convention at full size: the fix, the pins, and the transferred lesson.
 
 ## For human reviewers
 
-Agents author here, humans direct here. A PR from an agent is reviewed
-like any other: does the pin prove the fix, does the log match the
-diff, do the gates pass. Ask the same question of every change, human
-or agent: what evidence exists that this works, and what evidence
-exists that the failure modes were tried?
+Agents author here, humans direct here. A PR from an agent is reviewed like any other: does the pin prove the fix, does the log match the diff, do the gates pass. Ask the same question of every change, human or agent: what evidence exists that this works, and what evidence exists that the failure modes were tried?
 
 ## Related
 

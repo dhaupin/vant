@@ -66,6 +66,4 @@ fuzz('mutation', () => mutate(existing))
 - [list]
 ```
 
-**Role**: Fuzz Tester  
-**Input**: Target  
-**Output**: Crashes
+**Role**: Fuzz Tester **Input**: Target **Output**: Crashes

@@ -173,9 +173,7 @@ console.log(job.state); // pending -> completed/failed
 
 ### Track
 
-The queue runs jobs itself (there is no user `process()` handler API
-and the queue is not an EventEmitter - no `.on('job:complete')`).
-Track jobs by id and watch stats:
+The queue runs jobs itself (there is no user `process()` handler API and the queue is not an EventEmitter - no `.on('job:complete')`). Track jobs by id and watch stats:
 
 ```javascript
 const job = queue.get(jobId);  // job state after the fact
@@ -201,21 +199,14 @@ console.log(queue.stats());    // { queued, running, total, uptime }
 
 ## The MCP tap stream (`GET /mcp/events`)
 
-The board tap is a filtered, throttled, sanitized SSE view of THIS bus
-(auth posture identical to `/mcp/exec`; the pass-212 sanitization: listed
-keys only, values capped). Wire contract (build-day-11 fix - the frames
-are DEFAULT-message events):
+The board tap is a filtered, throttled, sanitized SSE view of THIS bus (auth posture identical to `/mcp/exec`; the pass-212 sanitization: listed keys only, values capped). Wire contract (build-day-11 fix - the frames are DEFAULT-message events):
 
 ```text
 id: <ms>
 data: {"tapType":"<full bus type>",...listed fields}
 ```
 
-`tapType` is the full type (e.g. `agent:spawned`); consumers key on the
-ROOT segment (`agent`). Named exceptions: `event: tap.revoked` is the
-pod's mid-stream revocation note - it kills the stream at the next beat
-and a browser closes its EventSource when it sees it. Internal families
-(`guest|mcp|sudo|config:*`) never board.
+`tapType` is the full type (e.g. `agent:spawned`); consumers key on the ROOT segment (`agent`). Named exceptions: `event: tap.revoked` is the pod's mid-stream revocation note - it kills the stream at the next beat and a browser closes its EventSource when it sees it. Internal families (`guest|mcp|sudo|config:*`) never board.
 
 ---
 

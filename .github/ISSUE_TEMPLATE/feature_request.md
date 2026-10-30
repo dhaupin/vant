@@ -9,14 +9,10 @@ assignees: ''
 
 ## Feature Description
 
-**Is your feature request related to a problem?**
-A clear description of what the problem is.
+**Is your feature request related to a problem?** A clear description of what the problem is.
 
-**Describe the solution you'd like**
-A clear description of what you want to happen.
+**Describe the solution you'd like** A clear description of what you want to happen.
 
-**Describe alternatives you've considered**
-Any alternative solutions you've considered.
+**Describe alternatives you've considered** Any alternative solutions you've considered.
 
-**Additional context**
-Add any other context or screenshots about the feature request here.
+**Additional context** Add any other context or screenshots about the feature request here.

@@ -122,8 +122,6 @@ curl api.com  // $$
 
 ---
 
-**Role**: Efficiency Reviewer  
-**Input**: System  
-**Output**: Cost?
+**Role**: Efficiency Reviewer **Input**: System **Output**: Cost?
 
 > Efficiency is money.

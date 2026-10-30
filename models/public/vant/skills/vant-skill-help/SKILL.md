@@ -167,6 +167,4 @@ When asking for help, include:
 
 ---
 
-**Role**: Helper  
-**Input**: What you need  
-**Output**: How to do it
+**Role**: Helper **Input**: What you need **Output**: How to do it

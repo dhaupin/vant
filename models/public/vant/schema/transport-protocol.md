@@ -123,14 +123,11 @@ islands.autoHydrate('fix the github pr');  // ['identity', 'learnings', 'decisio
 
 Three tiers (v0.8.6):
 
-1. **Static state** - Immutable facts, never changes
-   - identity.json, _succession.json
+1. **Static state** - Immutable facts, never changes - identity.json, _succession.json
 
-2. **Current state** - Active task per prompt
-   - models/public/goals.md, lessons.md
+2. **Current state** - Active task per prompt - models/public/goals.md, lessons.md
 
-3. **Temp state** - Wiped on prune
-   - states/active/, cache files
+3. **Temp state** - Wiped on prune - states/active/, cache files
 
 ---
 

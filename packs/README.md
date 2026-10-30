@@ -3054,3 +3054,48 @@ The post-census sweep's first retirement candidate set, driven by the
   batch 28/28 held; eslint flat on all four touched suites; the
   workflow YAML parses. Pack count untouched (21/302) - no EXPECTED
   table drift, no restamp IOU.
+
+
+## Wave 15 (2026-10-30) - riding issues #270 + #268: the version-truth leg lands, and living prose flows everywhere (the 72-col habit is dead)
+
+- **The version-truth leg (#270)** - package.json is THE single version
+  truth of vant, scored in test/version.test.js fixture-first (the
+  docs-truthfulness pin pattern: clean-tree PASS, drifted-throwaway
+  FAIL both pinned). The leg derives the root version and refuses
+  every living surface that hand-copies a stale copy of it:
+  Dockerfile ARG VERSION, docker-compose.yml VANT_VERSION, an
+  openapi.yaml info.version if one appears, README/AGENTS/CLAUDE Status lines and npm shield-badge
+  pins. Current living claims audited lawful: Docker
+  ARG + compose env already match (the 0.8.6 owner-locked era),
+  no README/AGENTS Status-line pin exists, openapi.yaml carries none,
+  lib/bin (v0.8.6) headers are the pass-155 owner-ruled dating
+  convention, the docs pages' `version:` frontmatter is the same
+  dating convention (128 refs, deliberately kept), web/* components
+  (vant-home etc.) carry their OWN versions per the one-way boundary,
+  and horcrux metadata versions are FORMAT contracts, not package
+  truth (per the deliberate-fossil audit). Dated era rows stay
+  lawful forever - only living claim points get refused.
+- **The prose-flow sweep (#268)** - copying eyestruct's
+  scripts/unwrap-prose.cjs (SHA d896aae3f333... with ONE hardening
+  inline: real YAML frontmatter can only open at line 0 - the
+  original heuristic opened frontmatter on an early `---` rule and,
+  without a partner inside its 40-line window, never closed it again -
+  README and ROADMAP (which open with an `---` rule) were being passed
+  through whole; the wrap census caught the skips, the one-line fix
+  landed (frontmatter can only open at index 0), and the sweep re-ran). The mechanical
+  paragraph-joiner never touches frontmatter, fenced code, table
+  rows, headings, or list starts. Swept the living tracked
+  fleet: 237 files unwrapped (+2541 / -9222), README to ROADMAP
+  to every docs page, PRD, public-vant brain stone, and web/
+  frontend README. Dated ledgers skipped by tier (packs/README
+  wave rows, labs/TASKS + MEM + archives, CHANGELOGs, audits and
+  dated sketches) as lawful era wording. No column-rule
+  statement existed in vant's keeper docs (eyestruct's step 2 was
+  already clean here), and the magpie brain was already unwrapped
+  from the other side.
+- Stamps: test/version.test.js 7/0 (incl. both negative controls),
+  docs-truthfulness pins 0-fail on the unwrapped tree, lint:docs
+  (style+links+frontmatter+language+truthfulness) exit 0, eslint
+  on script+leg 0 errors (3 upstream-carried warnings in the
+  wrapper kept for eyestruct fidelity), packs strings scan.
+  Dated ledgers intentionally left as-wrapped.

@@ -23,11 +23,7 @@ vant start
 
 ## Upgrading an old (single-brain) install
 
-Vant (the axolotl line, v0.8.6) stores brains in per-brain directories
-(`models/public/<brain>/`, `models/private/<brain>/`) plus a brain stack in
-`models/state.json`. If your install predates this (files sitting flat in
-`models/public/`), **`vant start` migrates you automatically** on first run
-and shows a confirmation banner, your brain name defaults to `vant`.
+Vant (the axolotl line, v0.8.6) stores brains in per-brain directories (`models/public/<brain>/`, `models/private/<brain>/`) plus a brain stack in `models/state.json`. If your install predates this (files sitting flat in `models/public/`), **`vant start` migrates you automatically** on first run and shows a confirmation banner, your brain name defaults to `vant`.
 
 Manual control:
 
@@ -38,19 +34,11 @@ vant migrate --brain-name mybrain  # choose the imported brain's name
 vant migrate                       # apply (import name: --brain-name > VANT_BRAIN > "vant")
 ```
 
-Detection is content-based and idempotent, safe to run any time, no-op on
-already-multi-brain trees. `vant start --no-migrate` skips the auto-import.
-MCP clients can check via the `brain_migration_status` tool. The full
-contract, naming rules, and troubleshooting are in the
-[Migration Guide](/vant/getting-started/migration).
+Detection is content-based and idempotent, safe to run any time, no-op on already-multi-brain trees. `vant start --no-migrate` skips the auto-import. MCP clients can check via the `brain_migration_status` tool. The full contract, naming rules, and troubleshooting are in the [Migration Guide](/vant/getting-started/migration).
 
 ## Environment Variables
 
-This page lists the vars most installs touch. The full registry (every
-`VANT_*` var mapped to its config key, ~100 entries including RAG, prune,
-marking, webhook, and QoS knobs) lives in the
-[Config Reference](/vant/reference/config): `config.get`, the ini dialect,
-and the env registry are the same source of truth.
+This page lists the vars most installs touch. The full registry (every `VANT_*` var mapped to its config key, ~100 entries including RAG, prune, marking, webhook, and QoS knobs) lives in the [Config Reference](/vant/reference/config): `config.get`, the ini dialect, and the env registry are the same source of truth.
 
 ### Required
 
@@ -58,8 +46,7 @@ and the env registry are the same source of truth.
 |----------|------------|------------|
 | `GITHUB_TOKEN` | GitHub API token (or `VANT_GITHUB_TOKEN`) | [Create token](https://github.com/settings/tokens) |
 
-`GITHUB_TOKEN` is only required when you use sync / the GitHub API. A local,
-sync-less install runs fine with no token at all.
+`GITHUB_TOKEN` is only required when you use sync / the GitHub API. A local, sync-less install runs fine with no token at all.
 
 ### Optional - Server
 
@@ -180,8 +167,7 @@ Check server is running: `vant health`
 
 ### "TLS certificate error"
 
-Set up TLS certificates (see [TLS Setup](#tls-setup) above); the dev server
-also accepts `VANT_SERVER_INSECURE=1` for plain HTTP.
+Set up TLS certificates (see [TLS Setup](#tls-setup) above); the dev server also accepts `VANT_SERVER_INSECURE=1` for plain HTTP.
 
 ---
 

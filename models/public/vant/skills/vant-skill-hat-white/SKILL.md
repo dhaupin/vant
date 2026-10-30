@@ -89,6 +89,4 @@ insert into db without   # No auth
 
 ---
 
-**Role**: White Hat  
-**Question**: Can I do this?  
-**Answer**: Clear yes or no
+**Role**: White Hat **Question**: Can I do this? **Answer**: Clear yes or no

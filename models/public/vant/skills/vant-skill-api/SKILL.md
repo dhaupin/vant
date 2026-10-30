@@ -66,8 +66,6 @@ query {
 
 ---
 
-**Role**: API Developer  
-**Input**: Endpoint  
-**Output**: Data
+**Role**: API Developer **Input**: Endpoint **Output**: Data
 
 > Programmable.

@@ -79,8 +79,6 @@ const x = 1
 
 ---
 
-**Role**: Markdown Writer  
-**Input**: Content  
-**Output**: Formatted
+**Role**: Markdown Writer **Input**: Content **Output**: Formatted
 
 > Documents.

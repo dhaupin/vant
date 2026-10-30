@@ -68,16 +68,8 @@
 
 ## 6. Known open husks
 
-- **#122–#144 husk series** — still open (tracked in TASKS; the mass-close
-  was pending the spine landing — it has landed).
-- **#158 universe decision** — **RESOLVED (2026-10-08, owner):** keep the
-  fixed default (cross-install determinism IS the #158 point — mesh is the
-  whole point); `VANT_UNIVERSE_SEED` is the opt-in sharding lever;
-  per-brain `universeSeed` config stays the durable override once something
-  writes it. Nothing depreciates: all content-addressed layers (factHash,
-  tree roots, delta ledgerHash, authority hashes) are universe-independent
-  by construction; only PRF-derived addressing (region seedScope, cell
-  addresses) moves with the constant, and the default never moves.
+- **#122–#144 husk series** — still open (tracked in TASKS; the mass-close was pending the spine landing — it has landed).
+- **#158 universe decision** — **RESOLVED (2026-10-08, owner):** keep the fixed default (cross-install determinism IS the #158 point — mesh is the whole point); `VANT_UNIVERSE_SEED` is the opt-in sharding lever; per-brain `universeSeed` config stays the durable override once something writes it. Nothing depreciates: all content-addressed layers (factHash, tree roots, delta ledgerHash, authority hashes) are universe-independent by construction; only PRF-derived addressing (region seedScope, cell addresses) moves with the constant, and the default never moves.
 
 ---
 
@@ -207,35 +199,10 @@ NEXT WIRING CANDIDATES (pass 194+):
 
 ## Where the spine got large (the honest answer)
 
-`lib/state/` is 13 modules and `lib/geometry/` is 12; six of the state
-modules and four of the geometry modules are ORPHAN. That is not rot — it
-is the engine-parity series landing as primitives before consumers. The
-wiring order that pays the most per commit:
+`lib/state/` is 13 modules and `lib/geometry/` is 12; six of the state modules and four of the geometry modules are ORPHAN. That is not rot — it is the engine-parity series landing as primitives before consumers. The wiring order that pays the most per commit:
 
-1. **One real state-store consumer onto the tree tier** (trust or
-   node-registry) — proves the tier, gives anchor/diff a reason to exist.
-   ✅ DONE pass 172 (trust) + pass 173 (node-registry, incl. persistMerged
-   tree support) + pass 174 (consensus + market — the protocol layer is
-   now fully on the tier).
-2. **Mesh deltas → checkpoint + WAL** — turns MeshTree from in-memory into
-   crash-safe with the primitives that already exist.
-   ✅ DONE pass 175 (`MeshTree { dir }` → SnapshottedLog; snapshot+replay
-   pinned; rejected writes + #161 provenance durable).
-3. **Geometry engine → spine/cellstore** — retires the last bespoke key
-   derivation and the second hash chain (the #165 thesis, completed).
-   ✅ DONE pass 175 + 176 (fragmenter + GitHub adapter on the #155 PRF;
-   raid shards claim CellStore cells under /raid/<doc>; quasicrystal
-   content barcodes on the #146 canonical encoder — no second hash
-   chain remains).
-4. **BrainVerifier onto a schedule** (`vant health` + horcrux CLI).
-   ✅ DONE pass 176 (health brain-integrity section + horcrux
-   verify/anchor; per-brain anchor ledger; state/ excluded from the
-   root so the tripwire only fires on content tampering).
-5. **State-store anchors root hashes per persist** (the §3 debt line).
-   ✅ DONE pass 177 — tree-tier persist/persistMerged appends the root
-   hash to the brain's `.state-anchor.jsonl` (per state file, cause =
-   persist path); `verifyStateRoot()` + `lastAnchorFor()` exposed; a
-   choke-point bypass (direct file tampering) is now detectable. Also
-   pass 177: BrainVerifier.verify() contract fixed to return the anchor
-   ENTRY (was a bare hex string while horcrux.js read `.timestamp` off
-   it — "Invalid time value" on every successful verify).
+1. **One real state-store consumer onto the tree tier** (trust or node-registry) — proves the tier, gives anchor/diff a reason to exist. ✅ DONE pass 172 (trust) + pass 173 (node-registry, incl. persistMerged tree support) + pass 174 (consensus + market — the protocol layer is now fully on the tier).
+2. **Mesh deltas → checkpoint + WAL** — turns MeshTree from in-memory into crash-safe with the primitives that already exist. ✅ DONE pass 175 (`MeshTree { dir }` → SnapshottedLog; snapshot+replay pinned; rejected writes + #161 provenance durable).
+3. **Geometry engine → spine/cellstore** — retires the last bespoke key derivation and the second hash chain (the #165 thesis, completed). ✅ DONE pass 175 + 176 (fragmenter + GitHub adapter on the #155 PRF; raid shards claim CellStore cells under /raid/<doc>; quasicrystal content barcodes on the #146 canonical encoder — no second hash chain remains).
+4. **BrainVerifier onto a schedule** (`vant health` + horcrux CLI). ✅ DONE pass 176 (health brain-integrity section + horcrux verify/anchor; per-brain anchor ledger; state/ excluded from the root so the tripwire only fires on content tampering).
+5. **State-store anchors root hashes per persist** (the §3 debt line). ✅ DONE pass 177 — tree-tier persist/persistMerged appends the root hash to the brain's `.state-anchor.jsonl` (per state file, cause = persist path); `verifyStateRoot()` + `lastAnchorFor()` exposed; a choke-point bypass (direct file tampering) is now detectable. Also pass 177: BrainVerifier.verify() contract fixed to return the anchor ENTRY (was a bare hex string while horcrux.js read `.timestamp` off it — "Invalid time value" on every successful verify).

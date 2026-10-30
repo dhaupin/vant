@@ -25,9 +25,7 @@ description: Task-oriented playbooks for mesh participants - join, vote, sync, s
 
 ## Join a mesh
 
-You need three things from the mesh operator, out-of-band: the host
-node's name and port, and a one-time secret. Never send the secret over
-the same wire you are joining.
+You need three things from the mesh operator, out-of-band: the host node's name and port, and a one-time secret. Never send the secret over the same wire you are joining.
 
 ### Pair join (first contact)
 
@@ -40,9 +38,7 @@ vant genesis join --name beta-node --agent beta-1 --port 4891 --host acme-node -
 
 ### Ring admission (every member after the first)
 
-The ring admits new members WITHOUT re-keying existing pairs. Ring
-admission is a lib surface (`lib/genesis.js` exports `admit` and
-`accept`; the `vant genesis` CLI ships create/join/status only):
+The ring admits new members WITHOUT re-keying existing pairs. Ring admission is a lib surface (`lib/genesis.js` exports `admit` and `accept`; the `vant genesis` CLI ships create/join/status only):
 
 ```js
 const genesis = require('./lib/genesis');
@@ -81,15 +77,11 @@ Or from the shell:
 vant agora vote acme-node q3-platform-call thursday-1400utc
 ```
 
-The ack carries the verdict (accepted, or the reason: non-member,
-quorum, deadline, duplicate). Your node never needs the owner's org
-model to vote.
+The ack carries the verdict (accepted, or the reason: non-member, quorum, deadline, duplicate). Your node never needs the owner's org model to vote.
 
 ## Propose a cross-org decision
 
-Scoped topics live on the node whose org model the scope points into
-(pass-50). Create it THERE, then announce the topic id to members by
-any channel you like:
+Scoped topics live on the node whose org model the scope points into (pass-50). Create it THERE, then announce the topic id to members by any channel you like:
 
 ```js
 forum_vote(
@@ -114,15 +106,11 @@ Members pull the result into their own node:
 agora_pull(node="acme-node", topic="forum-q3-platform-call-abc123")
 ```
 
-The merge re-derives status locally; the wire can never declare a topic
-passed.
+The merge re-derives status locally; the wire can never declare a topic passed.
 
 ## Read a scoped group topic locally
 
-Members of a group hold a replica of the steward's org model, so scope
-checks resolve on your own node. Nothing to do after the steward pushes:
-`consensus_get` with your `viewerId` admits you if the steward's model
-says you are a member, and denies you otherwise, fail-closed.
+Members of a group hold a replica of the steward's org model, so scope checks resolve on your own node. Nothing to do after the steward pushes: `consensus_get` with your `viewerId` admits you if the steward's model says you are a member, and denies you otherwise, fail-closed.
 
 Check what your node holds:
 
@@ -133,9 +121,7 @@ require('./lib/org-sync').replicaStatus()
 
 ## Publish and settle cross-node work
 
-List on the node whose gates hold the scope (the steward for group
-work), then settle: the buyer's escrow debits on the buyer's own node
-and the other side records a claim.
+List on the node whose gates hold the scope (the steward for group work), then settle: the buyer's escrow debits on the buyer's own node and the other side records a claim.
 
 ```js
 // seller side (steward holds the group scope):
@@ -146,8 +132,7 @@ settlement.makeInvoice({ listingId, price: 6, buyer: 'beta-1', seller: 'acme-1' 
 settlement.sendInvoice(crewBus, 'acme-node', invoice)
 ```
 
-The claims ledger is the proof of settlement; budgets never leave the
-node that owns them.
+The claims ledger is the proof of settlement; budgets never leave the node that owns them.
 
 ## Catch up after downtime
 
@@ -165,9 +150,7 @@ vant notices pull acme-node    # one peer
 vant notices list              # read the board
 ```
 
-Board notes carry a TTL (0 means sticky) and the board is capped, so a
-long-absent node converges to the same view as everyone else on the
-next pull.
+Board notes carry a TTL (0 means sticky) and the board is capped, so a long-absent node converges to the same view as everyone else on the next pull.
 
 ## Observe the mesh
 
@@ -178,8 +161,7 @@ vant mesh status --peers --json
 vant agora status              # sync surface: buses installed, pending round-trips
 ```
 
-The federated view shows only what each peer's scope filter admits:
-aggregates and public names, never scoped content.
+The federated view shows only what each peer's scope filter admits: aggregates and public names, never scoped content.
 
 ## Related
 

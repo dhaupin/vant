@@ -43,9 +43,7 @@ Vant comes with built-in islands (`DEFAULT_ISLANDS` in `lib/islands.js`):
 
 ### Step 1: Extend Islands
 
-The no-fork path is `vant.islands.createIsland(name, { type, triggers })`
-(shown under [Island Manifest](#island-manifest) below); editing
-`DEFAULT_ISLANDS` in `lib/islands.js` is the fork-and-ship alternative:
+The no-fork path is `vant.islands.createIsland(name, { type, triggers })` (shown under [Island Manifest](#island-manifest) below); editing `DEFAULT_ISLANDS` in `lib/islands.js` is the fork-and-ship alternative:
 
 ```javascript
 const DEFAULT_ISLANDS = {
@@ -121,10 +119,7 @@ const all = vant.islands.getAvailable();
 
 ## Island Manifest
 
-Islands live in a manifest (`islands.json` under the brain root) merged
-over `DEFAULT_ISLANDS` at load time. The public way to add one is
-`createIsland` - it validates, registers the definition, and stamps a
-brain file for static islands:
+Islands live in a manifest (`islands.json` under the brain root) merged over `DEFAULT_ISLANDS` at load time. The public way to add one is `createIsland` - it validates, registers the definition, and stamps a brain file for static islands:
 
 ```javascript
 const vant = require('vant');
@@ -139,8 +134,7 @@ vant.islands.createIsland('herbalism', {
 vant.islands.updateTriggers('herbalism', ['herb', 'plant', 'medicine']);
 ```
 
-(There is no exported `saveManifest` - `save(name, data)` persists
-island DATA into the registered island's storage slot.)
+(There is no exported `saveManifest` - `save(name, data)` persists island DATA into the registered island's storage slot.)
 
 ## Use Cases
 

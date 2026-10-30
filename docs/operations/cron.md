@@ -19,13 +19,11 @@ Run tasks on a repeating interval:
 - Compute and vectorization schedulers
 - Event emitter hooks (on/once/off for bus events)
 
-There is no cron-expression scheduler; for fixed system-time schedules
-("daily at midnight"), drive the CLI below from a real crontab entry.
+There is no cron-expression scheduler; for fixed system-time schedules ("daily at midnight"), drive the CLI below from a real crontab entry.
 
 ## Schedule
 
-`lib/cron.js` exposes a scheduler backed by interval timers (not cron
-expressions). `vant.cron` returns it:
+`lib/cron.js` exposes a scheduler backed by interval timers (not cron expressions). `vant.cron` returns it:
 
 ```javascript
 const cron = require('vant').cron;
@@ -38,13 +36,11 @@ const id = cron.schedule({
 });
 ```
 
-There is no cron-expression parser - schedules are interval-based, and
-intervals outside 1s..1day are rejected (VAF-validated).
+There is no cron-expression parser - schedules are interval-based, and intervals outside 1s..1day are rejected (VAF-validated).
 
 ## Event Hooks
 
-The module also exposes the shared event bus (this is `once('<event>')`,
-an EVENT listener - not a scheduler):
+The module also exposes the shared event bus (this is `once('<event>')`, an EVENT listener - not a scheduler):
 
 ```javascript
 cron.once('task:completed', (data) => {
@@ -79,11 +75,7 @@ cron.scheduleEmbed('reindex', options);                // vectorization
 
 ## CLI
 
-`vant cron` is also a routed command (see `vant cron --help`):
-`list` / `add <spec> <cmd>` / `remove <id>` / `run <id>` / `status`.
-Specs are interval-style ("30s", "10m", "2h", or ms integer). Jobs are
-scheduler slots in the invoking process - they are not persisted across
-restarts; for durable system-time schedules use a real crontab entry.
+`vant cron` is also a routed command (see `vant cron --help`): `list` / `add <spec> <cmd>` / `remove <id>` / `run <id>` / `status`. Specs are interval-style ("30s", "10m", "2h", or ms integer). Jobs are scheduler slots in the invoking process - they are not persisted across restarts; for durable system-time schedules use a real crontab entry.
 
 ---
 

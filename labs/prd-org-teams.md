@@ -1,8 +1,6 @@
 # PRD: Org → Dept → Team → Agents Flow (Multibrain Orgchart)
 
-**Status:** draft, needs decisions (D-1..D-5)
-**Created:** 2026-09-21, Buffy, from an executable end-to-end QC (`org → dept → team → role → assign → spawn`)
-**Scope:** `lib/teams.js` (1,354 ln), `lib/agents.js` (1,152 ln), sandbox capability grant UX, boot scopes
+**Status:** draft, needs decisions (D-1..D-5) **Created:** 2026-09-21, Buffy, from an executable end-to-end QC (`org → dept → team → role → assign → spawn`) **Scope:** `lib/teams.js` (1,354 ln), `lib/agents.js` (1,152 ln), sandbox capability grant UX, boot scopes
 
 ---
 

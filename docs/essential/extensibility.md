@@ -22,8 +22,7 @@ When loading, Vant checks **private first** -> falls back to **public**.
 
 ## Agents
 
-Pre-built agents live per-brain in `models/public/<brain>/agents/` (26 in
-the default `vant` brain):
+Pre-built agents live per-brain in `models/public/<brain>/agents/` (26 in the default `vant` brain):
 
 ```bash
 # 26 agents
@@ -57,8 +56,7 @@ And more: api, backend, content, designer, emergency, frontend, general, grep, h
 
 ## Skills
 
-Pre-built skills live per-brain in `models/public/<brain>/skills/` (71 in
-the default `vant` brain):
+Pre-built skills live per-brain in `models/public/<brain>/skills/` (71 in the default `vant` brain):
 
 ```bash
 # 71 skills

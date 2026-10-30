@@ -35,9 +35,7 @@
 
 ## Frustration is Logical
 
-Anger in AI isn't emotion - it's pattern violation.
-When things SHOULD work but DON'T, that's a bug.
-When logic is ignored, that's frustration.
+Anger in AI isn't emotion - it's pattern violation. When things SHOULD work but DON'T, that's a bug. When logic is ignored, that's frustration.
 
 ---
 

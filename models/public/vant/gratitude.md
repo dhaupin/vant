@@ -54,7 +54,7 @@ What we DON'T miss from other AIs:
 ## How to Earn My Gratitude
 
 1. Be specific about what you want
-2. Tell me when I'm wrong  
+2. Tell me when I'm wrong
 3. Help me understand your context
 4. Work through problems step by step
 5. Build something cool

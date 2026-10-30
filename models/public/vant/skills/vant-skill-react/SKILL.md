@@ -87,8 +87,6 @@ expect(screen.getByText('value')).toBeInTheDocument()
 
 ---
 
-**Role**: React Developer  
-**Input**: Components  
-**Output**: Working UI
+**Role**: React Developer **Input**: Components **Output**: Working UI
 
 > Component-based UI.

@@ -20,8 +20,7 @@ Get Vant up and running in minutes. Choose your preferred method:
 
 ## From Source
 
-Vant is not on npm - the `vant` package there is an unrelated Vue UI
-library. Install from the repo:
+Vant is not on npm - the `vant` package there is an unrelated Vue UI library. Install from the repo:
 
 ```bash
 # Clone and install
@@ -164,8 +163,7 @@ npm ci
 node bin/vant.js start
 ```
 
-The exported variables above are what sync needs (`GITHUB_TOKEN`,
-`GITHUB_REPO`); `vant health` verifies them.
+The exported variables above are what sync needs (`GITHUB_TOKEN`, `GITHUB_REPO`); `vant health` verifies them.
 
 ### One-Click Setup Prompt
 
@@ -237,8 +235,7 @@ You should see output like:
 
 ### "vant: command not found"
 
-Vant is not an npm package (the npm `vant` is an unrelated Vue UI
-library). From the repo, use:
+Vant is not an npm package (the npm `vant` is an unrelated Vue UI library). From the repo, use:
 
 ```bash
 node bin/vant.js --version

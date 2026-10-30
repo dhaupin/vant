@@ -81,8 +81,6 @@ node inspect
 
 ---
 
-**Role**: Debugger  
-**Input**: Code + error  
-**Output**: Root cause
+**Role**: Debugger **Input**: Code + error **Output**: Root cause
 
 > Find the bug.

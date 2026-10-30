@@ -51,19 +51,13 @@ await limiter.check('client-1', 'read');
 console.log(limiter.getStatus());
 ```
 
-`check(clientId, operation)` is async and records the request when
-allowed; when the window is full it throws a retryable
-`RATE_LIMIT_EXCEEDED` error (and emits `qos:rate-limit`). There is no
-boolean `isAllowed()`/`consume()` API. Reset a client with
-`limiter.reset(clientId)`.
+`check(clientId, operation)` is async and records the request when allowed; when the window is full it throws a retryable `RATE_LIMIT_EXCEEDED` error (and emits `qos:rate-limit`). There is no boolean `isAllowed()`/`consume()` API. Reset a client with `limiter.reset(clientId)`.
 
-Defaults come from `VANT_QOS_MAX_PER_MINUTE` (60) and
-`VANT_QOS_WINDOW_MS` (60000) when options are omitted.
+Defaults come from `VANT_QOS_MAX_PER_MINUTE` (60) and `VANT_QOS_WINDOW_MS` (60000) when options are omitted.
 
 ### Use with Sandbox
 
-The sandbox wires rate limiters for you - read/write quotas become
-per-minute `RateLimiter`s:
+The sandbox wires rate limiters for you - read/write quotas become per-minute `RateLimiter`s:
 
 ```javascript
 const sandbox = require('./lib/sandbox');
@@ -103,9 +97,7 @@ const breaker = new CircuitBreaker({
 | CLOSED | Normal operation |
 | OPEN | Failing - calls are refused until the timeout elapses |
 
-After the timeout passes, the circuit closes again and failure counting
-restarts. (`mode: 'full'` adds per-provider state with exponential
-backoff and optional persistence.)
+After the timeout passes, the circuit closes again and failure counting restarts. (`mode: 'full'` adds per-provider state with exponential backoff and optional persistence.)
 
 ### Record Outcomes
 
@@ -126,8 +118,7 @@ if (breaker.isClosed('api')) {
 }
 ```
 
-Calling a gated operation while open throws a retryable
-`SANDBOX_CIRCUIT_OPEN` error.
+Calling a gated operation while open throws a retryable `SANDBOX_CIRCUIT_OPEN` error.
 
 ### Inspect
 
@@ -161,8 +152,7 @@ const result = await bulkhead.run(async () => {
 });
 ```
 
-There is no `execute()` method or `BULKHEAD_REJECTED` rejection: calls
-beyond `concurrency` wait in the queue until a slot frees up.
+There is no `execute()` method or `BULKHEAD_REJECTED` rejection: calls beyond `concurrency` wait in the queue until a slot frees up.
 
 ### Options
 
@@ -262,8 +252,7 @@ async function apiCall(url, clientId) {
 }
 ```
 
-The `QoS` facade class combines the three for server pipelines - see
-`getLayerStatus()` / `check(clientId, operation)` on it.
+The `QoS` facade class combines the three for server pipelines - see `getLayerStatus()` / `check(clientId, operation)` on it.
 
 ## Integration
 

@@ -79,8 +79,6 @@ deno task build # Run build task
 
 ---
 
-**Role**: Deno Developer  
-**Input**: deno scripts  
-**Output**: Working code
+**Role**: Deno Developer **Input**: deno scripts **Output**: Working code
 
 > Secure JavaScript.

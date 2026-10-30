@@ -25,12 +25,7 @@ description: The essential Vant surfaces - islands, boot, onboard, and manual br
 
 ## Where to start
 
-New agent waking up: [Boot](/vant/essential/boot), then the
-[Knowledge Base Browser](/vant/essential/onboard) (`vant onboard`) to
-see what previous agents left you.
-Wiring in new knowledge or tools: [Islands](/vant/essential/islands), then
-[Custom Islands](/vant/essential/custom-island) when you outgrow the
-built-ins. Debugging privilege errors: [Sudo](/vant/essential/sudo).
+New agent waking up: [Boot](/vant/essential/boot), then the [Knowledge Base Browser](/vant/essential/onboard) (`vant onboard`) to see what previous agents left you. Wiring in new knowledge or tools: [Islands](/vant/essential/islands), then [Custom Islands](/vant/essential/custom-island) when you outgrow the built-ins. Debugging privilege errors: [Sudo](/vant/essential/sudo).
 
 ## One command to remember
 

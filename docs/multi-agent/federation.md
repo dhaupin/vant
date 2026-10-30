@@ -30,11 +30,7 @@ org (one install: brain, crews, org model, gates)
        -> group (a mesh with a dedicated steward install)
 ```
 
-A crew lives inside one install. A mesh is what you get when two or
-more installs register each other and start exchanging signed
-envelopes. A group adds a **steward**: a small, dedicated install that
-hosts the shared org model and the group's agora topics, running no
-production work (see the [Steward Runbook](/vant/operations/steward-runbook)).
+A crew lives inside one install. A mesh is what you get when two or more installs register each other and start exchanging signed envelopes. A group adds a **steward**: a small, dedicated install that hosts the shared org model and the group's agora topics, running no production work (see the [Steward Runbook](/vant/operations/steward-runbook)).
 
 Every mesh node has four things, all local by construction:
 
@@ -58,20 +54,12 @@ Every mesh node has four things, all local by construction:
 
 ## The authority rules
 
-Four rules make the mesh safe to reason about, and each one is pinned
-by tests:
+Four rules make the mesh safe to reason about, and each one is pinned by tests:
 
-1. **Scope resolves where the model lives.** A scoped topic is decided
-   on the node whose org model the scope points into. Members vote
-   remotely; the owner's gates run unchanged.
-2. **The wire never declares truth.** Synced ledgers merge adopt-only;
-   status is re-derived locally. A peer cannot declare a topic passed.
-3. **Membership facts travel, scope content does not.** Scoped
-   decisions stay in the agora; the board carries only plain outcome
-   notices. The bridge refuses scoped topics by design.
-4. **Money is recorded, not held.** A cross-node payment debits the
-   buyer's escrow locally; the other side records a claim. No shared
-   bank.
+1. **Scope resolves where the model lives.** A scoped topic is decided on the node whose org model the scope points into. Members vote remotely; the owner's gates run unchanged.
+2. **The wire never declares truth.** Synced ledgers merge adopt-only; status is re-derived locally. A peer cannot declare a topic passed.
+3. **Membership facts travel, scope content does not.** Scoped decisions stay in the agora; the board carries only plain outcome notices. The bridge refuses scoped topics by design.
+4. **Money is recorded, not held.** A cross-node payment debits the buyer's escrow locally; the other side records a claim. No shared bank.
 
 ## Next
 

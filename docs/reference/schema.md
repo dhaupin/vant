@@ -76,9 +76,7 @@ Files in your brain folder (default: the `vant` brain):
 
 ## Runtime State
 
-Runtime state lives in code (config cache, memory store, locks under
-`models/private/<brain>/.locks/`), not in a `states/active/` folder.
-Rate limiting state is per-process (lib/qos, lib/escrow).
+Runtime state lives in code (config cache, memory store, locks under `models/private/<brain>/.locks/`), not in a `states/active/` folder. Rate limiting state is per-process (lib/qos, lib/escrow).
 
 ## Schema / Cargo
 
