@@ -27,7 +27,8 @@
 // eyestruct@main scripts/verify-release.cjs
 // (sha256 8c8eb979e1cf1b2b79542cf937c52a330e8172bc510aeb4f81d450962d24a40a).
 
-// The battery leg (tests/release-verify.test.js) runs the same script over
+// The battery leg (test/release-verify.test.js, vant wiring of the family
+// ladder) runs the same script over
 // `npm pack` output - THE PACK LADDER EVERY PUSH, offline-first:
 //
 //   verify-release --pack <tgz>            (the contents ladder, below)
