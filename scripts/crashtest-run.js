@@ -2918,6 +2918,320 @@ function buildRoutes(sb, Harness) {
         return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
     });
 
+    // (heartbeat-lifecycle census 2026-10-30, wave 13) the context
+    // engine's heartbeat had ZERO graded behavior anywhere - the modern
+    // suites never claimed the timer lifecycle, so this row is the
+    // family's first stamp: cold-stop safety (stopHeartbeat before any
+    // start is a silent no-op, never a throw), the 4-minute interval the
+    // status shape reports, the ONE heartbeat:started event under a
+    // double start (idempotence is event-auditable), boot's timer
+    // registry actually holding 'context.heartbeat' at that interval,
+    // ping's honest shape ({ok:true, timestamp}) with its own event, the
+    // registry-wired stop (the timer entry is GONE from boot's map), and
+    // the enabled flag flipping back off.
+    const HEARTBEAT_LIFECYCLE_CHILD = `${CHILD_STDOUT_GUARD}
+(async () => {
+    const out = { family: 'heartbeat-lifecycle', ok: true, bail: null };
+    try {
+        const context = require('./lib/context.js');
+        const boot = require('./lib/boot.js');
+        const eventMod = require('./lib/event.js');
+        // ---- cold stop: safe no-op before any start
+        let coldOk = false;
+        try { context.stopHeartbeat(); coldOk = true; } catch (e) { coldOk = false; }
+        out.hbStopColdSafe = coldOk && context.getHeartbeatStatus().enabled === false;
+        // ---- status shape: the 4-minute warm window is the contract
+        const st0 = context.getHeartbeatStatus();
+        out.hbIntervalContract = typeof st0.enabled === 'boolean' && st0.interval === 240000;
+        // ---- ONE started event under a double start (event-audited idempotence)
+        let startedEvents = 0;
+        const onStarted = () => { startedEvents++; };
+        eventMod.on('heartbeat:started', onStarted);
+        context.startHeartbeat();
+        context.startHeartbeat();
+        eventMod.off('heartbeat:started', onStarted);
+        out.hbStartsEnabled = context.getHeartbeatStatus().enabled === true;
+        out.hbStartIdempotent = startedEvents === 1;
+        // ---- boot's registry holds the timer at the contracted interval
+        const timers = (boot.getTimers && boot.getTimers()) || {};
+        out.hbBootRegistered = !!(timers['context.heartbeat'] && timers['context.heartbeat'].intervalMs === 240000);
+        // ---- ping: honest shape + its own event
+        let pingEvents = 0;
+        const onPing = () => { pingEvents++; };
+        eventMod.on('heartbeat:ping', onPing);
+        const p = await context.ping();
+        eventMod.off('heartbeat:ping', onPing);
+        out.hbPingOk = !!(p && p.ok === true && Number.isFinite(p.timestamp));
+        out.hbPingEventFires = pingEvents === 1;
+        // ---- stop: the registry entry is gone, the flag is off,
+        // inspect() reports the disabled heartbeat honestly
+        context.stopHeartbeat();
+        const timersAfter = (boot.getTimers && boot.getTimers()) || {};
+        out.hbBootUnregistered = !timersAfter['context.heartbeat'];
+        out.hbStopsEnabled = context.getHeartbeatStatus().enabled === false;
+        const ins = context.inspect();
+        out.hbInspectHonest = !!(ins.heartbeat && ins.heartbeat.enabled === false && Array.isArray(ins.cacheStates));
+    } catch (e) {
+        out.ok = false;
+        out.bail = (e && e.message) ? e.message : String(e);
+    }
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
+})().catch((e) => { process.stdout.write('VANT_CT_JSON<<' + JSON.stringify({ ok: false, bail: String(e) }) + '>>END'); });
+`;
+
+    harness.registerRoute('heartbeat-lifecycle', async () => {
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', HEARTBEAT_LIFECYCLE_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: 'heartbeat-lifecycle probe child failed: ' + String(e.stderr || e.message).slice(0, 200) }), { status: 500 });
+        }
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
+    // (crypto-canon-laws census 2026-10-30, wave 13) lib/encrypt.js's OWN
+    // census: the file rode other families' rows (stego rode encrypt/
+    // decrypt, webhooks rode hmacSign) but its one-canon refusal chain
+    // was never graded - the census's first find is TWO PHANTOM CODES:
+    // encrypt()/rsaKeyPair() threw with errors.CODES.ENCRYPT_KEY_REQUIRED
+    // and ENCRYPT_KEY_INVALID, names that never existed in lib/error.js,
+    // so the typed refusals all carried code: undefined (fixed in this
+    // wave by adding them to the keyed map). The row grades the canon
+    // post-repair: the GCM round trip (modern 12-byte default nonce,
+    // legacy 16-byte opt-in still decoding by width sniffing, the
+    // zero-byte and non-ASCII payload edges), the keyed typed refusals
+    // (REQUIRED on no key, INVALID on sub-2048 RSA), decrypt's ONE-shape
+    // throw law (bad format, honest IV-length complaint, wrong key,
+    // flipped-hex tamper - every leg a VantError, the success path a
+    // bare string), hash/verify's round trip with malformed-stored-hash
+    // answering false without throwing, the hex HMAC law (genuine,
+    // tampered, non-hex), the 2-part signed token (round trip, wrong
+    // secret null, past-exp null under a genuine HMAC, garbage null),
+    // and the RSA OAEP/SHA256 pair's round trip + sign/verify + tamper.
+    const CRYPTO_CANON_CHILD = `${CHILD_STDOUT_GUARD}
+(async () => {
+    const out = { family: 'crypto-canon-laws', ok: true, bail: null };
+    try {
+        const Encrypt = require('./lib/encrypt.js');
+        const errMod = require('./lib/error.js');
+        const crypto = require('crypto');
+        const key = crypto.randomBytes(24).toString('hex');
+        // ---- GCM round trip incl. default/legacy IV widths + payload edges
+        const e1 = Encrypt.encrypt('van-census-plain', key);
+        const d1 = Encrypt.decrypt(e1, key);
+        const parts1 = e1.split(':');
+        out.ksGcmRoundTrip = d1 === 'van-census-plain';
+        out.ksIvModern12 = parts1.length === 4 && parts1[1].length === 24;
+        const e2 = Encrypt.encrypt('van-legacy', key, { ivLen: 16 });
+        out.ksIvLegacy16 = e2.split(':')[1].length === 32 && Encrypt.decrypt(e2, key) === 'van-legacy';
+        out.ksZeroByteRoundTrip = Encrypt.decrypt(Encrypt.encrypt('', key), key) === '';
+        const uni = 'van-' + String.fromCharCode(0xe9, 0x4f60);
+        out.ksUnicodeRoundTrip = Encrypt.decrypt(Encrypt.encrypt(uni, key), key) === uni;
+        // ---- typed refusals over the KEYED codes (post phantom-repair)
+        function failShape(fn) { try { fn(); return null; } catch (e) { return e; } }
+        const bk = failShape(() => Encrypt.encrypt('x'));
+        out.ksKeyRequiredTyped = !!(bk && bk.name === 'VantError' && bk.code === errMod.CODES.ENCRYPT_KEY_REQUIRED);
+        const shortRsa = failShape(() => Encrypt.rsaKeyPair(1024));
+        out.ksRsaMinBitsTyped = !!(shortRsa && shortRsa.name === 'VantError' && shortRsa.code === errMod.CODES.ENCRYPT_KEY_INVALID);
+        // ---- decrypt's ONE-shape throw law across the failure legs
+        const f1 = failShape(() => Encrypt.decrypt('garbage-without-cols', key));
+        out.ksFormatTyped = !!(f1 && f1.name === 'VantError' && String(f1.message).toLowerCase().indexOf('format') >= 0);
+        const f2 = failShape(() => Encrypt.decrypt('aa:bbccddee:1122:ccdd', key));
+        out.ksIvLengthHonest = !!(f2 && String(f2.message).indexOf('IV length') >= 0);
+        const f3 = failShape(() => Encrypt.decrypt(e1, 'wrong-key-fully'));
+        out.ksWrongKeyFails = !!(f3 && f3.name === 'VantError' && String(f3.message).toLowerCase().indexOf('wrong key') >= 0);
+        const tp = e1.split(':');
+        const body = tp[3];
+        const flipped = (body.charAt(0) === 'a') ? 'b' + body.slice(1) : 'a' + body.slice(1);
+        const f4 = failShape(() => Encrypt.decrypt([tp[0], tp[1], tp[2], flipped].join(':'), key));
+        out.ksTamperRefused = !!(f4 && f4.name === 'VantError');
+        out.ksSingleShape = typeof d1 === 'string';
+        // ---- hash/verify canon (malformed stored hash = non-match, never throws)
+        const h = Encrypt.hash('van-pass');
+        out.ksHashVerifyRoundTrip = Encrypt.verify('van-pass', h) === true && Encrypt.verify('van-wrong', h) === false;
+        out.ksMalformedHashFalse = Encrypt.verify('x', 'ab:zz') === false && Encrypt.verify('x', null) === false;
+        // ---- hex HMAC law (genuine, tampered, non-hex)
+        const sig = Encrypt.hmacSign('body', 'secret');
+        out.ksHmacGenuine = Encrypt.hmacVerify('body', 'secret', sig) === true;
+        out.ksHmacTampered = Encrypt.hmacVerify('body2', 'secret', sig) === false;
+        out.ksHmacNonHex = Encrypt.hmacVerify('body', 'secret', 'xyz-not-hex!') === false;
+        // ---- 2-part signed token (NOT a JWT - F7's doc law)
+        const tok = Encrypt.signToken({ sub: 'van-a' }, 'tok-secret');
+        const tokd = tok.split('.');
+        out.ksTokenTwoPart = tokd.length === 2 && tokd[0].length > 0 && tokd[1].length > 0;
+        const back = Encrypt.verifyToken(tok, 'tok-secret');
+        out.ksTokenRoundTrip = !!(back && back.sub === 'van-a' && back.iat > 0 && back.exp > back.iat);
+        out.ksTokenWrongSecret = Encrypt.verifyToken(tok, 'other') === null;
+        out.ksTokenGarbage = Encrypt.verifyToken('not-a-token', 'secret') === null;
+        const past = JSON.stringify({ sub: 'van-b', iat: Date.now() - 7200000, exp: Date.now() - 3600000 });
+        const pastEncoded = Buffer.from(past).toString('base64');
+        const pastSig = crypto.createHmac('sha256', 'tok-secret').update(pastEncoded).digest('base64');
+        out.ksTokenExpired = Encrypt.verifyToken(pastEncoded + '.' + pastSig, 'tok-secret') === null;
+        // ---- RSA OAEP/SHA256 pair
+        const pair = Encrypt.rsaKeyPair(2048);
+        out.ksRsaRoundTrip = Encrypt.rsaDecrypt(Encrypt.rsaEncrypt('van-rsa-msg', pair.publicKey), pair.privateKey) === 'van-rsa-msg';
+        const rsig = Encrypt.rsaSign('van-signed', pair.privateKey);
+        out.ksRsaSignVerify = Encrypt.rsaVerify('van-signed', rsig, pair.publicKey) === true;
+        out.ksRsaTampered = Encrypt.rsaVerify('van-other', rsig, pair.publicKey) === false;
+    } catch (e) {
+        out.ok = false;
+        out.bail = (e && e.message) ? e.message : String(e);
+    }
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
+})().catch((e) => { process.stdout.write('VANT_CT_JSON<<' + JSON.stringify({ ok: false, bail: String(e) }) + '>>END'); });
+`;
+
+    harness.registerRoute('crypto-canon-laws', async () => {
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', CRYPTO_CANON_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: 'crypto-canon-laws probe child failed: ' + String(e.stderr || e.message).slice(0, 200) }), { status: 500 });
+        }
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
+    // (noticeboard-field-walls census 2026-10-30, wave 13) the federation
+    // board's WIRE-PAYLOAD walls: the push leg's 'every field is
+    // re-clamped' comment had no row grading it - the whole envelope is
+    // untrusted and the dispatcher re-clamps (title to 120, body to
+    // 2000, ref to 120, ttlMs hard-capped at MAX_TTL_MS, from pinned to
+    // the SENDER), malformed entries inside a mixed payload are skipped
+    // without breaking the good ones, an unknown origin gets NO board
+    // oracle (the registered-peers-only law), a re-posted id is
+    // merge-only (first writer wins), the catch-up ask only answers
+    // REGISTERED peers and even an empty board answers (the retry-stop
+    // law), acks are sender-bound (a REGISTERED different peer replaying
+    // the observed reqId resolves nothing), pull's send-failure leg
+    // answers typed, pull's timeout leg answers 'timeout' with the
+    // pending entry deleted, and the board's own storage walls
+    // (title-required, invalid-ttl typed, the local clamp laws, TTL
+    // pruning with sticky survival) hold beside them.
+    const NOTICES_CHILD = `${CHILD_STDOUT_GUARD}
+(async () => {
+    const out = { family: 'noticeboard-field-walls', ok: true, bail: null };
+    try {
+        const crypto = require('crypto');
+        const notices = require('./lib/notices.js');
+        const errMod = require('./lib/error.js');
+        const NOW = 1700000000000;
+        function stubBus(name) {
+            const b = {
+                status() { return { name: name, configured: true }; },
+                nodes() { return [{ name: 'van-peer-a', url: 'http://127.0.0.1:1' }, { name: 'van-peer-b', url: 'http://127.0.0.1:2' }]; },
+                onDispatch(type, fn) { b._d[type] = fn; },
+                async send(nodeName, type, payload) { b.sends.push({ nodeName: nodeName, type: type, payload: payload }); return { ok: true, handlers: 1 }; },
+                async broadcast(type, payload) { return [{ node: 'van-peer-a', ok: true, handlers: 1 }, { node: 'van-peer-b', ok: true, handlers: 1 }]; },
+                sends: [],
+                _d: {}
+            };
+            return b;
+        }
+        function failShape(fn) { try { fn(); return null; } catch (e) { return e; } }
+        // ---- board storage walls (typed refusals + local clamps)
+        const badT = notices.post({});
+        out.nbTitleRequired = badT.ok === false && badT.reason === 'title_required';
+        out.nbNegTtlTyped = notices.post({ title: 'x', ttlMs: -5 }).reason === 'invalid_ttl';
+        out.nbNaNTtlTyped = notices.post({ title: 'x', ttlMs: NaN }).reason === 'invalid_ttl';
+        const clamped = notices.post({ title: 'T'.repeat(400), body: 'B'.repeat(5000), ref: 'R'.repeat(600), ttlMs: 61 * 24 * 3600 * 1000, now: NOW });
+        out.nbClampTitleBodyRef = clamped.ok === true && clamped.note.title.length === 120 && clamped.note.body.length === 2000 && clamped.note.ref.length === 120;
+        out.nbClampTtl = clamped.note.ttlMs > 0 && clamped.note.ttlMs <= notices.MAX_TTL_MS;
+        // ---- TTL law: expiry prunes on a later read, the sticky survives
+        const tsticky = notices.post({ title: 'van-sticky', now: NOW });
+        const ttlexp = notices.post({ title: 'van-ttl', ttlMs: 1000, now: NOW });
+        const later = notices.list({ now: NOW + 2000 });
+        out.nbTtlPrunes = !later.some((n) => n.id === ttlexp.note.id);
+        out.nbStickySurvives = later.some((n) => n.id === tsticky.note.id);
+        // ---- install idempotency + the typed bus-required chain
+        const bus = stubBus('van-node-local');
+        const i1 = notices.install(bus);
+        const i2 = notices.install(bus);
+        out.nbInstallIdempotent = i1.installed === true && i1.already === false && i2.already === true;
+        // (the pull/broadcast doors are async: their typed refusal arrives
+        // as a caught REJECTION, not a sync throw - grading it with a sync
+        // failShape let the VantError escape as an unhandled rejection and
+        // 500'd the route under the library flood)
+        out.nbTypedRefusals = [
+            failShape(() => notices.install(null)),
+            await notices.pull(null, 'x', {}).catch((err) => err),
+            await notices.broadcast(null).catch((err) => err)
+        ].every((e) => e && e.name === 'VantError' && e.code === errMod.CODES.INPUT_VALIDATION_FAILED);
+        // ---- the push leg's payload walls: every field re-clamped
+        const wideId = 'note-census-w-' + crypto.randomBytes(8).toString('hex');
+        bus._d['notice.post']({
+            from: 'van-peer-a',
+            payload: { notes: [
+                null,
+                { id: '', title: 'no id no adoption' },
+                { id: wideId, from: 'van-peer-a', title: 'W'.repeat(500), body: 'x'.repeat(9999), ts: NOW + 1, ttlMs: 90000000000, ref: 'z'.repeat(999) }
+            ] }
+        });
+        let adopted = null;
+        for (const n of notices.list({ now: NOW + 2 })) { if (n.id === wideId) adopted = n; }
+        out.nbWideAdopted = !!adopted;
+        out.nbWireTitleClamped = !!adopted && adopted.title.length === 120;
+        out.nbWireBodyClamped = !!adopted && adopted.body.length === 2000;
+        out.nbWireRefClamped = !!adopted && adopted.ref.length === 120;
+        out.nbWireTtlClamped = !!adopted && adopted.ttlMs > 0 && adopted.ttlMs <= notices.MAX_TTL_MS;
+        out.nbWireFromPinned = !!adopted && adopted.from === 'van-peer-a';
+        // ---- unknown origin: no board oracle even with a valid note
+        const ghostId = 'note-census-ghost-' + crypto.randomBytes(6).toString('hex');
+        bus._d['notice.post']({ from: 'van-stranger', payload: { notes: [{ id: ghostId, from: 'van-stranger', title: 'ghost', ts: NOW + 3 }] } });
+        out.nbUnknownOriginIgnored = !notices.list({ now: NOW + 4 }).some((n) => n.id === ghostId);
+        // ---- merge-only: the re-posted id NEVER clobbers (first writer wins)
+        const before = (notices.list({ now: NOW + 2 }).find((n) => n.id === wideId) || {}).title;
+        bus._d['notice.post']({ from: 'van-peer-a', payload: { notes: [{ id: wideId, title: 'VANISHED', ts: NOW + 5 }] } });
+        out.nbMergeOnlyFirstWriter = !!before && (notices.list({ now: NOW + 2 }).find((n) => n.id === wideId) || {}).title === before;
+        // ---- catch-up: a stranger's ask answers NOTHING; a registered
+        // peer's ask reaches the reply leg even over a tired board
+        bus._d['notice.request']({ from: 'van-stranger', payload: { reqId: 'van-ghost-req' } });
+        out.nbStrangerNoOracle = !bus.sends.some((s) => s.type === 'notice.board');
+        bus._d['notice.request']({ from: 'van-peer-a', payload: { reqId: 'van-live-req' } });
+        const liveReply = bus.sends.find((s) => s.type === 'notice.board' && s.nodeName === 'van-peer-a');
+        out.nbCatchUpAnswersRegistered = !!(liveReply && liveReply.payload && liveReply.payload.reqId === 'van-live-req' && Array.isArray(liveReply.payload.notes));
+        // ---- acks are SENDER-BOUND: a registered DIFFERENT peer can
+        // replay an observed reqId; the asker's pending resolves only
+        // from the node the ask was ADDRESSED to
+        const pullP = notices.pull(bus, 'van-peer-a', { timeoutMs: 8000 });
+        const ask = bus.sends.find((s) => s.type === 'notice.request');
+        const forgedId = 'note-census-forged-' + crypto.randomBytes(4).toString('hex');
+        bus._d['notice.board']({ from: 'van-peer-b', payload: { reqId: ask.payload.reqId, notes: [{ id: forgedId, title: 'forged' }] } });
+        const realId = 'note-census-ack-' + crypto.randomBytes(4).toString('hex');
+        bus._d['notice.board']({ from: 'van-peer-a', payload: { reqId: ask.payload.reqId, notes: [{ id: realId, title: 'honest-ack' }] } });
+        const pulled = await pullP;
+        out.nbForgedAckIgnored = !notices.list({ now: NOW + 6 }).some((n) => n.id === forgedId);
+        out.nbHonestAckAdopts = pulled.ok === true && pulled.pulled === 1 && pulled.from === 'van-peer-a';
+        // ---- pull's failure legs: send-failure typed, timeout typed
+        const busThrow = stubBus('van-node-throw');
+        busThrow.send = async () => { throw new Error('Unknown crew node: van-nowhere'); };
+        notices.install(busThrow);
+        const failed = await notices.pull(busThrow, 'van-nowhere', { timeoutMs: 5000 });
+        out.nbPullSendFailLeg = failed.pulled === 0 && String(failed.reason).indexOf('send_failed') === 0;
+        const timed = await notices.pull(bus, 'van-peer-a', { timeoutMs: 60 });
+        out.nbPullTimeoutTyped = timed.pulled === 0 && timed.reason === 'timeout';
+        // ---- push/broadcast round legs
+        const pushed = await notices.push(bus, 'van-peer-a');
+        out.nbPushRound = pushed.pushed === true && pushed.ok === true;
+        const spread = await notices.broadcast(bus);
+        out.nbBroadcastFanned = Array.isArray(spread) && spread.length === 2 && spread.every((r) => r.ok === true);
+    } catch (e) {
+        out.ok = false;
+        out.bail = (e && e.message) ? e.message : String(e);
+    }
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
+})().catch((e) => { process.stdout.write('VANT_CT_JSON<<' + JSON.stringify({ ok: false, bail: String(e) }) + '>>END'); });
+`;
+
+    harness.registerRoute('noticeboard-field-walls', async () => {
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', NOTICES_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: 'noticeboard-field-walls probe child failed: ' + String(e.stderr || e.message).slice(0, 200) }), { status: 500 });
+        }
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
+
     harness.registerRoute('mcp-exec', async (ctx) => {
         const j = await ctx.request.json().catch(() => ({}));
         let outText;

@@ -2941,3 +2941,60 @@ The stamp the waves-8-11 tranche owed (four new census rows, two real
   no pack or lib byte changed since), lint 21/299, audit +
   determinism flat. The STRUCT toolchain section and the README
   waves 8-11 ride this same commit hash as landed.
+
+
+## Wave 13 (2026-10-30) - the census pockets close: the heartbeat lifecycle, the crypto canon's TWO PHANTOM CODES, and the federation board's wire walls
+
+The census family's honest remainder measured in one wave - three
+pockets the modern suites and prior rows never claimed - and the
+pool is now EMPTY:
+
+- **The wave's find: two phantom error codes in lib/encrypt.js.**
+  `encrypt()` and `rsaKeyPair()` threw typed refusals on
+  `errors.CODES.ENCRYPT_KEY_REQUIRED` and `ENCRYPT_KEY_INVALID` -
+  names that NEVER existed in lib/error.js - so every typed key
+  refusal carried `code: undefined` and answered a caller's switch
+  with the generic arm. BOTH wired into the keyed CODES map this
+  wave (zero other callers repo-wide; the crypto-canon row grades
+  the keyed shapes post-repair).
+- **`heartbeat-lifecycle` (vant-census row 12)** - the context
+  engine's timer family had ZERO graded behavior anywhere: cold-stop
+  safety, the 4-minute contracted interval, the ONE heartbeat:started
+  event under a double start (idempotence event-audited), boot's
+  registry holding `context.heartbeat` at exactly that interval,
+  ping's honest shape `{ok:true,timestamp}` with its own event, and
+  the registry-wired stop (timer entry gone, flag off, inspect()
+  honest).
+- **`crypto-canon-laws` (row 13)** - lib/encrypt.js's own census:
+  the GCM round trip (modern 12-byte default nonce, the legacy
+  16-byte opt-in decoding by width sniffing, zero-byte and
+  non-ASCII edges), the keyed typed refusals post-phantom-repair,
+  decrypt's ONE-shape throw law across format/IV-length/wrong-key/
+  tamper legs, hash/verify's malformed-stored-hash answering false
+  without throwing, the hex HMAC law, the 2-part signed token
+  (round trip, wrong secret null, past-exp null under a genuine
+  HMAC), and the RSA OAEP/SHA256 pair (round trip, sign/verify,
+  tamper refused).
+- **`noticeboard-field-walls` (row 14)** - the federation board's
+  wire-payload posture: every untrusted field on the push leg
+  re-clamped (title 120, body 2000, ref 120, the 30-day ttl
+  ceiling, `from` pinned to the SENDER), malformed entries inside a
+  mixed payload skipped without breaking the good ones, no board
+  oracle for unknown origins, merge-only adoption (first writer
+  wins), registered-peer-gated catch-up with the empty-board
+  retry-stop intact, sender-bound acks (a registered DIFFERENT
+  peer replaying an observed reqId resolves nothing), and pull's
+  typed send-failure and timeout legs.
+
+- Stamps: full-table fires x2 verdict-identical: **275 pack rows
+  REFUSED / 0 EXPLOITED / 0 BOUNDED / 6 honest skips across 21
+  packs** per fire (the three new rows grade live x2), library
+  rows 48/0/1 per fire; contract **386/0 x2, verdict tables
+  identical** with the three rows graded honestly `skip` in-suite
+  (run-root-only arm, the sibling precedent); `packs:lint` 21
+  packs / 302 ids; eslint + audit gate flat.
+
+**The census family closes here**: with these three pockets
+measured, every ungraded behavior of the pod's lib tree now rides
+a pack row, a modern twin, or an honestly-armed route. New census
+rows only grow when the pod grows.

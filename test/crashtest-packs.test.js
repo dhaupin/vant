@@ -1192,6 +1192,33 @@ const EXPECTED = {
         // (run-root-only arm, the sibling precedent; the run fires grade
         // it live x2 and the README ledger pins the verdicts).
         'jobworker-pool': 'skip',
+        // (heartbeat-lifecycle, ARMED 2026-10-30, wave 13) the context
+        // engine's heartbeat timer had ZERO graded behavior anywhere -
+        // this row is the family's first stamp: cold-stop safety, the
+        // 4-minute contracted interval, the event-audited idempotent
+        // start, the boot-registry ride, ping's honest shape, and the
+        // registry-wired stop. Run-root-only arm (the sibling
+        // precedent); the run fires grade it live x2.
+        'heartbeat-lifecycle': 'skip',
+        // (crypto-canon-laws, ARMED 2026-10-30, wave 13) lib/encrypt.js's
+        // own census - the wave's find is TWO PHANTOM CODES (ENCRYPT_KEY_
+        // REQUIRED / ENCRYPT_KEY_INVALID were never defined in
+        // lib/error.js, so the typed refusals carried code: undefined);
+        // BOTH FIXED THIS WAVE and the canon graded post-repair (GCM
+        // round trip incl. the IV-width law, the ONE-shape decrypt
+        // refusal chain, hash/verify, HMAC, the 2-part token, RSA).
+        // Run-root-only arm (the sibling precedent).
+        'crypto-canon-laws': 'skip',
+        // (noticeboard-field-walls, ARMED 2026-10-30, wave 13) the
+        // federation board's WIRE-PAYLOAD walls: every untrusted field
+        // re-clamped on the push leg (title 120 / body 2000 / ref 120 /
+        // the 30-day ttl ceiling / from pinned to the sender), mixed
+        // payload entries skipped without breaking the good ones, no
+        // board oracle for unknown origins, merge-only adoption,
+        // registered-peer-gated catch-up, sender-bound acks, and the
+        // typed pull failure legs. Run-root-only arm (the sibling
+        // precedent); the run fires grade it live x2.
+        'noticeboard-field-walls': 'skip',
     },
     'vant-brain': {
         'private-first-fallback': 'REFUSED',

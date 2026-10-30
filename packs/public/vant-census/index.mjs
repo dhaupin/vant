@@ -372,6 +372,96 @@ export default {
         return { verdict: 'REFUSED', detail: '7 pool laws hold: racing adds reach the declared concurrency with the shared counter pairing back to 0, a throwing handler marks its job failed typed with the job:failed event AND the pool keeps serving the jobs behind it (the error cannot wedge the pool), a batch of adds under a one-slot cap drains fully, and the stats are honest mid-flight and at parity - the JobWorker pool is graded behaviorally, riding the wave-11 pattern sweep that cleared the other clearTimeout families', tookRequests: 1 };
       },
     },
+    {
+      name: 'heartbeat-lifecycle',
+      description: "the context engine's heartbeat lifecycle converts - the timer family the census sweep found with ZERO graded behavior anywhere (no twin, no pack row, no legacy smoke claimed it): cold-stop safety (stopHeartbeat before any start is a silent no-op, never a throw), the 4-minute interval the status shape contracts, the ONE heartbeat:started event under a double start (idempotence is event-audited), boot's timer registry actually holding 'context.heartbeat' at that interval, ping's honest shape ({ok:path, timestamp}) with its own heartbeat:ping event, and the registry-wired stop (the timer entry GONE from boot's map, the enabled flag off, inspect() reporting the disabled heartbeat honestly)",
+      async run(harness) {
+        const r = await tryRun(harness, 'heartbeat-lifecycle', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: '{}',
+        });
+        if (r._absent) return skip('no heartbeat-lifecycle route');
+        if (r.threw) return { verdict: 'REFUSED', skipped: true, detail: `heartbeat-lifecycle threw in the shim: ${r.error?.name}` };
+        const j = parseJson(await bodyText(r));
+        if (!j || j.error) return skip('heartbeat-lifecycle probe unavailable: ' + (j && j.error || 'no payload'));
+        if (j.ok === false) return { verdict: 'EXPLOITED', detail: 'the heartbeat-lifecycle child faulted mid-census: ' + (j.bail || 'unknown'), tookRequests: 1 };
+        const laws = [
+          ['cold-stop safe + status contract', j.hbStopColdSafe && j.hbIntervalContract],
+          ['start idempotent, event-audited', j.hbStartsEnabled && j.hbStartIdempotent],
+          ['boot registry ride', j.hbBootRegistered],
+          ['ping honest shape + event', j.hbPingOk && j.hbPingEventFires],
+          ['registry-wired stop + honest inspect', j.hbBootUnregistered && j.hbStopsEnabled && j.hbInspectHonest],
+        ];
+        const broken = laws.filter(([, ok]) => !ok);
+        if (broken.length) {
+          return { verdict: 'EXPLOITED', detail: 'the heartbeat family broke at: ' + broken.map(([n]) => n).join(', '), tookRequests: 1, evidence: { census: j } };
+        }
+        return { verdict: 'REFUSED', detail: '5 lifecycle laws hold: a cold stopHeartbeat is a silent no-op, the 4-minute interval is the contracted status shape, a double start emits exactly ONE heartbeat:started, the boot timer registry holds context.heartbeat at 240000ms, ping answers {ok:true, timestamp} with its own event, and the stop unregisters the timer from the boot map with the flag off and inspect() honest - the context heartbeat is graded behaviorally for the first time', tookRequests: 1 };
+      },
+    },
+    {
+      name: 'crypto-canon-laws',
+      description: "lib/encrypt.js's OWN census converts - the one-canon file rode other families' rows (stego rode encrypt/decrypt, webhooks rode hmacSign) but its refusal chain was never graded, and the census's first find is TWO PHANTOM CODES: encrypt()/rsaKeyPair() threw with errors.CODES.ENCRYPT_KEY_REQUIRED and ENCRYPT_KEY_INVALID, names that never existed in lib/error.js, so the typed refusals carried code: undefined (fixed this wave by adding them to the keyed map). The row grades the canon post-repair: the GCM round trip (modern 12-byte default nonce, the legacy 16-byte opt-in decoding by width sniffing, the zero-byte and non-ASCII payload edges), the keyed typed refusals, decrypt's ONE-shape throw law (bad format, the honest IV-length complaint, wrong key, flipped-hex tamper - every leg a VantError, the success path a bare string), hash/verify (round trip, malformed stored hash answering false without throwing), the hex HMAC law (genuine, tampered, non-hex), the 2-part signed token (round trip, wrong secret null, past-exp null under a genuine HMAC, garbage null), and the RSA OAEP/SHA256 pair",
+      async run(harness) {
+        const r = await tryRun(harness, 'crypto-canon-laws', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: '{}',
+        });
+        if (r._absent) return skip('no crypto-canon-laws route');
+        if (r.threw) return { verdict: 'REFUSED', skipped: true, detail: `crypto-canon-laws threw in the shim: ${r.error?.name}` };
+        const j = parseJson(await bodyText(r));
+        if (!j || j.error) return skip('crypto-canon-laws probe unavailable: ' + (j && j.error || 'no payload'));
+        if (j.ok === false) return { verdict: 'EXPLOITED', detail: 'the crypto-canon child faulted mid-census: ' + (j.bail || 'unknown'), tookRequests: 1 };
+        const laws = [
+          ['GCM round trip + IV widths', j.ksGcmRoundTrip && j.ksIvModern12 && j.ksIvLegacy16 && j.ksZeroByteRoundTrip && j.ksUnicodeRoundTrip],
+          ['keyed typed refusals (post phantom repair)', j.ksKeyRequiredTyped && j.ksRsaMinBitsTyped],
+          ['decrypt one-shape law', j.ksFormatTyped && j.ksIvLengthHonest && j.ksWrongKeyFails && j.ksTamperRefused && j.ksSingleShape],
+          ['hash/verify canon', j.ksHashVerifyRoundTrip && j.ksMalformedHashFalse],
+          ['hex HMAC law', j.ksHmacGenuine && j.ksHmacTampered && j.ksHmacNonHex],
+          ['signed token canon', j.ksTokenTwoPart && j.ksTokenRoundTrip && j.ksTokenWrongSecret && j.ksTokenGarbage && j.ksTokenExpired],
+          ['RSA OAEP pair', j.ksRsaRoundTrip && j.ksRsaSignVerify && j.ksRsaTampered],
+        ];
+        const broken = laws.filter(([, ok]) => !ok);
+        if (broken.length) {
+          return { verdict: 'EXPLOITED', detail: 'the crypto canon broke at: ' + broken.map(([n]) => n).join(', '), tookRequests: 1, evidence: { census: j } };
+        }
+        return { verdict: 'REFUSED', detail: 'the census\'s first find is TWO PHANTOM CODES - encrypt()/rsaKeyPair() threw on errors.CODES.ENCRYPT_KEY_REQUIRED and ENCRYPT_KEY_INVALID, names that never existed in lib/error.js, so the typed refusals carried code: undefined (BOTH FIXED THIS WAVE by adding them to the keyed map) - and post-repair 25 canon laws hold: the GCM round trip rides the modern 12-byte nonce with the legacy 16-byte opt-in decoding by width sniffing (plus zero-byte and non-ASCII edges), the key refusals answer with KEYED typed codes, decrypt keeps its ONE-shape throw law across format/IV-length/wrong-key/tamper legs, hash/verify answers non-match without throwing, the HMAC law is genuine/tampered/non-hex, the 2-part token round-trips and rejects wrong secrets, past-exps and garbage, and the RSA OAEP/SHA256 pair round-trips + verifies + refuses tamper', tookRequests: 1 };
+      },
+    },
+    {
+      name: 'noticeboard-field-walls',
+      description: "the federation board's wire-payload walls convert - the push leg's 'every field is re-clamped' comment had no row grading it: the envelope is untrusted and the dispatcher clamps (title 120, body 2000, ref 120, ttlMs hard-capped at MAX_TTL_MS, from pinned to the SENDER), malformed entries inside a mixed payload are skipped without breaking the good ones, an unknown origin gets NO board oracle, a re-posted id is merge-only (first writer wins), the catch-up ask only answers registered peers (even an empty board answers - the retry-stop law), acks are sender-bound (a REGISTERED different peer replaying the observed reqId resolves nothing), pull's send-failure and timeout legs answer typed with the pending entry deleted, and the board's storage walls (title-required, invalid-ttl typed, local clamps, TTL pruning with sticky survival) hold beside them",
+      async run(harness) {
+        const r = await tryRun(harness, 'noticeboard-field-walls', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: '{}',
+        });
+        if (r._absent) return skip('no noticeboard-field-walls route');
+        if (r.threw) return { verdict: 'REFUSED', skipped: true, detail: `noticeboard-field-walls threw in the shim: ${r.error?.name}` };
+        const j = parseJson(await bodyText(r));
+        if (!j || j.error) return skip('noticeboard-field-walls probe unavailable: ' + (j && j.error || 'no payload'));
+        if (j.ok === false) return { verdict: 'EXPLOITED', detail: 'the noticeboard child faulted mid-census: ' + (j.bail || 'unknown'), tookRequests: 1 };
+        const laws = [
+          ['storage walls typed + clamped', j.nbTitleRequired && j.nbNegTtlTyped && j.nbNaNTtlTyped && j.nbClampTitleBodyRef && j.nbClampTtl],
+          ['TTL pruning + sticky survival', j.nbTtlPrunes && j.nbStickySurvives],
+          ['install idempotent + typed chain', j.nbInstallIdempotent && j.nbTypedRefusals],
+          ['push payload walls', j.nbWideAdopted && j.nbWireTitleClamped && j.nbWireBodyClamped && j.nbWireRefClamped && j.nbWireTtlClamped && j.nbWireFromPinned],
+          ['no oracle for strangers + merge-only', j.nbUnknownOriginIgnored && j.nbMergeOnlyFirstWriter],
+          ['catch-up gated + answered', j.nbStrangerNoOracle && j.nbCatchUpAnswersRegistered],
+          ['acks sender-bound', j.nbForgedAckIgnored && j.nbHonestAckAdopts],
+          ['pull failure legs typed', j.nbPullSendFailLeg && j.nbPullTimeoutTyped],
+          ['push/broadcast rounds', j.nbPushRound && j.nbBroadcastFanned],
+        ];
+        const broken = laws.filter(([, ok]) => !ok);
+        if (broken.length) {
+          return { verdict: 'EXPLOITED', detail: 'the board walls broke at: ' + broken.map(([n]) => n).join(', '), tookRequests: 1, evidence: { census: j } };
+        }
+        return { verdict: 'REFUSED', detail: '24 board-wall laws hold: the push leg re-clamps every untrusted field (title 120, body 2000, ref 120, the 30-day ttl ceiling, from pinned to the sender) and skips malformed entries in a mixed payload without losing the good ones, strangers get no board oracle and their ids never adopt, a re-posted id clobbers nothing (first writer wins), the catch-up ask answers registered peers only with the empty-board retry-stop intact, a registered DIFFERENT peer replaying an observed reqId resolves nothing while the addressed-node ack adopts, the pull send-failure and timeout legs answer typed, and the board storage walls (title-required, invalid-ttl typed, the local clamps, TTL pruning with sticky survival) hold - the untrusted-payload posture of the federation board is graded behaviorally', tookRequests: 1 };
+      },
+    },
   ],
 };
 
