@@ -208,6 +208,30 @@ test('BM25 #199: quantifier-shaped term returns fast (no event-loop stall)', () 
     return { success: (Date.now() - t0) < 3000, ms: Date.now() - t0 };
 });
 
+// (wave 14) the commit-pin law, first native grade (was typeof-only in
+// the coverage smoke battery): getCurrentCommit pins the INSTALL tree's
+// .git head as the 7-hex citation pin - through refs or detached HEAD,
+// anchored to the install, never the caller's cwd (pass 24).
+test('getCurrentCommit pins the install-tree head (7-hex), or answers null without a readable HEAD dir', () => {
+    const fs = require('fs');
+    const search = require(path.join(ROOT, 'lib', 'search'));
+    const c = search.getCurrentCommit();
+    const gitPath = path.join(ROOT, '.git');
+    const hadDir = fs.existsSync(gitPath) && fs.lstatSync(gitPath).isDirectory();
+    if (!hadDir) {
+        // linked-worktree / tarball installs: .git is a file or absent, so
+        // there is no HEAD dir to read - the honest answer is null
+        return { success: c === null, c, gitShape: 'no .git dir' };
+    }
+    // real checkout: the pin equals the HEAD the lib just read - resolve
+    // the same file chain back and demand the first 7 hex match
+    const head = fs.readFileSync(path.join(gitPath, 'HEAD'), 'utf8').trim();
+    const resolved = head.startsWith('ref: ')
+        ? fs.readFileSync(path.join(gitPath, head.slice(5)), 'utf8').trim()
+        : head;
+    return { success: typeof c === 'string' && resolved.startsWith(c) && /^[0-9a-f]{7}$/.test(c), c, head: resolved };
+});
+
 console.log('\n--- RESULTS ---\n');
 console.log(`  Passed:  ${results.passed}`);
 console.log(`  Failed:  ${results.failed}`);

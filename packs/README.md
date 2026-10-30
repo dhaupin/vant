@@ -2998,3 +2998,59 @@ pool is now EMPTY:
 measured, every ungraded behavior of the pod's lib tree now rides
 a pack row, a modern twin, or an honestly-armed route. New census
 rows only grow when the pod grows.
+
+
+## Wave 14 (2026-10-30) - the leave-behind trio retires: the coverage smoke battery, the vibe eval lane, the orphan fresh-install probe
+
+The post-census sweep's first retirement candidate set, driven by the
+ convert-first law (nothing retires until its behavior rides pack rows
+ or a modern twin):
+
+- **The census that drove it:** `test/coverage.js` poked 13 modules
+  with typeof shape checks. Eleven of them ALREADY ride modern
+  coverage (schema→schema.test.js, audit→audit.test.js, citations→
+  citations.test.js + the naked-lib-first-doors pack row, islands
+  triggers/autoHydrate→islands.test.js, state→storage.test.js + the
+  vant-state-wiring rows, search→search.test.js, hybrid sync→
+  provider-timeouts/sync-recursion, gallery section → was a NO-OP - its
+  optional save/load asserts never fired on the real lib/stego exports,
+  so it graded nothing). FOUR pockets had NO graded behavior anywhere,
+  and all four converted FIRST:
+  - **`search.getCurrentCommit`** → tests the commit-pin law: reads the
+    INSTALL tree's .git head (anchored, not cwd) and answers the 7-hex
+    pin (ref or detached HEAD), or honestly `null` when the install has
+    no readable HEAD dir (the linked-worktree/tarball shape).
+  - **the repos seat** (`storage.get('repos')` → register/mount/
+    unmount, serving bin/repos.js) → the round trip: register writes
+    url+options into the registry; mount of an unknown name answers
+    null (not a throw); mount flags the repo mounted in config.json
+    and unmount clears it - all against a throwaway reposDir.
+  - **`stego.createBootstrap`/`parseBootstrap`** → the bootstrap
+    channel: manifest → sealed envelope → virgin manifest round trip,
+    the plaintext lane, and the wrong-key refusal (typed throw).
+  - **gitlab/bitbucket island triggers** (the vibe eval's lane) →
+    findTriggers('merge request in gitlab repo') includes('gitlab'),
+    findTriggers('bitbucket PR') includes('bitbucket').
+- **The retirements (convert FIRST, then retire):** test/coverage.js
+  (a 36-shape stability battery from the 2026-10-27 stability
+  audits, invisible to the run-all sweep since it was a non-.test.js
+  CI-only lane),
+  test/evals/vibe.js (the 4 keyword-trigger evals, CI-only lane,
+  islands.test.js carries the trigger laws now), and
+  scripts/probe-fresh.js (a fresh-install audit probe unwired
+  ANYWHERE - not in npm scripts, not CI, not docs; its test-all/
+  format-test doors verified unclaimed by pack rows and remain
+  #181 door-pin candidates, not census blocks). The CI lane now
+  reads: ci.js, runner.js, the eyes gate.
+- **No pack rows needed this wave** - every gap fit a modern twin,
+  which is the honest arm when the behavior is seed-sized and the
+  suite is standing.
+
+- Stamps: all four converted suites green in their own process
+  (search 27/0 incl. the honest-null leg, stego 15/0, islands 16/0,
+  storage 43/0 incl. the async repos round trip); the two remaining
+  CI lanes run locally clean: test/ci.js (no ✗, one pre-existing
+  environmental warning), test/runner.js exit 0 with the door-pin
+  batch 28/28 held; eslint flat on all four touched suites; the
+  workflow YAML parses. Pack count untouched (21/302) - no EXPECTED
+  table drift, no restamp IOU.

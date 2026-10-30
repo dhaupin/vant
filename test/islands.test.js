@@ -175,6 +175,20 @@ test('findTriggers detects linear triggers', () => {
     return { success: triggers.includes('linear') };
 });
 
+// (wave 14) the gitlab/bitbucket trigger lanes convert from the vibe
+// eval (their only coverage was the CI-only eval lane):
+test('findTriggers detects gitlab triggers', () => {
+    const islands = require(path.join(ROOT, 'lib', 'islands'));
+    const triggers = islands.findTriggers('merge request in gitlab repo');
+    return { success: triggers.includes('gitlab') };
+});
+
+test('findTriggers detects bitbucket triggers', () => {
+    const islands = require(path.join(ROOT, 'lib', 'islands'));
+    const triggers = islands.findTriggers('bitbucket PR');
+    return { success: triggers.includes('bitbucket') };
+});
+
 test('findTriggers returns empty for unrelated query', () => {
     const islands = require(path.join(ROOT, 'lib', 'islands'));
     const triggers = islands.findTriggers('hello world');

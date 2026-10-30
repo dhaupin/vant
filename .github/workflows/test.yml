@@ -54,8 +54,6 @@ jobs:
           node -e "console.log('vant', require('./package.json').version)"
           node test/ci.js
           node test/runner.js
-          node test/evals/vibe.js
-          node test/coverage.js
 
       - name: Eyes gate (eyestruct@1.0 visual ledger, browserless)
         # The crashtest lane aimed at appearance instead of attackability.
