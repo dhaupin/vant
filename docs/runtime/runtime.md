@@ -14,7 +14,7 @@ description: The programmatic API - init, learn, remember, think, agents, sync.
 ## Quick Start
 
 ```javascript
-const vant = require('vant');
+const vant = require('vant-os');
 
 // Initialize
 await vant.init({ name: 'MyAgent' });

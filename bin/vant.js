@@ -682,8 +682,13 @@ const script = COMMANDS[cmd];
 if (!script) {
     // Built-in commands
     if (cmd === 'version' || cmd === '--version' || cmd === '-v') {
-        const vant = require('../lib/vant');
-        console.log('vant CLI v' + vant.version);
+        // Truthful --version contract (the verify-release ladder, vant#275):
+        // stdout is EXACTLY the semver - no runtime hydration (the brain
+        // load printed its fresh-install notices to stdout before the
+        // banner, so the first machine-parsed --version was polluted), no
+        // prose prefix. Human-friendly surfaces keep 'vant CLI v...' in
+        // their own renderings.
+        console.log(require('../package.json').version);
         process.exit(0);
     }
     if (cmd === 'distributed') {

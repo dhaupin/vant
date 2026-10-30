@@ -27,7 +27,7 @@ The storage layer handles all brain read/write operations:
 Import storage:
 
 ```javascript
-const Storage = require('vant').storage;
+const Storage = require('vant-os').storage;
 ```
 
 `vant.storage` is the lib/storage.js module itself. `Storage.get(type)` returns factory instances; most APIs below take a `basePath` or use the brain path by default.

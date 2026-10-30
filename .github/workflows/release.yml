@@ -1,0 +1,194 @@
+name: release
+# The repo-cut release ladder, adopted from the family example (eyestruct's
+# publish.yml, dhaupin/eyestruct#1.0.0-era) with vant's deltas spelled out:
+#
+#   1. publish  - npm trusted publishing (OIDC): no NPM_TOKEN secret exists,
+#                 the job's id-token proves the tarball came from THIS tree.
+#                 npm >= 11.5.1 floor installed in-lane. The battery rides
+#                 automatically: npm publish runs prepublishOnly
+#                 (npm run check:battery) - a red battery cannot mint a
+#                 tarball. Deltas vs the eyestruct gate:
+#                   - NO 0.x refusal: vant serves the 0.8.6 line by the
+#                     owner's ruling (versions hold at 0.8.6; vant#275).
+#                   - MANUAL-FIRST: the maiden cut (exactly 0.8.6) publishes
+#                     by the owner's hand from a machine, never the lane -
+#                     the tag v0.8.6 is pushed AFTER the manual publish, so
+#                     the already-served check below carries the lane into
+#                     verify naturally.
+#                     already-served idempotency: if the registry already
+#                     serves this exact version, the publish step skips
+#                     (loudly) and the lane proceeds to release + verify -
+#                     a re-cut or a re-run judgment never fights the claim.
+#                   - tag == packaged version gate (a tag that lies about its
+#                     version never cuts), push events only.
+#   2. release  - the GH release object is cut from the pushed tag. Notes
+#                 are EXTRACTED from the changelog's own text
+#                 (scripts/release-notes.js - the vant variant: CHANGELOG.md
+#                 accumulates per-pass "## [Unreleased]" sections while the
+#                 version holds, so the notes are every current
+#                 [Unreleased] pass section down to the last version-stamped
+#                 heading). An empty extraction refuses the cut. Idempotent:
+#                 an existing release object carries on to verify.
+#   3. verify   - the post-publish truth (scripts/verify-release.cjs, the
+#                 family ladder, local rider for --allowed per eyestruct#33):
+#                   --npm: registry latest == this tree's package version;
+#                   served tarball sha512 == registry integrity; provenance
+#                   attestations present; then the FULL pack ladder on the
+#                   served tarball (forbidden scan BY NAME against vant's
+#                   own additions, served set == npm pack of this tree,
+#                   identity, consumer install + probe, bin --version).
+#                   vant rider: web/ is ALLOWED in the tarball (dashboards,
+#                   relay, home ride - vant#275) and models/tmp/labs/test/
+#                   packs/ are forbidden additions.
+#                   --gh: the release object exists for the tag, its target
+#                   commit == `git rev-parse tag^{commit}`, and the source
+#                   tarball's file list diffs byte-identical against
+#                   `git archive` of that release commit - zero drift.
+#                 Both tars judged: the npm tar (served, contents+ladder)
+#                 and the GH source tar (byte-drift vs the release commit).
+#
+# verify-only dispatch mode: no publish, no release minting - the verify
+# job re-runs the trust ladder against what is ALREADY published and
+# released.
+#
+# Owner-side prerequisite (once): register "trusted publisher" on
+# npmjs.com/package/vant-os - repo dhaupin/vant, workflow
+# .github/workflows/release.yml - so the OIDC mint approves this lane.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'publish = registry cut | verify-only = re-run the trust ladder against what is already served'
+        required: false
+        default: 'publish'
+        type: choice
+        options: ['publish', 'verify-only']
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  publish:
+    if: github.event_name == 'push' || inputs.mode != 'verify-only'
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.gate.outputs.version }}
+      tag: ${{ steps.gate.outputs.tag }}
+      served: ${{ steps.served.outputs.served }}
+    steps:
+      # fetch-depth: 0 - prepublishOnly's battery and the verify ladder's
+      # git archive need the release commit reachable.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with: { node-version: 22 }
+      - name: npm floor for trusted publishing (11.5.1+)
+        run: npm install -g npm@^11
+      - id: gate
+        name: the gate - tag == packaged version (0.x serves; manual-first on 0.8.6)
+        # Every github context value reaches this script through env, never
+        # inline interpolation - an expression-injected tag name is the
+        # classic Actions injection class (the eyestruct hardening walk
+        # 2026-10-28), and ref_name is attacker-adjacent input however much
+        # we trust the collaborators.
+        env:
+          TAG_REF: ${{ github.ref_name }}
+          EVENT_NAME: ${{ github.event_name }}
+          MANUAL_FIRST_VERSION: '0.8.6'
+        run: |
+          set -e
+          V="$(node -p "require('./package.json').version")"
+          if [ "$V" = "$MANUAL_FIRST_VERSION" ]; then
+            echo "publish gate: $V is the manual-first cut (vant#275) - the npm push is the owner's hand; the lane skips the npm publish and can still cut the GH release + verify"
+            echo "publishable=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "publishable=true" >> "$GITHUB_OUTPUT"
+          fi
+          REF="$TAG_REF"
+          EVENT="$EVENT_NAME"
+          if [ "$EVENT" = "push" ]; then
+            if [ "$REF" != "v$V" ]; then
+              echo "publish gate: refusing - tag $REF does not equal the packaged version v$V (a tag that lies about its version never cuts)"; exit 1
+            fi
+          fi
+          TAG="v$V"
+          echo "publish gate: $TAG passes the tag==version gate"
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+      - id: served
+        name: already-served check
+        run: |
+          set -e
+          V="$(node -p "require('./package.json').version")"
+          if npm view "vant-os@$V" version > /dev/null 2>&1; then
+            echo "already-served: vant-os@$V is on the registry - publish skips, the verify lane keeps the receipt from here"
+            echo "served=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "not served: vant-os@$V is absent - the publish step owns the mint"
+            echo "served=false" >> "$GITHUB_OUTPUT"
+          fi
+      - run: npm ci --no-fund --no-audit
+      - name: npm publish --provenance (OIDC trusted publishing)
+        if: steps.gate.outputs.publishable == 'true' && steps.served.outputs.served == 'false'
+        run: npm publish --provenance
+
+  release:
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with: { fetch-depth: 0 }
+      # BLOCK_* arrive through env from the publish job's outputs - the same
+      # no-inline-interpolation rule the gate obeys. notes.md lives in
+      # RUNNER_TEMP: never a silent overwrite of a repo file that happens
+      # to carry the name.
+      - name: extract the release notes from the changelog (refuses empty)
+        env:
+          BLOCK_VERSION: ${{ needs.publish.outputs.version }}
+        run: node scripts/release-notes.js "$BLOCK_VERSION" > "$RUNNER_TEMP/notes.md"
+      - name: cut the GH release from the tag (idempotent)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BLOCK_VERSION: ${{ needs.publish.outputs.version }}
+          BLOCK_TAG: ${{ needs.publish.outputs.tag }}
+        run: |
+          TAG="$BLOCK_TAG"
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            echo "release $TAG already exists - not re-minting; the verify job judges its truth"
+          else
+            gh release create "$TAG" --title "vant-os $BLOCK_VERSION" --notes-file "$RUNNER_TEMP/notes.md"
+          fi
+
+  # No `needs` on release here by design under the if: the verify leg runs
+  # after release on a real cut, but ALSO stands alone in verify-only mode
+  # (publish skipped, release skipped, the ladder judged against what is
+  # already served and released).
+  verify:
+    needs: publish
+    if: >-
+      always() &&
+      (needs.publish.result == 'success' ||
+       (needs.publish.result == 'skipped' && inputs.mode == 'verify-only'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with: { node-version: 22 }
+      - name: the post-publish trust ladder (npm + GH release)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -e
+          V="$(node -p "require('./package.json').version")"
+          PROBE="const p=require('vant-os');if(p.getVersion()!=='$V')process.exit(1)"
+          node scripts/verify-release.cjs --npm --version "$V" --probe "$PROBE" \
+            --allowed 'web/' \
+            --forbidden 'models/,tmp/,labs/,test/,packs/'
+          node scripts/verify-release.cjs --gh --tag "v$V"
