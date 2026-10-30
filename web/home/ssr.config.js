@@ -14,10 +14,11 @@
  *   /showcase  the portfolio of real Vant installs (case-study cards)
  *   /terms     terms of use
  *   /privacy   privacy policy
- *   /status    public surfacing status (island-backed)
- *   /contact   contact (form composes a GitHub issue; nothing is POSTed)
- *   /changelog rendered at build time from CHANGELOG.md (parity-gated)
- */
+ *   /status    public surfacing status (island-backed)* /contact contact (form composes a GitHub issue; nothing is POSTed)
+* /ailments the install-ailment checker (vant#260): paste CLI output, get
+*   the matched known-issue rows from a static registry (client-side)
+* /changelog rendered at build time from CHANGELOG.md (parity-gated)
+*/
 
 import { readFileSync } from 'fs'
 
@@ -143,17 +144,26 @@ export default {
                 description:
                     'The four STRUCT families combined on one page: packstruct conformance, the crashtest packs floor, the eyestruct vision battery, and the poststruct render audit. Skeleton epoch: mock-shaped cards until the live feeds wire in.',
             },
-        },
-        {
-            path: '/contact',
-            priority: '0.6',
-            changefreq: 'yearly',
-            meta: {
-                title: 'Contact - Vant',
-                description:
-                    'Reach the Vant project: compose a GitHub issue from the browser, or use the docs and dashboard doors.',
-            },
-        },
+        },{
+path: '/contact',
+priority: '0.6',
+changefreq: 'yearly',
+meta: {
+title: 'Contact - Vant',
+description:
+'Reach the Vant project: compose a GitHub issue from the browser, or use the docs and dashboard doors.',
+},
+},
+{
+path: '/ailments',
+priority: '0.6',
+changefreq: 'monthly',
+meta: {
+title: 'Ailment checker - Vant',
+description:
+'Paste vant CLI output, get the known-issue rows back: what it means, how bad it is, where it is tracked. Client-side matcher, nothing leaves the paste box.',
+},
+},
     ],
 
     // JSON-LD structured data (prestruct contract): FOUR graph nodes on

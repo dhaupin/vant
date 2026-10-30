@@ -38,6 +38,7 @@ import { WALK, WALK_LIVE, STATUS_LIVE } from '../walk.mjs'
 // Stops outside the walk (footer-only by owner direction) join the sidebar's
 // "More" section, so the drawer is the one place the full route set lives.
 const MORE = [
+    { label: 'Ailment checker', href: '/ailments' },
     { label: 'Changelog', href: '/changelog' },
     { label: 'Terms', href: '/terms' },
     { label: 'Privacy', href: '/privacy' },
