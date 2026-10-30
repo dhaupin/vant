@@ -43,14 +43,19 @@ export const WALK = [
     // (mock-labelled cards prerender; nothing to wire before it answers),
     // so unlike Status this stop rides UNGATED in the walk.
     { label: 'Struct audit', href: '/audit' },
+    // the ailment checker (vant#260): same statically-honest posture —
+    // registry + matcher prerender, the paste box is client-only, the
+    // agent door is the edge function. UNGATED like the audit stop.
+    { label: 'Ailments', href: '/ailments' },
     { label: 'Releases', href: 'https://github.com/dhaupin/vant/releases' },
     { label: 'GitHub', href: 'https://github.com/dhaupin/vant' },
     { label: 'Docs', href: 'https://docs.creadev.org/vant/' },
     { label: 'Contact', href: '/contact' },
 ]
 
-// Ten entries, one per WALK stop (the owner's same-count rule): the footer
-// columns render the same height on every route.
+// One entry per WALK stop (the owner's same-count rule): the footer
+// columns render the same height on every route. The Ailments stop pairs
+// with the Troubleshooting map — symptom-first docs, checker-first site.
 export const LEARN = [
     { label: 'Quick start', href: 'https://docs.creadev.org/vant/getting-started/quick-start' },
     { label: 'Agent onboarding', href: 'https://docs.creadev.org/vant/getting-started/agent-onboarding' },
@@ -63,6 +68,7 @@ export const LEARN = [
     { label: 'Security', href: 'https://docs.creadev.org/vant/security/' },
     { label: 'Operations', href: 'https://docs.creadev.org/vant/operations/' },
     { label: 'MCP tools', href: 'https://docs.creadev.org/vant/reference/mcp-tools' },
+    { label: 'Troubleshooting', href: 'https://docs.creadev.org/vant/advanced/troubleshooting' },
 ]
 
 export const STATUS_LIVE = gates.STATUS_LIVE

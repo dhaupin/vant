@@ -53,3 +53,4 @@ vant sync      # Push brain changes to GitHub
 - [The Brain](/vant/memory/brain) - what the memory files are and where they live
 - [MCP Server](/vant/runtime/mcp) - connect any MCP client
 - [CLI Reference](/vant/reference/cli) - all commands
+- [Ailment Checker](https://vant.creadev.org/ailments) - paste any CLI output here (or `curl 'https://vant.creadev.org/api/ailments/check?q=...'`) and get the known-issue rows back: what it means, how bad it is, where it is tracked
