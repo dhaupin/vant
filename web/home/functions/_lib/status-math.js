@@ -14,7 +14,8 @@
  *     so a quiet week stays honest instead of inventing outages.
  */
 
-/** The owner-named defaults (status page, pass 355). Kinds:
+/** The owner-named defaults (status page, pass 355; the struct family's six
+ *   sites joined at version 2 once all six answered live). Kinds:
  *   http       - network response must be ok (2xx)
  *   json-ok    - response must be 2xx AND parse as JSON without an `error` key
  *   github-ci  - the repo's latest completed Actions run must be a success
@@ -31,7 +32,19 @@ export const MONITOR_DEFAULTS = [
         kind: 'github-ci',
         options: { maxStaleHours: 26 },
     },
+    // The sibling family (owner call, wave 19: all six sites live on the web).
+    { name: 'Packstruct', url: 'https://packstruct.creadev.org/', kind: 'http', options: {} },
+    { name: 'Crashtest', url: 'https://crashtest.creadev.org/', kind: 'http', options: {} },
+    { name: 'Eyestruct', url: 'https://eyestruct.creadev.org/', kind: 'http', options: {} },
+    { name: 'Poststruct', url: 'https://poststruct.creadev.org/', kind: 'http', options: {} },
+    { name: 'Govstruct', url: 'https://govstruct.creadev.org/', kind: 'http', options: {} },
+    { name: 'Monoforge', url: 'https://monoforge.creadev.org/', kind: 'http', options: {} },
 ]
+
+/** Bump when MONITOR_DEFAULTS changes shape: seedDefaults inserts only the
+ *   owner-named rows missing at this version (one upgrade moment per bump,
+ *   so an admin's deliberate endpoint.remove survives every later cold GET). */
+export const MONITOR_DEFAULTS_VERSION = 2
 
 export const ENDPOINT_KINDS = ['http', 'json-ok', 'github-ci']
 

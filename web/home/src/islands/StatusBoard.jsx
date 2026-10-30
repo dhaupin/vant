@@ -218,7 +218,7 @@ export default function StatusBoard() {
                         <button className="status-panel-btn" onClick={() => admin({ action: 'alert.clear' })}>Clear alert</button>
                     </div>
                     <h4>Monitored endpoints</h4>
-                    <p className="status-note">The board is modular: add any https URL with a kind (http, json-ok, github-ci). Removal is instant; reset restores the six defaults.</p>
+                    <p className="status-note">The board is modular: add any https URL with a kind (http, json-ok, github-ci). Removal is instant; reset restores the twelve owner-named defaults (the six Vant surfaces plus the six family sites).</p>
                     {endpoints.map((e) => (
                         <div className="status-panel-row" key={'rm-' + e.id}>
                             <span className="status-name" style={{ flex: '1 1 auto' }}>{e.name}</span>

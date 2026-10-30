@@ -42,6 +42,20 @@ export function Footer() {
         >
           Vant Home
         </a>
+        <a
+          href="https://vant.creadev.org/status"
+          rel="noopener"
+          className="hover:underline"
+        >
+          Status
+        </a>
+        <a
+          href="https://vant.creadev.org/ailments"
+          rel="noopener"
+          className="hover:underline"
+        >
+          Ailments
+        </a>
         <span className="ml-auto">
           Open-source, no warranty. The agents act; you approve. Use at your own risk.
         </span>
