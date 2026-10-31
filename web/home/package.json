@@ -28,5 +28,8 @@
         "vite": "^6.4.5",
         "prestruct": "1.1.0",
         "vitest": "^5.0.5"
+    },
+    "dependencies": {
+        "three": "^0.187.0"
     }
 }
