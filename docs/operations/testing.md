@@ -89,7 +89,7 @@ The repo's tests are plain-Node scripts with assert (no mocha/jest runner). A un
 
 ```javascript
 const assert = require('assert');
-const vant = require('vant');
+const vant = require('vant-os');
 
 (async () => {
     const inited = await vant.init({ name: 'Test' });

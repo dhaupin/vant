@@ -63,15 +63,13 @@ describe('ssr.config.js: the owner-face JSON-LD contract', () => {
 });
 
 describe('ssr.config.js: the route table the site ships', () => {
-    const paths = config.routes.map((r) => r.path);
-
-    it('is the pinned eleven routes (pass 357 adds /showcase; issue #264 adds /audit)', () => {
-        expect(config.siteUrl).toBe('https://vant.creadev.org');
-        expect(paths).toHaveLength(11);
-        expect(paths).toEqual(
-            expect.arrayContaining([
-                '/', '/install', '/security', '/showcase', '/brain', '/changelog', '/terms', '/privacy', '/status', '/contact', '/audit',
-            ]),
-        );
-    });
+    const paths = config.routes.map((r) => r.path);it('is the pinned twelve routes (pass 357 adds /showcase; issue #264 adds /audit; issue #260 adds /ailments)', () => {
+expect(config.siteUrl).toBe('https://vant.creadev.org');
+expect(paths).toHaveLength(12);
+expect(paths).toEqual(
+expect.arrayContaining([
+'/', '/install', '/security', '/showcase', '/brain', '/changelog', '/terms', '/privacy', '/status', '/contact', '/audit', '/ailments',
+]),
+);
+});
 });

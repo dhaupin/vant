@@ -130,16 +130,37 @@ nav.top { display: flex; align-items: center; justify-content: space-between; pa
 
 /* ---------- hero ---------- */
 .hero { position: relative; padding: 54px 0 0; }
-#lattice { position: absolute; inset: 0; z-index: 0; opacity: calc(0.9 * var(--fx)); }
-/* static constellation: a hand-set inline SVG + soft glow, DOM-inline
-   so it works with or without JS. */
-#lattice svg {
+#lattice { position: absolute; inset: 0; z-index: 0; opacity: calc(0.55 * var(--fx)); }
+/* live mycelium: the three.js canvas fills the hero slot; the 'mem learned'
+   tags are positioned by the component (in canvas px, left/top from the
+   spike's origin neuron) and float-fade on a CSS keyframe. */
+#lattice canvas {
     display: block;
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
-    opacity: calc(0.7 * var(--fx));
+}
+.mem-tag {
+    position: absolute;
+    z-index: 1;
+    font-size: 0.64rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: color-mix(in srgb, var(--bg-card) 82%, transparent);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 3px 10px;
+    white-space: nowrap;
+    pointer-events: none;
+    animation: mem-float 1.8s ease-out both;
+}
+@keyframes mem-float {
+    0% { opacity: 0; transform: translate(-50%, -40%) scale(0.92); }
+    16% { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%, -190%); }
 }
 .hero-veil {
     position: absolute; inset: 0; z-index: 1; pointer-events: none;
@@ -310,7 +331,7 @@ img, svg, canvas, video { max-width: 100%; }
     html { scroll-behavior: auto; }
     * { transition: none !important; animation: none !important; }
     .fx-reveal { opacity: 1; transform: none; }
-    #lattice { opacity: 0.35; }
+    .mem-tag { display: none; }
 }
 
 /* ---------- legal pages (/terms /privacy) ---------- */

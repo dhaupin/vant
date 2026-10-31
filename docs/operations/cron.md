@@ -26,7 +26,7 @@ There is no cron-expression scheduler; for fixed system-time schedules ("daily a
 `lib/cron.js` exposes a scheduler backed by interval timers (not cron expressions). `vant.cron` returns it:
 
 ```javascript
-const cron = require('vant').cron;
+const cron = require('vant-os').cron;
 
 // Interval scheduling: interval is milliseconds (1000 - 86400000, 1 day max)
 const id = cron.schedule({

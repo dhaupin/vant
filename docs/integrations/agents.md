@@ -25,7 +25,7 @@ Manage multiple agents:
 Import agents:
 
 ```javascript
-const agents = require('vant').agents;
+const agents = require('vant-os').agents;
 ```
 
 ## Spawn Agent

@@ -27,7 +27,7 @@ Vant's scheduler (`vant.cron`) is interval-based, not cron-expression based: `sc
 ### Schedule Sync
 
 ```javascript
-const cron = require('vant').cron;
+const cron = require('vant-os').cron;
 const sync = require('./lib/sync');
 
 // Sync brain every hour
@@ -66,7 +66,7 @@ vant watch --interval 30
 
 ```javascript
 // Daily report
-const cron = require('vant').cron;
+const cron = require('vant-os').cron;
 
 cron.schedule({
     id: 'daily-report',
