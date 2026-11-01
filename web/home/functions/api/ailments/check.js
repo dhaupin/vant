@@ -20,9 +20,18 @@
 * Error contract: 400 with a one-line error + fix field, mirroring the
 * honest-error posture of the status doors (no prose soup, no echo of
 * internals).
+*
+* The matcher/receipt/registry ride vendored byte-copies at
+* functions/_lib/ailments/ (wave 19.6): the Pages Functions bundle only
+* chases imports inside functions/, so a src/-reaching import dies at
+* the edge build with "Could not resolve". The copies stay locked to
+* src/ailments byte-for-byte by test/ailments-vendor-lockstep.test.mjs -
+* src/ailments is the single source of truth; touch one side, touch
+* both.
+* Docs: web/home/docs/ailments-api.md.
 */
-import { checkAilments, maxPasteChars, registrySummary } from '../../src/ailments/matcher.js'
-import { renderReceipt } from '../../src/ailments/receipt.js'
+import { checkAilments, maxPasteChars, registrySummary } from '../../_lib/ailments/matcher.js'
+import { renderReceipt } from '../../_lib/ailments/receipt.js'
 
 function json(status, payload) {
 return new Response(JSON.stringify(payload) + '\n', {
