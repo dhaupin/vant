@@ -1,10 +1,11 @@
 # Vant Web — Provider Mode: brain.creadev.org as the Community Face — Product Requirements Document
 
-**Version:** 0.1 (planning draft — defined, NOT built; §10 names every truth-state)
-**Branch:** axolotl  **Date:** 2026-11-01  **Status:** Draft for owner ruling. This spec DEFINES
-the provider-mode rung; nothing in it is built on any branch yet. **Parent PRDs:**
-[prd-web.md](prd-web.md) (§3.5 session binding, §3.7 origin env) and [prd-relay.md](prd-relay.md)
-(the relay chain, the sovereign scope, the ride machinery this mode rides).
+**Version:** 0.2 (planning draft — defined, NOT built; §10 names every truth-state)
+**Branch:** axolotl  **Date:** 2026-11-01  **Status:** Draft, second owner pass recorded in §0
+(rulings 5–10). This spec DEFINES the provider-mode rung; nothing in it is built on any branch
+yet. **Parent PRDs:** [prd-web.md](prd-web.md) (§3.5 session binding, §3.7 origin env) and
+[prd-relay.md](prd-relay.md) (the relay chain, the sovereign scope, the ride machinery this
+mode rides).
 
 ---
 
@@ -23,8 +24,28 @@ the provider-mode rung; nothing in it is built on any branch yet. **Parent PRDs:
 4. *(session conclusion, owner-approved)* The third path wins: **the pod dials out; the browser
    rides** — provider mode = a pairing-code REGISTRATION gate that opens per-guest property slots,
    reusing the already-built pairing + ride machinery. No user-typed pod URL ever reaches the edge.
-
----
+5. *Naming, owner-ruled:* the gate lives in the relay family — `VANT_RELAY_PROVIDER_MODE`
+   (ruling on the earlier `VANT_PROVIDER_MODE` draft), and the slot cap follows:
+   `VANT_RELAY_PROVIDER_SLOTS`.
+6. *Slot scoping, owner-ruled:* it is BOTH, enforced at both levels — an install-wide ceiling
+   (`VANT_RELAY_PROVIDER_SLOTS`, total live member slots) AND a per-account ceiling
+   (`VANT_RELAY_PROVIDER_SLOTS_PER_USER`, default **1**). Answered in §3.6 with the
+   squatter/forget-squatter rails.
+7. *Slots ride the import, owner-ruled:* *"they would — the profile transport already carries
+   chain + keys + tokens... a slot id's presence should ride along anyway — yes I guess."* Moved
+   from open question to RULED (§3.7 pins the mechanism and the dedup law; PM4 tests it).
+8. *Accounts are REQUIRED, owner-ruled:* *"It should be locked to accounts right to avoid abuse,
+   and enforce the VANT_RELAY_PROVIDER_SLOTS."* Slot acquisition is impossible signed-out. This
+   flips the v0.1 non-goal that said "NO account requirement" (§7 records the flip honestly).
+9. *Auth shape, owner-ruled:* *"We don't wanna store passwords, we can use the 'code was sent to
+   email' style."* — email one-time-code sign-in, NOTHING password-shaped in any KV row. §3.8
+   defines it.
+10. *Mail handlers, owner-ruled:* bolete gains a mail-handler layer with a CONNECTOR style —
+    the handler is an interface, each mail vendor is a connector — first connector **Purelymail**
+    (the owner's own mail domain), second **Resend** as the backup. *"Resend is like a backup
+    option, we will use purelymail (if they allow it)."* — the "if they allow it" question is
+    ANSWERED in §3.9 with receipts (they allow transactional mail; the catch is transport, not
+    policy).
 
 ## 1. The problem this closes (real, live-diagnosed 2026-11-01)
 
@@ -67,32 +88,39 @@ Recorded so six waves from now nobody re-proposes it.
 
 ## 3. The chosen mechanic: provider property slots from a pairing voucher
 
-### 3.1 The gate (operator side, one env fact)
+### 3.1 The gate (operator side, one env fact, relay-family name)
 
-- `VANT_PROVIDER_MODE = 1` — the ONLY env key. Absent → today's dashboard, byte-identical:
-  env-only properties, no registration UI. Set (on the dashboard-relay flavor ONLY) → the
-  registration surfaces exist and the edge accepts provider property ids.
+- `VANT_RELAY_PROVIDER_MODE = 1` — the ONLY env key for posture. Absent → today's dashboard,
+  byte-identical: env-only properties, no registration UI. Set (on the dashboard-relay flavor
+  ONLY) → the registration surfaces exist and the edge accepts provider property ids.
 - It is named in the public capabilities shape (`GET /api/r/capabilities`) as
   `"provider": "offering"` — clients adapt from caps, never from a guess. OFF posture omits the key
   entirely (the honesty law prd-relay.md §4 lives by: an OFF posture has NO surface).
 - The gate is NOT a bank vault: provider mode opens REGISTRATION, never arbitrary forwarding.
   The edge's bridge stays env-origin-only (`VANT_PROPERTY_*`); the ONE-WAY credential law stands.
+- **Co-requisite, owner-ruled (ruling 8):** provider ON makes `BOLETE_KV` REQUIRED (accounts
+  gate every slot). The gate without the KV is a misconfigured posture: caps still say
+  `provider: offering`, but the registration panel answers a TYPED refusal
+  (`E_STORE_UNCONFIGURED`, the honest 503 already built) — never a silent dead button.
 
 ### 3.2 The member flow (user side, four steps, no public URL typed anywhere)
 
-1. **Request a voucher.** The dashboard's provider panel (visible only under the gate) mints a
-   single-use pairing code — `vhpair-` family, hash-persisted, 24h expiry (the existing
-   `offerPairing`/`pair` law: "a voucher, not a standing credential").
-2. **Redeem on YOUR pod.** `vant guest pair --code vhpair-...` (the shipped CLI verb) — redemption
+1. **Sign in** (an account is required — ruling 8). First visit: type an email, receive a
+   one-time code, type the code, done (§3.8). The session is the existing prd-web.md §3.5
+   server-side binding — no cookies carry anything sensitive, no passwords exist.
+2. **Request a voucher.** The dashboard's provider panel (visible only under the gate, only
+   signed-in) mints a single-use pairing code — `vhpair-` family, hash-persisted, 24h expiry (the
+   existing `offerPairing`/`pair` law: "a voucher, not a standing credential").
+3. **Redeem on YOUR pod.** `vant guest pair --code vhpair-...` (the shipped CLI verb) — redemption
    is single-use, timing-safe, marks the pod's pairing spent, and (relay posture armed) the SAME
    reply carries the e2e channel key for the profile — shown once, beside the token, never again
    through any door or caps surface (the P3/H6 reply contract already built in lib/mcp.js).
-3. **The pod dials out (Mode A).** The pod's webhook transport opens its outbound lane to the relay;
-   the edge HOLDS NOTHING sensitive — the e2e channel key rides inside the user's sovereign profile
-   export path as designed (prd-relay.md §2.2).
-4. **A provider property slot opens.** Property id derived, minted by the redeem, not chosen by the
-   user: `p = g<guest id hex>` — kebab-charset-safe by construction (`g` + `[a-f0-9]{6,32}`, honors
-   the existing ROUTE_RE and readPropertyFromUrl charset). Collision-free without a signup
+4. **The pod dials out (Mode A), and a provider property slot opens.** The pod's webhook
+   transport opens its outbound lane to the relay; the edge HOLDS NOTHING sensitive — the e2e
+   channel key rides inside the user's sovereign profile export path as designed (prd-relay.md
+   §2.2). The slot's property id is minted by the redeem, not chosen by the user:
+   `p = g<guest id hex>` — kebab-charset-safe by construction (`g` + `[a-f0-9]{6,32}`, honors the
+   existing ROUTE_RE and readPropertyFromUrl charset). Collision-free without a signup
    database; a pod re-pairing after revocation mints a fresh id honestly.
 
 ### 3.3 The lanes under provider mode, named in lastRoute
@@ -112,97 +140,247 @@ networks.
 ### 3.4 Where pod tokens live under provider mode (scope-split honest)
 
 Unchanged from prd-relay.md §2.2: **memory/crypto-held, client-side** — never in relay KV, never in
-logs, never inside cookie values on the relay face. The pairing voucher and the minted property id
-are the only provider-state the edge needs; both are row-shaped and PII-free by construction
-(prd-web.md's ledger: "append PII-free"). Side note honored by any build wave: provider mode does NOT change the account lane's
-deployment needs — the KV-backed flows stay the operator's optional layer (the honest
-`E_STORE_UNCONFIGURED` 503 keeps answering wherever `BOLETE_KV` is unset); provider slots do NOT
-depend on it (the voucher grants the property, not a profile).
+logs, never inside cookie values on the relay face. Under provider mode the edge additionally
+holds only account-shaped provider state, all row-shaped and scoped:
+
+- the slot row: `{ slotId (g<hex>), acctId, createdAt, keepaliveAt, revokedAt? }` — PII-free
+  (an id and timestamps; the ACCOUNT store is the only row that holds an email, §3.8);
+- the voucher rows and the one-time-code rows (§3.8: code rows hold only the code HASH routed
+  to the acctId, TTL-bounded).
+
+Side note, revised for ruling 8: the voucher does not grant a profile — **the ACCOUNT grants the
+voucher; the voucher grants the slot.** The KV-backed layers therefore stop being optional UNDER
+provider mode (§3.1's co-requisite); for pure operator use (own-edge-bridge only, VANT_RELAY_PROVIDER_MODE
+unset) the deployment needs stay exactly as prd-web.md defined them.
+
+### 3.5 What an account is (build-time shape, PII-honest)
+
+- One row per account in BOLETE_KV: `{ acctId, email, createdAt, lastLoginAt }`. The email IS
+  stored here — this is the ONE deviation from the "append PII-free" ledger law of prd-web.md,
+  and it is pinned here deliberately: the account store is its own KV namespace, separate from
+  the guest ledger and the slot ledger; nothing slot-shaped ever references the email, only
+  `acctId`. No profile data, no preferences, no third-party identity — an email and a server
+  side session binding, nothing else.
+
+### 3.6 Slot caps + the squatter rails (owner ruling 6, answered)
+
+**Both levels, both enforced:**
+
+- `VANT_RELAY_PROVIDER_SLOTS = 32` (DEFAULT) — the install-wide ceiling: total live member slots
+  across all accounts. Above it, registration refuses with a TYPED message ("this deployment's
+  provider quota is full"), not a spin. The breaker honors it venue-wide like every other limit.
+- `VANT_RELAY_PROVIDER_SLOTS_PER_USER = 1` (DEFAULT) — the per-account ceiling. One pod per
+  account by default; an operator may raise it for members who genuinely run several pods, but
+  the default makes slot-farming need one verified email EACH. Fungible email signup inflation is
+  bounded by (a) one code at a time per email (§3.8), (b) code-send rate limits, and
+  (c) the perish-axis rails below — anonymous slot-vandal math just does not close anymore.
+
+**Squatters and the "I set it up and forgot" person (owner's stated worry):** a slot is LEASE-SHAPED,
+not a fixture:
+
+| Rail | Mechanic | Receipt |
+|------|----------|---------|
+| A slot dies with its dial | the only thing keeping a slot live is the pod's own outbound keepalive; past a grace window, the slot is reaped at the edge — it falls out of the property list and stops being counted against BOTH caps. | proposal: 72h grace (OPEN QUESTION #2); the keepalive beat already exists as Mode A session reauth, no new ping loop |
+| Reaping is edge-scoped, graceful | the reap deletes ONLY the edge-side slot row; the pod keeps its guest ledger and token untouched. The member re-pairs later and a fresh slot mints honestly — same pod, new id, no "stranded ghost" state | the reap must never call pod doors — the edge has no authority to mutate a member's pod, and takes none |
+| Self-service cleanup | the provider panel lists YOUR slots (acctId-scoped) with creation times; a DETACH action revokes the pairing and frees the slot immediately (pod-side, the CLI verb `vant provider detach` closes the outbound session too) | panel-side: refusal-honest; never pretends a detach propagated that hasn't |
+| Self-repair beats ghost-parking | nobody must re-register a dead slot's id — a re-pair mints a fresh one. No repair requests, no operator tickets for leftovers | leas-shaped state needs no janition by design |
+| Squat-vandal math closes | account gate + per-user default 1 + both caps + reap + venue-wide rate limit/breaker (existing `VANT_EDGE_RATE_PER_MIN` + per-property breaker, applied venue-wide to provider slots) | the operative answer to owner's "how do we prevent squatters" |
+
+**At the cap ARRIVAL:** when `VANT_RELAY_PROVIDER_SLOTS` is full and keepalive beats keep dying,
+keeps the quota self-cleaning (dead slots reap back into it); the member panel shows
+`slots: yours 1 of 1 · deployment 31 of 32` so the family of numbers is visible.
+
+### 3.7 Cross-device: slots ride the sovereign profile (owner ruling 7, RULED)
+
+They ride — the export already carries chain + keys + tokens; the slot id is part of the chain's
+`own` hop shape, so it rides the transported profile. BUILD-TIME claim, pinned for the PM4 rung:
+the slot row rides the profile transport under its provider hop (never requires re-pairing to be
+signaled capability); IMPORT stamps the slot with the SAME acctId (it carries its own); a slot
+carried in a profile never needs re-pairing on the second device or any new mint. The dedup law:
+an import whose carried slot row matches an existing row updates it, never doubles it.
+
+### 3.8 The account lane: email-code auth, NOTHING password-shaped (owner rulings 8–9)
+
+- **First visit:** the AuthGate's account lane asks for an EMAIL only. "We sent you a code"
+  screen. Code: 6 digits, TTL 10 minutes, SINGLE-use, consumed at verify, hash-only in KV
+  (code rows: `{ codeHash, acctId, expiresAt }`). Resend-throttle: 1 active code per email, and
+  a per-email + per-IP send budget (existing rate-gate posture, generous for a human, unspeakable
+  for a loop).
+- **No password exists anywhere.** No password hash, no reset flow, no "strength meter" module.
+  A code that was never stored in plain, TTL-bounded and single-use REPLACES the password
+  concept for the family of auth we ship here.
+- **Session:** the existing prd-web.md §3.5 server-side binding under this account — the
+  AuthGate's successful code-verify is just another branch of the flows it already types.
+- **Envelope dirty math check:** the account lane rides the same KV as session-token binding —
+  at brain.creadev.org today this lane answers `E_STORE_UNCONFIGURED` 503, meaning provider ON
+  also answers with it (§3.1's co-requisite). Deploys that carry accounts but not provider mode
+  change NOTHING except the panel going away.
+
+### 3.9 The mail handlers: a connector interface, Purelymail first, Resend backup (owner ruling 10)
+
+- **The interface, vendor-blind:** bolete (the dashboard edge) speaks to ONE interface:
+  `sendMail({ to, subject, text })` — text-only OTP and system notices, no HTML tracking pixels,
+  no templates to fiddle. The connector REGISTRY is an ordered list read from env
+  (`VANT_RELAY_MAIL_CONNECTORS = purelymail, resend` — fail through to the next connector at
+  each failure, and after the last connector, the typed refusal "code could not be sent" —
+  never a fake "sent"). One OTP send = one attempt chain that is honest end to end (each
+  connector response recorded on the attempt row, provider name + verbatim status code + retry
+  count). Keys are Pages env ONLY: `Purelymail/ SMTP-app-password || RESEND_API_KEY` from
+  Sites → Secrets, never client-visible, never in repo files (the key-handling law).
+- **purelymail (connector #1):** SPEAKS SMTP at `smtp.purelymail.com:465` (SSL/TLS) with an
+  SMTP-scoped app password (owner mints it; `PURELYMAIL_SMTP_USER` + `PURELYMAIL_SMTP_APP_PASSWORD`
+  secrets). **The "if they allow it" ruling question is ANSWERED with receipts:** there is NO
+  HTTP send API (the REST surface is account-management only — verified from the docs index and
+  the API's operation list), and SMTP is the only send-in door — but their own ToS and homepage
+  explicitly allow transactional mail ("you can generally send transactional related emails to
+  customers"), and their own docs define "SEND ONLY SERVICES" with an SMTP-scoped app password —
+  an OTP service is that exact shape. Rate ceiling: ~3,000 external sends/day, 300 at once —
+  thousands of slots' worth of headroom. **The catch is transport, not policy:** a Workers
+  isolate has no native SMTP client, so the purelymail connector must ride `cloudflare:sockets`
+  (`connect()` + TLS-on-socket, a client speaking SMTP bytes itself) — the biggest single piece
+  of implementation risk this PRD carries (OPEN QUESTION #1) — the receipts and the fallbacks
+  are in §8.
+- **resend (connector #2, the backup):** plain HTTP — `POST https://api.resend.com/emails`,
+  `Authorization: Bearer <RESEND_API_KEY>`, JSON `{ from, to, subject, text }`, verified sender
+  domain. Works with only a `fetch()` from a worker — landed and hard in one wave.
+- **Domain coherence:** both connectors share the operator's mail domain (e.g. From:
+  `codes@creadev.org` — the MX of the domain is already on Purelymail for incoming, the
+  connector carries the envelope for outgoing); the "from" edge is one env:
+  `VANT_RELAY_MAIL_FROM`.
 
 ---
 
 ## 4. Risks + rails (each: threat, rail, where the rail already exists)
 
 | Threat | Rail |
-|--------|-------|
+|--------|------|
 | Voucher replay after expiry/refusal | single-use, timing-safe, 24h expiry rejected plainly (the existing pair() law) |
 | Property-slot squatting on ids | ids are MINTED from guest ids at redeem, not user-chosen; a guest forfeiture/rotation mints a fresh slot honestly |
+| Squatting accounts to farm slots | the account gate (ruling 8) + `..._PER_USER` default 1 + both caps + the reap rails (§3.6) close the math |
+| Forgot-my-slot pollution (owner's own worry) | lease-shaped slots: dead dial past grace = reaped against BOTH caps, panel lists/detaches (§3.6) |
 | Relay-side credential capture | scope split: the e2e key rides INSIDE the sovereign profile; the voucher is consumed at the pod, not held at the edge |
+| Credential stuffing / code brute-force on the CODE lane | 6-digit code TTL 10 min + 1-active-code/email + per-email+per-IP budgets + timing-safe verify (§3.8); the account lane gains the same typed-refusal on abusers |
+| Code could not be sent = NO LOOK | typed refusal after the LAST connector; on-failure relay-state recorded with the provider + verbatim code; user can retry (resend-throttled); the "fake sent" = a UI face banned by prd-web.md's honesty law |
+| Purelymail deliverability | their docs note that unusual sending domains sometimes hit the snag; the CONNECTOR chain (Resend #2) is the rail — exactly what the backup exists for |
+| After the OWN address/premise is deemed unverified/spam-prone by an upstream | the perk of a swapped-out connector: the STORE step stays, the transport impl swaps when the owner rules |
 | Hammering the relay via member pods | the existing rate gate (`VANT_EDGE_RATE_PER_MIN`) and the per-property breaker (already in bridge.ts) apply VENUE-WIDE to provider slots — a bad actor's pod gets its own breaker trip |
 | A revoked guest's slot going stale | revocation is denylist-backed (auth.revokeToken → guests.revoke); a revoked slot answers the door's raw 401 with an honest reason, never a silent ghost |
 | UI promising a lane that doesn't answer | the /chain badge + state.lastRoute name the ACTUAL lane; the refusal surface (Refusal.tsx) already renders honest reasons for dead tokens |
 
 ## 5. UI surfaces (dashboard only; relay face stays minimal-always)
 
-- A provider panel in Settings (rendering only when caps read `provider: offering`): the voucher
-  mint button + the four-step member copy (paste-level, no jargon), state: minted/copied/consumed.
-- The AuthGate: unchanged primary flows. A member who paired simply finds `g<hex>` in the property
+- A provider panel in Settings (rendering only when caps read `provider: offering` AND the
+  session is account-scoped): the voucher mint button + the four-step member copy (paste-level,
+  no jargon), state: minted/copied/consumed; lists YOUR slots with detach; shows the family
+  of cap numbers ("yours 1 of 1 · deployment 31 of 32"). Signed-out → the panel collapses to
+  the "why: slots need an account (email + code, no passwords)" line, honest.
+- The AuthGate: account lane added (email → code → verify — §3.8), inline with its existing
+  lanes' typing. A member who paired simply finds `g<hex>` in the property
   switcher — no property typing, no URL field, NO new paste mode.
 - The posture card: unchanged read-only honesty — provider ON/OFF is the operator's env fact
   (6.1's two-sided law holds verbatim).
 
 ## 6. Migration (feature-shaped, honest)
 
-- brain.creadev.org can turn provider mode on with the gate alone (no schema bump, no wire
+- brain.creadev.org can turn provider mode on with the gate + the KV (no schema bump, no wire
   versioning). Vouchers ride the existing ledger mechanics; slots ride the existing property
-  plumbing. OFF → ON is additive; ON → OFF hides the panel and orphans slots (they answer honestly
-  unreachable — documented everywhere the panel prints).
-- DEPLOY.md gains §12.x (dashboard-relay provider posture): the one env key, the
-  BOLETE_KV-if-accounts note, the caps-read self-check.
+  plumbing; accounts and codes ride BOLETE_KV's namespace. OFF → ON is additive; ON → OFF hides
+  the panel and orphans slots (they answer honestly unreachable — documented everywhere the panel
+  prints).
+- DEPLOY.md gains §12.x (dashboard-relay provider posture): the gate + co-requisite KV + the
+  connector envs (mail FROM + connector credentials from Sites → Secrets) + the caps-read
+  self-check.
 
 ## 7. Non-goals (this spec)
 
 - NO new edge-side forwarding lane to user-named origins (§3.3, recorded).
-- NO account requirement for a provider slot (the voucher grants the property; accounts are the
-  operator's optional layer — the scope split holds).
+- **REVISED from v0.1 (owner ruling 8):** provider slots DO require an account — that "NO account
+  requirement" non-goal is now REFUSED (the older position is what the owner overruled). The
+  scoping that survived from v0.1: accounts are REQUIRED for slots but still OPTIONAL for the
+  operator's own dashboard use (own-edge-bridge stays open without one; provider ON makes the
+  KV co-requisite on the registration face only, not on the operator's token flows).
 - NO pod-side changes beyond what Mode A already requires. The protected invariant stands: the
   pod's DOOR AUTH POSTURE does not change to make provider mode work.
 - NO global directory of member pods (mesh discovery stays opt-in-and-later, prd-relay.md §9 gating).
+- NO password storage, anywhere, including "helpfully hashed" ones — ruling 9 is absolute; the
+  email code REPLACES the password concept on this face.
+- NO HTML email, tracking pixels, or marketing mail through the handler — the purelymail
+  connector is transactional by its ToS and its design; the entire connector family signs that law.
 
-## 8. Open questions for the owner (before build waves resume)
+## 8. Open questions FOR the owner (revised — v0.1's questions 1, 2 and 3 are ANSWERED above)
 
-1. Slot cap per deploy: how many live member slots before the gate trips? Proposal: env-defined
-   (`VANT_PROVIDER_SLOTS`, default 32) with the breaker honoring it dishonesty-proof (typed refusal).
-2. Do provider slots ride the sovereign-profile IMPORT on a second device (they would — the profile
-   transport already carries chain + keys + tokens... a slot id's presence should ride along anyway)?
-3. Name check: `VANT_PROVIDER_MODE` — or does the owner want it under the relay family
-   (`VANT_RELAY_PROVIDER`) since it extends the relay face? (This spec assumes the former;
-   the rename is a one-line surface change).
+1. **The Purelymail transport build (the genuine risk).** No HTTP send API exists; SMTP must be
+   client-spoken from the Worker isolate via `cloudflare:sockets` + TLS-on-socket. Options:
+   a) a small self-contained SMTP client inside the purelymail connector (no new deploy face;
+      the connector is just longer code) — proposal;
+   b) the backup-first tempering: ship `resend` as connector #1 for the first rung (one `fetch()`,
+      landable in an afternoon), swap purelymail into slot #1 when its SMTP client ships — owner
+      said purelymail first, so this is a sequencing question, not a refusal;
+   c) a tiny standalone mail relay outside Workers (most moving parts, weakest posture — listed
+      for completeness, not proposed).
+2. **The reap grace window.** 72h is proposed (a pod offline for the weekend survives; a pod
+   dead for a week frees itself). Up/down? Note the caps self-clean either way — this only
+   tunes WHO can register while the cap is at its ceiling.
+3. **`_PER_USER` default.** 1 is proposed (one pod per verified account); operators may raise
+   per-deploy. Confirm 1 as the shipping default?
+4. **The purelymail app password.** The owner mints an SMTP-scoped app password (their docs'
+   "SEND ONLY SERVICES" scope — literally built for this) for the sending identity; the sender
+   name/From (`codes@creadev.org`?) lands with ruling.
 
-## 9. The definition ledger (defined / built — nothing else named)
+## 9. The definition ledger (defined / built / ruled / refused — the ledger v0.2)
 
 | Element | Truth-state |
 |---------|-------------|
-| Provider gate (env fact, capabilities line `provider: offering | absent`) | DEFINED (this spec) |
-| Voucher-issued provider property slots (`p = g<guest id hex>`) | DEFINED |
-| Voucher→pod dial→edge acceptance→slot mints (the 4-step member flow) | DEFINED |
+| Provider gate (env fact, capabilities line `provider: offering \| absent`) | RULED (ruling 5) + DEFINED (§3.1) |
+| Voucher-issued provider property slots (`p = g<guest id hex>`) | DEFINED (§3.2) |
+| Account-locked slot acquisition (BOLETE_KV co-requisite) | RULED (ruling 8) + DEFINED (§3.1/§3.5) |
+| Email-code account lane (no passwords anywhere) | RULED (ruling 9) + DEFINED (§3.8) |
+| Mail-handler connector interface; Purelymail #1, Resend #2 | RULED (ruling 10); receipts verified live this session (§3.9); transport impl = OPEN QUESTION #1 |
+| Slot caps, both levels + squatter rails + lease-shaped reap | RULED (ruling 6) + DEFINED (§3.6); grace window = OPEN QUESTION #2 |
+| Slots ride sovereign-profile import | RULED (ruling 7); dedup law PENDING PIN (import wave; PM4 tests it) |
+| URL-in-token edge lane (user-named origins) | REFUSED (this spec §2, recorded with receipts) |
+| Voucher→pod dial→edge acceptance→slot mints (the 4-step member flow) | DEFINED (§3.2) |
 | Sealed-ride as the member's primary lane; owning-edge unchanged | BUILT (prd-relay.md; provider re-rides it, adds nothing) |
-| Edge-forwarded lane to user-named origins | REFUSED (this spec §2, recorded with receipts) |
-| Provider panel + property-switcher behavior | DEFINED (UI rung) |
-| Tier-2 risk rails (slot cap env, breaker span, revocation UX) | DEFINED (§4/§8) |
+| Provider panel + AuthGate account lane + property-switcher behavior | DEFINED (UI rung, §5) |
+| Tier-2 risk rails (slot caps env, breaker span, revocation UX, reap) | DEFINED (§4/§8) |
 
 ## 10. Acceptance criteria per rung
 
-- **PM1 — gate + caps.** With the gate absent, the dashboard is byte-identical to today
-  (snapshots prove it); caps omit the provider key. With the gate set, caps answer
-  `provider: offering` and the panel exists. Nothing else changes on either posture.
-- **PM2 — voucher → slot.** Mint a voucher under the gate; redeem on a real second pod with relay
-  armed; the redeem reply carries the e2e key ONCE; the dashboard's property switcher names
-  `g<hex>`; the pod's outbound dial answers the caps probe; a `sealed-ride-e2e` door call reaches
-  THIS pod's ledger (a mint-on-your-pod token works bounce-for-bounce — the fail that opened this
-  investigation cannot recur through the provider path).
+- **PM1 — gate + caps.** With `VANT_RELAY_PROVIDER_MODE` absent, the dashboard is byte-identical
+  to today (snapshots prove it); caps omit the provider key. With the gate set, caps answer
+  `provider: offering` and the panel exists. With the gate set but `BOLETE_KV` absent, caps read
+  `offering` while registration answers the TYPED E-store refusal. Nothing else changes on any
+  posture.
+- **PM-A — account lane + mail handlers.** An email receives a 6-digit code via the connector
+  chain; a wrong/expired/reused code refuses TYPED and throttled; a successful verify opens the
+  session under the §3.5 binding; run the family under connector #1 (purelymail) and re-roll the
+  receipt with connector #1 failover → #2 (resend) by fault injection; brute-force math refused
+  (rate budget); no password-shaped value appears in any KV row anywhere (grep/print pins); the
+  KV namespace check: the code rows carry only `{ codeHash, acctId, expiresAt }`.
+- **PM-B — slot caps + reap.** Both caps enforce with typed messages (`..._SLOTS` full,
+  `_PER_USER` saturated); a slot's-out-keepalive reap frees BOTH counters and honestly removes
+  the property (no reload bounce needed); the detach action on the panel revokes the pairing
+  (returns to unreachable). At cap-saturation the deposit of registration is refusal-typed.
+- **PM2 — voucher → slot.** Sign in (email-code, connector chain), mint a voucher under the gate;
+  redeem on a real second pod with relay armed; the redeem reply carries the e2e key ONCE; the
+  dashboard's property switcher names `g<hex>`; the pod's outbound dial answers the caps probe; a
+  `sealed-ride-e2e` door call reaches THIS pod's ledger (a mint-on-your-pod token works
+  bounce-for-bounce — the fail that opened this investigation cannot recur through the provider
+  path).
 - **PM3 — refusal honesty.** An expired/misused voucher refuses typed; a revoked guest's slot
   answers 401; a gated-off deploy answers 404 (no provider surface); the /chain badge names the
   lane that actually answered.
 - **PM4 — two devices.** The sovereign profile export/import carries a provider slot: same member
-  pod reached from a second dashboard hop without re-pairing; the edge held nothing new between them.
+  pod reached from a second dashboard hop without re-pairing; the edge held nothing new between
+  them; the carried slot duplicates NOTHING at import (dedup law).
 
 ## 11. Verify it (after build waves, from anywhere)
 
 ```bash
 node test/relay.test.js                # the ride face this mode rides (38 pins, untouched)
 node test/relay-parity.test.js         # r/2 contract + pins (40); provider adds NOTHING to the wire
-node web/dashboard/scripts/…           # provider panel lint (lands with PM1)
+node web/dashboard/scripts/provider-gate.test.mjs  # lands with PM1: OFF byte-identical, ON typed
 ```
 
-Operational face: docs/operations/relay-playbook.md and this spec; config face: §8's env keys.
+Operational face: docs/operations/relay-playbook.md and this spec; config face: §8's env keys
+(the gate, the caps, the connectors, the FROM).
