@@ -11,6 +11,19 @@ nav_order: 99
 
 Common issues and fixes.
 
+> **Paste first, diagnose second.** Before hand-diagnosing any CLI output, run it
+> through the [Ailment Checker](https://vant.creadev.org/ailments) - paste the
+> output, get the known-issue rows back (what it is, how bad it is, the issue
+> refs). Agents can skip the browser:
+>
+> ```bash
+> curl -s 'https://vant.creadev.org/api/ailments/check?q=PASTE-YOUR-OUTPUT-HERE'
+> ```
+>
+> A clean result means the output matches nothing in the known-issues registry
+> - it is a known-issue index, not a doctor - so carry on below, and file the
+> paste with a new issue if it still looks wrong.
+
 ## Health Check Failures
 Diagnose system health issues.
 

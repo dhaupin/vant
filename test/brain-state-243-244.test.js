@@ -117,7 +117,8 @@ function runRoot(root, body) {
         console.log(JSON.stringify({ stack: brain.getStack(), current: current }));
     `);
     check('#244: fresh install boots with NO schema-fault banner', r.stderr.indexOf('schema fault') === -1, r.stderr.slice(0, 200));
-    check('#244: the boot emits the honest fresh-install line instead', stdoutHasFresh(r.stdout) === true, r.stdout.slice(0, 200));
+    check('#244: the boot emits the honest fresh-install line instead (on stderr, vant#275 stdout-truth law)', stderrHasFresh(r.stderr) === true, r.stderr.slice(0, 200));
+    check('#244: the honest line stays OFF stdout (machine-parsed stdout keeps its purity)', r.stdout.indexOf('state.json missing (fresh install)') === -1, `${r.stderr.indexOf('state.json missing (fresh install)') !== -1 ? 'fresh line correctly on stderr; ' : ''}${r.stdout.slice(0, 200)}`);
     let d = null;
     try { d = JSON.parse(r.stdout.trim().split('\n').pop()); } catch (e) { /* surfaced below */ }
     check('#244: fresh defaults still apply (stack [vant], current vant)', d && JSON.stringify(d.stack) === JSON.stringify(['vant']) && d.current === 'vant', d ? JSON.stringify(d) : r.stdout.slice(0, 200));
@@ -141,9 +142,13 @@ function runRoot(root, body) {
     fs.rmSync(root, { recursive: true, force: true });
 }
 
-// helper: the fresh-install info line lands on stdout (console.log)
-function stdoutHasFresh(stdout) {
-    return stdout.indexOf('state.json missing (fresh install)') !== -1;
+// helper: the fresh-install info line lands on stderr (console.error,
+// vant#275 wave-17: stdout must stay pure for machine-parsed output -
+// `vant --version` once answered with the notice riding the real version,
+// and the offline verify ladder caught it) - hence the pin judges BOTH
+// channels: honesty still emitted, stdout still clean.
+function stderrHasFresh(stderr) {
+    return stderr.indexOf('state.json missing (fresh install)') !== -1;
 }
 
 console.log(`\nbrain-state-243-244: ${failures === 0 ? 'ALL PINS PASS' : `${failures} pin(s) failed`}`);

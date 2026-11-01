@@ -6,7 +6,8 @@
  *
  *   ensureSchema  - CREATE TABLE IF NOT EXISTS x4 + meta, so the owner's
  *                   setup is "bind D1 as DB in Pages settings", nothing else
- *   seedDefaults  - the six owner-named endpoints on first boot
+ *   seedDefaults  - the twelve owner-named endpoints on first boot, plus
+ *                   the name-missing upgrade insert per defaults version
  *   runSweep      - probe every endpoint ONCE, record check + daily rollup
  *   getSummary    - everything the board renders, assembled in one read
  *
@@ -21,7 +22,7 @@
  */
 
 import {
-    MONITOR_DEFAULTS, ALERT_LEVELS,
+    MONITOR_DEFAULTS, MONITOR_DEFAULTS_VERSION, ALERT_LEVELS,
     utcDay, dayBuckets, uptimePct, overallStatus, pickAlert,
 } from './status-math.js'
 
@@ -162,13 +163,32 @@ async function ensureSchema(db) {
 
 /* ============================== ENDPOINTS ============================== */
 
+/** Seed law (wave 19): the owner-named endpoints ride a version stamp in
+ *   status_meta. An empty table seeds fully (first boot). An existing table
+ *   only gains the rows whose NAME is missing from the current defaults
+ *   version - and only once per version bump - so the family joined without
+ *   a manual admin-panel re-add, while a deliberate endpoint.remove keeps
+ *   surviving every cold GET afterwards. */
+const DEFAULTS_VERSION_KEY = 'defaults_version'
+
 async function seedDefaults(db) {
-    const row = await db.prepare('SELECT COUNT(*) AS n FROM status_endpoints').first()
-    if (row && Number(row.n) > 0) return
-    const inserts = MONITOR_DEFAULTS.map((e) => db.prepare(
+    let done = null
+    try {
+        const row = await db.prepare(
+            'SELECT value FROM status_meta WHERE key = ?').bind(DEFAULTS_VERSION_KEY).first()
+        done = row ? Number(row.value) : null
+    } catch (e) { done = null }
+    if (done !== null && done >= MONITOR_DEFAULTS_VERSION) return
+    const existing = await db.prepare('SELECT name FROM status_endpoints').all()
+    const names = new Set((existing.results || []).map((r) => String(r.name)))
+    const now = new Date().toISOString()
+    const inserts = MONITOR_DEFAULTS.filter((e) => !names.has(e.name)).map((e) => db.prepare(
         'INSERT OR IGNORE INTO status_endpoints (name, url, kind, kind_options, created_at) VALUES (?, ?, ?, ?, ?)'
-    ).bind(e.name, e.url, e.kind, JSON.stringify(e.options || {}), new Date().toISOString()))
-    await db.batch(inserts)
+    ).bind(e.name, e.url, e.kind, JSON.stringify(e.options || {}), now))
+    if (inserts.length > 0) await db.batch(inserts)
+    await db.prepare(
+        'INSERT INTO status_meta (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value'
+    ).bind(DEFAULTS_VERSION_KEY, String(MONITOR_DEFAULTS_VERSION)).run()
 }
 
 async function getEndpoints(db) {

@@ -1,0 +1,165 @@
+{
+  "registryVersion": 1,
+  "severityOrder": ["benign", "informational", "cosmetic", "nuisance", "actionable"],
+  "severities": {
+    "benign": {
+      "label": "Benign",
+      "hint": "Supposed to be there. No action, ever."
+    },
+    "informational": {
+      "label": "Informational",
+      "hint": "Worth reading once. No action required."
+    },
+    "cosmetic": {
+      "label": "Cosmetic",
+      "hint": "Display art only. Your install is fine."
+    },
+    "nuisance": {
+      "label": "Nuisance",
+      "hint": "Noise or a surprising behavior with an open ask. Nothing is broken."
+    },
+    "actionable": {
+      "label": "Actionable",
+      "hint": "A real fault. Read the row and act."
+    }
+  },
+  "entries": [
+    {
+      "id": "AIL-1",
+      "title": "Honest fresh-install line",
+      "severity": "informational",
+      "meaning": "A fresh install has no models/state.json yet. The boot prints this honest line and starts with defaults; the file is created on first save. Nothing is wrong. (This is the line a v0.8.6+ tree prints INSTEAD of the old schema-fault misreport below.)",
+      "refs": [],
+      "docs": null,
+      "fixed_in": "0.8.6",
+      "note": "Refers to the #244/#258 fix: missing state.json is a friendly default, not corruption.",
+      "re": "\\[brain\\] state\\.json missing \\(fresh install\\)",
+      "flags": "",
+      "samples": [
+        "[brain] state.json missing (fresh install) — starting with defaults (models/state.json will be created on first save)"
+      ]
+    },
+    {
+      "id": "AIL-2",
+      "title": "state.json schema fault (corrupt content)",
+      "severity": "actionable",
+      "meaning": "state.json exists but is unreadable or wrong-typed (truncated write, hand edit, partial file). This is a REAL fault and the runtime refuses loudly by design — restore the file from a backup, or remove it so a fresh default can be seeded.",
+      "refs": [],
+      "docs": null,
+      "fixed_in": null,
+      "note": "INSIDE the refusals-are-loud fail-closed chain: the runtime never half-writes state.",
+      "re": "\\[brain\\] state\\.json schema fault(?![^\\n]*ENOENT)",
+      "flags": "",
+      "samples": [
+        "[brain] state.json schema fault — state.json is not valid JSON (refused: never reaches the runtime pointer)"
+      ]
+    },
+    {
+      "id": "AIL-3",
+      "title": "Fresh-install false fault: ENOENT reported as corruption",
+      "severity": "actionable",
+      "meaning": "An OLD (pre-0.8.6) boot misreported a missing state.json (ENOENT) as corruption. Fixed: a modern install prints the honest line above instead. If you paste this line, you are running a pre-0.8.6 vant — update your clone and the banner is gone.",
+      "refs": [258],
+      "docs": null,
+      "fixed_in": "0.8.6",
+      "note": "Retired row, kept by the #260 lifecycle: 'fixed in vX.YZ' beats disappearing silently.",
+      "re": "\\[brain\\] state\\.json schema fault[^\\n]*ENOENT",
+      "flags": "",
+      "samples": [
+        "[brain] state.json schema fault — unreadable (truncated/corrupt): \"ENOENT\" (failed: never reaches the runtime pointer)"
+      ]
+    },
+    {
+      "id": "AIL-4",
+      "title": "Starter brain seeded without asking",
+      "severity": "nuisance",
+      "meaning": "A first `vant start` planted a starter brain (identity, goals, lessons, start) into models/private/<brain>/ of whatever directory you were standing in — no consent, location, or name ask. Nothing is broken and the files are yours to edit or delete; the consent ask is tracked at the linked issue.",
+      "refs": [257],
+      "docs": null,
+      "fixed_in": null,
+      "note": "Surprise write, not corruption: delete the files or keep them — vant never re-seeds over an existing brain.",
+      "re": "Seeded starter brain: models/private/",
+      "flags": "",
+      "samples": [
+        "[Start] Seeded starter brain: models/private/vant/ (start, identity, goals, lessons)."
+      ]
+    },
+    {
+      "id": "AIL-5",
+      "title": "Dangling-hyphen cleanup line",
+      "severity": "cosmetic",
+      "meaning": "The hint line under the seed message prints a bare hyphen instead of a readable sentence break. Pure display art; your brain is fine.",
+      "refs": [259],
+      "docs": null,
+      "fixed_in": null,
+      "note": null,
+      "re": "Edit them freely - they are yours\\.",
+      "flags": "",
+      "samples": [
+        " Edit them freely - they are yours."
+      ]
+    },
+    {
+      "id": "AIL-6",
+      "title": "Sandbox not configured",
+      "severity": "informational",
+      "meaning": "No sandbox capability policy is configured, so reads/writes allow by default. Convenience posture, not a fault: configure the sandbox in config to enforce the fail-closed capability chain.",
+      "refs": [],
+      "docs": "https://docs.creadev.org/vant/security/sandbox",
+      "fixed_in": null,
+      "note": "Fires once per process while boot configures capabilities.",
+      "re": "Sandbox not configured; allowing by default\\.",
+      "flags": "",
+      "samples": [
+        "[storage] Sandbox not configured; allowing by default. Configure sandbox capabilities to enforce.",
+        "[brain] Sandbox not configured; allowing by default. Configure sandbox capabilities to enforce."
+      ]
+    },
+    {
+      "id": "AIL-7",
+      "title": "Install-state decode",
+      "severity": "informational",
+      "meaning": "Decode of the install-state line on start/onboard: 🌱 fresh = no brain seeded yet, ⏳ legacy = pre-multi-brain layout detected (migrate runs), 🧠 current = multi-brain layout healthy. All three are normal.",
+      "refs": [],
+      "docs": null,
+      "fixed_in": null,
+      "note": null,
+      "re": "Install: (🌱 fresh|⏳ legacy|🧠 current)",
+      "flags": "",
+      "samples": [
+        "Install: 🌱 fresh — brain: 0 files",
+        "Install: 🧠 current — brain: 62 files"
+      ]
+    },
+    {
+      "id": "AIL-8",
+      "title": "Bare stack trace, no named reason-code",
+      "severity": "actionable",
+      "meaning": "A crash reached the surface as a bare stack trace with no named reason code. That violates the 0-1-2 exit contract under the honest-refusal law and is worth filing as a bug with the pasted trace.",
+      "refs": [],
+      "docs": null,
+      "fixed_in": null,
+      "note": "This checker RETURNS for it because the honest-boot contract says surfacing should be named, not raw.",
+      "re": "at Object\\.<anonymous>",
+      "flags": "",
+      "samples": [
+        "at Object.<anonymous> (/home/me/vant/bin/vant.js:12:3)"
+      ]
+    },
+    {
+      "id": "AIL-9",
+      "title": "Starter brain seed skipped",
+      "severity": "benign",
+      "meaning": "Seeding is a convenience, never a hard failure: an existing brain was found (existing-wins), so the seed refused and moved on. Normal.",
+      "refs": [],
+      "docs": null,
+      "fixed_in": null,
+      "note": null,
+      "re": "\\[Start\\] Starter brain seed skipped:",
+      "flags": "",
+      "samples": [
+        "[Start] Starter brain seed skipped: already seeded"
+      ]
+    }
+  ]
+}

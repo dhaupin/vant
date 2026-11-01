@@ -35,8 +35,11 @@ import { WALK, WALK_LIVE, STATUS_LIVE } from '../walk.mjs'
 // every surface this file renders (top menu here, drawer sections below);
 // WALK_LIVE is the filtered tour the menu orders by.
 
-// Stops outside the walk (footer-only by owner direction) join the sidebar's
+// Stops outside the walk (footer-meta by owner direction) join the sidebar's
 // "More" section, so the drawer is the one place the full route set lives.
+// The ailment checker left this list when its stop joined the walk: the top
+// menu, the drawer, the walk hops, and the footer now all render it from the
+// one WALK list (vant#260).
 const MORE = [
     { label: 'Changelog', href: '/changelog' },
     { label: 'Terms', href: '/terms' },
@@ -52,11 +55,11 @@ const MENU_SECTIONS = [
     },
     {
         head: 'The install',
-        items: [WALK[2], WALK[3], WALK[4], WALK[5], WALK[9]],
+        items: [WALK[2], WALK[3], WALK[4], WALK[5], WALK[6], WALK[7], WALK[11]],
     },
     {
         head: 'The family',
-        items: [WALK[6], WALK[7], WALK[8]],
+        items: [WALK[8], WALK[9], WALK[10]],
     },
     {
         head: 'More',

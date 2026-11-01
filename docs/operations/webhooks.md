@@ -54,7 +54,7 @@ Crew-bus events are also emitted as `webhook:crew.<type>` events you can subscri
 Use cron - schedules are interval timers in milliseconds (1000-86400000), not cron expressions:
 
 ```javascript
-const cron = require('vant').cron;
+const cron = require('vant-os').cron;
 
 // Hourly sync
 const sync = require('./lib/sync');
@@ -82,7 +82,7 @@ For pruning, use the real prune CLI on a schedule outside the process (cron tab 
 ### Trigger Agent Action
 
 ```javascript
-const vant = require('vant');
+const vant = require('vant-os');
 const sync = require('./lib/sync');
 const { commit } = require('./lib/branch');
 

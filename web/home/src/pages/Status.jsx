@@ -14,6 +14,13 @@ const SURFACES = [
     { name: 'Docs hub', url: 'https://docs.creadev.org/vant/', note: 'Jekyll + pagefind' },
     { name: 'Brain dashboard', url: 'https://brain.creadev.org', note: 'requires a running install' },
     { name: 'GitHub repository', url: 'https://github.com/dhaupin/vant', note: 'canonical source + releases' },
+    // The sibling family (owner update: all six sites live - touched lights, honest notes).
+    { name: 'Packstruct', url: 'https://packstruct.creadev.org', note: 'the shared packs spec home: one manifest, entry, and lifecycle contract' },
+    { name: 'Crashtest', url: 'https://crashtest.creadev.org', note: 'adversarial QA for agent-built apps' },
+    { name: 'Eyestruct', url: 'https://eyestruct.creadev.org', note: "eyes for production agents: look/look-diff with a git-backed visual memory" },
+    { name: 'Poststruct', url: 'https://poststruct.creadev.org', note: 'audit what shipped: baked-HTML head/link/hygiene contract' },
+    { name: 'Govstruct', url: 'https://govstruct.creadev.org', note: 'the family controller layer: members manifest, per-shape renders, doctor verb' },
+    { name: 'Monoforge', url: 'https://monoforge.creadev.org', note: 'the fleet factory: stamp from template blocks, doctor for truth' },
 ]
 
 export default function Status() {

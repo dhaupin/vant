@@ -233,6 +233,32 @@ function SideNav({ open, onClose }: { open: boolean; onClose: () => void }) {
             </a>
           </li>
           <li>
+            {/* The status board (vant#260 wave 19): the twelve-surface uptime
+                board, now including the six sibling family sites. */}
+            <a
+              href="https://vant.creadev.org/status"
+              rel="noopener"
+              target="_blank"
+              onClick={onClose}
+              className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-ink-soft hover:bg-ink/5"
+            >
+              Status
+            </a>
+          </li>
+          <li>
+            {/* The ailment checker (vant#260 wave 18): paste CLI output, get
+                the known-issue rows back - dashboard-side crosslink. */}
+            <a
+              href="https://vant.creadev.org/ailments"
+              rel="noopener"
+              target="_blank"
+              onClick={onClose}
+              className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-ink-soft hover:bg-ink/5"
+            >
+              Ailment checker
+            </a>
+          </li>
+          <li>
             <a
               href="https://github.com/dhaupin/vant/issues"
               rel="noopener"

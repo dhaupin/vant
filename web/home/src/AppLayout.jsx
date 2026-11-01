@@ -31,6 +31,7 @@ import Privacy          from './pages/Privacy.jsx'
 import Status           from './pages/Status.jsx'
 import StructAudit      from './pages/StructAudit.jsx'
 import Contact          from './pages/Contact.jsx'
+import Ailments         from './pages/Ailments.jsx'
 import Install          from './pages/Install.jsx'
 import Security        from './pages/Security.jsx'
 import Showcase        from './pages/Showcase.jsx'
@@ -50,6 +51,7 @@ const META = {
     '/privacy': { title: 'Privacy - Vant', description: 'Vant privacy: your brain is your repo. This site collects nothing.' },
     '/status':  { title: 'Status - Vant', description: 'Vant surfaces status: every public asset swept from the edge with 35 days of uptime history, an ongoing-issue alert spot, and an honest fallback.' },
     '/contact': { title: 'Contact - Vant', description: 'Reach the Vant project: compose a GitHub issue from the browser.' },
+    '/ailments':{ title: 'Ailment checker - Vant', description: 'Paste vant CLI output, get the known-issue rows back: what it means, how bad it is, where it is tracked. Client-side matcher, nothing leaves the paste box.' },
     '/changelog': { title: 'Changelog - Vant', description: 'The Vant changelog, rendered straight from the canonical CHANGELOG.md at build time and byte-gated against it.' },
 }
 
@@ -221,6 +223,7 @@ export default function AppLayout() {
                     <Route path="/status"  element={STATUS_LIVE ? <Status /> : <Maintenance section="01" title="Status" />} />
                     <Route path="/audit"   element={<StructAudit />} />
                     <Route path="/contact" element={<Contact />} />
+                    <Route path="/ailments" element={<Ailments />} />
                     <Route path="/changelog" element={<Changelog />} />
                     <Route path="*"        element={<NotFound />} />
                 </Routes>
