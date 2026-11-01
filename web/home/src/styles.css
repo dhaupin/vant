@@ -125,6 +125,9 @@ nav.top { display: flex; align-items: center; justify-content: space-between; pa
 @media (min-width: 781px) { .menu-scrim, .menu-drawer { display: none !important; } }
 @media (max-width: 780px) {
     .top-links a { display: none; }
+    /* the GitHub mark is an icon button, not a prose link - it stays next
+       to the theme switch at every width (asked for on the live site). */
+    .top-links a.gh-btn { display: inline-flex; }
     .menu-btn { display: inline-flex; align-items: center; justify-content: center; }
 }
 
