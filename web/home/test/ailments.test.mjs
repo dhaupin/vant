@@ -188,8 +188,13 @@ expect(receipt).toContain('https://github.com/dhaupin/vant/issues/new')
 describe('ailments edge door: CONTRACT gate (source-level, like config.test.mjs)', () => {
 const src = readFileSync(new URL('../functions/api/ailments/check.js', import.meta.url), 'utf8')
 it('reuses the SAME pure matcher + receipt modules (one truth, no drift copy)', () => {
-expect(src).toContain("'../../src/ailments/matcher.js'")
-expect(src).toContain("'../../src/ailments/receipt.js'")
+// wave 19.6: the route rides the vendored byte-copies at
+// functions/_lib/ailments (the Pages Functions bundle only chases imports
+// inside functions/); the lockstep suite pins those copies to src/ailments
+// byte-for-byte, so "same module as the page" still holds - this gate now
+// pins the vendored path itself.
+expect(src).toContain("'../../_lib/ailments/matcher.js'")
+expect(src).toContain("'../../_lib/ailments/receipt.js'")
 })
 it('stays binding-free: a pure CPU door, no D1, no secrets, no fetch', () => {
 expect(src).not.toContain('context.env')
