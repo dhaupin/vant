@@ -6,3 +6,10 @@
 #   for humans reading the tree).
 dist/
 node_modules/
+#
+# Wave 19.3: the lint gate is wired for real now. .eslintrc.json sits next
+# to this file (app-local, so web/home self-lints without demanding the
+# pod's config), linting js/mjs/jsx with JSX-aware unused-import rules
+# (eslint-plugin-react). The stylistic law itself (no semicolons, single
+# quotes, module style) stays owned by scripts/check-web-home-style.js on
+# the pod side (lint:home) - this gate catches structural rot only.

@@ -9,7 +9,7 @@
         "dev": "vite",
         "test": "vitest",
         "test:run": "vitest run",
-        "lint": "eslint . --ext js,mjs"
+        "lint": "eslint . --ext js,mjs,jsx"
     },
     "engines": {
         "node": ">=20"
@@ -22,11 +22,13 @@
     },
     "devDependencies": {
         "@vitejs/plugin-react": "^4.7.0",
+        "eslint": "^8.57.1",
+        "eslint-plugin-react": "^7.37.5",
+        "prestruct": "1.1.0",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
         "react-router-dom": "^6.30.6",
         "vite": "^6.4.5",
-        "prestruct": "1.1.0",
         "vitest": "^5.0.5"
     },
     "dependencies": {
