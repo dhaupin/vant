@@ -1,6 +1,12 @@
 {
-  "registryVersion": 1,
-  "severityOrder": ["benign", "informational", "cosmetic", "nuisance", "actionable"],
+  "registryVersion": 2,
+  "severityOrder": [
+    "benign",
+    "informational",
+    "cosmetic",
+    "nuisance",
+    "actionable"
+  ],
   "severities": {
     "benign": {
       "label": "Benign",
@@ -25,21 +31,6 @@
   },
   "entries": [
     {
-      "id": "AIL-1",
-      "title": "Honest fresh-install line",
-      "severity": "informational",
-      "meaning": "A fresh install has no models/state.json yet. The boot prints this honest line and starts with defaults; the file is created on first save. Nothing is wrong. (This is the line a v0.8.6+ tree prints INSTEAD of the old schema-fault misreport below.)",
-      "refs": [],
-      "docs": null,
-      "fixed_in": "0.8.6",
-      "note": "Refers to the #244/#258 fix: missing state.json is a friendly default, not corruption.",
-      "re": "\\[brain\\] state\\.json missing \\(fresh install\\)",
-      "flags": "",
-      "samples": [
-        "[brain] state.json missing (fresh install) — starting with defaults (models/state.json will be created on first save)"
-      ]
-    },
-    {
       "id": "AIL-2",
       "title": "state.json schema fault (corrupt content)",
       "severity": "actionable",
@@ -55,26 +46,13 @@
       ]
     },
     {
-      "id": "AIL-3",
-      "title": "Fresh-install false fault: ENOENT reported as corruption",
-      "severity": "actionable",
-      "meaning": "An OLD (pre-0.8.6) boot misreported a missing state.json (ENOENT) as corruption. Fixed: a modern install prints the honest line above instead. If you paste this line, you are running a pre-0.8.6 vant — update your clone and the banner is gone.",
-      "refs": [258],
-      "docs": null,
-      "fixed_in": "0.8.6",
-      "note": "Retired row, kept by the #260 lifecycle: 'fixed in vX.YZ' beats disappearing silently.",
-      "re": "\\[brain\\] state\\.json schema fault[^\\n]*ENOENT",
-      "flags": "",
-      "samples": [
-        "[brain] state.json schema fault — unreadable (truncated/corrupt): \"ENOENT\" (failed: never reaches the runtime pointer)"
-      ]
-    },
-    {
       "id": "AIL-4",
       "title": "Starter brain seeded without asking",
       "severity": "nuisance",
       "meaning": "A first `vant start` planted a starter brain (identity, goals, lessons, start) into models/private/<brain>/ of whatever directory you were standing in — no consent, location, or name ask. Nothing is broken and the files are yours to edit or delete; the consent ask is tracked at the linked issue.",
-      "refs": [257],
+      "refs": [
+        257
+      ],
       "docs": null,
       "fixed_in": null,
       "note": "Surprise write, not corruption: delete the files or keep them — vant never re-seeds over an existing brain.",
@@ -82,21 +60,6 @@
       "flags": "",
       "samples": [
         "[Start] Seeded starter brain: models/private/vant/ (start, identity, goals, lessons)."
-      ]
-    },
-    {
-      "id": "AIL-5",
-      "title": "Dangling-hyphen cleanup line",
-      "severity": "cosmetic",
-      "meaning": "The hint line under the seed message prints a bare hyphen instead of a readable sentence break. Pure display art; your brain is fine — vant itself now prints the real dash (wave 19.8, start.js banner); this row stays to recognize older receipts.",
-      "refs": [259],
-      "docs": null,
-      "fixed_in": "0.8.6",
-      "note": null,
-      "re": "Edit them freely - they are yours\\.",
-      "flags": "",
-      "samples": [
-        " Edit them freely - they are yours."
       ]
     },
     {

@@ -50,7 +50,7 @@ it('exposes the pure matcher API the two doors share', () => {
 expect(typeof checkAilments).toBe('function')
 expect(typeof maxPasteChars).toBe('function')
 expect(maxPasteChars()).toBe(64000)
-expect(summary.registryVersion).toBe(1)
+expect(summary.registryVersion).toBe(2)
 expect(summary.rows).toBe(registry.entries.length)
 expect(SEVERITY_ORDER).toContain('benign')
 })
@@ -92,16 +92,15 @@ expect(re.test(sample), entry.id + ' must match its own sample: ' + sample).toBe
 }
 }
 })
-it('rejects a sample test that drags in another fault row (cross-row honesty)', () => {
-// The pinned pair: the retired ENOENT false-fault sample must NOT trip
-// AIL-2 (the real corrupt-content row), only its own retired row.
-const enoentRow = registry.entries.find((e) => e.id === 'AIL-3')
+it('rejects the old ENOENT false-fault paste from tripping the real-fault row (cross-row honesty)', () => {
+// The pinned pair (registry v2: the retired ENOENT row itself was DELETED,
+// so the guard rides a literal paste now): the pre-0.8.6 misreport must
+// not drag AIL-2 (the real corrupt-content row) into a ghost match.
+const enoentPaste = '[brain] state.json schema fault - unreadable (truncated/corrupt): "ENOENT" (failed: never reaches the runtime pointer)'
 const faultRow = registry.entries.find((e) => e.id === 'AIL-2')
-expect(enoentRow && faultRow).toBeTruthy()
-const realFaultRe = compile(faultRow)
-for (const sample of enoentRow.samples) {
-expect(realFaultRe.test(sample), 'ENOENT false fault must not trip the real-fault row').toBe(false)
-}
+expect(faultRow).toBeTruthy()
+expect(compile(faultRow).test(enoentPaste), 'old ENOENT paste must not trip the real-fault row').toBe(false)
+expect(checkAilments(enoentPaste)).toEqual([])
 })
 })
 
@@ -134,11 +133,13 @@ const allSamples = () => registry.entries.flatMap((e) => e.samples).join('\n')
 
 it('matches every row on the all-rows paste, ranked by tier then registry order', () => {
 const rows = checkAilments(allSamples())
+// registry v2: the repaired rows retired on the owner's call (vant#260) -
+// AIL-1 (honest line), AIL-3 (ENOENT false fault), AIL-5 (dangling hyphen)
+// are deleted, not stamped: a repaired line matching nothing IS the doc.
 expect(rows.map((r) => r.id)).toEqual([
-'AIL-2', 'AIL-3', 'AIL-8', // actionable (registry order inside the tier)
+'AIL-2', 'AIL-8', // actionable (registry order inside the tier)
 'AIL-4', // nuisance
-'AIL-5', // cosmetic
-'AIL-1', 'AIL-6', 'AIL-7', // informational
+'AIL-6', 'AIL-7', // informational
 'AIL-9', // benign: last, by the taxonomy's own design
 ])
 })
@@ -149,15 +150,21 @@ expect(first.title).toContain('state.json')
 expect(first.refs).toEqual([])
 expect(first.fixedIn).toBeNull()
 })
-it('keeps the honest fresh-install line out of EVERY fault row', () => {
-const honest = byId['AIL-1'].samples[0]
-const rows = checkAilments(honest).map((r) => r.id)
-expect(rows).toEqual(['AIL-1'])
+it('keeps the honest fresh-install line out of EVERY row (deleted row = no match)', () => {
+// registry v2: AIL-1 was the honest line's own row. Deleted on the owner
+// call, so the good line must now match NOTHING - the row's absence is
+// the anti-false-positive regression pin.
+const honest = '[brain] state.json missing (fresh install) - starting with defaults (models/state.json will be created on first save)'
+expect(checkAilments(honest)).toEqual([])
 })
-it('pins the wave-17 story: the old ENOENT paste trips ONLY the retired row', () => {
-const rows = checkAilments(byId['AIL-3'].samples[0]).map((r) => r.id)
-expect(rows).toEqual(['AIL-3'])
-expect(checkAilments(byId['AIL-3'].samples[0])[0].fixedIn).toBe('0.8.6')
+it('pins the retired pastes: old receipts match nothing, no ghost rows', () => {
+// The two deleted rows' shapes must not resurrect inside other rows:
+// the wave-17 ENOENT false fault and the wave-19.8 dangling-hyphen
+// banner both land as EMPTY - deletion, not a hidden fixed_in ghost.
+const enoent = '[brain] state.json schema fault - unreadable (truncated/corrupt): "ENOENT" (failed: never reaches the runtime pointer)'
+const hyphen = ' Edit them freely - they are yours.'
+expect(checkAilments(enoent)).toEqual([])
+expect(checkAilments(hyphen)).toEqual([])
 })
 it('caps an absurd paste at 64k chars and stays empty', () => {
 const rows = checkAilments('at Object.<anonymous> (' + 'x'.repeat(100000) + ')')
@@ -173,8 +180,10 @@ it('renders matched rows: tier first, refs inline, fixed rows retired visibly', 
 const text = registry.entries.flatMap((e) => e.samples).join('\\n')
 const receipt = renderReceipt(text.length, checkAilments(text), summary)
 expect(receipt).toContain('[Actionable]')
-expect(receipt).toContain('#258')
-expect(receipt).toContain('fixed in v0.8.6')
+expect(receipt).toContain('#257')
+// registry v2: no row carries fixed_in anymore, so the retired line the
+// renderer knows how to print must NOT appear (deletion, not stamping).
+expect(receipt).not.toContain('fixed in v')
 expect(receipt).toContain('registry v' + summary.registryVersion)
 })
 it('renders the empty paste honestly (the honest ceiling): known-issue index, NOT a doctor', () => {
