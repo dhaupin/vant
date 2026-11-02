@@ -1,7 +1,8 @@
 import type { AccountsApi, DashRole } from "./accounts";
 import type { PagesContext } from "../types";
 import { StoreUnavailableError, storeFor } from "./kv";
-import { SESSION_COOKIE, makeAccounts, emailHashFor } from "./accounts";
+import { dashSessionId } from "./bridge";
+import { makeAccounts, emailHashFor } from "./accounts";
 import { PROVIDER_ENV_KEYS } from "./provider";
 
 /**
@@ -47,9 +48,10 @@ export async function ensureAdmin(context: PagesContext): Promise<AdminGate> {
   }
   const accounts = makeAccounts(store, emailSalt(context), envEmail(context) ?? undefined);
   const support = supportEmail(context);
-  const cookie = context.request.headers.get("Cookie") ?? "";
-  const row = cookie.split(/;\s*/).find((c) => c.startsWith(`${SESSION_COOKIE}=`));
-  const sessionId = row ? decodeURIComponent(row.split("=").slice(1).join("=")) : null;
+  // (wave 19.18) the ONE guarded session read: a malformed-escape cookie
+  // pair is not a crash (URIError -> raw 500, the users-list killer) -
+  // it simply counts as no session, and the typed 401 says so.
+  const sessionId = dashSessionId(context.request);
   if (!sessionId)
     return {
       ok: false,

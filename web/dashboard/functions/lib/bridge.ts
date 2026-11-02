@@ -44,6 +44,23 @@ export function sessionCookieHeader(): string {
   return SESSION_COOKIE;
 }
 
+/** The dashboard ACCOUNT session id from the cookie (the ONE guarded
+ *  reader, wave 19.18): a pair that does not decode is simply not
+ *  counted (the same law podTokenFor got at the TC-scan). Until now
+ *  auth_guard.ts and auth/session.ts decoded the raw header inline - a
+ *  malformed-escape `bdash_session` value (stale cookie from an older
+ *  deploy, edited cookie, hostile header) threw URIError INSIDE
+ *  ensureAdmin and every gate surface 500'd raw (/api/users, /api/audit,
+ *  /api/auth/session) while the login POSTs - which never ride the
+ *  cookie - kept working. Untrusted request data is never allowed to
+ *  crash a gate into a bare 500: no decodable value = no session, the
+ *  typed 401 path names it honestly. */
+export function dashSessionId(request: Request): string | null {
+  const cookies = parseCookies(request);
+  const sessionId = cookies[SESSION_COOKIE];
+  return typeof sessionId === "string" && sessionId.length > 0 ? sessionId : null;
+}
+
 /** Access token resolution order: explicit Authorization header, then
  *  the SERVER-SIDE bound session token (P2 session binding, prd-web.md
  *  3.5), then the MVP raw-token cookie (unbound fallback, e.g. local
