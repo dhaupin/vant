@@ -168,9 +168,63 @@ function Login() {
     }
   };
 
-  return <GateShell>{mode === "email" ? <EmailMode /> : <TokenMode />}</GateShell>;
+  return (
+    <GateShell>
+      {mode === "email" ? (
+        <EmailMode
+          step={step}
+          email={email}
+          code={code}
+          err={err}
+          setEmail={setEmail}
+          setCode={setCode}
+          request={request}
+          verify={verify}
+          onResetEmail={() => setStep({ s: "email" })}
+          onUseToken={() => setMode("token")}
+        />
+      ) : (
+        <TokenMode err={err} setErr={setErr} onUseEmail={() => setMode("email")} />
+      )}
+    </GateShell>
+  );
+}
 
-  function EmailMode() {
+/**
+ * The two panels are MODULE-scope components on purpose: while they were
+ * inner functions of Login, every render minted a NEW component identity
+ * and React unmounted/remounted the whole form. With the resend countdown
+ * re-rendering Login every second, the code input lost focus (and the
+ * mobile keyboard) exactly when the seconds changed - live-caught on a
+ * phone during the first admin bootstrap. Hoisted, the DOM persists and
+ * reconciliation keeps the input mounted.
+ */
+
+type EmailModeProps = {
+  step: Step;
+  email: string;
+  code: string;
+  err: string | null;
+  setEmail: (value: string) => void;
+  setCode: (value: string) => void;
+  request: () => Promise<void>;
+  verify: () => Promise<void>;
+  onResetEmail: () => void;
+  onUseToken: () => void;
+};
+
+function EmailMode({
+  step,
+  email,
+  code,
+  err,
+  setEmail,
+  setCode,
+  request,
+  verify,
+  onResetEmail,
+  onUseToken,
+}: EmailModeProps) {
     const sent = step.s === "sent";
     return (
       <div className="mt-6 rounded-lg border border-line bg-surface p-4">
@@ -244,7 +298,7 @@ function Login() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setStep({ s: "email" })}
+                  onClick={onResetEmail}
                   className="text-ink-soft hover:text-ink"
                 >
                   use another email
@@ -256,7 +310,7 @@ function Login() {
         {err ? <p className="mt-3 text-xs text-err">{err}</p> : null}
         <button
           type="button"
-          onClick={() => setMode("token")}
+          onClick={onUseToken}
           className="mt-4 text-xs text-ink-soft underline hover:text-ink"
         >
           Paste a vguest_ token instead
@@ -265,7 +319,13 @@ function Login() {
     );
   }
 
-  function TokenMode() {
+type TokenModeProps = {
+  err: string | null;
+  setErr: (value: string | null) => void;
+  onUseEmail: () => void;
+};
+
+function TokenMode({ err, setErr, onUseEmail }: TokenModeProps) {
     const [value, setValue] = useState("");
     const property = useApp((s) => s.property);
     const account = useApp((s) => s.account);
@@ -335,14 +395,13 @@ function Login() {
         {err ? <p className="mt-3 text-xs text-err">{err}</p> : null}
         <button
           type="button"
-          onClick={() => setMode("email")}
+          onClick={onUseEmail}
           className="mt-3 block text-xs text-ink-soft underline hover:text-ink"
         >
           Use email code sign-in
         </button>
       </div>
     );
-  }
 }
 
 function GateShell({ children }: { children: React.ReactNode }) {
