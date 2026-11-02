@@ -48,6 +48,19 @@ export const onRequestPost: Handler = async (context: PagesContext) => {
   if (status !== "active" && status !== "disabled") {
     return json({ error: "E_BAD_STATUS", detail: "status must be active or disabled" }, 400);
   }
+  // Wave 19.16: the BOLETE_ADMIN_ACCOUNT pin is protected - disabling it
+  // would brick the deterministic admin path, so the door refuses first
+  // (battery: self-disable above stays for a non-pinned operator).
+  if (status === "disabled" && gate.protectedHash && emailHash === gate.protectedHash) {
+    return json(
+      {
+        error: "E_ADMIN_PROTECTED",
+        detail:
+          "this hash is the BOLETE_ADMIN_ACCOUNT operator pin - it cannot be disabled (re-point the env at another address first if you truly intend to retire it)",
+      },
+      409,
+    );
+  }
   if (emailHash === gate.emailHash && status === "disabled") {
     return json(
       { error: "E_SELF_DISABLE", detail: "you cannot disable your own account (typed lockout guard)" },

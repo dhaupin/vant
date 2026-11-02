@@ -94,4 +94,22 @@ describe("provider posture (PM1)", () => {
         expect(p.caps?.slotsPerUser).toBe(1);
         expect(p.caps?.graceHours).toBe(48);
     });
+
+    it("EMAIL_SUPPORT set: the caps line carries supportEmail (wave 19.16)", () => {
+        const env = baseRelayEnv();
+        (env as unknown as Record<string, unknown>)[PROVIDER_ENV_KEYS.mode] = "true";
+        (env as unknown as Record<string, unknown>)[PROVIDER_ENV_KEYS.supportEmail] = "Help@Creadev.ORG ";
+        const p = providerPosture(env as unknown as Record<string, unknown>);
+        expect(p.caps?.supportEmail).toBe("help@creadev.org"); // trimmed + lower-cased
+    });
+
+    it("EMAIL_SUPPORT unset or malformed: the key is ABSENT, never an empty string", () => {
+        const env = baseRelayEnv();
+        (env as unknown as Record<string, unknown>)[PROVIDER_ENV_KEYS.mode] = "true";
+        const unset = providerPosture(env as unknown as Record<string, unknown>);
+        expect("supportEmail" in (unset.caps ?? {})).toBe(false);
+        (env as unknown as Record<string, unknown>)[PROVIDER_ENV_KEYS.supportEmail] = "junk-no-ats";
+        const malformed = providerPosture(env as unknown as Record<string, unknown>);
+        expect("supportEmail" in (malformed.caps ?? {})).toBe(false);
+    });
 });

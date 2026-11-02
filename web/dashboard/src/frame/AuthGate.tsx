@@ -200,6 +200,27 @@ function Login() {
  * reconciliation keeps the input mounted.
  */
 
+/** Wave 19.16 (owner): refusal text that carries a support mailbox
+ *  renders it as a clickable mailto - the address arrives via JS from
+ *  the typed-refusal JSON (EMAIL_SUPPORT env), never baked into a
+ *  static asset. No mailto present = plain error line, unchanged. */
+const SUPPORT_EMAIL_RE = /[\w.+-]+@[\w-]+(?:\.[\w-]+)+/;
+
+function SupportErr({ err }: { err: string }) {
+  const m = SUPPORT_EMAIL_RE.exec(err);
+  if (!m) return <p className="mt-3 text-xs text-err">{err}</p>;
+  const at = m.index;
+  return (
+    <p className="mt-3 text-xs text-err">
+      {err.slice(0, at)}
+      <a href={`mailto:${m[0]}`} className="underline hover:text-ink">
+        {m[0]}
+      </a>
+      {err.slice(at + m[0].length)}
+    </p>
+  );
+}
+
 type EmailModeProps = {
   step: Step;
   email: string;
@@ -307,7 +328,7 @@ function EmailMode({
             </form>
           </>
         )}
-        {err ? <p className="mt-3 text-xs text-err">{err}</p> : null}
+        {err ? <SupportErr err={err} /> : null}
         <button
           type="button"
           onClick={onUseToken}
@@ -392,7 +413,7 @@ function TokenMode({ err, setErr, onUseEmail }: TokenModeProps) {
           <span className="mt-2 inline-block text-xs text-ink-soft">Where do tokens come from?</span>
         </Help>
         {note ? <p className="mt-3 text-xs text-ink-soft">{note}</p> : null}
-        {err ? <p className="mt-3 text-xs text-err">{err}</p> : null}
+        {err ? <SupportErr err={err} /> : null}
         <button
           type="button"
           onClick={onUseEmail}
