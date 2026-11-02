@@ -10,6 +10,8 @@
  *   2. list_complete stops the walk; rows arrive in order
  *   3. a namespace already answering the array shape passes through
  *   4. a binding missing the duck methods = the typed StoreUnavailable
+ *   5. (19.19) a REAL class-backed namespace whose list is a this-bound
+ *      prototype method - the shape every arrow shim hid - adapts too
  */
 import { describe, expect, it } from "vitest";
 import { KV_BINDING, StoreUnavailableError, storeFor } from "../functions/lib/kv";
@@ -86,6 +88,42 @@ describe("BOLETE_KV adapter (storeFor)", () => {
       list: () => Promise.resolve([{ name: "acct:row" } as { name: string }]),
     }));
     await expect(store.list("acct:")).resolves.toEqual([{ name: "acct:row" }]);
+  });
+
+  it("(wave 19.19) a namespace whose list is a real method - bound to `this` - answers rows, not an detached-call crash", async () => {
+    /** The production shape the arrow-property shims never carried: a
+     *  REAL workerd namespace is a class-backed platform object; its
+     *  list is a prototype method that reads `this`. Calling it
+     *  detached (what the 19.15 adapter did) throws on every
+     *  production list call while tests, which always hang list on a
+     *  plain object, never see it. Live-caught 2026-11-02 on
+     *  brain.creadev.org: /api/users and /api/audit answered bare 1101
+     *  for live admin sessions while /api/auth/session (which never
+     *  lists) sailed through 200. */
+    class PlatformNamespace {
+      #rows: Array<{ name: string }>;
+      constructor(rows: Array<{ name: string }>) {
+        this.#rows = rows;
+      }
+      get(key: string) {
+        return Promise.resolve(this.#rows.some((r) => r.name === key) ? "{}" : null);
+      }
+      put() {
+        return Promise.resolve();
+      }
+      delete() {
+        return Promise.resolve();
+      }
+      list(options: { prefix?: string; cursor?: string; limit?: number }) {
+        return Promise.resolve({
+          keys: this.#rows.filter((r) => r.name.startsWith(options.prefix ?? "")),
+          list_complete: true,
+        });
+      }
+    }
+    const detached = new PlatformNamespace([{ name: "acct:live" }]);
+    const store = storeFor(contextWith(detached));
+    await expect(store.list("acct:")).resolves.toEqual([{ name: "acct:live" }]);
   });
 
   it("a binding half-shaped without the duck methods refuses typed, not 500", () => {
