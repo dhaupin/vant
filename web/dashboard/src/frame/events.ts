@@ -1,4 +1,5 @@
 import { useEffect, useSyncExternalStore } from "react";
+import { getState } from "../state";
 
 /**
  * The ONE SSE connection per ACTIVE property (prd-web.md 3.3 resp. 3:
@@ -34,12 +35,15 @@ const RING_MAX = 80;
 interface FanoutState {
   status: "idle" | "connecting" | "live" | "down";
   property: string;
+  /** (wave 19.25) which lane the stream rides: the operator's edge bridge
+   *  (default) or the user's own entered door (browser-direct). */
+  where: "edge" | "door";
   ring: BoardEvent[];
 }
 
 type Listener = () => void;
 const listeners = new Set<Listener>();
-let state: FanoutState = { status: "idle", property: "", ring: [] };
+let state: FanoutState = { status: "idle", property: "", where: "edge", ring: [] };
 let es: EventSource | null = null;
 let desiredProperty: string | null = null;
 
@@ -73,15 +77,30 @@ export function setDesiredProperty(property: string): void {
   reconnect();
 }
 
+/** (wave 19.25) the ONE stream-url law: a user-entered pod endpoint rides
+ *  the DOOR's own /mcp/events tap browser-direct (its gates are the
+ *  door's); anything else rides the edge bridge with the ?p= property.
+ *  Pure and exported so the lane choice is pinnable by tests. */
+export function streamUrlFor(podEndpoint: string, property: string): string {
+  const ep = podEndpoint.trim().replace(/\/+$/, "");
+  if (ep && /^[a-z]+:\/\//.test(ep)) return ep + "/mcp/events";
+  return `/api/mcp/events?p=${encodeURIComponent(property)}`;
+}
+
 function reconnect() {
   if (es) {
     es.close();
     es = null;
   }
   if (!desiredProperty) return;
-  setState({ status: "connecting", property: desiredProperty, ring: state.ring });
+  // (wave 19.25) the entered-door lane: when a verified pod origin is set
+  // in the profile, the stream rides the door's OWN tap; otherwise the
+  // edge bridge with the ?p= property. The lane is stated in state.where.
+  const entered = getState().podEndpoint.trim().replace(/\/+$/, "");
+  const where: FanoutState["where"] = entered && /^[a-z]+:\/\//.test(entered) ? "door" : "edge";
+  setState({ status: "connecting", property: desiredProperty, where, ring: state.ring });
   // switch closes the OLD stream before opening the next (prd-web.md 3.4)
-  const next = new EventSource(`/api/mcp/events?p=${encodeURIComponent(desiredProperty)}`);
+  const next = new EventSource(streamUrlFor(entered, desiredProperty));
   es = next;
   next.onopen = () => {
     if (es === next) setState({ status: "live" });

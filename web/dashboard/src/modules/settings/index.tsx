@@ -73,6 +73,113 @@ type RelayCaps = {
   events: string;
 };
 
+/**
+ * (wave 19.25) THE POD ENDPOINT CARD: the user's own vant door origin,
+ * entered + verified LIVE (the door's /health, then /mcp/tools — both
+ * honest GETs the door serves; the door's own CORS posture decides what
+ * the browser may read). When saved, exec + the board stream ride the
+ * door BROWSER-DIRECT (api.execDoorDirect / events.streamUrlFor) — the
+ * dashboard then knows where to connect. Never a blind origin: save =
+ * verify; clear = empty, and every reach returns to the edge bridge.
+ */
+function PodEndpointCard() {
+  const saved = useApp((s) => s.podEndpoint);
+  const [draft, setDraft] = useState(saved);
+  const [state, setState] = useState<
+    | { kind: "idle" }
+    | { kind: "checking" }
+    | { kind: "ok"; origin: string; tools: number }
+    | { kind: "bad"; why: string }
+  >({ kind: "idle" });
+
+  const verify = () => {
+    const ep = draft.trim().replace(/\/+$/, "");
+    if (!ep) {
+      actions.setPodEndpoint("");
+      setState({ kind: "bad", why: "Cleared - every reach returns to this deploy's edge bridge." });
+      return;
+    }
+    let parsed: URL;
+    try {
+      parsed = new URL(ep);
+    } catch {
+      setState({ kind: "bad", why: "Not a usable origin (scheme + host required)." });
+      return;
+    }
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      setState({ kind: "bad", why: "http(s) only - the door speaks plain origins." });
+      return;
+    }
+    const origin = parsed.origin;
+    setState({ kind: "checking" });
+    fetch(origin + "/health")
+      .then((r) => (r.ok ? r.json().then((j: { status?: unknown }) => j) : undefined))
+      .then(async (health) => {
+        if (!health || health.status !== "ok") {
+          setState({ kind: "bad", why: "Answered but not as a vant door (no ok /health) - refusing to save, never guessing." });
+          return;
+        }
+        try {
+          const t = await fetch(origin + "/mcp/tools");
+          const j = (await t.json().catch(() => ({}))) as { tools?: unknown[] };
+          const n = Array.isArray(j.tools) ? j.tools.length : 0;
+          actions.setPodEndpoint(origin);
+          setState({ kind: "ok", origin, tools: n });
+        } catch {
+          setState({ kind: "bad", why: "/health answered but /mcp/tools did not - the door surface is not reachable from this browser." });
+        }
+      })
+      .catch(() => {
+        setState({ kind: "bad", why: "Unreachable from THIS browser (down, wrong origin, or mixed-content blocked - a https page may only reach http://localhost, never http://other-LAN hosts)." });
+      });
+  };
+
+  return (
+    <div className="text-sm">
+      <label className="block">
+        <span className="text-ink-soft">your vant door origin:</span>
+        <div className="mt-1 flex gap-2">
+          <input
+            type="url"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") verify(); }}
+            placeholder="http://localhost:3457"
+            className="w-full rounded-md border border-line bg-surface px-2 py-1 font-mono text-xs"
+          />
+          <button
+            onClick={verify}
+            className="shrink-0 rounded-md border border-line px-2 py-1 text-xs hover:bg-ink/5"
+          >
+            verify live
+          </button>
+        </div>
+      </label>
+      <p className="mt-2 text-ink-soft">
+        {state.kind === "checking" && <span>Reading the door's /health and /mcp/tools...</span>}
+        {state.kind === "idle" && saved && (
+          <span>
+            Saved <span className="font-mono text-ink">{saved}</span> - door calls and the board stream ride it BROWSER-DIRECT
+            (unverified this visit; verify live re-reads the door).
+          </span>
+        )}
+        {state.kind === "idle" && !saved && (
+          <span>No endpoint entered - the dashboard rides this deploy's edge bridge (the operator's Pages-env property registry).</span>
+        )}
+        {state.kind === "bad" && <span className="text-accent">✗ {state.why}</span>}
+        {state.kind === "ok" && (
+          <span>
+            ✓ verified live: the door at <span className="font-mono text-ink">{state.origin}</span> answers
+            ({state.tools} tool{state.tools === 1 ? "" : "s"} registered). Calls now ride it directly - the
+            lane is named in /chain's route record. A keyed door (mcp.requireKey) may refuse the browser's
+            Bearer across origins - that door's gates, stated plainly, not guessed.
+          </span>
+        )}
+      </p>
+    </div>
+  );
+}
+
 function RelayEndpoint() {
   const saved = useApp((s) => s.relayEndpoint);
   const [draft, setDraft] = useState(saved);
@@ -296,6 +403,9 @@ function ChainEditor() {
  * identities (inside the seal only), reach choice. Export = a download;
  * import = typed-open + merge (never clobbering what this tab holds).
  * No passphrase ever crosses the wire; a wrong one opens to nothing.
+//
+// (wave 19.25) the pod door origin rides the seal too — it is a route
+// pref owned by the same profile (tokens + keys + hops + reach + door).
  */
 function SovereignProfileCard() {
   const app = useAppRaw();
@@ -311,6 +421,7 @@ function SovereignProfileCard() {
         channelKeys: app.channelKeys,
         tokens: app.tokens,
         relayUsage: app.relayUsage,
+        podEndpoint: app.podEndpoint || undefined,
       };
       const out = await exportProfile(assets, expPass);
       const blob = new Blob([out.text], { type: "text/plain" });
@@ -320,7 +431,7 @@ function SovereignProfileCard() {
       a.download = out.filename;
       a.click();
       URL.revokeObjectURL(url);
-      setNote(`exported ${out.filename} — ${carrying.length} identit${carrying.length === 1 ? "y" : "ies"}, ${Object.keys(app.channelKeys).length} key(s), ${app.chain.length} hop(s). The file opens with THIS passphrase only; nothing plaintext ever left this tab.`);
+      setNote(`exported ${out.filename} — ${carrying.length} identit${carrying.length === 1 ? "y" : "ies"}, ${Object.keys(app.channelKeys).length} key(s), ${app.chain.length} hop(s)${app.podEndpoint ? ", your door endpoint" : ""}. The file opens with THIS passphrase only; nothing plaintext ever left this tab.`);
       setExpPass("");
     } catch (e) {
       setNote(e instanceof Error ? e.message : "the export refused");
@@ -341,7 +452,8 @@ function SovereignProfileCard() {
         if (!app.chain.some((x) => x.origin === h.origin)) { actions.addHop({ origin: h.origin, flavor: h.flavor, e2e: h.e2e }); hop++; }
       }
       if (p.relayUsage && !app.relayUsage) actions.setRelayUsage(true);
-      setNote(`imported: ${tok} identit${tok === 1 ? "y" : "ies"} bound, ${key} key(s) bound, ${hop} hop(s) added — held where it already existed, untouched. The profile is yours from here on (§2.2).`);
+      if (p.podEndpoint && !app.podEndpoint) actions.setPodEndpoint(p.podEndpoint);
+      setNote(`imported: ${tok} identit${tok === 1 ? "y" : "ies"} bound, ${key} key(s) bound, ${hop} hop(s) added${p.podEndpoint && !app.podEndpoint ? ", your door endpoint landed" : ""} — held where it already existed, untouched. The profile is yours from here on (§2.2).`);
       setImpPass("");
     } catch (e) {
       setNote(e instanceof Error ? e.message : "the import refused");
@@ -667,6 +779,19 @@ export default function Settings() {
         settings plumbing.
       </p>
 
+      {/* (wave 19.25, owner) CONNECT FIRST: the vguest identity card moved
+          to the top of Settings — binding a pod identity is the most
+          common action here, so it no longer sits below the relay cards. */}
+      <Section title="Connect your pod (your identity)">
+        <PodTokenCard />
+      </Section>
+
+      <Section title="Pod endpoint (browser-direct lane)">
+        <Help text="wave 19.25: enter your own vant door origin and the dashboard connects BROWSER-DIRECT — exec and the board stream ride the pod door's own posture instead of this deploy's edge bridge">
+          <PodEndpointCard />
+        </Help>
+      </Section>
+
       <Section title="Theme">
         <Help text="Light and dark ship from day one (prd-web.md 2.6); tokens are CSS vars so the brand carries across both.">
           <div className="flex gap-2">
@@ -726,10 +851,6 @@ export default function Settings() {
 
       <Section title="Run a relay (piggyback)">
         <RelayPosture />
-      </Section>
-
-      <Section title="Connect your pod (your identity)">
-        <PodTokenCard />
       </Section>
 
       <Section title="Session & properties">

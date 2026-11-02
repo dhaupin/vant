@@ -99,10 +99,13 @@ function TopBar({ property, navOpen, onToggleNav }: { property: string; navOpen:
           <MenuIcon size={16} />
         </button>
         <Link to="/" className="flex items-center gap-2 font-semibold tracking-tight">
+          {/* (wave 19.25) the 96px cut of the master bolete art: the spot
+              renders at 24px, so the browser was pulling the 221KB master
+              for a stamp. One small creature, everywhere. */}
           <img
             alt=""
             className="size-6 rounded-md"
-            src="/vant-bolete-logo.jpg"
+            src="/vant-bolete-logo-sm.png"
           />
           Bolete
         </Link>
