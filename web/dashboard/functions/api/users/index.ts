@@ -1,6 +1,4 @@
 import type { Handler, PagesContext } from "../../types";
-import { storeFor } from "../../lib/kv";
-import { makeLedger } from "../../lib/ledger";
 import { ensureAdmin } from "../../lib/auth_guard";
 import { clientIp, json, rateGate } from "../../lib/bridge";
 
@@ -30,49 +28,8 @@ export const onRequestGet: Handler = async (context: PagesContext) => {
   return json({ users, count: users.length });
 };
 
-export const onRequestPost: Handler = async (context: PagesContext) => {
-  const budget = rateGate(context, "users", clientIp(context.request));
-  if (budget) return budget;
-  const gate = await ensureAdmin(context);
-  if (!gate.ok) return gate.response;
-
-  let emailHash = "";
-  let status = "";
-  try {
-    const body = (await context.request.json()) as { emailHash?: unknown; status?: unknown };
-    if (typeof body.emailHash === "string") emailHash = body.emailHash.trim().toLowerCase();
-    if (typeof body.status === "string") status = body.status;
-  } catch {
-    return json({ error: "E_BAD_BODY", detail: "JSON body with emailHash and status required" }, 400);
-  }
-  if (status !== "active" && status !== "disabled") {
-    return json({ error: "E_BAD_STATUS", detail: "status must be active or disabled" }, 400);
-  }
-  // Wave 19.16: the BOLETE_ADMIN_ACCOUNT pin is protected - disabling it
-  // would brick the deterministic admin path, so the door refuses first
-  // (battery: self-disable above stays for a non-pinned operator).
-  if (status === "disabled" && gate.protectedHash && emailHash === gate.protectedHash) {
-    return json(
-      {
-        error: "E_ADMIN_PROTECTED",
-        detail:
-          "this hash is the BOLETE_ADMIN_ACCOUNT operator pin - it cannot be disabled (re-point the env at another address first if you truly intend to retire it)",
-      },
-      409,
-    );
-  }
-  if (emailHash === gate.emailHash && status === "disabled") {
-    return json(
-      { error: "E_SELF_DISABLE", detail: "you cannot disable your own account (typed lockout guard)" },
-      400,
-    );
-  }
-  const ok = await gate.api.setAccountStatus(emailHash, status);
-  if (!ok) return json({ error: "E_NO_ACCOUNT", detail: "no account with that hash" }, 404);
-
-  await makeLedger(storeFor(context)).append(
-    status === "disabled" ? "auth.account.disabled" : "auth.account.activated",
-    {}, // BY DESIGN no target hash in the ledger: the roster is the only place it lives
-  );
-  return json({ ok: true });
-};
+// (wave 19.20) the set-status law moved to its own module -
+// api/users/set-status.ts - so POST /api/users/set-status (what the
+// roster UI actually calls, src/api.ts) works AND POST /api/users
+// keeps answering with the SAME handler, no drift.
+export { onRequestPost } from "./set-status";
