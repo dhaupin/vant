@@ -49,6 +49,13 @@ export interface AppState {
    *  relay's public capabilities page; non-sensitive (caps are public,
    *  secrets-free by contract), persisted like the other reach prefs. */
   relayEndpoint: string;
+  /** (wave 19.25) THE USER'S OWN POD DOOR origin (e.g.
+   *  http://localhost:3457). When set, exec + the board stream ride the
+   *  pod door's OWN CORS posture browser-direct instead of the operator's
+   *  edge bridge — the enter-your-endpoint lane (the dashboard then knows
+   *  where to connect). Non-sensitive route pref, persisted like the
+   *  other reach prefs; the door's own gates stay the authority. */
+  podEndpoint: string;
   /** (P6b rung, prd-relay.md 3.3/6.1) THE USER'S chain, order matters:
    *  the hops added by decision in Settings, each badged from its OWN
    *  verified caps read (never a guess). Non-sensitive entries only:
@@ -83,6 +90,7 @@ let state: AppState = {
   help: readRawPref("bolete-help") !== "0",
   relayUsage: readRawPref("bolete-relay-usage") === "1",
   relayEndpoint: readRawPref("bolete-relay-endpoint") ?? "",
+  podEndpoint: readRawPref("bolete-pod-endpoint") ?? "",
   chain: readChain("bolete-chain"),
   channelKeys: {},
   deviceProfile: null,
@@ -164,6 +172,9 @@ function mergeProfileBack(p: SovereignProfile): number {
   }
   for (const h of p.chain ?? []) actions.addHop({ origin: h.origin, flavor: h.flavor, e2e: h.e2e });
   if (p.relayUsage && !state.relayUsage) actions.setRelayUsage(true);
+  // (wave 19.25) the door origin rides the profile too — an upgrade that
+  // never clobbers a live one (same one-way law as the reach choice).
+  if (p.podEndpoint && !state.podEndpoint) actions.setPodEndpoint(p.podEndpoint);
   return tok + keys;
 }
 
@@ -240,6 +251,7 @@ export const actions = {
       channelKeys: state.channelKeys,
       tokens: state.tokens,
       relayUsage: state.relayUsage,
+      podEndpoint: state.podEndpoint || undefined,
     };
     try {
       await storeProfileOnDevice(indexeddbKV(), profile);
@@ -292,6 +304,7 @@ export const actions = {
       channelKeys: state.channelKeys,
       tokens: state.tokens,
       relayUsage: state.relayUsage,
+      podEndpoint: state.podEndpoint || undefined,
     };
     const { bindPrfProfile, indexeddbKV } = await import("./lib/profile-store");
     await bindPrfProfile(indexeddbKV(), profile);
@@ -380,6 +393,15 @@ export const actions = {
     set({ help: on });
     try {
       localStorage.setItem("bolete-help", on ? "1" : "0");
+    } catch { /* private mode: session-only preference */ }
+  },
+  /** (wave 19.25) the user's own pod door origin — verified live against
+   *  the door's /health + /mcp/tools before it lands (no blind origins).
+   *  Non-sensitive route pref; the door's own gates stay the authority. */
+  setPodEndpoint(url: string) {
+    set({ podEndpoint: url });
+    try {
+      localStorage.setItem("bolete-pod-endpoint", url);
     } catch { /* private mode: session-only preference */ }
   },
   /** the web/relay endpoint this dashboard RUNS WITH (owner's corrected

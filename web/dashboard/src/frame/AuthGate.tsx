@@ -418,10 +418,12 @@ function GateShell({ children }: { children: React.ReactNode }) {
     <div className="grid min-h-screen place-items-center p-6">
       <div className="w-full max-w-xl">
         <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
+          {/* (wave 19.25) same 96px cut as the top bar - the gate logo and
+              the in-app logo are the SAME file, never a second copy. */}
           <img
             alt=""
             className="size-7 inline-block rounded-lg"
-            src="/vant-bolete-logo.jpg"
+            src="/vant-bolete-logo-sm.png"
           />
           Bolete
         </h1>

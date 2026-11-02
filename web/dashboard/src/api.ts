@@ -98,6 +98,15 @@ function headers(json: boolean): HeadersInit {
  * actually answered is named in state.lastRoute (the /chain badge). */
 export async function exec(tool: string, args: Record<string, unknown> = {}): Promise<unknown> {
   const s = getState();
+  // (wave 19.25) THE USER'S OWN DOOR FIRST: when a pod endpoint is set
+  // and verified, door calls go BROWSER-DIRECT to that origin's
+  // /mcp/exec (the pod door's own CORS posture + its own gates). The
+  // edge bridge stays the default when no endpoint is entered — the
+  // lane that actually answered is always named in /chain's record.
+  if (s.podEndpoint) {
+    stateActions.markRoute("direct-door " + s.podEndpoint);
+    return execDoorDirect(tool, args);
+  }
   if (s.relayUsage && s.channelKeys[s.property]) {
     try {
       const out = await sealedExec(tool, args);
@@ -111,6 +120,40 @@ export async function exec(tool: string, args: Record<string, unknown> = {}): Pr
     stateActions.markRoute(s.relayUsage ? "own-edge-bridge (no e2e key bound yet)" : "direct");
   }
   return execDirect(tool, args);
+}
+
+/**
+ * (wave 19.25) POST <podEndpoint>/mcp/exec BROWSER-DIRECT (the entered
+ * endpoint lane). Same JSON-RPC envelope as the bridge proxies; auth
+ * rides the door's own rule (default companion posture accepts an
+ * unauthenticated POST; a keyed door honors Bearer — its CORS posture
+ * names what it allows, and a typed refusal is never a fake answer).
+ */
+async function execDoorDirect(tool: string, args: Record<string, unknown> = {}): Promise<unknown> {
+  const base = getState().podEndpoint.replace(/\/+$/, "");
+  const head: Record<string, string> = { "Content-Type": "application/json" };
+  const t = token();
+  if (t) head.Authorization = `Bearer ${t}`;
+  let res: Response;
+  try {
+    res = await fetch(base + "/mcp/exec", {
+      method: "POST",
+      headers: head,
+      body: JSON.stringify({ tool, args }),
+    });
+  } catch {
+    throw new ApiError("the entered door answered nothing on the browser lane (offline, wrong origin, or the door's CORS posture refuses it)", "network");
+  }
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    throw new ApiError(shortRefusal(res.status, detail), "refused", res.status);
+  }
+  const parsed = ExecOut.safeParse(await res.json().catch(() => null));
+  if (!parsed.success) throw new ApiError("unparseable door response", "shape");
+  if (parsed.data.error) {
+    throw new ApiError(`door: ${parsed.data.error.message ?? "refused"}`, "refused");
+  }
+  return parsed.data.result;
 }
 
 /** POST /api/mcp/exec through the Worker proxy (auth forwarded, never logged). */

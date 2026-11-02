@@ -3,6 +3,7 @@ import {
   Activity,
   Brain,
   Briefcase,
+  DoorOpen,
   FileClock,
   ListChecks,
   Waypoints,
@@ -269,6 +270,20 @@ export const MODULES = [
     families: [],
     icon: Network,
     load: () => import("../modules/chain"),
+  },
+  {
+    // (wave 19.25) the connect-your-vant walk: launch -> door (enter +
+    // verify live) -> vguest paste -> open the board. Fields are right
+    // there; every verdict is a real read, never a faked green.
+    id: "onboarding",
+    title: "Connect",
+    blurb: "Step-by-step: launch vant, enter your door + guest token.",
+    route: "/onboarding",
+    tiers: ["O", "H", "A", "S"],
+    section: "ops",
+    families: [],
+    icon: DoorOpen,
+    load: () => import("../modules/onboarding"),
   },
   {
     // (the traveler carrier, tr/1; pass 254/256 frontend lane) the
