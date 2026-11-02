@@ -2,6 +2,7 @@ import type { Handler } from "../../types";
 import {
     FLAVORS, ROUTES, EDGE_ENV_KEYS, capsShape,
 } from "../../lib/relay-contract.cjs";
+import { providerPosture } from "../../lib/provider";
 
 /**
  * Dashboard-relay flavor: GET /api/r/capabilities - the PUBLIC posture
@@ -42,5 +43,9 @@ export const onRequestGet: Handler = async (context) => {
         events: "bridge families served: relay.sync (ingest), relay.lost (beacon), relay.call (api bridge); relay.hop forwards; rides decode at the pod",
         posture: EDGE_POSTURE,
     });
-    return json(200, caps);
+    // Provider mode (PM1, prd-provider-mode.md): an ADDITIVE line only -
+    // OFF posture merges nothing, so when the key is absent response
+    // bytes match the provider-never-existed shape exactly.
+    const { caps: providerCaps } = providerPosture(env);
+    return json(200, providerCaps ? { ...caps, provider: providerCaps } : caps);
 };

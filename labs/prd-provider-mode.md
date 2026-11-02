@@ -442,7 +442,7 @@ From and for admin alerts.
 ```bash
 node test/relay.test.js                # the ride face this mode rides (38 pins, untouched)
 node test/relay-parity.test.js         # r/2 contract + pins (40); provider adds NOTHING to the wire
-node web/dashboard/scripts/provider-gate.test.mjs  # lands with PM1: OFF byte-identical, ON typed
+(web/dashboard) node_modules/.bin/vitest run test/provider-gate.test.ts   # PM1 pins: OFF omits the key entirely (no null-server lie), ON adds the provider line additive-only, the gate-ON/KV-absent middle reads offering + storeReady:false, malformed numerals fall back to defaults
 ```
 
 Operational face: docs/operations/relay-playbook.md and this spec; config face: §8's env keys
