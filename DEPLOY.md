@@ -512,6 +512,58 @@ Fail-closed in every posture: enabled without a gate key serves NOTHING (hops an
 
 **Using relays is the USER'S side** and never env-side: dashboard Settings #4 carries a **Use relays** toggle (reach pod through relay hops / direct, persisted) plus the operator's run-a-relay posture card that reads `/api/r/capabilities` and states the truth. Under the corrected arc (pass 233) the dashboard also RUNS WITH a relay as a setting: **Run with a relay (web/relay endpoint)** takes the relay's origin and verifies it live against that relay's public caps page. The full operational walkthrough lives in the [relay playbook](/vant/operations/relay-playbook) (serving, hosting the solo flavor, piggybacking, using, verifying); the mechanism spec is [labs/prd-relay.md](labs/prd-relay.md) and the operations page is [docs/operations/relay.md](docs/operations/relay.md).
 
+### 12.5 Provider mode (the community face — members pair their OWN pods)
+
+**What it is:** the dashboard-relay flavor gains a registration face — members sign in with an
+email one-time code (NO passwords exist), mint a single-use pairing voucher, and redeem it on
+THEIR OWN pod (`vant guest pair --code vhpair-...`). The pod dials OUT (Mode A, prd-relay.md) and
+a provider property slot mints itself as `g<guest id hex>` (kebab-safe; minted, never typed).
+The member then reaches their own pod through the sealed-ride lane — exactly the ride face
+prd-relay.md already built. Spec: [labs/prd-provider-mode.md](labs/prd-provider-mode.md).
+Nothing in provider mode opens edge-forwarding to user-named origins — the bridge stays
+env-origin-only.
+
+**The envelope (all in PAGES SETTINGS, Production AND Preview; Text unless marked **Secret**):**
+
+| Variable | Value | Notes |
+|----------|-------|-------|
+| `VANT_RELAY_PROVIDER_MODE` | `1` | Text. The ONLY posture key. Unset = today's dashboard byte-for-byte (no panel, no provider surface). Set it on the dashboard-relay flavor only |
+| `VANT_RELAY_PROVIDER_SLOTS` | `32` (default); the community face runs `100` | Text, optional. The install-wide ceiling of LIVE member slots — registration refuses typed at the cap, and the cap SELF-CLEANS (a pod that stops dialing past the grace window frees its slot, §3.6 of the spec) |
+| `VANT_RELAY_PROVIDER_SLOTS_PER_USER` | `1` (default) | Text, optional. Per-account ceiling. One pod per verified account; operators may raise it per-deploy |
+| `VANT_RELAY_PROVIDER_GRACE_HOURS` | `48` (default) | Text, optional. The reap grace: a slot whose newest keepalive write is older than this is reaped against BOTH caps (the §12.1 P2 namespace's slot-row rewrite gates to 12h intervals, so 48h tolerates four missed windows — the flapping-safe zone). Owner-ruled (prd-provider-mode.md ruling 15) |
+| `BOLETE_KV` | (KV namespace binding) | **REQUIRED under provider mode.** Slot rows, vouchers, accounts and code rows all ride this namespace (the one from the §12.1 P2 step — no second binding). Gate set without the binding = caps say `provider: "offering"` but registration answers the typed `E_STORE_UNCONFIGURED` refusal — honest, never a silent dead button |
+| `VANT_RELAY_MAIL_CONNECTORS` | `purelymail, resend` | Text, optional; the ordered connector chain for the code mails — tried in order, fall through on failure, and after the LAST connector the member gets the typed "code could not be sent" (a fake "sent" stays banned) |
+
+**The mail connectors (credentials are Secrets; the From/admin faces are Text):**
+
+| Variable | Notes |
+|----------|-------|
+| `EMAIL_FROM` | Text (the §12.1 P2 var — REUSED, not renamed). The shared sender face, e.g. `Bolete <hello@creadev.org>` |
+| `EMAIL_ADMIN_TO` | **PRIVATE: add as type Secret** (owner's panel choice — the connector reads it identically). Where operator notices go (mailbox-full mails, connector failures), e.g. `hello@creadev.org` |
+| `PURELYMAIL_SMTP_USER` | Text — connector #1. The Purelymail user that may send, e.g. `hello@creadev.org` |
+| `PURELYMAIL_SMTP_APP_PASSWORD` | **PRIVATE: add as type Secret.** Purelymail → Users → App Password → scope it SMTP only (their docs' "SEND ONLY SERVICES" move: a compromised value can send, never read) |
+| `RESEND_API_KEY` | **PRIVATE: add as type Secret.** Connector #2 (the §12.1 P2 var — REUSED). The HTTP fallback; `api.resend.com/emails`, plain fetch, no SDK |
+| `VANT_EMAIL_SALT` | (the §12.1 P2 var — REUSED) | hashes codes; unset = unsalted hash — set it |
+
+Connector receipts (verified live, spec §3.9): Purelymail ALLOWS transactional mail (ToS bans
+marketing/unsolicited, not OTP) but has NO HTTP send API — connector #1 speaks SMTP
+(`smtp.purelymail.com:465`, implicit TLS) inside the Worker via `cloudflare:sockets` `connect()`
+(officially supported runtime API; Pages Functions run the same runtime — port 465 `secureTransport:
+"on"` is the reliable shape, the STARTTLS-on-587 path has an open flakiness issue in workerd).
+Purelymail's rate ceiling is ~3,000 external sends/day — orders of magnitude above the OTP
+volume a family of slots can generate. Resend = plain `fetch()`; free tier 3,000/mo but 100/day
+— a fine BACKUP, thin as a permanent primary.
+
+**Member-facing quickstart (copy-paste for panel copy):** sign in with your email → type the
+6-digit code → mint a pairing voucher → run `vant guest pair --code vhpair-...` on YOUR pod →
+your pod appears in the property switcher as `g<hex>`. Slot caps, squatters, forgotten setups:
+a slot lives only while the pod keeps dialing (grace-window reap, edge-side only — the pod keeps
+its ledger); the panel lists YOUR slots with a detach action.
+
+**Self-check (run from anywhere):** `GET /api/r/capabilities` answers
+`{"provider":"offering"}` when the gate is set (and OMITS the key when unset — an OFF posture has
+no surface); `GET /api/auth/session` answers a session or the typed store refusal, never a spin.
+
 ---
 
 ## 13. The Docs Site (docs.creadev.org — CI-owned, zero panel work)
