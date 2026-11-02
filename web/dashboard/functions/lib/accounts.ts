@@ -9,10 +9,18 @@ import type { KVStore } from "./kv";
  *   - the account identifier is a HASHED email (deployment salt env)
  *   - verify attempts are budgeted; the request side has a cooldown
  *   - roles: admin|viewer; the FIRST account ever bootstraps as admin
+ *     (racing bootstrap resolves to whichever writer lands last - a
+ *     single-operator pattern, stated not pretended)
+ * Wave 19.16 (owner): BOLETE_ADMIN_ACCOUNT (optional env) makes admin
+ * DETERMINISTIC instead of race-won. The email named there is
+ *   - bootstrapped straight to admin on first verify for it;
+ *   - an EXISTING viewer account promoted to admin on its next verify;
+ *   - never demoted and never disable-able (the gate route refuses
+ *     E_ADMIN_PROTECTED - auth_guard.ts carries the hash).
+ * Pass the value as the third factory arg; unset = today's law.
  * Honest notes kept in code, not swept: the minimal KV shape has no
- * atomic ops, so the bootstrap-admin race resolves to whichever
- * writer lands last (a single-operator boot pattern, stated in the
- * docs rather than pretended atomic).
+ * atomic ops, so concurrent first verifies still race to one admin
+ * only when the env pin is unset.
  */
 
 // ---- tunables (PRD-shaped; a deployment overrides via env only) ----
@@ -162,9 +170,17 @@ export interface AccountsApi {
   ): Promise<boolean>;
 }
 
-export function makeAccounts(store: KVStore, emailSalt: string): AccountsApi {
+export function makeAccounts(
+  store: KVStore,
+  emailSalt: string,
+  adminEmail?: string,
+): AccountsApi {
   const now = () => Date.now();
   const ehFor = (email: string) => emailHashFor(email, emailSalt);
+  // The env-pinned admin hash, resolved at most once (no promises start
+  // for an unset/empty value - the unset path is byte-identical to the old law).
+  const adminEhPromise =
+    adminEmail && validEmailShape(adminEmail) ? emailHashFor(adminEmail, emailSalt) : null;
 
   async function readJson<T>(key: string): Promise<T | null> {
     const raw = await store.get(key);
@@ -233,13 +249,24 @@ export function makeAccounts(store: KVStore, emailSalt: string): AccountsApi {
       if (account && account.status === "disabled") {
         return { verdict: "disabled" };
       }
+      const adminEh = adminEhPromise ? await adminEhPromise : null;
+      const envAdmin = adminEh !== null && eh === adminEh;
       if (!account) {
         account = { created: now(), role: "viewer", status: "active" };
         const bootstrap = await store.get(keys.bootstrap());
-        if (bootstrap === null) {
+        if (envAdmin) {
+          // Deterministic admin: the env pin wins the role outright and
+          // the race marker is left alone (it never held this address).
+          account.role = "admin";
+        } else if (bootstrap === null) {
           account.role = "admin";
           await store.put(keys.bootstrap(), eh);
         }
+        await store.put(keys.account(eh), JSON.stringify(account));
+      } else if (envAdmin && account.role !== "admin") {
+        // Promotion (idempotent): an existing viewer account whose
+        // address matches the env pin flips to admin on this verify.
+        account.role = "admin";
         await store.put(keys.account(eh), JSON.stringify(account));
       }
       const sessionId = `bsess_${randomToken(32)}`;

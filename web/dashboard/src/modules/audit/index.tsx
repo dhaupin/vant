@@ -90,8 +90,10 @@ function Inbox({ account }: { account: { role: "admin" | "viewer" } | null }) {
             s: "down",
             msg:
               data.error === "E_FORBIDDEN"
-                ? "The audit inbox is admin-only; this identity is a viewer (typed 403, by design)."
-                : (data.detail ?? data.error ?? `refused: HTTP ${res.status}`),
+                ? "The audit inbox is admin-only: your account is signed in and active, but you do not hold the operator's admin role - ask the operator to pin your email via BOLETE_ADMIN_ACCOUNT, or retry after being promoted."
+                : data.error === "E_NO_SESSION"
+                  ? "You are signed out (or your session expired). Sign in with the email-code gate on the front page first - and note this surface is admin-only anyway."
+                  : (data.detail ?? data.error ?? `refused: HTTP ${res.status}`),
           });
         }
       })
