@@ -26,8 +26,11 @@ const vaf = require("../lib/vaf");
 const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
+const readline = require('readline');
 
 const BIN_DIR = __dirname;
+
+const BRAIN_NAME_RE = /^[A-Za-z0-9][A-Za-z0-9._ -]*$/;
 
 /**
  * First-run brain seed.
@@ -40,31 +43,78 @@ const BIN_DIR = __dirname;
  *
  * Resolved against process.cwd() - the brain runtime (lib/brain.js) reads
  * CWD-relative models/ paths, so seeding must match that root.
+ *
+ * (issues #257/#297) The seed used to be a silent side effect that always
+ * wrote a brain named "vant" into whatever directory you were standing in.
+ * On a first run with an interactive terminal it now ASKS for the brain
+ * name (with a here-and-now consent line) before writing anything. The
+ * non-interactive and scripted paths are unchanged and explicit:
+ *   --brain-name <name>  pin the name (no prompt)
+ *   --seed-starter       seed without prompting (explicit opt-in)
+ *   --no-seed            never seed (explicit opt-out)
+ *   VANT_BRAIN=<name>    pin the name
+ *   VANT_SEED=off        never seed
+ * A non-TTY stdin (pipes, CI, tests) keeps the legacy silent seed so every
+ * existing fresh-boot pin still holds.
  */
-function seedStarterBrain() {
-    // Brain name: (pass 93) resolve via state-store's path-active resolver
-    // (VANT_BRAIN env > stack[0]) — the SAME seam agents/teams got in passes
-    // 88/93. The raw stack[0] lookup ignored VANT_BRAIN, so `VANT_BRAIN=x
-    // vant start` checked the DEFAULT brain for existing .md files, found
-    // it populated, and never seeded the env brain — every env-scoped fresh
-    // brain woke with no identity/goals/lessons ("brain is in use, scaffold
-    // skipped" in health) and stayed that way forever.
-    let brainName = 'vant';
-    try {
-        const stateStore = require('../lib/state-store');
-        brainName = stateStore.currentBrain() || 'vant';
-    } catch (e) {
-        const statePath = path.join('models', 'state.json');
-        try {
-            const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
-            if (Array.isArray(state.stack) && state.stack.length &&
-                /^[A-Za-z0-9_-]+$/.test(state.stack[0])) {
-                brainName = state.stack[0];
-            }
-        } catch (e2) { /* no state yet - default name */ }
-    }
 
+/** Should we seed at all? Env + flags are the escape hatch; TTY asks. */
+function _seedDecision(args) {
+    if (args.includes('--no-seed')) return 'never';
+    if (process.env.VANT_SEED === 'off' || process.env.VANT_SEED === '0') return 'never';
+    if (args.includes('--seed-starter')) return 'seed';
+    return 'ask';
+}
+
+/** Is there ANY private brain with .md content to load? If so, never seed. */
+function _anyPrivateBrainExists() {
+    const root = path.join('models', 'private');
+    try {
+        if (!fs.existsSync(root)) return false;
+        return fs.readdirSync(root, { withFileTypes: true })
+            .filter((d) => d.isDirectory() && !d.name.startsWith('.'))
+            .some((d) => fs.readdirSync(path.join(root, d.name), { recursive: true })
+                .some((f) => String(f).endsWith('.md')));
+    } catch (e) {
+        return false;
+    }
+}
+
+/**
+ * Resolve the brain to seed: flags/env pin the name; otherwise `ask` runs
+ * when an interactive terminal should consent. Returns { name } or null
+ * when the operator declined at the prompt.
+ */
+async function _resolveSeedTarget(args, ask, defaultName = 'vant') {
+    const flagIdx = args.indexOf('--brain-name');
+    const flagName = flagIdx !== -1 ? args[flagIdx + 1] : null;
+    const candidate = flagName || process.env.VANT_BRAIN || null;
+    if (candidate) {
+        if (BRAIN_NAME_RE.test(candidate)) return { name: candidate };
+        console.log(`[Start] Ignoring invalid brain name "${candidate}" (use letters, digits, . _ -).`);
+    }
+    if (ask) {
+        const answer = (await ask(
+            '\n[Start] No brain found here. Create a starter brain in models/private/?\n' +
+            `        Name it [${defaultName}] (or "no" to skip): `
+        )).trim();
+        if (/^(no|n|skip|nope)$/i.test(answer)) return null;
+        if (!answer) return { name: defaultName };
+        if (BRAIN_NAME_RE.test(answer)) return { name: answer };
+        console.log(`[Start] "${answer}" is not a valid brain name (letters, digits, . _ -) — using "${defaultName}".`);
+    }
+    return { name: defaultName };
+}
+
+/** One-shot readline prompt (resolves the trimmed answer). */
+function _askUser(question) {
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    return new Promise((resolve) => rl.question(question, (a) => { rl.close(); resolve(a); }));
+}
+
+function _seedStarterBrain(brainName) {
     const brainDir = path.join('models', 'private', brainName);
+
     try {
         if (fs.existsSync(brainDir)) {
             const existing = fs.readdirSync(brainDir, { recursive: true })
@@ -78,7 +128,7 @@ function seedStarterBrain() {
         fs.writeFileSync(path.join(brainDir, 'identity.md'),
 `# identity.md
 
-NAME: Vant
+NAME: ${brainName}
 ROLE: Persistent Memory Agent
 
 ## About
@@ -111,9 +161,57 @@ Full guide: https://docs.creadev.org/vant/getting-started/agent-onboarding
 `);
         console.log(`[Start] Seeded starter brain: models/private/${brainName}/ (start, identity, goals, lessons).`);
         console.log('        Edit them freely — they are yours.');
+        return true;
     } catch (e) {
         // Seeding is a convenience, never a hard failure.
         console.log(`[Start] Starter brain seed skipped: ${e.message}`);
+        return false;
+    }
+}
+
+/**
+ * The seed gate. Never clobbers a brain with content; honors --no-seed /
+ * VANT_SEED; and on a genuine first run (no private brain anywhere) with an
+ * interactive terminal, ASKS for consent + the brain name. A pinned
+ * VANT_BRAIN / --brain-name seeds that brain silently (the pass-93 env-brain
+ * path), and a non-TTY stdin keeps the legacy silent seed for pipes / CI.
+ */
+async function _maybeSeed(args) {
+    if (_seedDecision(args) === 'never') {
+        console.log('[Start] Seeding disabled (--no-seed / VANT_SEED=off).');
+        return;
+    }
+
+    let defaultName = 'vant';
+    try {
+        const stateStore = require('../lib/state-store');
+        defaultName = stateStore.currentBrain() || 'vant';
+    } catch (e) { /* no state yet - default name */ }
+
+    const firstRun = !_anyPrivateBrainExists();
+    const interactive = process.stdin.isTTY && process.stdout.isTTY;
+    const ask = (firstRun && _seedDecision(args) !== 'seed' && interactive) ? _askUser : null;
+
+    const target = await _resolveSeedTarget(args, ask, defaultName);
+    if (!target) {
+        console.log('[Start] Skipped starter brain seed (run "vant start" again anytime).');
+        return;
+    }
+    const seeded = _seedStarterBrain(target.name); // idempotent: no-ops on a brain with content
+
+    // A brand-new brain with a NON-default name must become the pointer, or
+    // the runtime would seed <name> and then read the template/default brain
+    // (the #297 split, reintroduced by the name choice). VANT_BRAIN resolves
+    // by env and needs no state write; an interactive name must persist.
+    if (seeded && !process.env.VANT_BRAIN && target.name !== defaultName) {
+        try {
+            const brain = require('../lib/brain');
+            brain.switchBrain(target.name, 'private');
+            if (brain.flushStateSave) await brain.flushStateSave();
+            console.log(`[Start] Brain "${target.name}" is now current (models/state.json).`);
+        } catch (e) {
+            console.log(`[Start] Could not set "${target.name}" current: ${e.message.split('\n')[0]}`);
+        }
     }
 }
 
@@ -184,10 +282,10 @@ function main() {
     };
 
     const proceed = () => showInstallState().then(runHealth);
+    const boot = async () => { await _maybeSeed(args); await proceed(); };
 
     if (!doMigrate) {
-        seedStarterBrain();
-        proceed();
+        boot();
         return;
     }
 
@@ -243,14 +341,12 @@ function main() {
         // leaves models/private empty and the seed creates the starter
         // brain; on a legacy tree the import owns the brain dir and the
         // seed skips (never shadows imported content).
-        seedStarterBrain();
-        proceed();
+        boot();
     });
 
     mig.on('error', () => {
         console.log('[Start] Could not run layout migration — continuing.');
-        seedStarterBrain();
-        proceed();
+        boot();
     });
 }
 
