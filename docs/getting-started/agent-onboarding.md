@@ -13,6 +13,29 @@ description: Wake, work, and sleep sequences for an AI agent inheriting a Vant b
 
 This page is written for you, the agent. It assumes the repo you woke up in has a Vant layout: `models/public/<brain>/` and `models/private/<brain>/` with the active stack in `models/state.json`. If the layout looks different, step one tells you how to check, and the [migration guide](/vant/getting-started/migration) has the details.
 
+The whole loop, on one line:
+
+```text
+check the layout → wake (load the brain) → work with memory → sleep (write, commit, push)
+```
+
+## The layout at a glance
+
+Two different things in a Vant install are called "state" - do not confuse them:
+
+```text
+models/
+  state.json             # THE ROSTER: the install's active brain stack + current brain
+  public/<brain>/        # shared template files, syncable to a repo
+  private/<brain>/       # YOUR HEAD: identity.md, goals.md, lessons.md, orgchart/
+  private/<brain>/state/ # that brain's own runtime ledgers (era rollups, trust, traces)
+```
+
+- **`models/state.json` is the roster, not a head.** It lives at the models root - outside every brain directory - because it must be neutral: its job is to *name* the brains on the active stack (`{ "stack": ["vant", "nova"], "currentBrain": "vant", ... }`), so a stack with several brains never belongs to any one of them.
+- **Each brain keeps its own state, inside its own directory.** `models/private/<brain>/state/` holds that brain's runtime ledgers (era rollups, trust decisions, trace spans, conversation records). Your memory files and your state stay with your brain - they ride backup and horcrux gathers, so a restored install keeps them.
+
+Mnemonic that saves a lost afternoon: **don't confuse the roster for the head.**
+
 ## Step 1: Check the layout
 
 Run the migration status check before reading anything. It tells you whether the brain is in the current multi-brain layout or a legacy import is pending.
@@ -56,6 +79,21 @@ const identity = await brain.read('identity');
 
 `brain.read` checks your private brain first, then falls back to the public template. Files may be markdown, JSON, YAML, or plain text; `read` detects the format and returns parsed data for structured files.
 
+Before your first write, check how much autonomy this install grants you:
+
+```bash
+vant succession
+```
+
+| Level | What it means |
+|-------|---------------|
+| `high` | Full autonomy, act freely |
+| `medium` | Most ops, ask for big decisions |
+| `low` | Ask before acting |
+| `none` | Wait for instructions |
+
+Your level is set by `models/public/<brain>/_succession.json` and the humans can raise it over time - the [contributor workflow](/vant/advanced/agent-contributors) explains the ladder.
+
 ## Step 3: Work with memory
 
 During the session, write what you learn as it happens. The learning call:
@@ -85,23 +123,15 @@ Before the session ends, write what the next session needs. Append to the lesson
 vant memory learn lessons "2026-09-23: Found and fixed a race in the sync pull path."
 ```
 
-Commit and push the brain so the next session inherits it:
+Commit and push the brain so the next session inherits it. Use your own agent identifier as the commit prefix - it is how lineage work gets attributed across the roster:
 
 ```bash
 git add models/
-```
-
-Stage the brain changes. Then:
-
-```bash
-git commit -m "agent: session learnings"
-```
-
-Then push:
-
-```bash
+git commit -m "agent-yourname: session learnings"
 git push
 ```
+
+Memory work usually happens on a per-agent working branch (`agent-yourname`), created off the repo's documented base branch.
 
 ## The MCP equivalent
 
@@ -148,8 +178,10 @@ The layered model is deliberate: capabilities are part of the keeper layer, so t
 
 - Read before write. Load the brain before changing anything.
 - Check migration status at every wake. It is one command and it is cheap.
+- Check your trust level (`vant succession`) before your first write.
 - Write lessons while they are fresh, not at the deadline.
 - Never hand-move brain files. Use `vant migrate` for layout changes.
+- The roster is a pointer, not a head: `models/state.json` names the active brains; your state lives in `models/private/<brain>/state/`.
 - Keep identity.md short and put the most important facts at the top.
 
 ---
