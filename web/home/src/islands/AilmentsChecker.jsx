@@ -3,7 +3,7 @@
 * ===========================================
 * Client-only island for /ailments (vant#260). Never prerendered: the page
 * ships a JS-required fallback inside the <pre-island> hole, and this
-* component replaces it in the browser. No fetch anywhere — the check runs
+* component replaces it in the browser. No fetch anywhere - the check runs
 * against the same static registry the page rendered, so the paste never
 * leaves the browser (same posture the /contact composer states).
 */
@@ -99,7 +99,7 @@ The paste is capped at {cap} characters for the check; only the first {cap} will
 <p className="contact-note" style={{ margin: '10px 0 0', maxWidth: 'none', whiteSpace: 'pre-line' }}>{receipt}</p>
 <p className="status-meta">
 {rows.length === 0
-? 'No known rows matched — the honest ceiling applies: this is a known-issue index, not a doctor.'
+? 'No known rows matched - the honest ceiling applies: this is a known-issue index, not a doctor.'
 : rows.length + ' row(s) matched, ranked by tier: ' + SEVERITY_ORDER.join(' → ') + '.'}
 {rows.length > 0 && rows[0] ? (
 <>
