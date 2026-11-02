@@ -1,11 +1,12 @@
 # Vant Web — Provider Mode: brain.creadev.org as the Community Face — Product Requirements Document
 
-**Version:** 0.2 (planning draft — defined, NOT built; §10 names every truth-state)
-**Branch:** axolotl  **Date:** 2026-11-01  **Status:** Draft, second owner pass recorded in §0
-(rulings 5–10). This spec DEFINES the provider-mode rung; nothing in it is built on any branch
-yet. **Parent PRDs:** [prd-web.md](prd-web.md) (§3.5 session binding, §3.7 origin env) and
-[prd-relay.md](prd-relay.md) (the relay chain, the sovereign scope, the ride machinery this
-mode rides).
+**Version:** 0.3 (planning draft — defined, NOT built; §10 names every truth-state)
+**Branch:** axolotl  **Date:** 2026-11-02  **Status:** Draft, third owner pass recorded in §0
+(rulings 11–14); owner is setting the envelope in the Cloudflare Pages panel live
+(the envelope is also DEPLOY.md §12.5 as of this version). This spec DEFINES the provider-mode
+rung; nothing in it is built on any branch yet. **Parent PRDs:** [prd-web.md](prd-web.md)
+(§3.5 session binding, §3.7 origin env) and [prd-relay.md](prd-relay.md) (the relay chain, the
+sovereign scope, the ride machinery this mode rides).
 
 ---
 
@@ -46,6 +47,27 @@ mode rides).
     option, we will use purelymail (if they allow it)."* — the "if they allow it" question is
     ANSWERED in §3.9 with receipts (they allow transactional mail; the catch is transport, not
     policy).
+11. *Transport sequencing, owner-ruled with condition:* Purelymail FIRST — *"can we use the cf
+    pages workers functions for smtp? Pretty sure we can. If so we should do purely mail first"*
+    — and the condition HOLDS (§3.9's receipts verified this session): `connect()` from
+    `cloudflare:sockets` is an official Workers runtime API (docs updated Oct 2026), SMTP named
+    among its supported protocols; Pages Functions run the same workerd runtime, so the Pages
+    function reaching `smtp.purelymail.com:465` implicit TLS is in-contract. Sequencing (a) wins:
+    purelymail ships FIRST, resend stands behind it as the connector-chain backup. Honest receipt
+    kept for build day: the STARTTLS-on-587 path has an open flakiness issue in workerd — the
+    connector builds on port 465 `secureTransport: "on"`, NOT 587.
+12. *Per-user cap, owner-confirmed:* `_PER_USER` default **1** stands (owner set it in the
+    Pages panel the same hour). The open question is closed — default ships as 1.
+13. *Install-wide slots, owner-declared:* the community face runs
+    `VANT_RELAY_PROVIDER_SLOTS=100` (owner set it in the Pages panel; 32 remains the shipped
+    default for an operator that didn't tune it). Capacity math at 100 (§3.6): comfortably
+    inside the free tier.
+14. *Sender identity, owner-ruled:* From = `hello@creadev.org`, admin alerts to the same
+    mailbox ("hehe"). In DEPLOY.md §12.5 names: `EMAIL_FROM` (REUSED from the P2 email face,
+    not renamed) + `EMAIL_ADMIN_TO`; the purelymail app password mints at purelymail →
+    Users → App Passwords, SMTP scope, and lands as two Pages secrets
+    (`PURELYMAIL_SMTP_USER`, `PURELYMAIL_SMTP_APP_PASSWORD`) — yes, plain Pages vars/secrets,
+    never code.
 
 ## 1. The problem this closes (real, live-diagnosed 2026-11-01)
 
@@ -169,6 +191,7 @@ unset) the deployment needs stay exactly as prd-web.md defined them.
 - `VANT_RELAY_PROVIDER_SLOTS = 32` (DEFAULT) — the install-wide ceiling: total live member slots
   across all accounts. Above it, registration refuses with a TYPED message ("this deployment's
   provider quota is full"), not a spin. The breaker honors it venue-wide like every other limit.
+  The community face runs `100` (owner-declared, ruling 13).
 - `VANT_RELAY_PROVIDER_SLOTS_PER_USER = 1` (DEFAULT) — the per-account ceiling. One pod per
   account by default; an operator may raise it for members who genuinely run several pods, but
   the default makes slot-farming need one verified email EACH. Fungible email signup inflation is
@@ -180,15 +203,32 @@ not a fixture:
 
 | Rail | Mechanic | Receipt |
 |------|----------|---------|
-| A slot dies with its dial | the only thing keeping a slot live is the pod's own outbound keepalive; past a grace window, the slot is reaped at the edge — it falls out of the property list and stops being counted against BOTH caps. | proposal: 72h grace (OPEN QUESTION #2); the keepalive beat already exists as Mode A session reauth, no new ping loop |
+| A slot dies with its dial | the only thing keeping a slot live is the pod's own outbound keepalive; past a grace window, the slot is reaped at the edge — it falls out of the property list and stops being counted against BOTH caps. | grace = the keepalive WRITE cadence × tolerance, not raw dial beats (see the capacity math below; proposal 48h, OPEN QUESTION #1) |
 | Reaping is edge-scoped, graceful | the reap deletes ONLY the edge-side slot row; the pod keeps its guest ledger and token untouched. The member re-pairs later and a fresh slot mints honestly — same pod, new id, no "stranded ghost" state | the reap must never call pod doors — the edge has no authority to mutate a member's pod, and takes none |
 | Self-service cleanup | the provider panel lists YOUR slots (acctId-scoped) with creation times; a DETACH action revokes the pairing and frees the slot immediately (pod-side, the CLI verb `vant provider detach` closes the outbound session too) | panel-side: refusal-honest; never pretends a detach propagated that hasn't |
 | Self-repair beats ghost-parking | nobody must re-register a dead slot's id — a re-pair mints a fresh one. No repair requests, no operator tickets for leftovers | leas-shaped state needs no janition by design |
 | Squat-vandal math closes | account gate + per-user default 1 + both caps + reap + venue-wide rate limit/breaker (existing `VANT_EDGE_RATE_PER_MIN` + per-property breaker, applied venue-wide to provider slots) | the operative answer to owner's "how do we prevent squatters" |
 
-**At the cap ARRIVAL:** when `VANT_RELAY_PROVIDER_SLOTS` is full and keepalive beats keep dying,
-keeps the quota self-cleaning (dead slots reap back into it); the member panel shows
-`slots: yours 1 of 1 · deployment 31 of 32` so the family of numbers is visible.
+**At the cap ARRIVAL:** when the install-wide cap is full, the queue answer is an honest WAIT or
+the typed full-refusal — never a queue that silently promises. The panel shows
+`slots: yours 1 of 1 · deployment 31 of 100` (owner-declared cap) so the family of numbers is
+visible. The cap NAME rides NOTHING (turning any family var off is a one-line env change).
+
+**Capacity math at the declared 100 slots (the "how many users can CF Pages free take" ruling):**
+reap grace is throttled by the KV WRITE budget, not by slots. A free Workers account has
+~1,000 KV writes/DAY — SHARED account-wide across the Creadev Pages family — so the edge writes
+a slot's keepalive row no more often than every 12h (a beat arriving sooner only refreshes a
+local timestamp; the row rewrite gates on the threshold). At 100 slots that is ≈200 writes/day
+for the whole keepalive face, plus single-use voucher/code/session writes for a handful of
+sign-ins — a fraction of the shared budget. With the 12h write cadence, a reap grace of ≥4
+missed windows is the flapping-safe zone: 48h (proposal) survives any pod that sleeps
+nights AND any normal weekend-away, while a dead pod still frees itself inside two days.
+Read lane: sessions/slots read per dashboard hop — thousands of reads/day against a 100k/day
+free read budget: no constraint. STRONGEST truth: slot count is NOT the binding constraint on
+the free tier — the Boxes-wide shared KV WRITE budget is, and 100 slots fits; raising past
+~300 live slots wants the write threshold raised (18h+) or the KV paid plan, which is a
+two-line change when a family stage arrives. Fixes all documented here because the owner's
+Second-ruling worry ("free-takeability") deserves the shape in print, not a hunch.
 
 ### 3.7 Cross-device: slots ride the sovereign profile (owner ruling 7, RULED)
 
@@ -227,26 +267,36 @@ an import whose carried slot row matches an existing row updates it, never doubl
   connector response recorded on the attempt row, provider name + verbatim status code + retry
   count). Keys are Pages env ONLY: `Purelymail/ SMTP-app-password || RESEND_API_KEY` from
   Sites → Secrets, never client-visible, never in repo files (the key-handling law).
-- **purelymail (connector #1):** SPEAKS SMTP at `smtp.purelymail.com:465` (SSL/TLS) with an
-  SMTP-scoped app password (owner mints it; `PURELYMAIL_SMTP_USER` + `PURELYMAIL_SMTP_APP_PASSWORD`
-  secrets). **The "if they allow it" ruling question is ANSWERED with receipts:** there is NO
-  HTTP send API (the REST surface is account-management only — verified from the docs index and
-  the API's operation list), and SMTP is the only send-in door — but their own ToS and homepage
-  explicitly allow transactional mail ("you can generally send transactional related emails to
-  customers"), and their own docs define "SEND ONLY SERVICES" with an SMTP-scoped app password —
-  an OTP service is that exact shape. Rate ceiling: ~3,000 external sends/day, 300 at once —
-  thousands of slots' worth of headroom. **The catch is transport, not policy:** a Workers
-  isolate has no native SMTP client, so the purelymail connector must ride `cloudflare:sockets`
-  (`connect()` + TLS-on-socket, a client speaking SMTP bytes itself) — the biggest single piece
-  of implementation risk this PRD carries (OPEN QUESTION #1) — the receipts and the fallbacks
-  are in §8.
+- **Env names ride the EXISTING P2 email face (DEPLOY.md §12.1), nothing invented:** the
+  connector chain env is `VANT_RELAY_MAIL_CONNECTORS` (new, e.g. `purelymail, resend`); the
+  sender From is `EMAIL_FROM` (the P2 var, REUSED — owner-ruled to `hello@creadev.org`,
+  ruling 14); admin alerts get `EMAIL_ADMIN_TO` (new, same mailbox "hehe"); resend's
+  credential is the existing `RESEND_API_KEY`; purelymail's credential is the pair
+  `PURELYMAIL_SMTP_USER` + `PURELYMAIL_SMTP_APP_PASSWORD` (both Pages Secrets) — the owner
+  mints the app password at purelymail → Users → App Passwords, SMTP scope (their docs'
+  "SEND ONLY SERVICES" guidance: a compromised value can send, never read).
+- **purelymail (connector #1, shipping FIRST — ruling 11):** SPEAKS SMTP at
+  `smtp.purelymail.com:465` (implicit TLS). **The "if they allow it" ruling question is
+  ANSWERED with receipts:** there is NO HTTP send API (the REST surface is
+  account-management only — verified from the docs index and the API's operation list), and
+  SMTP is the only send-in door — but their own ToS and homepage explicitly allow
+  transactional mail ("you can generally send transactional related emails to customers"),
+  and their own docs define "SEND ONLY SERVICES" with an SMTP-scoped app password — an OTP
+  service is that exact shape. Rate ceiling: ~3,000 external sends/day, 300 at once —
+  thousands of slots' worth of headroom. **The catch is transport, not policy** — and the
+  transport is ANSWERED (ruling 11): `connect()` from `cloudflare:sockets` is an official
+  Workers runtime API (docs updated Oct 2026; SMTP named among supported protocols; Pages
+  Functions run the same workerd runtime), so connector #1 talks SMTP bytes over the socket
+  INSIDE the Pages function. Honest build-day receipt kept: the STARTTLS-on-587 path has an
+  open flakiness issue in workerd — build on port 465 `secureTransport: "on"`, not 587, and
+  the first PM-A wave must prove ONE live send through BOTH sockets paths in CI-less sanity
+  before the panel ships.
 - **resend (connector #2, the backup):** plain HTTP — `POST https://api.resend.com/emails`,
   `Authorization: Bearer <RESEND_API_KEY>`, JSON `{ from, to, subject, text }`, verified sender
-  domain. Works with only a `fetch()` from a worker — landed and hard in one wave.
-- **Domain coherence:** both connectors share the operator's mail domain (e.g. From:
-  `codes@creadev.org` — the MX of the domain is already on Purelymail for incoming, the
-  connector carries the envelope for outgoing); the "from" edge is one env:
-  `VANT_RELAY_MAIL_FROM`.
+  domain. Works with only a `fetch()` from a worker — landed and hard in one wave. Free tier:
+  3,000/mo, but 100/day — a fine BACKUP, thin as a permanent primary.
+- **Domain coherence:** both connectors share the operator's mail domain (the From edge is
+  `EMAIL_FROM` — one var, both connectors), the MX for incoming is already on purelymail.
 
 ---
 
@@ -307,35 +357,37 @@ an import whose carried slot row matches an existing row updates it, never doubl
 - NO HTML email, tracking pixels, or marketing mail through the handler — the purelymail
   connector is transactional by its ToS and its design; the entire connector family signs that law.
 
-## 8. Open questions FOR the owner (revised — v0.1's questions 1, 2 and 3 are ANSWERED above)
+## 8. Open questions FOR the owner (v0.3 — three of four answered with this pass)
 
-1. **The Purelymail transport build (the genuine risk).** No HTTP send API exists; SMTP must be
-   client-spoken from the Worker isolate via `cloudflare:sockets` + TLS-on-socket. Options:
-   a) a small self-contained SMTP client inside the purelymail connector (no new deploy face;
-      the connector is just longer code) — proposal;
-   b) the backup-first tempering: ship `resend` as connector #1 for the first rung (one `fetch()`,
-      landable in an afternoon), swap purelymail into slot #1 when its SMTP client ships — owner
-      said purelymail first, so this is a sequencing question, not a refusal;
-   c) a tiny standalone mail relay outside Workers (most moving parts, weakest posture — listed
-      for completeness, not proposed).
-2. **The reap grace window.** 72h is proposed (a pod offline for the weekend survives; a pod
-   dead for a week frees itself). Up/down? Note the caps self-clean either way — this only
-   tunes WHO can register while the cap is at its ceiling.
-3. **`_PER_USER` default.** 1 is proposed (one pod per verified account); operators may raise
-   per-deploy. Confirm 1 as the shipping default?
-4. **The purelymail app password.** The owner mints an SMTP-scoped app password (their docs'
-   "SEND ONLY SERVICES" scope — literally built for this) for the sending identity; the sender
-   name/From (`codes@creadev.org`?) lands with ruling.
+1. **The reap grace window (the one left open).** With the owner-ruled `100` slots and the
+   12h keepalive write threshold, 48h is the PROPOSED value — it survives a pod that sleeps
+   nights AND a normal weekend-away (two missed windows), while a truly dead pod still frees
+   itself inside two days against the shared free-tier KV write budget (§3.6's math).
+   72h — the original draft — is equally free-tier-safe but reaps slower; both self-clean.
+   Owner tick pending. (Proposed in code as `VANT_RELAY_PROVIDER_GRACE_HOURS`, default 48
+   once ticked.)
+2. **The purelymail app password (an ACTION, not a ruling).** The owner mints an SMTP-scoped
+   app password at purelymail → Users → App Passwords (their docs' "SEND ONLY SERVICES" scope
+   — literally built for this), and the two Pages Secrets land in DEPLOY.md §12.5's table.
+
+Closed by rulings 11–14 this pass: transport sequencing = purelymail FIRST (sockets receipts
+verified; port 465, not 587); `_PER_USER` = 1 (owner set it); install-wide slots = 100
+(owner set it; 32 stays the untuned default); sender identity = `hello@creadev.org` for the
+From and for admin alerts.
 
 ## 9. The definition ledger (defined / built / ruled / refused — the ledger v0.2)
 
 | Element | Truth-state |
 |---------|-------------|
 | Provider gate (env fact, capabilities line `provider: offering \| absent`) | RULED (ruling 5) + DEFINED (§3.1) |
+| Install-wide slots = 100 on the community face (32 default) | RULED (ruling 13; owner set it in the Pages panel) |
+| Per-account slots default 1 | RULED (ruling 12; owner set it in the Pages panel) |
+| Purelymail connector FIRST via `cloudflare:sockets` (port 465, implicit TLS) | RULED (ruling 11; receipts verified this session — SCTP docs page + workerd 587 flakiness noted) |
+| Sender `hello@creadev.org` From + admin alerts; P2 env names REUSED (`EMAIL_FROM`, `RESEND_API_KEY`) | RULED (ruling 14; DEPLOY.md §12.5 documents the surface) |
 | Voucher-issued provider property slots (`p = g<guest id hex>`) | DEFINED (§3.2) |
 | Account-locked slot acquisition (BOLETE_KV co-requisite) | RULED (ruling 8) + DEFINED (§3.1/§3.5) |
 | Email-code account lane (no passwords anywhere) | RULED (ruling 9) + DEFINED (§3.8) |
-| Mail-handler connector interface; Purelymail #1, Resend #2 | RULED (ruling 10); receipts verified live this session (§3.9); transport impl = OPEN QUESTION #1 |
+| Mail-handler connector interface; Purelymail #1, Resend #2 | RULED (rulings 10 + 11); receipts verified live (§3.9); transport impl = build-day receipt kept (465 not 587) |
 | Slot caps, both levels + squatter rails + lease-shaped reap | RULED (ruling 6) + DEFINED (§3.6); grace window = OPEN QUESTION #2 |
 | Slots ride sovereign-profile import | RULED (ruling 7); dedup law PENDING PIN (import wave; PM4 tests it) |
 | URL-in-token edge lane (user-named origins) | REFUSED (this spec §2, recorded with receipts) |
