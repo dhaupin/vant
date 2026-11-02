@@ -75,9 +75,20 @@ export function storeFor(context: PagesContext): KVStore {
   const del = (ns.delete as (key: string) => Promise<void>).bind(ns);
   // The runtime's list() takes the OBJECT-options form; the declared
   // KVNamespaceLike is the wish. Narrow cast at the one call site.
-  const realList = ns.list as unknown as (
+  // (wave 19.19) get/put/delete are .bind()-ed above, but list was left
+  // detached - the one prod-only 500 left standing: every test shim
+  // hangs list on a plain object (a free function), while the REAL
+  // workerd namespace is a class-backed platform object whose methods
+  // need `this`. A detached ns.list(...) threw inside the adapter on
+  // EVERY production list call - /api/users and /api/audit answered
+  // bare "error code: 1101" for live admin sessions while
+  // /api/auth/session (which never lists) sailed through 200.
+  // Live-caught 2026-11-02 by signing in as the operator and bracketing
+  // the failure between fake-cookie (typed 401) and the roster/audit
+  // routes: same binding, same get() - only the detached list was left.
+  const realList = (ns.list as unknown as (
     options: RealListOptions,
-  ) => Promise<Array<{ name: string }> | RealListPage>;
+  ) => Promise<Array<{ name: string }> | RealListPage>).bind(ns);
 
   return {
     async get(key) {
