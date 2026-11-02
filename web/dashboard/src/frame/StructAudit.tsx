@@ -14,13 +14,16 @@ import * as React from "react";
  * EPOCH LAW (honest by construction): every inline feed here carries
  * `mock: true` and renders a MOCK identity chip; nothing reads a
  * network, nothing fabricates a green. LIVE feeds replace their mock
- * twins in the SAME shape — (b, landed) the crashtest verdict-ledger
- * stamp consumed from the flavors' generated struct-feed.json copies
- * (written by scripts/struct-feed-stamp.js, .sha256-pinned); (c) the
- * packstruct gate; (d) the eyestruct + poststruct npm feeds — and the
- * chips flip with the data. These edges are consumed by both flavors:
- * web/dashboard via the vendored pinned frame copy, web/home via its
- * pure-data struct-feeds.mjs over the generated stamp.
+ * twins in the SAME shape — and three now have (steps b + c + d landed):
+ * the crashtest verdict ledger, the packstruct dual emit (lint --deep
+ * --json + the audit gate's own verdict line), and the eyestruct gate
+ * row — all written byte-identically by scripts/struct-feed-stamp.js
+ * (.sha256-pinned) and consumed per flavor: web/dashboard substitutes
+ * them in modules/struct-audit over the vendored pinned frame copy,
+ * web/home reads them in its pure-data struct-feeds.mjs. The MOCK arrays
+ * below stay as the kit's skeleton baseline and shape preview; only
+ * poststruct still renders from one in both flavors (its npm package is
+ * staged 0.9.0, pre-publish — the honest inline absence).
  *
  * The one pre-staged adapter: parsePoststructFeed below, built against
  * the PRD contract -- poststruct graduated from its gistory staging

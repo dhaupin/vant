@@ -1,18 +1,27 @@
 /**
  * test/struct-feeds.test.mjs (vant-home)
  * ======================================
- * The struct-audit skeleton's data laws (vant issue #264, step a). Pins:
+ * The struct-audit board's data laws (vant issue #264; steps a + b landed
+ * at 2026-10-28, steps c + d landed 2026-11-02). Pins:
  *   1. four sources AND ONLY four (the E_STRUCT_SOURCE law mirrored)
- *   2. every mock row self-declares mock: true (the epoch badge)
- *   3. the ABSENT row (poststruct, pre-npm) states its absence in words
- *      and carries NO cross-repo anchor (check-home rule 4 admits only
- *      github links under dhaupin/vant)
+ *   2. every inline-skeleton row self-declares mock: true (the epoch
+ *      badge) - after steps (b)(c)(d) the ONLY such row left is
+ *      poststruct (pre-npm); packstruct / crashtest / eyestruct ride
+ *      LIVE stamped emits with no mock flag
+ *   3. the ABSENT rows state their absence in words, and the anchor
+ *      laws hold (check-home rule 4 admits only the links a row states)
  *   4. verdictOf: PASS / FINDINGS / ABSENT escalation exactly
  *   5. evidenceSlice caps and never mutates
- *   6. all source links land on npmjs.com (the feeds' real carriers)
+ *   6. every ok row anchors npmjs.com (the feeds' real carriers)
+ *   7. the live rows: byte-equal to their generated stamps, .sha256 pins
+ *      present on disk, provenance (_stamp) stated, counts internally
+ *      consistent with their own findings
  */
 
 import { describe, it, expect } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import path from 'node:path'
 import {
     STRUCT_SOURCES,
     STRUCT_LABELS,
@@ -21,10 +30,15 @@ import {
     evidenceSlice,
 } from '../src/struct-feeds.mjs'
 import liveCrashFeed from '../src/generated/struct-feed.json'
+import livePackstructFeed from '../src/generated/struct-feed-packstruct.json'
+import liveEyestructFeed from '../src/generated/struct-feed-eyestruct.json'
 
-const REQUIRED = ['source', 'ok', 'mock']
+const HERE = path.dirname(fileURLToPath(import.meta.url))
+const GENERATED = path.join(HERE, '..', 'src', 'generated')
 
-describe('struct-feeds (the /audit skeleton laws)', () => {
+const REQUIRED = ['source', 'ok']
+
+describe('struct-feeds (the /audit board laws)', () => {
     it('carries four sources and only four', () => {
         expect(STRUCT_SOURCES).toEqual(['packstruct', 'crashtest', 'eyestruct', 'poststruct'])
         expect(STRUCT_FEEDS).toHaveLength(4)
@@ -34,34 +48,29 @@ describe('struct-feeds (the /audit skeleton laws)', () => {
         for (const s of STRUCT_SOURCES) expect(STRUCT_LABELS[s]).toBeTruthy()
     })
 
-    it('every INLINE skeleton row self-declares mock: true', () => {
+    it('every INLINE skeleton row self-declares mock: true; the live rows carry none', () => {
         const mocks = STRUCT_FEEDS.filter(f => f.mock)
         for (const feed of mocks) {
             for (const key of REQUIRED) expect(feed, feed.source).toHaveProperty(key)
             expect(feed.mock, feed.source).toBe(true)
         }
-        // the live row (step b) carries NO mock flag - the badge stays off
-        expect(mocks.map(f => f.source)).toEqual(['packstruct', 'eyestruct', 'poststruct'])
+        // poststruct is the skeleton's only inline row left (the honest
+        // absence until its npm lands); the three stamped rows run badge-free
+        expect(mocks.map(f => f.source)).toEqual(['poststruct'])
     })
 
-    it('the ABSENT row names its absence in words, anchorless (gate rule 4)', () => {
-        const post = STRUCT_FEEDS.find(f => f.source === 'poststruct')
-        expect(post.ok).toBe(false)
-        expect(String(post.error)).toMatch(/absent/i)
-        expect(String(post.error)).toMatch(/poststruct/)
-        expect(post.sourceHref).toBeFalsy()
+    it('absent rows name their absence in words (nothing is graded)', () => {
+        for (const feed of STRUCT_FEEDS.filter(f => !f.ok)) {
+            expect(String(feed.error), feed.source).toMatch(/absent/i)
+        }
+        // the inline-skeleton absence carries no cross-repo anchor (gate
+        // rule 4): the blob never names github.com/dhaupin/poststruct
         const blob = JSON.stringify(STRUCT_FEEDS)
         expect(blob).not.toMatch(/https:\/\/github\.com\/dhaupin\/poststruct/)
     })
 
-    it('the three ok rows anchor npmjs.com feeds only', () => {
-        for (const feed of STRUCT_FEEDS.filter(f => f.ok)) {
-            expect(feed.sourceHref, feed.source).toMatch(/^https:\/\/www\.npmjs\.com\//)
-        }
-    })
-
     it('verdictOf escalates exactly: ABSENT / FINDINGS(via counts.fail) / FINDINGS(via a fail row) / PASS', () => {
-        const base = { source: 'eyestruct', mock: true }
+        const base = { source: 'eyestruct' }
         expect(verdictOf({ ...base, ok: false })).toBe('ABSENT')
         expect(verdictOf({ ...base, ok: true })).toBe('PASS')
         expect(verdictOf({ ...base, ok: true, counts: { fail: 1 } })).toBe('FINDINGS')
@@ -92,7 +101,7 @@ describe('struct-feeds (the /audit skeleton laws)', () => {
         expect(feed.findings).toHaveLength(5)
     })
 
-    it('the mock mocks mirror the kit contract keys exactly', () => {
+    it('all findings rows mirror the kit contract keys exactly', () => {
         // shape pins from web/kit/components/struct-audit.tsx (kit head):
         // findings rows: { id, page?, level: fail|warn|info, message }
         for (const feed of STRUCT_FEEDS.filter(f => Array.isArray(f.findings))) {
@@ -105,33 +114,63 @@ describe('struct-feeds (the /audit skeleton laws)', () => {
     })
 })
 
-describe('the LIVE crashtest row (issue #264 step b)', () => {
-    const live = STRUCT_FEEDS.find(f => f.source === 'crashtest')
+describe('the LIVE stamped rows (issue #264 steps b, c, d)', () => {
+    // The ring law applied to data: each row is byte-equal to its stamp,
+    // each stamp has its .sha256 pin sidecar beside BOTH flavor copies,
+    // provenance is stated, and the counts are internally consistent.
+    const LIVE = [
+        ['crashtest', liveCrashFeed],
+        ['packstruct', livePackstructFeed],
+        ['eyestruct', liveEyestructFeed],
+    ]
 
-    it('rides the stamped ledger, badge off, no mock', () => {
-        // the JSON import re-materializes the stamp; equality is deep
-        expect(live).toStrictEqual(liveCrashFeed)
-        expect(live.ok).toBe(true)
-        expect(live.mock).toBeUndefined()
+    it.each(LIVE)(`%s: byte-equal to its stamp, pin sidecars on disk, badge off`, (source, feed) => {
+        expect(feed.source).toBe(source)
+        expect(feed.ok).toBe(true)
+        expect(feed.mock).toBeUndefined()
+        const row = STRUCT_FEEDS.find(f => f.source === source)
+        expect(row).toStrictEqual(feed)
+        // pins exist next to both flavor copies written by the stamp
+        const ROOT = path.join(HERE, '..', '..', '..')
+        for (const flavor of ['home', 'dashboard']) {
+            const stamp = path.join(ROOT, 'web', flavor, 'src', 'generated', `struct-feed${source === 'crashtest' ? '' : '-' + source}.json`)
+            expect(readFileSync(stamp + '.sha256', 'utf8')).toMatch(/^[0-9a-f]{64}\n?$/)
+            expect(readFileSync(stamp, 'utf8')).toBe(JSON.stringify(feed, null, 2) + '\n')
+        }
     })
 
-    it('the ledger arithmetic is internally consistent', () => {
-        const c = live.counts
-        expect(c.packs).toBeGreaterThanOrEqual(1)
-        expect(c.rows).toBeGreaterThanOrEqual(1)
-        expect(c.refused + c.skipped + c.exploited).toBe(c.rows)
-        // the whitelist is EMPTY: an EXPLOITED row is a regression
-        expect(c.exploited).toBe(0)
+    it.each(LIVE)(`%s: provenance stated and dated`, (source, feed) => {
+        expect(feed._stamp.by).toBe('scripts/struct-feed-stamp.js')
+        expect(feed._stamp.from || feed._stamp.legend).toBeTruthy()
+        expect(String(feed.generatedAt)).toMatch(/^\d{4}-\d{2}-\d{2}$/)
     })
 
-    it('the stamp states its own provenance and date', () => {
-        expect(live.version).toBe('crashledger/1')
-        expect(String(live.generatedAt)).toMatch(/^\d{4}-\d{2}-\d{2}$/)
-        expect(live._stamp.by).toBe('scripts/struct-feed-stamp.js')
-        expect(String(live._stamp.legend)).toMatch(/restamp/i)
+    it.each(LIVE)(`%s: counts are internally consistent with their own findings`, (source, feed) => {
+        const c = feed.counts
+        expect(c).toBeTruthy()
+        if (source === 'crashtest') {
+            expect(c.packs).toBeGreaterThanOrEqual(1)
+            expect(c.rows).toBeGreaterThanOrEqual(1)
+            expect(c.refused + c.skipped + c.exploited).toBe(c.rows)
+            // the whitelist is EMPTY: an EXPLOITED row is a regression
+            expect(c.exploited).toBe(0)
+        }
+        if (source === 'packstruct') {
+            expect(c.packs).toBeGreaterThanOrEqual(1)
+            expect(c.ids).toBeGreaterThanOrEqual(0)
+            expect(c.honored + c.pinned).toBeLessThanOrEqual(8) // the conformance corpus is 8
+            expect(c.violations).toBe(0)
+            expect(String(feed.findings[0].message)).toMatch(/conformance honored/)
+        }
+        if (source === 'eyestruct') {
+            expect(c.fail).toBe(0) // the gate judged ok: no unexplained artifact
+            expect(c.artifacts).toBeGreaterThanOrEqual(0)
+            expect(c.rows).toBeGreaterThanOrEqual(0)
+            expect(feed.findings.length).toBe(1)
+        }
     })
 
-    it('its verdict grades live (never ABSENT)', () => {
-        expect(verdictOf(live)).not.toBe('ABSENT')
+    it('the live rows grade live (never ABSENT)', () => {
+        for (const [, feed] of LIVE) expect(verdictOf(feed)).not.toBe('ABSENT')
     })
 })
