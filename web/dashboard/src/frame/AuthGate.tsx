@@ -3,12 +3,15 @@ import { actions, useApp, type DashRole } from "../state";
 import { Help } from "./Tooltip";
 
 /**
- * Login gate (prd-web.md 3.5, P2): email + one-time code is the
- * PRIMARY flow now; the vguest_ paste stays as the honestly-labeled
- * fallback for local installs without email/store config. The session
- * itself is server-side (`bsess_` HttpOnly cookie) - the browser never
- * holds the pod token or the email. On load we PROBE /api/auth/session
- * so a live session is restored without flashing the login screen.
+ * Login gate (prd-web.md 3.5, P2): email + one-time code is THE
+ * entry - no token path is offered here (wave 19.17, owner call:
+ * identity is verified by email first, the vguest_ paste moves inside
+ * to Settings -> Connect your pod). The paste survives at the gate ONLY
+ * when this deploy has no email/store config at all - the honest local
+ * fallback that keeps Mode B installable. The session itself is
+ * server-side (`bsess_` HttpOnly cookie) - the browser never holds the
+ * pod token or the email. On load we PROBE /api/auth/session so a live
+ * session is restored without flashing the login screen.
  */
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
@@ -181,10 +184,9 @@ function Login() {
           request={request}
           verify={verify}
           onResetEmail={() => setStep({ s: "email" })}
-          onUseToken={() => setMode("token")}
         />
       ) : (
-        <TokenMode err={err} setErr={setErr} onUseEmail={() => setMode("email")} />
+        <TokenMode err={err} setErr={setErr} />
       )}
     </GateShell>
   );
@@ -231,7 +233,6 @@ type EmailModeProps = {
   request: () => Promise<void>;
   verify: () => Promise<void>;
   onResetEmail: () => void;
-  onUseToken: () => void;
 };
 
 function EmailMode({
@@ -244,7 +245,6 @@ function EmailMode({
   request,
   verify,
   onResetEmail,
-  onUseToken,
 }: EmailModeProps) {
     const sent = step.s === "sent";
     return (
@@ -329,24 +329,18 @@ function EmailMode({
           </>
         )}
         {err ? <SupportErr err={err} /> : null}
-        <button
-          type="button"
-          onClick={onUseToken}
-          className="mt-4 text-xs text-ink-soft underline hover:text-ink"
-        >
-          Paste a vguest_ token instead
-        </button>
+        <p className="mt-4 text-xs text-ink-soft">
+          Inside the dashboard you add your pod identity on the
+          Settings page (Connect your pod).
+        </p>
       </div>
     );
   }
 
-type TokenModeProps = {
-  err: string | null;
-  setErr: (value: string | null) => void;
-  onUseEmail: () => void;
-};
-
-function TokenMode({ err, setErr, onUseEmail }: TokenModeProps) {
+/** Only reachable when the deploy answered E_EMAIL_UNCONFIGURED /
+ *  E_STORE_UNCONFIGURED: the honest local fallback, stated as what it
+ *  is. Email-configured deploys never see this card (wave 19.17). */
+function TokenMode({ err, setErr }: { err: string | null; setErr: (value: string | null) => void }) {
     const [value, setValue] = useState("");
     const property = useApp((s) => s.property);
     const account = useApp((s) => s.account);
@@ -386,11 +380,12 @@ function TokenMode({ err, setErr, onUseEmail }: TokenModeProps) {
 
     return (
       <div className="mt-6 rounded-lg border border-line bg-surface p-4">
-        <p className="text-sm font-medium">Show your identity (fallback)</p>
+        <p className="text-sm font-medium">Show your identity (email sign-in is not configured here)</p>
         <p className="mt-1 text-xs text-ink-soft">
-          Paste the guest token for this pod. With a live account session
-          it binds SERVER-SIDE; without one it stays in memory for this
-          load, never stored and never logged.
+          This deploy offers no email gate, so identity rides a pasted
+          guest token. With a live account session it binds SERVER-SIDE;
+          without one it stays in memory for this load, never stored and
+          never logged.
         </p>
         <form onSubmit={submit} className="mt-4 space-y-3">
           <input
@@ -414,13 +409,6 @@ function TokenMode({ err, setErr, onUseEmail }: TokenModeProps) {
         </Help>
         {note ? <p className="mt-3 text-xs text-ink-soft">{note}</p> : null}
         {err ? <SupportErr err={err} /> : null}
-        <button
-          type="button"
-          onClick={onUseEmail}
-          className="mt-3 block text-xs text-ink-soft underline hover:text-ink"
-        >
-          Use email code sign-in
-        </button>
       </div>
     );
 }
