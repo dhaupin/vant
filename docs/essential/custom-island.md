@@ -60,7 +60,7 @@ const DEFAULT_ISLANDS = {
 **Runtime API**
 
 ```javascript
-const vant = require('vant');
+const vant = require('vant-os');
 
 // Get available islands
 const available = vant.islands.getAvailable();
@@ -94,7 +94,7 @@ Add content to your brain:
 ### Step 3: Trigger Usage
 
 ```javascript
-const vant = require('vant');
+const vant = require('vant-os');
 
 // Think about herbs - auto-hydrates island
 const result = await vant.islands.autoHydrate('What herbs help with sleep?');
@@ -122,7 +122,7 @@ const all = vant.islands.getAvailable();
 Islands live in a manifest (`islands.json` under the brain root) merged over `DEFAULT_ISLANDS` at load time. The public way to add one is `createIsland` - it validates, registers the definition, and stamps a brain file for static islands:
 
 ```javascript
-const vant = require('vant');
+const vant = require('vant-os');
 
 vant.islands.createIsland('herbalism', {
     type: 'lazy',

@@ -26,7 +26,7 @@ The sandbox is Vant's "keeper" layer. It provides:
 Create a sandboxed agent:
 
 ```javascript
-const sandbox = require('./lib/sandbox');   // also: require('vant').sandbox (real getter)
+const sandbox = require('./lib/sandbox');   // also: require('vant-os').sandbox (real getter)
 
 const s = sandbox.create({
     agentId: 'agent-1',

@@ -523,6 +523,11 @@ function makeFakeD1() {
         function exec() {
             if (/^create table/i.test(low)) return { changes: 0 };
             if (low.includes('select count(*) as n from status_endpoints')) return { first: { n: db.endpoints.length } };
+            // (wave 19.5 lockstep) the seed law's missing-name probe
+            // (web/home/functions/_lib/status.js seedDefaults): the fake
+            // store answers the name existence check honestly so the
+            // versioned seeding behaves over the fake exactly as over D1
+            if (low.includes('select name from status_endpoints')) return { results: db.endpoints.map((e) => ({ name: e.name })) };
             if (low.includes('insert or ignore into status_endpoints')) {
                 const [name, url, kind, kindOptions, createdAt] = args;
                 if (db.endpoints.some((e) => e.name === name)) return { changes: 0 };

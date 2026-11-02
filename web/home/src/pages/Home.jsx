@@ -13,7 +13,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import Term from '../components/Term.jsx'
-import Constellation from '../components/Constellation.jsx'
+import Neurons from '../components/Neurons.jsx'
 import stats from '../generated/stats.json'
 
 const FAQ = [
@@ -44,7 +44,7 @@ export default function Home() {
     return (
         <>
         <header className="hero">
-            <div id="lattice" aria-hidden="true"><Constellation /></div>
+            <div id="lattice" aria-hidden="true"><Neurons /></div>
             <div className="hero-veil"></div>
             <div className="container">
                 <span className="kicker fx-reveal"><span className="dot" aria-hidden="true"></span>Trusting the universe, but with receipts</span>
@@ -82,7 +82,7 @@ export default function Home() {
                     </div>
                 </div>
                 <p className="drag-hint">
-                    The constellation behind this text is your agent's memory graph: every amber pulse is a lesson landing in the brain.
+                    The firing web behind this text is your agent's brain: every spike is a mem learned, rippling out to its neighbours.
                 </p>
             </div>
         </header>

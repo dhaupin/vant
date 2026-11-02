@@ -10,7 +10,7 @@ Everything the API routes under `functions/` need is configured in the **Cloudfl
 2. Open the **vant-home Pages project → Settings → Bindings → Add → D1 database bindings**.
 3. Variable name: **`DB`**. Database: **`vant-pub`**. Save.
 
-That is the whole wiring. Tables create themselves on first read (`ensureSchema`); the six owner-named endpoints seed themselves on first boot (`seedDefaults`). To apply the schema deliberately instead, the versioned migration lives at `../migrations/0001_status_monitor.sql`:
+That is the whole wiring. Tables create themselves on first read (`ensureSchema`); the twelve owner-named endpoints (the six Vant surfaces plus the six sibling family sites, joined at defaults version 2) seed themselves on first boot (`seedDefaults`), and a defaults-version bump upgrades an existing D1 by inserting only the missing names — a deliberate `endpoint.remove` stays removed. To apply the schema deliberately instead, the versioned migration lives at `../migrations/0001_status_monitor.sql`:
 
 ```bash
 npx wrangler d1 migrations apply vant-pub --remote

@@ -53,7 +53,7 @@ Pull skills from different repos:
 ### Register Repo
 
 ```javascript
-const repos = require('vant').storage.get('repos');
+const repos = require('vant-os').storage.get('repos');
 
 // Register external repo
 repos.register('my-skills', 'https://github.com/user/skills-repo', {

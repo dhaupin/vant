@@ -14,7 +14,7 @@ Complete API reference for lib/vant.js.
 ## Main Exports
 
 ```javascript
-const vant = require('vant');
+const vant = require('vant-os');
 ```
 
 ## Functions
@@ -165,7 +165,7 @@ vant.getStatus()
 ## Sub-Modules
 
 ```javascript
-const vant = require('vant');
+const vant = require('vant-os');
 
 // Lazy-loaded modules
 vant.getBrain()      // Storage

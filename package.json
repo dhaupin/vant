@@ -1,7 +1,15 @@
 {
-  "name": "vant",
+  "name": "vant-os",
   "version": "0.8.6",
   "description": "vant CLI - Persistent AI agent with generational memory transfer",
+  "files": [
+    "index.js",
+    "bin/",
+    "lib/",
+    "web/",
+    "!web/home/.prestruct",
+    "!web/home/.eslintignore"
+  ],
   "bin": {
     "vant": "bin/vant.js",
     "mcp": "bin/mcp.js"

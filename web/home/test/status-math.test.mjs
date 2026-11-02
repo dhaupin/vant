@@ -1,13 +1,13 @@
 import { describe, it, expect } from 'vitest'
 import {
-    MONITOR_DEFAULTS, ENDPOINT_KINDS, ALERT_LEVELS,
+    MONITOR_DEFAULTS, MONITOR_DEFAULTS_VERSION, ENDPOINT_KINDS, ALERT_LEVELS,
     utcDay, trailingDays, dayBuckets, uptimePct,
     overallStatus, pickAlert, validEndpointSpec, adminKeyMatch,
 } from '../functions/_lib/status-math.js'
 
 describe('monitor defaults (owner-named)', () => {
-    it('pins the six owner-named endpoints, all https, valid kinds', () => {
-        expect(MONITOR_DEFAULTS).toHaveLength(6)
+    it('pins the twelve owner-named endpoints, all https, valid kinds', () => {
+        expect(MONITOR_DEFAULTS).toHaveLength(12)
         for (const e of MONITOR_DEFAULTS) {
             expect(e.name).toBeTruthy()
             expect(e.url).toMatch(/^https:\/\//)
@@ -15,7 +15,7 @@ describe('monitor defaults (owner-named)', () => {
         }
     })
 
-    it('names every surface the owner listed', () => {
+    it('names every surface the owner listed (plus the six sibling family sites)', () => {
         const names = MONITOR_DEFAULTS.map((e) => e.name)
         expect(names).toContain('Vant Home')
         expect(names).toContain('Vant Brain')
@@ -23,6 +23,15 @@ describe('monitor defaults (owner-named)', () => {
         expect(names).toContain('Vant Docs')
         expect(names.find((n) => n.startsWith('Axolotl'))).toBeTruthy()
         expect(names.find((n) => n.startsWith('GitHub CI'))).toBeTruthy()
+        // the family upgrade (version 2): all six struct-sibling sites live
+        for (const fam of ['Packstruct', 'Crashtest', 'Eyestruct', 'Poststruct', 'Govstruct', 'Monoforge']) {
+            expect(names).toContain(fam)
+        }
+    })
+
+    it('stamps the defaults version and keeps the names unique', () => {
+        expect(MONITOR_DEFAULTS_VERSION).toBeGreaterThanOrEqual(2)
+        expect(new Set(MONITOR_DEFAULTS.map((e) => e.name)).size).toBe(MONITOR_DEFAULTS.length)
     })
 })
 

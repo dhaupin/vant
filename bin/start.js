@@ -110,7 +110,7 @@ Full guide: https://docs.creadev.org/vant/getting-started/agent-onboarding
 - (empty) Lessons land here via "vant learn <key> <content>".
 `);
         console.log(`[Start] Seeded starter brain: models/private/${brainName}/ (start, identity, goals, lessons).`);
-        console.log('        Edit them freely - they are yours.');
+        console.log('        Edit them freely — they are yours.');
     } catch (e) {
         // Seeding is a convenience, never a hard failure.
         console.log(`[Start] Starter brain seed skipped: ${e.message}`);
