@@ -28,6 +28,30 @@ export interface KVStore {
   list(prefix: string): Promise<Array<{ name: string }>>;
 }
 
+/** What a REAL Workers KV namespace answers from list(): a page object
+ *  with cursor pagination - not the plain row array the KVStore
+ *  contract (and every consumer) speaks. The adapter lives HERE, the
+ *  one choke point every store consumer rides (accounts roster, audit
+ *  ledger), instead of trusting the wishful declaration. Live-caught
+ *  2026-11-02 on brain.creadev.org: /api/users answered 500 because
+ *  listAccounts().map() hit this page object; the in-test memory
+ *  stores hid it because they already answered the array shape. */
+interface RealListOptions {
+  prefix?: string;
+  cursor?: string;
+  limit?: number;
+}
+
+interface RealListPage {
+  keys?: Array<{ name?: string }>;
+  list_complete?: boolean;
+  cursor?: string;
+}
+
+/** Bounded paging: at most 100 x 1000 keys per request-path call.
+ *  Honesty over unbounded traversal. */
+const MAX_LIST_PAGES = 100;
+
 /** The deployment leaves the binding undefined until an owner attaches
  *  it; callers treat that as a STATE (typed refusal), not a crash. */
 export function storeFor(context: PagesContext): KVStore {
@@ -42,5 +66,45 @@ export function storeFor(context: PagesContext): KVStore {
   ) {
     throw new StoreUnavailableError();
   }
-  return ns as KVStore;
+  const get = (ns.get as (key: string) => Promise<string | null>).bind(ns);
+  const put = (ns.put as (
+    key: string,
+    value: string,
+    options?: { expirationTtl?: number },
+  ) => Promise<void>).bind(ns);
+  const del = (ns.delete as (key: string) => Promise<void>).bind(ns);
+  // The runtime's list() takes the OBJECT-options form; the declared
+  // KVNamespaceLike is the wish. Narrow cast at the one call site.
+  const realList = ns.list as unknown as (
+    options: RealListOptions,
+  ) => Promise<Array<{ name: string }> | RealListPage>;
+
+  return {
+    async get(key) {
+      return get(key);
+    },
+    async put(key, value, options) {
+      await put(key, value, options);
+    },
+    async delete(key) {
+      await del(key);
+    },
+    async list(prefix) {
+      const rows: Array<{ name: string }> = [];
+      let cursor: string | undefined;
+      for (let page = 0; page < MAX_LIST_PAGES; page++) {
+        const result = await realList({ prefix, cursor, limit: 1000 });
+        // A namespace that already answers the minimal-shape array
+        // (test shims, thin local adapters) passes through untouched.
+        if (Array.isArray(result)) return result;
+        for (const key of result.keys ?? []) {
+          if (typeof key?.name === "string") rows.push({ name: key.name });
+        }
+        if (result.list_complete) return rows;
+        if (typeof result.cursor !== "string") return rows; // nothing to follow; stop quietly
+        cursor = result.cursor;
+      }
+      return rows;
+    },
+  };
 }
