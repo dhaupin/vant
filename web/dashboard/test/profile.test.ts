@@ -28,6 +28,7 @@ const ASSETS = {
   channelKeys: { local: KEY },
   tokens: { local: TOKEN },
   relayUsage: true,
+  podEndpoint: "http://localhost:3457", // (wave 19.25) the door rides the seal too
 };
 
 /** The pod's decrypt law, node re-statement (same as chain-e2e's). */
@@ -58,6 +59,7 @@ describe("§1 — the profile file is the Encrypt canon", () => {
     expect(back.channelKeys.local).toBe(KEY);
     expect(back.chain[0].origin).toBe("https://relay.example.com");
     expect(back.relayUsage).toBe(true);
+    expect(back.podEndpoint).toBe("http://localhost:3457");
   });
 });
 

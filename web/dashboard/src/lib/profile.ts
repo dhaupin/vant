@@ -33,6 +33,10 @@ export interface SovereignProfile {
   tokens: Record<string, string>;
   /** the user's reach choice (prd-relay.md 6.1) */
   relayUsage?: boolean;
+  /** (wave 19.25) the user's own pod door origin — a non-sensitive route
+   *  pref that rides INSIDE the seal like everything else (the browser
+   *  never learns nothing about your install from the file's outside). */
+  podEndpoint?: string;
 }
 
 function assertPassphrase(passphrase: string): string {
@@ -71,6 +75,9 @@ function assertProfileShape(raw: string): SovereignProfile {
       throw new Error("E_PROFILE_SHAPE: a chain entry is not an https origin");
     }
   }
+  if (p.podEndpoint !== undefined && (typeof p.podEndpoint !== "string" || !/^[a-z]+:\/\//.test(p.podEndpoint))) {
+    throw new Error("E_PROFILE_SHAPE: the pod door entry is not an origin");
+  }
   return p;
 }
 
@@ -80,7 +87,7 @@ function assertProfileShape(raw: string): SovereignProfile {
  * whole artifact (prefix + envelope) — write it to `bolete-profile.enc`.
  */
 export async function exportProfile(
-  assets: { chain: SovereignProfile["chain"]; channelKeys: Record<string, string>; tokens: Record<string, string>; relayUsage?: boolean },
+  assets: { chain: SovereignProfile["chain"]; channelKeys: Record<string, string>; tokens: Record<string, string>; relayUsage?: boolean; podEndpoint?: string },
   passphrase: string,
 ): Promise<{ filename: string; text: string }> {
   const key = assertPassphrase(passphrase);
@@ -92,6 +99,7 @@ export async function exportProfile(
     channelKeys: assets.channelKeys,
     tokens: assets.tokens,
     relayUsage: assets.relayUsage,
+    podEndpoint: assets.podEndpoint,
   };
   // the KEK floor is the profile's own law: 8+ chars (§2.2 unlock path (a))
   const envelope = await sealEnvelope(JSON.stringify(profile), key, { minLen: 8, what: "passphrase" });
