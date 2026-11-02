@@ -464,7 +464,10 @@ Whatever lands ships pre-gated: `web/home/test/config.test.mjs` (rides test.yml)
    Each new pair appears in the dashboard's property switcher (4 above, 4 entries) without redeploying app code. Switching keeps your route, module, and filters; everything data-side re-keys to the chosen pod and the SSE stream reconnects (prd-web.md 3.4).
 4. **Make the pod reachable from the edge** - pick ONE: - **Tunnel (recommended for home/VPS pods):** `cloudflared tunnel create vant-pod`, route a hostname like `pod-<murmur>.<your-domain>.com` to `http://localhost:3457`, run the connector on the pod host. Stable egress identity, no ports opened, no allowlist churn - this is the prd-web.md 8.3 fallback path and it dodges the IP-allowlist refresh problem entirely. - **IP allowlist path:** let pages origin fetches hit the door (fetch egress comes from Cloudflare IP ranges, https://www.cloudflare.com/ips/) and allowlist those ranges at the pod's firewall with a scheduled refresh - broad by nature, and refreshes are the owner-posture requirement (prd-web.md 8.3).
 5. **Mint an identity** on the pod: `vant guest issue --name <seat>` and copy the `vguest_` token.
-6. **Log in**: open the dashboard's subdomain, paste the token at the gate. The status page will name anything still missing (functions, origin var, bridge), exactly as built.
+6. **Log in**: open the dashboard's subdomain and sign in with your dashboard email (one-time code); then open Settings
+   → Connect your pod and paste the `vguest_` token there - inside, after the email gate verified you (wave 19.17; the
+   login gate offers a token paste only when this deploy has no email/store config at all). The status page will name
+   anything still missing (functions, origin var, bridge), exactly as built.
 7. **Point the lander's "Dashboard" link** at the new subdomain when satisfied.
 
 ### 12.2 Mode B — pod same-origin (the local-ops fallback, OFF by default)

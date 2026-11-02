@@ -728,6 +728,10 @@ export default function Settings() {
         <RelayPosture />
       </Section>
 
+      <Section title="Connect your pod (your identity)">
+        <PodTokenCard />
+      </Section>
+
       <Section title="Session & properties">
         <p className="text-sm text-ink-soft">
           Property <span className="font-mono text-ink">{app.property}</span>;
@@ -736,6 +740,105 @@ export default function Settings() {
         </p>
         <ConfirmationModal />
       </Section>
+    </div>
+  );
+}
+
+/**
+ * Wave 19.17 (owner): the pod-identity paste lives INSIDE the dashboard
+ * now - email+code is the entry (prd-web.md 3.5 primary flow), and the
+ * vguest_ token is added here, from Settings, once that identity is
+ * verified. The login gate keeps a paste only for deploys with no
+ * email/store config. Same bind contract as the old gate card: with a
+ * live account session the token binds SERVER-SIDE (the browser never
+ * holds it, prd-web.md 3.5); with no session it stays memory-only for
+ * this tab, wiped on close, never stored and never logged.
+ */
+function PodTokenCard() {
+  const property = useApp((s) => s.property);
+  const account = useApp((s) => s.account);
+  const boundFor = useApp((s) => s.boundFor);
+  const carried = useApp((s) => s.tokens[property] ?? null);
+  const [value, setValue] = useState("");
+  const [note, setNote] = useState<string | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+
+  const bound = boundFor.includes(property);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const pasted = value.trim();
+    if (!pasted.startsWith("vguest_")) {
+      setErr("That is not a guest token. It starts with vguest_.");
+      return;
+    }
+    setErr(null);
+    if (account) {
+      // live account session: bind the pod token SERVER-SIDE; the
+      // browser never holds it (prd-web.md 3.5 session binding)
+      try {
+        const res = await fetch(`/api/session?p=${encodeURIComponent(property)}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: pasted }),
+        });
+        const data = (await res.json().catch(() => ({}))) as { bound?: boolean };
+        if (res.ok && data.bound) {
+          actions.markBound(property);
+          setNote("Bound server-side to your session - the browser holds no copy.");
+          setValue("");
+          return;
+        }
+        setNote("Functions refused the bind - carrying it memory-only for this tab.");
+      } catch {
+        setNote("Functions not reachable - keeping the token memory-only for this tab.");
+      }
+    } else {
+      setNote("No email session on this tab - kept memory-only, never stored or logged.");
+    }
+    actions.setToken(property, pasted);
+  };
+
+  return (
+    <div className="text-sm">
+      <p className="text-ink-soft">
+        {carried || bound ? (
+          <>
+            This tab already carries an identity for pod{" "}
+            <span className="font-mono text-ink">{property}</span> -{" "}
+            {bound
+              ? "bound server-side to your session."
+              : "memory-only: this tab's scope, wiped on close."}{" "}
+            Paste again to replace it.
+          </>
+        ) : (
+          <>
+            No identity carried yet for pod{" "}
+            <span className="font-mono text-ink">{property}</span>. Paste the
+            guest token for this pod below - issued with{" "}
+            <span className="font-mono">vant guest issue</span> on the pod.
+          </>
+        )}
+      </p>
+      <form onSubmit={submit} className="mt-3 flex flex-wrap items-end gap-2">
+        <input
+          type="password"
+          autoComplete="off"
+          spellCheck={false}
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          placeholder="vguest_..."
+          className="block w-56 rounded-md border border-line bg-paper px-2 py-1 font-mono text-xs outline-none focus:border-accent"
+        />
+        <button
+          type="submit"
+          className="rounded-md bg-accent px-3 py-1.5 text-xs font-medium text-paper hover:bg-accent-deep"
+        >
+          Bind identity
+        </button>
+      </form>
+      {note ? <p className="mt-2 text-xs text-ink-soft">{note}</p> : null}
+      {err ? <p className="mt-2 text-xs text-err">{err}</p> : null}
     </div>
   );
 }
