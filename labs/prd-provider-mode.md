@@ -1,9 +1,10 @@
 # Vant Web — Provider Mode: brain.creadev.org as the Community Face — Product Requirements Document
 
-**Version:** 0.3 (planning draft — defined, NOT built; §10 names every truth-state)
-**Branch:** axolotl  **Date:** 2026-11-02  **Status:** Draft, third owner pass recorded in §0
-(rulings 11–14); owner is setting the envelope in the Cloudflare Pages panel live
-(the envelope is also DEPLOY.md §12.5 as of this version). This spec DEFINES the provider-mode
+**Version:** 0.4 (planning draft — defined, NOT built; §10 names every truth-state)
+**Branch:** axolotl  **Date:** 2026-11-02  **Status:** Draft, fourth owner pass recorded in §0
+(ruling 15). The envelope is SET — owner configured the full provider surface in the Pages
+panel the same session (gate, slots=100, per-user=1, grace=48, connector keys,
+`BOLETE_KV` bound); DEPLOY.md §12.5 documents it. Open questions: **zero**. This spec DEFINES the provider-mode
 rung; nothing in it is built on any branch yet. **Parent PRDs:** [prd-web.md](prd-web.md)
 (§3.5 session binding, §3.7 origin env) and [prd-relay.md](prd-relay.md) (the relay chain, the
 sovereign scope, the ride machinery this mode rides).
@@ -68,6 +69,13 @@ sovereign scope, the ride machinery this mode rides).
     Users → App Passwords, SMTP scope, and lands as two Pages secrets
     (`PURELYMAIL_SMTP_USER`, `PURELYMAIL_SMTP_APP_PASSWORD`) — yes, plain Pages vars/secrets,
     never code.
+15. *Reap grace, owner-ticked:* `VANT_RELAY_PROVIDER_GRACE_HOURS = 48` — owner set it in the
+    Pages panel the same session ("sounds like a plan!"), closing the LAST open ruling: the
+    12h keepalive write threshold × 4 tolerated missed windows is the law; 72h retired.
+    Owner also set `EMAIL_ADMIN_TO` AS TYPE SECRET — fine and noted (the connector reads it
+    identically; Text vs Secret is panel hygiene, and the address lands in recipients'
+    inboxes either way). The envelope is COMPLETE: resend + purelymail keys set, `BOLETE_KV`
+    bound — provider mode has zero remaining configuration before its first build wave.
 
 ## 1. The problem this closes (real, live-diagnosed 2026-11-01)
 
@@ -203,7 +211,7 @@ not a fixture:
 
 | Rail | Mechanic | Receipt |
 |------|----------|---------|
-| A slot dies with its dial | the only thing keeping a slot live is the pod's own outbound keepalive; past a grace window, the slot is reaped at the edge — it falls out of the property list and stops being counted against BOTH caps. | grace = the keepalive WRITE cadence × tolerance, not raw dial beats (see the capacity math below; proposal 48h, OPEN QUESTION #1) |
+| A slot dies with its dial | the only thing keeping a slot live is the pod's own outbound keepalive; past a grace window, the slot is reaped at the edge — it falls out of the property list and stops being counted against BOTH caps. | grace = the keepalive WRITE cadence × tolerance, not raw dial beats (see the capacity math below; 48h LAW, ruling 15) |
 | Reaping is edge-scoped, graceful | the reap deletes ONLY the edge-side slot row; the pod keeps its guest ledger and token untouched. The member re-pairs later and a fresh slot mints honestly — same pod, new id, no "stranded ghost" state | the reap must never call pod doors — the edge has no authority to mutate a member's pod, and takes none |
 | Self-service cleanup | the provider panel lists YOUR slots (acctId-scoped) with creation times; a DETACH action revokes the pairing and frees the slot immediately (pod-side, the CLI verb `vant provider detach` closes the outbound session too) | panel-side: refusal-honest; never pretends a detach propagated that hasn't |
 | Self-repair beats ghost-parking | nobody must re-register a dead slot's id — a re-pair mints a fresh one. No repair requests, no operator tickets for leftovers | leas-shaped state needs no janition by design |
@@ -221,7 +229,7 @@ a slot's keepalive row no more often than every 12h (a beat arriving sooner only
 local timestamp; the row rewrite gates on the threshold). At 100 slots that is ≈200 writes/day
 for the whole keepalive face, plus single-use voucher/code/session writes for a handful of
 sign-ins — a fraction of the shared budget. With the 12h write cadence, a reap grace of ≥4
-missed windows is the flapping-safe zone: 48h (proposal) survives any pod that sleeps
+missed windows is the flapping-safe zone: 48h (RULLED — ruling 15) survives any pod that sleeps
 nights AND any normal weekend-away, while a dead pod still frees itself inside two days.
 Read lane: sessions/slots read per dashboard hop — thousands of reads/day against a 100k/day
 free read budget: no constraint. STRONGEST truth: slot count is NOT the binding constraint on
@@ -357,18 +365,21 @@ an import whose carried slot row matches an existing row updates it, never doubl
 - NO HTML email, tracking pixels, or marketing mail through the handler — the purelymail
   connector is transactional by its ToS and its design; the entire connector family signs that law.
 
-## 8. Open questions FOR the owner (v0.3 — three of four answered with this pass)
+## 8. Open questions FOR the owner (v0.4 — NONE OPEN; the envelope is set)
 
-1. **The reap grace window (the one left open).** With the owner-ruled `100` slots and the
-   12h keepalive write threshold, 48h is the PROPOSED value — it survives a pod that sleeps
-   nights AND a normal weekend-away (two missed windows), while a truly dead pod still frees
-   itself inside two days against the shared free-tier KV write budget (§3.6's math).
-   72h — the original draft — is equally free-tier-safe but reaps slower; both self-clean.
-   Owner tick pending. (Proposed in code as `VANT_RELAY_PROVIDER_GRACE_HOURS`, default 48
-   once ticked.)
-2. **The purelymail app password (an ACTION, not a ruling).** The owner mints an SMTP-scoped
-   app password at purelymail → Users → App Passwords (their docs' "SEND ONLY SERVICES" scope
-   — literally built for this), and the two Pages Secrets land in DEPLOY.md §12.5's table.
+Both questions this section carried were resolved owner-side the same session they were
+asked:
+
+1. **The reap grace window → RULING 15, LAW.** Owner ticked 48h and set
+   `VANT_RELAY_PROVIDER_GRACE_HOURS=48` in the Pages panel. The 12h keepalive write
+   threshold × 4 tolerated missed windows is the shipped law; 72h retired.
+2. **The purelymail app password → DONE.** The owner minted the SMTP-scoped app password,
+   set BOTH connector credentials (`PURELYMAIL_SMTP_USER/_APP_PASSWORD`, `RESEND_API_KEY`),
+   bound `BOLETE_KV`, and set `EMAIL_ADMIN_TO` (as Secret — their menu choice; the
+   connector reads it identically). The provider envelope has zero remaining
+   configuration; DEPLOY.md §12.5 remains the panel mirror.
+
+Open-question count: **0**. The rungs in §10 are unblocked.
 
 Closed by rulings 11–14 this pass: transport sequencing = purelymail FIRST (sockets receipts
 verified; port 465, not 587); `_PER_USER` = 1 (owner set it); install-wide slots = 100
@@ -388,7 +399,7 @@ From and for admin alerts.
 | Account-locked slot acquisition (BOLETE_KV co-requisite) | RULED (ruling 8) + DEFINED (§3.1/§3.5) |
 | Email-code account lane (no passwords anywhere) | RULED (ruling 9) + DEFINED (§3.8) |
 | Mail-handler connector interface; Purelymail #1, Resend #2 | RULED (rulings 10 + 11); receipts verified live (§3.9); transport impl = build-day receipt kept (465 not 587) |
-| Slot caps, both levels + squatter rails + lease-shaped reap | RULED (ruling 6) + DEFINED (§3.6); grace window = OPEN QUESTION #2 |
+| Slot caps, both levels + squatter rails + lease-shaped reap | RULED (ruling 6) + DEFINED (§3.6); grace = 48h LAW (ruling 15; `VANT_RELAY_PROVIDER_GRACE_HOURS` owner-set) |
 | Slots ride sovereign-profile import | RULED (ruling 7); dedup law PENDING PIN (import wave; PM4 tests it) |
 | URL-in-token edge lane (user-named origins) | REFUSED (this spec §2, recorded with receipts) |
 | Voucher→pod dial→edge acceptance→slot mints (the 4-step member flow) | DEFINED (§3.2) |

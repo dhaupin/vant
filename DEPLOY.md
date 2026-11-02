@@ -530,6 +530,7 @@ env-origin-only.
 | `VANT_RELAY_PROVIDER_MODE` | `1` | Text. The ONLY posture key. Unset = today's dashboard byte-for-byte (no panel, no provider surface). Set it on the dashboard-relay flavor only |
 | `VANT_RELAY_PROVIDER_SLOTS` | `32` (default); the community face runs `100` | Text, optional. The install-wide ceiling of LIVE member slots — registration refuses typed at the cap, and the cap SELF-CLEANS (a pod that stops dialing past the grace window frees its slot, §3.6 of the spec) |
 | `VANT_RELAY_PROVIDER_SLOTS_PER_USER` | `1` (default) | Text, optional. Per-account ceiling. One pod per verified account; operators may raise it per-deploy |
+| `VANT_RELAY_PROVIDER_GRACE_HOURS` | `48` (default) | Text, optional. The reap grace: a slot whose newest keepalive write is older than this is reaped against BOTH caps (the §12.1 P2 namespace's slot-row rewrite gates to 12h intervals, so 48h tolerates four missed windows — the flapping-safe zone). Owner-ruled (prd-provider-mode.md ruling 15) |
 | `BOLETE_KV` | (KV namespace binding) | **REQUIRED under provider mode.** Slot rows, vouchers, accounts and code rows all ride this namespace (the one from the §12.1 P2 step — no second binding). Gate set without the binding = caps say `provider: "offering"` but registration answers the typed `E_STORE_UNCONFIGURED` refusal — honest, never a silent dead button |
 | `VANT_RELAY_MAIL_CONNECTORS` | `purelymail, resend` | Text, optional; the ordered connector chain for the code mails — tried in order, fall through on failure, and after the LAST connector the member gets the typed "code could not be sent" (a fake "sent" stays banned) |
 
@@ -538,7 +539,7 @@ env-origin-only.
 | Variable | Notes |
 |----------|-------|
 | `EMAIL_FROM` | Text (the §12.1 P2 var — REUSED, not renamed). The shared sender face, e.g. `Bolete <hello@creadev.org>` |
-| `EMAIL_ADMIN_TO` | Text. Where operator notices go (mailbox-full mails, connector failures), e.g. `hello@creadev.org` |
+| `EMAIL_ADMIN_TO` | **PRIVATE: add as type Secret** (owner's panel choice — the connector reads it identically). Where operator notices go (mailbox-full mails, connector failures), e.g. `hello@creadev.org` |
 | `PURELYMAIL_SMTP_USER` | Text — connector #1. The Purelymail user that may send, e.g. `hello@creadev.org` |
 | `PURELYMAIL_SMTP_APP_PASSWORD` | **PRIVATE: add as type Secret.** Purelymail → Users → App Password → scope it SMTP only (their docs' "SEND ONLY SERVICES" move: a compromised value can send, never read) |
 | `RESEND_API_KEY` | **PRIVATE: add as type Secret.** Connector #2 (the §12.1 P2 var — REUSED). The HTTP fallback; `api.resend.com/emails`, plain fetch, no SDK |
