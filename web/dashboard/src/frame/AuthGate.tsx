@@ -420,8 +420,8 @@ function GateShell({ children }: { children: React.ReactNode }) {
         <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
           <img
             alt=""
-            className="size-7 inline-block"
-            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='13' r='10' fill='%23a9701e'/%3E%3Crect x='12' y='22' width='8' height='8' rx='3' fill='%23b89a5a'/%3E%3C/svg%3E"
+            className="size-7 inline-block rounded-lg"
+            src="/vant-bolete-logo.jpg"
           />
           Bolete
         </h1>

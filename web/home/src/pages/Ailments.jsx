@@ -9,7 +9,7 @@
 *   visitors and crawling agents read the complete known-rows index in
 *   plain HTML;
 * - the interactive part (islands/AilmentsChecker.jsx, client-only): the
-*   paste box + copyable receipt. Nothing is POSTed anywhere — the same
+*   paste box + copyable receipt. Nothing is POSTed anywhere - the same
 *   privacy story the /contact composer states, one page over.
 *
 * The edge door for agents (GET /api/ailments/check?q=...) runs the SAME
@@ -21,7 +21,7 @@ import registry from '../ailments/ailments.json'
 const ISSUE_URL = 'https://github.com/dhaupin/vant/issues/'
 
 function refsCell(refs) {
-if (!refs || refs.length === 0) return '—'
+if (!refs || refs.length === 0) return '-'
 return refs.map((n, i) => (
 <span key={n} style={{ marginLeft: i === 0 ? 0 : '0.5rem' }}>
 <a href={ISSUE_URL + n}>#{n}</a>
@@ -41,11 +41,11 @@ return (
 
 <div className="cta-card" style={{ maxWidth: 'none' }}>
 <h2>Run the check</h2>
-<p>CLI → copy → paste → read the receipt rows. Severity ranked: <strong>actionable</strong> first, <strong>benign</strong> last. Copy the receipt and it is agent-legible as plain text — paste it back into chat, a lesson, or an issue.</p>
+<p>CLI → copy → paste → read the receipt rows. Severity ranked: <strong>actionable</strong> first, <strong>benign</strong> last. Copy the receipt and it is agent-legible as plain text - paste it back into chat, a lesson, or an issue.</p>
 <pre-island data-pre-island="ailments-checker" data-pre-load="eager">
 <p className="island-loading">Loading the checker…</p>
 <p className="contact-note" style={{ marginTop: 8 }}>
-The interactive paste box needs JavaScript. The full known-rows table is below this card, readable without it —
+The interactive paste box needs JavaScript. The full known-rows table is below this card, readable without it -
 and agents can skip the browser entirely: <code>GET /api/ailments/check?q=&lt;your paste&gt;</code> on this site runs
 the same matcher on the edge and answers JSON.
 </p>
@@ -63,7 +63,7 @@ pins every sample against its own regex before build, so the table below cannot 
 <p className="contact-note" style={{ margin: '0 0 10px' }}>How to read a tier:</p>
 <ul className="legal" style={{ paddingLeft: '1.3rem', color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: 0 }}>
 {layers.map((s) => (
-<li key={s.label}><strong>{s.label}</strong> — {s.hint}</li>
+<li key={s.label}><strong>{s.label}</strong> - {s.hint}</li>
 ))}
 </ul>
 </div>
@@ -85,7 +85,7 @@ pins every sample against its own regex before build, so the table below cannot 
 <td style={{ ...TABLE_CELL, color: 'var(--ink)' }}>
 <strong>{entry.title}</strong>
 {entry.fixed_in ? (
-<div style={{ color: 'var(--text-muted)', fontSize: '0.83rem', marginTop: 2 }}>fixed in v{entry.fixed_in} — kept as history, not hidden</div>
+<div style={{ color: 'var(--text-muted)', fontSize: '0.83rem', marginTop: 2 }}>fixed in v{entry.fixed_in} - kept as history, not hidden</div>
 ) : null}
 {entry.docs ? (
 <div style={{ fontSize: '0.85rem', marginTop: 2 }}><a href={entry.docs}>doc →</a></div>
@@ -120,7 +120,7 @@ pins every sample against its own regex before build, so the table below cannot 
 </div>
 <div className="card">
 <h3>Extending the registry</h3>
-<p>Rows live in <code>src/ailments/ailments.json</code> as pure data. Fix a row&rsquo;s ailment and the row retires to <code>fixed in vX.YZ</code> — visible history beats silent deletion. Rows extend without touching the matcher.</p>
+<p>Rows live in <code>src/ailments/ailments.json</code> as pure data. Fix a row&rsquo;s ailment and the row retires to <code>fixed in vX.YZ</code> - visible history beats silent deletion. Rows extend without touching the matcher.</p>
 </div>
 </div>
 </section>

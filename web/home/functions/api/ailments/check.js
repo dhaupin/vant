@@ -3,12 +3,12 @@
 * ===========================================
 * The agent door for the /ailments checker (vant#260). GET ?q=<paste>,
 * or POST { q } as application/json. Runs the SAME pure matcher module
-* the page island runs — one truth, two doors, zero bindings:
+* the page island runs - one truth, two doors, zero bindings:
 *
 * - no D1, no secrets, no fetch: this is a CPU-only edge function over a
 *   static registry, so there is nothing for a hostile client to hammer
 *   beyond the paste-size cap below (STATUS-style throttling is not
-*   needed — no database, no network probes);
+*   needed - no database, no network probes);
 * - the paste is capped (MAX_PASTE_CHARS, 64k) so a giant body can never
 *   burn edge CPU; the cap is private-to-shipped-value safe because the
 *   limit is a public constant, not an env var;

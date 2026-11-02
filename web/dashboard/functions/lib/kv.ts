@@ -90,6 +90,43 @@ export function storeFor(context: PagesContext): KVStore {
     options: RealListOptions,
   ) => Promise<Array<{ name: string }> | RealListPage>).bind(ns);
 
+  // The pages-walk helper + the dual-contract normalization (wave 19.22):
+  // the OBJECT-options call is the real workerd law, but the plain-object
+  // test shims (and the cyber page adapters) speak the positional-prefix
+  // KVStore contract - live-caught by the crashtest run root: a positional
+  // shim given the object form prefix-matches the literal
+  // "[object Object]" and answers an honest-looking empty array, which
+  // the roster/audit inboxes dutifully read back as count=0. So: ask
+  // object-first; whenever the object answer is an ARRAY (could be an
+  // honest array-shaped store, could be a positional shim silently lying
+  // empty), re-ask positionally and prefer whichever answer carries rows.
+  // A real namespace NEVER answers an array, so the page-walk only ever
+  // serves the platform binding.
+  const normalizeRows = (
+    answer: Array<{ name: string }> | RealListPage | undefined,
+  ): Array<{ name: string }> | null => {
+    if (Array.isArray(answer)) return answer.map((r) => ({ name: r.name }));
+    if (answer && Array.isArray(answer.keys)) {
+      const rows: Array<{ name: string }> = [];
+      for (const k of answer.keys as Array<{ name?: string }>) {
+        if (typeof k?.name === "string") rows.push({ name: k.name });
+      }
+      return rows;
+    }
+    return null; // not a shape we can read
+  };
+  const callPositional = async (prefix: string): Promise<Array<{ name: string }> | null> => {
+    try {
+      const answer = (await (realList as unknown as (p: string) => Promise<unknown>)(prefix)) as
+        | Array<{ name: string }>
+        | RealListPage
+        | undefined;
+      return normalizeRows(answer);
+    } catch {
+      return null; // positional not spoken here either; caller falls back to its object answer
+    }
+  };
+
   return {
     async get(key) {
       return get(key);
@@ -101,21 +138,38 @@ export function storeFor(context: PagesContext): KVStore {
       await del(key);
     },
     async list(prefix) {
-      const rows: Array<{ name: string }> = [];
-      let cursor: string | undefined;
-      for (let page = 0; page < MAX_LIST_PAGES; page++) {
-        const result = await realList({ prefix, cursor, limit: 1000 });
-        // A namespace that already answers the minimal-shape array
-        // (test shims, thin local adapters) passes through untouched.
-        if (Array.isArray(result)) return result;
-        for (const key of result.keys ?? []) {
-          if (typeof key?.name === "string") rows.push({ name: key.name });
-        }
-        if (result.list_complete) return rows;
-        if (typeof result.cursor !== "string") return rows; // nothing to follow; stop quietly
-        cursor = result.cursor;
+      let objectAnswer: Awaited<ReturnType<typeof realList>>;
+      try {
+        objectAnswer = await realList({ prefix, limit: 1000 });
+      } catch {
+        // The binding tolerates only the positional contract on this
+        // shelf (old adapters, custom shims): read positionally and
+        // normalize whatever shape comes back.
+        const positional = await callPositional(prefix);
+        return positional ?? [];
       }
-      return rows;
+      if (!Array.isArray(objectAnswer)) {
+        // The platform page-walk path (real workerd namespaces only).
+        const rows: Array<{ name: string }> = [];
+        let cursor: string | undefined;
+        let page: RealListPage = objectAnswer as RealListPage;
+        for (let i = 0; i < MAX_LIST_PAGES; i++) {
+          for (const key of page.keys ?? []) {
+            if (typeof key?.name === "string") rows.push({ name: key.name });
+          }
+          if (page.list_complete) return rows;
+          if (typeof page.cursor !== "string") return rows; // nothing to follow; stop quietly
+          cursor = page.cursor;
+          page = (await realList({ prefix, cursor, limit: 1000 })) as RealListPage;
+        }
+        return rows;
+      }
+      // Array answer: ambiguous between "honest array-shaped store" and
+      // "positional shim that silently returned [] for the object arg".
+      // The positional re-ask decides: whoever holds more truth rides.
+      const positional = await callPositional(prefix);
+      if (positional && positional.length > objectAnswer.length) return positional;
+      return objectAnswer.map((r) => ({ name: r.name }));
     },
   };
 }

@@ -126,6 +126,53 @@ describe("BOLETE_KV adapter (storeFor)", () => {
     await expect(store.list("acct:")).resolves.toEqual([{ name: "acct:live" }]);
   });
 
+  it("(wave 19.22) a positional-prefix shim keeps riding its rows - the object-options call never swallows them into a silent empty", async () => {
+    /** The crashtest live-catch: the probe child's in-child KVStore gimme
+     *  speaks list(prefix) POSITIONALLY (startsWith(String(prefix))). The
+     *  object-options call (wave 19.19's real-namespace fix) prefix-matches
+     *  the literal "[object Object]" inside such a shim and answers an
+     *  honest-LOOKING empty array - the roster rode count=0 and the audit
+     *  inbox rode count=0 with zero faults printed. The adapter now
+     *  re-asks positionally whenever the object answer is an array and
+     *  obeys whichever answer carries rows. */
+    const rows: Array<{ name: string }> = [
+      { name: "acct:ud-admin" },
+      { name: "aud:1700_mint" },
+      { name: "acct:ud-viewer" },
+    ];
+    const positionalShim = {
+      get: () => Promise.resolve(null),
+      put: () => Promise.resolve(),
+      delete: () => Promise.resolve(),
+      list(prefix: string) {
+        return Promise.resolve(
+          rows.filter((r) => r.name.startsWith(String(prefix))),
+        );
+      },
+    };
+    const store = storeFor(contextWith(positionalShim));
+    await expect(store.list("acct:")).resolves.toEqual([
+      { name: "acct:ud-admin" },
+      { name: "acct:ud-viewer" },
+    ]);
+  });
+
+  it("(wave 19.22) an object-form-only shim that answers an array keeps its rows when the positional re-ask gives less", async () => {
+    const objectOnly = {
+      get: () => Promise.resolve(null),
+      put: () => Promise.resolve(),
+      delete: () => Promise.resolve(),
+      list(options: { prefix?: string }) {
+        const empty = !options || typeof options.prefix !== "string";
+        return Promise.resolve(
+          empty ? [] : [{ name: "acct:kept" } as { name: string }],
+        );
+      },
+    };
+    const store = storeFor(contextWith(objectOnly));
+    await expect(store.list("acct:")).resolves.toEqual([{ name: "acct:kept" }]);
+  });
+
   it("a binding half-shaped without the duck methods refuses typed, not 500", () => {
     expect(() => storeFor(contextWith({ get: 42 }))).toThrow(StoreUnavailableError);
   });

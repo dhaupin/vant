@@ -68,9 +68,19 @@ function flunk(name, msg) {
 const seeds = fs.mkdtempSync(path.join(os.tmpdir(), 'release-verify-seeds-'));
 
 function packTree() {
+    // maxBuffer: the --json file inventory scales with the tree's built
+    // frontends (web/*/dist lands in the pack under its parent files /
+    // allowlist), and the stock 1MiB spawnSync cap truncated the JSON
+    // mid-blob - the parse then faulted with a shifting 'Expected ...'
+    // position instead of an honest size complaint. A local dev tree that
+    // has ever run a frontend build packs ~3.3MiB of inventory; give the
+    // pipe real room.
     const r = spawnSync('npm', ['pack', '--json', '--pack-destination', seeds], {
-        cwd: ROOT, encoding: 'utf8', timeout: 120000
+        cwd: ROOT, encoding: 'utf8', timeout: 120000, maxBuffer: 64 * 1024 * 1024
     });
+    if (r.status !== 0 || !r.stdout) {
+        throw new Error(`npm pack failed (exit ${r.status}): ${(r.stderr || '').trim().slice(-200)}`);
+    }
     const out = JSON.parse(r.stdout);
     const row = Array.isArray(out) ? out[0] : out;
     const tgz = path.join(seeds, row.filename);
@@ -85,7 +95,7 @@ const LADDER_ARGS = ['--allowed', 'web/', '--forbidden', 'models/,tmp/,labs/,tes
 
 function run(copyPath, args, env) {
     return spawnSync(process.execPath, [copyPath, ...args], {
-        cwd: ROOT, encoding: 'utf8', timeout: 120000,
+        cwd: ROOT, encoding: 'utf8', timeout: 120000, maxBuffer: 64 * 1024 * 1024,
         env: env ? { ...process.env, ...env } : process.env
     });
 }

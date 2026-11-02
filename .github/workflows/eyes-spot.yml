@@ -1,0 +1,57 @@
+name: EYES SPOT
+
+# eyestruct spot-check lane (owner call, vant#260 thread): the gate job in
+# VANT CI reads committed MEANINGS (labs/.eyes/ ledger) and stays browserless
+# by design; this lane is the opposite half — it captures the PIXELS of the
+# live deployed frontends and hands them to a human as build artifacts.
+# Nothing here gates: capture output is environment-shaped (fonts, theme
+# re-fits), so the artifacts are for eyeball review / wave baselines, not
+# hard pass-fail. Runs weekly and on manual dispatch to keep minutes cheap.
+#
+# GitHub runners ship google-chrome stable preinstalled, so no browser
+# install step is needed — `--browser-exec` pins it explicitly (the pinned
+# env is the only honest capture surface; see eyestruct manifest pin).
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 4 * * 3'  # weekly, midweek, away from the Sunday default-branch cycle
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  spot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Spot deployed frontends (home, dashboard, crashtest site)
+        # Each spot is one short process (eyestruct law): captures land in
+        # labs/.eyes-candidates/ with agent-friendly list output. Viewport
+        # rides a desktop window; theme rides eyestruct's --theme flag.
+        env:
+          CHROME: /usr/bin/google-chrome
+        run: |
+          mkdir -p labs/.eyes-candidates
+          npx -y eyestruct@1 spot https://vant.creadev.org \
+            --viewport 1280x800 --browser-exec "$CHROME"
+          npx -y eyestruct@1 spot https://brain.creadev.org \
+            --viewport 1280x800 --browser-exec "$CHROME"
+          npx -y eyestruct@1 spot https://crashtest.creadev.org \
+            --viewport 1280x800 --browser-exec "$CHROME"
+          ls -la labs/.eyes-candidates/
+
+      - name: Upload spot artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: eyes-spot-candidates
+          path: labs/.eyes-candidates/
+          retention-days: 14

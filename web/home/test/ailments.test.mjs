@@ -6,18 +6,18 @@
 * page that can lie.
 *
 * Gates owned here:
-* 1. SCHEMA — the registry is well-formed: severity enum closed, ids
+* 1. SCHEMA - the registry is well-formed: severity enum closed, ids
 *    unique and namespaced, samples present.
-* 2. SELF-MATCH — every sample string matches its own regex. Editing one
+* 2. SELF-MATCH - every sample string matches its own regex. Editing one
 *    without the other fails here, before the page documents it.
-* 3. PATTERN SAFETY — bounded regexes only: a pathological pattern can
+* 3. PATTERN SAFETY - bounded regexes only: a pathological pattern can
 *    never turn the paste box (or the edge door) into a CPU toy.
-* 4. MATCHER TRUTH — the happy path (all rows matched, severity-ranked,
+* 4. MATCHER TRUTH - the happy path (all rows matched, severity-ranked,
 *    registry-stable inside a tier) and the honest corners: the ENOENT
 *    false-fault row must NOT trip the real-fault row, the honest
 *    fresh-install line must not trip ANY fault row, and a giant paste
 *    cannot crash or uncap the matcher.
-* 5. EDGE DOOR CONTRACT — functions/api/ailments/check.js rides the SAME
+* 5. EDGE DOOR CONTRACT - functions/api/ailments/check.js rides the SAME
 *    matcher module, carries no D1 binding, caps the paste, and their
 *    error contract stays one-line honest (source-level pins, because a
 *    Pages Function cannot run under vitest).
@@ -168,7 +168,7 @@ expect(checkAilments(hyphen)).toEqual([])
 })
 it('caps an absurd paste at 64k chars and stays empty', () => {
 const rows = checkAilments('at Object.<anonymous> (' + 'x'.repeat(100000) + ')')
-// The AIL-8 line appears only inside the first 64k chars... it does — so
+// The AIL-8 line appears only inside the first 64k chars... it does - so
 // the pin is: NO crash, and the cap makes the row match regardless.
 expect(rows.map((r) => r.id)).toEqual(['AIL-8'])
 expect(checkAilments('')).toEqual([])

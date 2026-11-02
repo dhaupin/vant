@@ -4,16 +4,16 @@
 * The pure part of the install-ailment checker (vant#260). No React, no
 * react-router, no window/document, no network: the same module is imported
 * by the /ailments page (client island), the vitest gates, and the edge
-* door (functions/api/ailments/check.js) — one truth, several doors.
+* door (functions/api/ailments/check.js) - one truth, several doors.
 *
 * HARD LAWS (the two the gates own, stated here so the module explains
 * itself):
 *
-* SELF-MATCH LAW — every entry's own sample strings must match its own
+* SELF-MATCH LAW - every entry's own sample strings must match its own
 * regex. Editing one without the other fails the gate suite before build,
 * so the page can never document a pattern it does not actually match.
 *
-* HONEST-CEILING LAW — this is a known-issue index, not a doctor: a paste
+* HONEST-CEILING LAW - this is a known-issue index, not a doctor: a paste
 * with zero rows matched is served the clean-exit plate (nothing known IN
 * THIS REGISTRY), never invented further help. Lying cleanly beats
 * guessing loudly.
