@@ -101,8 +101,8 @@ function TopBar({ property, navOpen, onToggleNav }: { property: string; navOpen:
         <Link to="/" className="flex items-center gap-2 font-semibold tracking-tight">
           <img
             alt=""
-            className="size-6"
-            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='13' r='10' fill='%23a9701e'/%3E%3Crect x='12' y='22' width='8' height='8' rx='3' fill='%23b89a5a'/%3E%3C/svg%3E"
+            className="size-6 rounded-md"
+            src="/vant-bolete-logo.jpg"
           />
           Bolete
         </Link>

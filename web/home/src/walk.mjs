@@ -43,7 +43,7 @@ export const WALK = [
     // (mock-labelled cards prerender; nothing to wire before it answers),
     // so unlike Status this stop rides UNGATED in the walk.
     { label: 'Struct audit', href: '/audit' },
-    // the ailment checker (vant#260): same statically-honest posture —
+    // the ailment checker (vant#260): same statically-honest posture -
     // registry + matcher prerender, the paste box is client-only, the
     // agent door is the edge function. UNGATED like the audit stop.
     { label: 'Ailments', href: '/ailments' },
@@ -55,7 +55,7 @@ export const WALK = [
 
 // One entry per WALK stop (the owner's same-count rule): the footer
 // columns render the same height on every route. The Ailments stop pairs
-// with the Troubleshooting map — symptom-first docs, checker-first site.
+// with the Troubleshooting map - symptom-first docs, checker-first site.
 export const LEARN = [
     { label: 'Quick start', href: 'https://docs.creadev.org/vant/getting-started/quick-start' },
     { label: 'Agent onboarding', href: 'https://docs.creadev.org/vant/getting-started/agent-onboarding' },

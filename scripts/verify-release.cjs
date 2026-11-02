@@ -104,7 +104,11 @@ function fail(line) { die(1, line) }
 function cap(line) { die(2, line) }
 
 function sh(cmd, args, opts) {
-  return spawnSync(cmd, args, { encoding: 'utf8', ...opts })
+  // maxBuffer: tar -tzf of a tree that packs its built frontends rides a
+  // ~2-3k-line file list; the stock 1MiB spawnSync cap dies with
+  // spawnSync ... ENOBUFS (status null, empty stderr), which surfaced
+  // downstream as the misleading 'tar failed to list' refusal.
+  return spawnSync(cmd, args, { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, ...opts })
 }
 
 function readCheckout() {
