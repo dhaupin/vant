@@ -244,6 +244,32 @@ test('rebase: marker-polluted brain files block the push', async () => {
     };
 });
 
+test('pullAny: all-providers-failed throws a CODED VantError (issue #296)', async () => {
+    // Regression: the local `errors = []` array used to shadow the module-level
+    // `errors` module inside pullAny, so the all-failed path threw
+    // `TypeError: Cannot read properties of undefined (reading 'GITHUB_SYNC_FAIL')`
+    // instead of the documented coded failure callers classify on.
+    // isolate: a lingering healthy test provider would make `success` true
+    sync._clearTestProviders();
+    sync._setTestProvider('deadgit', {
+        getType: () => 'deadgit',
+        isConfigured: () => true,
+        async getRepoInfo() { throw new Error('Provider API error: HTTP 403'); }
+    });
+    let thrown = null;
+    try {
+        await sync.pullAny({ preference: 'deadgit' });
+    } catch (e) {
+        thrown = e;
+    }
+    sync._clearTestProviders();
+    const coded = thrown && thrown.name === 'VantError' && thrown.code === 'GITHUB_SYNC_FAIL' && thrown.retryable === true;
+    return {
+        success: !!coded,
+        error: thrown ? `${thrown.name}/${thrown.code}: ${thrown.message}` : 'pullAny did not throw'
+    };
+});
+
 test('test provider map: production path ignores it when empty', () => {
     // Remove all test providers; rebase('fakegit') must now fail as unknown.
     sync._clearTestProviders();
