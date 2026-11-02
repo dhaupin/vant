@@ -33,10 +33,13 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Spot deployed frontends (home, dashboard, crashtest site)
+      - name: Spot deployed frontends (home, dashboard)
         # Each spot is one short process (eyestruct law): captures land in
         # labs/.eyes-candidates/ with agent-friendly list output. Viewport
         # rides a desktop window; theme rides eyestruct's --theme flag.
+        # (Owner call, vant#260 thread: crashtest.creadev.org is NOT spotted
+        # here - crashtest is a QA engine site, not a frontend under visual
+        # check; the gate lane in test.yml already runs its meanings.)
         env:
           CHROME: /usr/bin/google-chrome
         run: |
@@ -44,8 +47,6 @@ jobs:
           npx -y eyestruct@1 spot https://vant.creadev.org \
             --viewport 1280x800 --browser-exec "$CHROME"
           npx -y eyestruct@1 spot https://brain.creadev.org \
-            --viewport 1280x800 --browser-exec "$CHROME"
-          npx -y eyestruct@1 spot https://crashtest.creadev.org \
             --viewport 1280x800 --browser-exec "$CHROME"
           ls -la labs/.eyes-candidates/
 
