@@ -34,6 +34,15 @@ export const PROVIDER_ENV_KEYS = {
     emailAdminTo: "EMAIL_ADMIN_TO",
     purelymailUser: "PURELYMAIL_SMTP_USER",
     purelymailAppPassword: "PURELYMAIL_SMTP_APP_PASSWORD",
+    /** (wave 19.16, owner) the operator email the deployment's admin
+     *  account is pinned to (auth also reads it). Secret-or-text both
+     *  work: it is hashed server-side, never echoed to a client. */
+    adminAccount: "BOLETE_ADMIN_ACCOUNT",
+    /** (wave 19.16, owner) the member-facing support mailbox rendered
+     *  into verbose refusals (slot-full, disabled, privilege walls) and
+     *  the caps provider line - JS-loaded, never baked into a static
+     *  asset. Text var (it is mail-facing by design). */
+    supportEmail: "EMAIL_SUPPORT",
 } as const;
 
 /** The provider component's shipped defaults (DEPLOY.md 12.5 rows). */
@@ -51,6 +60,9 @@ export interface ProviderCapsLine {
     graceHours: number;
     /** true when the BOLETE_KV binding is attach-shaped right now. */
     storeReady: boolean;
+    /** The member support mailbox - present ONLY when EMAIL_SUPPORT is
+     *  set (the key must be ABSENT, never null, when unset). */
+    supportEmail?: string;
 }
 
 function envFlag(value: unknown): boolean {
@@ -113,5 +125,19 @@ export function providerPosture(env: Record<string, unknown>): ProviderPosture {
         ),
         storeReady: providerStoreReady(env),
     };
+    // supportEmail rides the caps only when actually set - the honesty
+    // law again: an unset var is an ABSENT key, never an empty string.
+    const support = env[PROVIDER_ENV_KEYS.supportEmail];
+    if (typeof support === "string" && support.trim() && validEmailShapeLoose(support)) {
+        caps.supportEmail = support.trim().toLowerCase();
+    }
     return { offering, storeReady: caps.storeReady, caps };
+}
+
+/** Loose shape check for the support face - any string that at least
+ *  contains an @ and a dot around it; stricter validation lives at the
+ *  typed refusal render (a bad var must not posture-gate anything). */
+function validEmailShapeLoose(value: string): boolean {
+    const v = value.trim();
+    return v.length >= 5 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 }

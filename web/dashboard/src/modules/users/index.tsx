@@ -78,8 +78,10 @@ export default function Users() {
         {state.s === "down" ? (
           <p className="text-sm text-ink-soft">
             {state.msg.includes("E_FORBIDDEN")
-              ? "This roster is admin-only; your identity is a viewer (typed 403, by design)."
-              : state.msg}
+              ? "This surface is admin-only: your account is signed in and active, but you do not hold the operator's admin role - ask the operator to pin you via BOLETE_ADMIN_ACCOUNT or retry your sign-in after being promoted."
+              : state.msg.includes("E_NO_SESSION")
+                ? "You are signed out (or your session expired). Sign in with the email-code gate on the front page first - and note this surface is admin-only anyway."
+                : state.msg}
           </p>
         ) : null}
         {state.s === "ok" && state.rows.length === 0 ? (
