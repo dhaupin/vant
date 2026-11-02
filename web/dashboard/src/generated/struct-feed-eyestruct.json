@@ -1,0 +1,25 @@
+{
+  "source": "eyestruct",
+  "ok": true,
+  "version": "eyestruct-gate/1",
+  "generatedAt": "2026-11-02",
+  "counts": {
+    "fail": 0,
+    "warn": 0,
+    "artifacts": 0,
+    "rows": 0
+  },
+  "findings": [
+    {
+      "id": "eyes-gate",
+      "level": "info",
+      "message": "The vi gate verdict: 0 visual artifact(s) all explained by 0 ledger row(s); pin ghcr.io/fleet/pinned-chromium:2026-10."
+    }
+  ],
+  "sourceHref": "https://www.npmjs.com/package/eyestruct",
+  "_stamp": {
+    "by": "scripts/struct-feed-stamp.js",
+    "from": "npx eyestruct@1 gate --json",
+    "legend": "values derive from the gate emit (ok/artifacts/rows + the tool's own verdict line); restamp with npm run struct:stamp -- --rows eyestruct after a labs/.eyes/ wave"
+  }
+}

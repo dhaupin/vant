@@ -1,0 +1,27 @@
+{
+  "source": "packstruct",
+  "ok": true,
+  "version": "packstruct-lint/1",
+  "generatedAt": "2026-11-02",
+  "counts": {
+    "packs": 21,
+    "ids": 302,
+    "honored": 7,
+    "pinned": 1,
+    "violations": 0
+  },
+  "findings": [
+    {
+      "id": "audit-conformance",
+      "page": "vant-spine",
+      "level": "info",
+      "message": "7/8 conformance honored; 1 pinned known finding (clean), honest and tracked in packs/README.md."
+    }
+  ],
+  "sourceHref": "https://www.npmjs.com/package/packstruct",
+  "_stamp": {
+    "by": "scripts/struct-feed-stamp.js",
+    "from": "npx packstruct@1.0.0 lint packs/ --deep --json + scripts/audit-packs-gate.js",
+    "legend": "values derive from the two measured emits (lint machine truth + the gate's own verdict line); restamp with npm run struct:stamp -- --rows packstruct after a packs/ or loader wave"
+  }
+}

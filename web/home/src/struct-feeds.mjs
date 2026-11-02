@@ -16,17 +16,21 @@
  *   findings: [{ id, page?, level: 'fail'|'warn'|'info', message }]
  *   verdict derivation: verdictOf - PASS | FINDINGS | ABSENT
  *
- * EPOCH LAW: every row that is inline data carries its MOCK SKELETON
- * badge. The crashtest row is LIVE (issue #264 step b): it rides the
- * stamped verdict ledger (src/generated/struct-feed.json, written by
- * scripts/struct-feed-stamp.js, pin sidecar beside it) and carries NO
- * mock flag. The three npm-live feeds (packstruct / eyestruct) wire
- * in at issue steps (c)-(d); poststruct is PRD-staged until its npm
- * lands. There are four and only four sources - the kit's own typed
+ * EPOCH LAW: inline data wears its MOCK SKELETON badge. THREE rows are
+ * now LIVE (issue #264 steps b, c, d): the crashtest stamped verdict
+ * ledger, the packstruct dual-emit row (lint --deep --json + the audit
+ * gate's own verdict line) and the eyestruct gate row -- all written by
+ * scripts/struct-feed-stamp.js into src/generated/struct-feed*.json with
+ * .sha256 pin sidecars, all carrying NO mock flag. poststruct is PRD-
+ * staged until its npm lands: its row is the honest inline absence and
+ * still rides the badge, because it is the skeleton's shape, not a tool's
+ * emit. There are four and only four sources - the kit's own typed
  * refusal law, mirrored here: E_STRUCT_SOURCE on anything else.
  */
 
 import liveCrashFeed from './generated/struct-feed.json'
+import livePackstructFeed from './generated/struct-feed-packstruct.json'
+import liveEyestructFeed from './generated/struct-feed-eyestruct.json'
 
 export const STRUCT_SOURCES = ['packstruct', 'crashtest', 'eyestruct', 'poststruct']
 
@@ -54,49 +58,31 @@ export function evidenceSlice(feed, n) {
 }
 
 /**
- * The skeleton epoch's feed rows - one per family, each shaped exactly
- * as the landing feed will arrive. The crashtest row is LIVE (stamped
- * verdict ledger); the other three are inline mocks until their feeds
- * land (poststruct's row already follows the PRD contract's post-parse
- * shape).
+ * The board's feed rows - one per family. Three are LIVE stamps written
+ * byte-identically by scripts/struct-feed-stamp.js (a shape drift there
+ * breaks its own --check gate in CI); the poststruct row is the inline
+ * honest absence until the npm package publishes (the badge stays on:
+ * it is the skeleton's shape previewing the feed, not a tool's data).
  */
 export const STRUCT_FEEDS = [
     {
-        source: 'packstruct',
-        ok: true,
-        mock: true,
-        generatedAt: '2026-10-28',
-        counts: { packs: 21, ids: 291, honored: 7, pinned: 1 },
-        findings: [
-            {
-                id: 'audit-conformance',
-                page: 'vant-spine',
-                level: 'info',
-                message: '7/8 conformance honored; 1 pinned known finding, honest and tracked in packs/README.md.',
-            },
-        ],
-        sourceHref: 'https://www.npmjs.com/package/packstruct',
+        // (step c, LIVE) the packstruct row: the dual-emit stamp (machine
+        // lint + the gate's own verdict line). No mock flag - the badge
+        // stays off, and the counts are the tools' own arithmetic.
+        ...livePackstructFeed,
     },
     {
         // (step b, LIVE) the crashtest row rides the stamped verdict
-        // ledger (src/generated/struct-feed.json); no mock flag, the
-        // badge stays off, and the counts statement is the ledger's own.
+        // ledger; no mock flag, the badge stays off, and the counts
+        // statement is the ledger's own.
         ...liveCrashFeed,
     },
     {
-        source: 'eyestruct',
-        ok: true,
-        mock: true,
-        generatedAt: '2026-10-28',
-        counts: { fail: 0, warn: 0 },
-        findings: [
-            {
-                id: 'npm-landing',
-                level: 'info',
-                message: 'The eyestruct package is live on npm; the findings feed wires in at step (d). No vision findings are claimed by this mock.',
-            },
-        ],
-        sourceHref: 'https://www.npmjs.com/package/eyestruct',
+        // (step d, LIVE) the eyestruct gate row: {ok, artifacts, rows,
+        // pin} emit + the tool's own verdict line. No mock flag; zero
+        // artifacts/rows is the battery's true state - the gate treats
+        // that lane as wired, and the stamp records exactly what it saw.
+        ...liveEyestructFeed,
     },
     {
         source: 'poststruct',
