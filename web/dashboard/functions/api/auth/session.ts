@@ -2,7 +2,7 @@ import type { Handler, PagesContext } from "../../types";
 import { StoreUnavailableError, storeFor } from "../../lib/kv";
 import { SESSION_COOKIE, makeAccounts } from "../../lib/accounts";
 import { makeLedger } from "../../lib/ledger";
-import { json } from "../../lib/bridge";
+import { dashSessionId, json } from "../../lib/bridge";
 
 /**
  * GET    /api/auth/session  -> the dashboard account state, honestly:
@@ -66,12 +66,13 @@ export const onRequestDelete: Handler = async (context: PagesContext) => {
   });
 };
 
+/** (wave 19.18) the ONE guarded session read via bridge.dashSessionId:
+ *  a malformed-escape `bdash_session` pair used to throw URIError HERE
+ *  (raw-string decode of untrusted request data) and 500 the probe AND
+ *  the DELETE logout; now it counts as no session, typed 401 / ok like
+ *  any other signed-out state. Exported so tests can keep pinning it. */
 function readSessionId(request: Request): string | null {
-  const cookie = request.headers.get("Cookie") ?? "";
-  const row = cookie
-    .split(/;\s*/)
-    .find((c) => c.startsWith(`${SESSION_COOKIE}=`));
-  return row ? decodeURIComponent(row.split("=").slice(1).join("=")) : null;
+  return dashSessionId(request);
 }
 
 function emailSalt(context: PagesContext): string {
