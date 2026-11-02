@@ -80,7 +80,11 @@ console.log('\n🚌 E2E GRAND TOUR (pass 119)\n');
             'clone state wrong');
 
         // TRUE fresh install: no VANT_BRAIN override — the default brain
-        // resolves to the shipped template (models/public/vant).
+        // resolves to the PRIVATE runtime (models/private/vant), which the
+        // shipped public template layers underneath as starter content
+        // (issue #297). Pre-#297 this resolved to models/public/vant, which
+        // split the pointer: writes landed private while reads/ledgers looked
+        // public. The public template is still found - as the starter layer.
         // (pass 287) the comment was already the contract, but the env
         // spread BELOW never actually stripped VANT_BRAIN — a parent run
         // with a scratch brain set (env-scoped sweeps, multi-runtime hosts)
@@ -89,8 +93,9 @@ console.log('\n🚌 E2E GRAND TOUR (pass 119)\n');
         const env = { ...process.env, NODE_PATH: path.join(ROOT, 'node_modules') };
         delete env.VANT_BRAIN; // the documented fresh-install intent, now enforced
         const health = execFileSync('node', ['bin/health.js'], { cwd: tmpClone, env, timeout: 60000 }).toString();
-        report('gate A: fresh `vant health` passes (template brain found)',
-            health.includes('✓ Brain exists at models/public/vant'),
+        report('gate A: fresh `vant health` passes (private runtime + public starter layer)',
+            health.includes('✓ Brain exists at models/private/vant') &&
+            health.includes('Starter content layered from public template models/public/vant'),
             health.slice(-160));
 
         execFileSync('node', ['bin/migrate.js'], { cwd: tmpClone, env, timeout: 60000 });
