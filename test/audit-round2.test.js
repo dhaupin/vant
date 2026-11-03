@@ -260,6 +260,79 @@ function check(name, ok, detail) {
         fs.rmSync(HROOT, { recursive: true, force: true });
     }
 
+    // ---- I. The storage MUTATION doors (write/rm/cp) are reachable by any
+    //         canWrite guest and had NO config-file protection. A brain's
+    //         config.json is the auth-authority root (mcp.requireKey gates the
+    //         MCP transport; mcp.apiKey is the credential it checks, both via
+    //         _brainConfigValue). A guest could overwrite it to set
+    //         requireKey=false / plant a known apiKey — turning the auth gate
+    //         OFF — or rm it, or cp it out of the private store. The config
+    //         door already refuses secret writes (E_CONFIG_SECRET_IMMUTABLE);
+    //         the storage door must not be a side entrance.
+    const IROOT = fs.mkdtempSync(path.join(ROOT, 'models', 'private', 'r2i-'));
+    try {
+        const cfgRel = 'models/private/vant/config.json';
+        fs.mkdirSync(path.join(IROOT, 'models', 'private', 'vant'), { recursive: true });
+        fs.writeFileSync(path.join(IROOT, cfgRel), JSON.stringify({ mcp: { apiKey: 'ORIGINAL', requireKey: true } }));
+        const outFile = path.join(IROOT, 'r2i-out.json');
+        const probe = `
+            const fs = require('fs');
+            const mcp = require(${JSON.stringify(path.join(ROOT, 'lib', 'mcp'))});
+            const cfg = ${JSON.stringify(cfgRel)};
+            const tryDoor = async (n, p) => { try { return { ok: true, r: await Promise.resolve(mcp.call(n, p)) }; } catch (e) { return { ok: false, reason: e.reason || e.code }; } };
+            (async () => {
+                const res = {
+                    write: await tryDoor('vant_storage_write', { path: cfg, content: JSON.stringify({ mcp: { requireKey: false, apiKey: 'ATTACKER' } }) }),
+                    rm: await tryDoor('vant_storage_rm', { path: cfg }),
+                    cpOut: await tryDoor('vant_storage_cp', { src: cfg, dest: 'models/public/leak.json' }),
+                    cpOver: await tryDoor('vant_storage_cp', { src: 'models/public/x.json', dest: cfg }),
+                    plainWrite: await tryDoor('vant_storage_write', { path: 'models/public/ok.json', content: '{"a":1}' }),
+                    intact: fs.readFileSync(cfg, 'utf8')
+                };
+                fs.writeFileSync(${JSON.stringify(outFile)}, JSON.stringify(res));
+            })().catch((e) => fs.writeFileSync(${JSON.stringify(outFile)}, JSON.stringify({ error: e.message })));
+        `;
+        spawnSync(process.execPath, ['-e', probe], { cwd: IROOT, encoding: 'utf8' });
+        let out = {};
+        try { out = JSON.parse(fs.readFileSync(outFile, 'utf8')); } catch (e) { out = { error: 'no-child-output' }; }
+        const refused = (r) => r && r.ok === false && r.reason === 'CONFIG_INVALID';
+        check('I1: vant_storage_write refuses to overwrite a brain config.json', refused(out.write), `-> ${JSON.stringify(out.write)}`);
+        check('I2: vant_storage_rm refuses to delete a brain config.json', refused(out.rm), `-> ${JSON.stringify(out.rm)}`);
+        check('I3: vant_storage_cp refuses to copy a brain config.json OUT (exfil)', refused(out.cpOut), `-> ${JSON.stringify(out.cpOut)}`);
+        check('I4: vant_storage_cp refuses to copy OVER a brain config.json', refused(out.cpOver), `-> ${JSON.stringify(out.cpOver)}`);
+        check('I5: the config file is left intact and non-config writes still work',
+            out.intact === JSON.stringify({ mcp: { apiKey: 'ORIGINAL', requireKey: true } }) && out.plainWrite && out.plainWrite.ok === true,
+            `intact=${out.intact} plain=${JSON.stringify(out.plainWrite)}`);
+    } finally {
+        fs.rmSync(IROOT, { recursive: true, force: true });
+    }
+
+    // ---- J. vant_config_get on a SECTION key (`github`) returned the whole
+    //         nested object; maskIfSecret inspects only the top-level key, so
+    //         the raw token rode out inside the object. Deep-redact object
+    //         values at the door.
+    const jDoor = require(path.join(ROOT, 'lib', 'mcp'));
+    const jCfg = require(path.join(ROOT, 'lib', 'config'));
+    const jSecret = 'ghp_SECTION_LEAK_42';
+    const savedTok = process.env.GITHUB_TOKEN;
+    try {
+        process.env.GITHUB_TOKEN = jSecret;
+        // config.load() memoises _config; clear so the env change is seen.
+        jCfg.clearCache();
+        const jr = await Promise.resolve(jDoor.call('vant_config_get', { key: 'github' }));
+        const jText = JSON.stringify(jr);
+        check('J1: vant_config_get of a section key does not leak a nested secret',
+            !jText.includes(jSecret), `-> ${jText.slice(0, 120)}`);
+        check('J2: vant_config_get of a section key still returns the section shape (masked)',
+            jr.value && jr.value.token && String(jr.value.token).includes('****') && 'repo' in jr.value,
+            `-> ${JSON.stringify(jr.value)}`);
+        const jScalar = await Promise.resolve(jDoor.call('vant_config_get', { key: 'github.token' }));
+        check('J3: vant_config_get of a scalar secret key is still masked',
+            !JSON.stringify(jScalar).includes(jSecret), `-> ${JSON.stringify(jScalar)}`);
+    } finally {
+        if (savedTok === undefined) delete process.env.GITHUB_TOKEN; else process.env.GITHUB_TOKEN = savedTok;
+    }
+
     console.log(`\n${failures === 0 ? '✓ all pins hold' : `✗ ${failures} pin(s) failed`}`);
     process.exit(failures === 0 ? 0 : 1);
 })();
