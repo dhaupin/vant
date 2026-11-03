@@ -49,7 +49,9 @@
  * and found), not a tool fault; anything but schema-1-shaped output on
  * a stamp run is an absence.
  *
- * Usage: node scripts/audit-deps.js [--json]
+ * Usage: node scripts/audit-deps.js [--json] [--probe <name>]
+ *   (no flags: the full census; --json: the stamp emit; --probe: the
+ *   pickup handler, one dep graded through the same verdict math)
  */
 
 'use strict';
@@ -395,6 +397,119 @@ function census() {
     return { pkg, deps, declared, ledgerNames };
 }
 
+// ---- the probe (the pickup handler: one dep, the same verdict math) ----
+// The census grades the whole fleet; the probe grades a single name with
+// the per-dep subset of that machinery, so a lane can ask "is crashtest
+// still wired?" without sweeping the whole tree. Typed refusals carry the
+// load: an unknown name, an unledgered declare, a failed verdict — every
+// outcome is a named row, and exit 1 iff the probe graded a FAIL.
+function probe(name) {
+    const pkg = JSON.parse(read('package.json'));
+    const deps = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) };
+    const adjacent = ADJACENT.find((a) => a.name === name);
+
+    console.log(`\n🔍 DEP PROBE (depstruct): ${name}\n`);
+    if (adjacent) {
+        // an adjacent name is graded by its guard, not the ledger doors
+        const declared = Object.prototype.hasOwnProperty.call(deps, name);
+        const wanted = adjacent.guard === 'must-stay-declared-absent';
+        const holds = wanted ? !declared : declared;
+        console.log(`  [adjacent] ${name}: guard "${adjacent.guard}" ${holds ? 'HOLDS' : 'BROKEN'}`);
+        if (wanted && declared) {
+            fail('adjacent:pre-npm', 'package.json', `${name} is pre-npm: a declared dep here 404s npm ci for every consumer`
+            );
+        }
+        if (!wanted && !declared) {
+            warn('adjacent:web-home', 'web/home/package.json', `${name} no longer rides where its guard places it — an honest drift to glance at`);
+        }
+        console.log(`  why: ${adjacent.why}`);
+        console.log('');
+        probeExit();
+        return;
+    }
+    if (!deps[name]) {
+        fail('probe:unknown', 'package.json', `"${name}" is neither declared in package.json nor an adjacent record — the crew has no such name to probe (the ledger carries: ${Object.keys(LEDGER).join(', ')})`);
+        console.log(`  ✗ ${name} is not a declared dep — typed refusal, nothing graded (ledger names: ${Object.keys(LEDGER).join(', ')})`);
+        console.log('');
+        probeExit();
+        return;
+    }
+    const row0 = LEDGER[name];
+    if (!row0) {
+        fail('ledger:coverage', 'package.json', `"${name}" is declared but absent from the dependency ledger — the never-add-deps law`);
+        console.log(`  ✗ ${name} is declared but has no ledger row — the never-add law refuses it`);
+        console.log('');
+        probeExit();
+        return;
+    }
+
+    // pin law (per-name)
+    const pin = FAMILY_PINS[name];
+    if (pin) {
+        const declaredRange = deps[name];
+        const got = caretComponents(declaredRange);
+        if (got) {
+            const want = resolvedComponents(pin);
+            if (got[0] !== want[0]) {
+                fail('pin:family', 'package.json', `"${name}" is pinned ${got[0]}.x (${declaredRange}) but the family pin is ${pin} — majors must agree`);
+            }
+        } else {
+            warn('pin:caret', 'package.json', `"${name}" rides "${declaredRange}" — the family rides ^major.minor.patch carets`);
+        }
+    }
+
+    // use-check (per-name)
+    const sites = evidenceFor(name);
+    const total = sites.code.length + sites.cli.length + sites.config.length + sites.ledger.length;
+    const laneWaits = {
+        code: ['code', 'cli', 'config'],
+        ci: ['cli'],
+        config: ['config', 'cli', 'code'],
+        peer: ['config', 'cli', 'code', 'ledger'],
+        record: ['ledger'],
+    };
+    const admitted = laneWaits[row0.lane] || [];
+    if (total === 0) {
+        fail('use:evidence', 'package.json', `"${name}" claims lane "${row0.lane}" but the census finds zero evidence — an unwired dependency is a finding`);
+    } else if (!admitted.some((k) => sites[k].length > 0)) {
+        warn('use:lane', 'package.json', `"${name}" claims lane "${row0.lane}" whose authorized classes (${admitted.join(', ')}) are empty — its evidence rides ${Object.entries(sites).filter(([, v]) => v.length).map(([k, v]) => `${k}(${v.length})`).join(' + ')}`);
+    }
+
+    // lockfile parity (per-name)
+    const lock = JSON.parse(read('package-lock.json'));
+    const lockEntry = (lock.packages || {})[`node_modules/${name}`];
+    if (!lockEntry || !lockEntry.version) {
+        fail('lock:parity', 'package-lock.json', `"${name}" does not resolve in package-lock.json — npm ci reproducibility is broken for this manifest`);
+    }
+    if (pin && lockEntry && lockEntry.version) {
+        const got = resolvedComponents(lockEntry.version);
+        const want = resolvedComponents(pin);
+        if (got && want && got[0] !== want[0]) {
+            fail('lock:family', 'package-lock.json', `the lock resolves ${name}@${lockEntry.version} but the family pin is ${pin} — the installed major drifted from the recorded pin`);
+        }
+    }
+
+    const kinds = Object.entries(sites).filter(([, v]) => v.length).map(([k, v]) => `${k}(${v.length})`).join(' + ') || 'NONE';
+    console.log(`  [${(pkg.dependencies || {})[name] !== undefined ? 'runtime' : 'dev'}] ${name}: ${kinds}   lane ${row0.lane}`);
+    console.log(`  note: ${row0.note}`);
+    if (pin) console.log(`  pin: ${pin}${lockEntry ? ` (lock resolves ${lockEntry.version})` : ''}`);
+    const fails = findings.filter((f) => f.level === 'fail');
+    const warns = findings.filter((f) => f.level === 'warn');
+    if (fails.length) {
+        console.log('\n✗ PROBE FAILED:');
+        for (const f of fails) console.log(`  - ${f.id} [${f.page}] ${f.message}`);
+    } else {
+        console.log(`✓ PROBE PASS — ${name} holds: ledgered, evidenced (lane ${row0.lane}), pin${pin ? ' honored' : 'less (non-family dep)'}${warns.length ? `, ${warns.length} honest warn${warns.length === 1 ? '' : 's'} ride along` : ''}`);
+    }
+    console.log('');
+    probeExit();
+}
+
+function probeExit() {
+    const fails = findings.filter((f) => f.level === 'fail');
+    process.exitCode = fails.length > 0 ? 1 : 0;
+}
+
 function summarize({ pkg, declared, ledgerNames }) {
     // the human census table + verdict
     const counts = {
@@ -458,5 +573,15 @@ function emit({ declared, ledgerNames }) {
 }
 
 const ctx = census();
-if (asJson) emit(ctx);
+const probeIdx = process.argv.indexOf('--probe');
+const probeName = probeIdx !== -1 ? (process.argv[probeIdx + 1] || '').trim() : null;
+
+if (probeIdx !== -1 && !probeName) {
+    console.error('usage: node scripts/audit-deps.js [--json] [--probe <dep-name>] — --probe needs the name of a declared dep or adjacent record');
+    process.exit(2);
+}
+
+if (probeName) {
+    probe(probeName);
+} else if (asJson) emit(ctx);
 else summarize(ctx);

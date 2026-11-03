@@ -131,7 +131,16 @@ jobs:
         # drift from the tree it describes. gistory-sync gets a typed
         # pre-npm guard: declaring a 404 dep breaks npm ci for every
         # consumer (the registry-ladder law, packs/README.md).
-        run: npm run lint:deps
+        #
+        # Wave 19.32: the crew picks up pickup-handler duty in CI too
+        # — spot probes (--probe) exercise the handler over a code-lane
+        # dep and the family floor carrier, so the one-name door the
+        # fleet can call for can never silently rot behind the full
+        # census.
+        run: |
+          npm run lint:deps
+          node scripts/audit-deps.js --probe jsqr
+          node scripts/audit-deps.js --probe crashtest
 
       - name: changelog parity gate (site json vs CHANGELOG.md byte-compare, version truth)
         run: npm run lint:changelog
