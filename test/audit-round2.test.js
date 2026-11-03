@@ -177,6 +177,23 @@ function check(name, ok, detail) {
         guests.classifyTool('brain_state') === 'read',
         `class=${guests.classifyTool('brain_state')}`);
 
+    // ---- G. maskIfSecret (the CLI/door secret masker) had two defects: the
+    //         substring match was case-SENSITIVE (so `Slack.Token` was
+    //         immutable at the door yet echoed in cleartext), and it called
+    //         value.substring() on any truthy value (numbers/booleans threw).
+    const cfg = require(path.join(ROOT, 'lib', 'config'));
+    check('G1: maskIfSecret masks a case-variant secret key (Slack.Token)',
+        String(cfg.maskIfSecret('Slack.Token', 'supersecretvalue')).includes('****'),
+        `-> ${JSON.stringify(cfg.maskIfSecret('Slack.Token', 'supersecretvalue'))}`);
+    let threw = null;
+    let numMask = null;
+    try { numMask = cfg.maskIfSecret('x.token', 12345); } catch (e) { threw = e.message; }
+    check('G2: maskIfSecret does not throw on a non-string value (number token)',
+        threw === null && String(numMask).includes('****'), `threw=${threw} -> ${JSON.stringify(numMask)}`);
+    check('G3: maskIfSecret leaves a non-secret key untouched',
+        cfg.maskIfSecret('plain.key', 'ok') === 'ok',
+        `-> ${JSON.stringify(cfg.maskIfSecret('plain.key', 'ok'))}`);
+
     console.log(`\n${failures === 0 ? '✓ all pins hold' : `✗ ${failures} pin(s) failed`}`);
     process.exit(failures === 0 ? 0 : 1);
 })();
