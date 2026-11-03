@@ -4,14 +4,16 @@ import liveCrashFeed from "../../generated/struct-feed.json";
 import livePackstructFeed from "../../generated/struct-feed-packstruct.json";
 import liveEyestructFeed from "../../generated/struct-feed-eyestruct.json";
 import livePoststructFeed from "../../generated/struct-feed-poststruct.json";
+import liveDepsFeed from "../../generated/struct-feed-deps.json";
 import { Help } from "../../frame/Tooltip";
 
 /**
- * Module: struct-audit (vant issue #264). One page, the four STRUCT
+ * Module: struct-audit (vant issue #264). One page, the five STRUCT
  * families side by side: packstruct (pack conformance), crashtest
  * (the packs floor), eyestruct (the vision battery), poststruct (the
- * shipped audit, npm-live since 2026-11-02). The data contract,
- * the verdict derivation, and the poststruct adapter live in the kit
+ * shipped audit, npm-live since 2026-11-02), and depstruct (the
+ * dependency ledger census, wave 19·31). The data contract,
+ * the verdict derivation, and the poststruct/depstruct adapters live in the kit
  * (web/kit/components/struct-audit.tsx) and ride vendored + hash-pinned.
  *
  * FEED SOURCES (steps b + c + d landed, + the poststruct landing):
@@ -32,6 +34,7 @@ const LIVE: Record<string, StructFeed> = {
   packstruct: livePackstructFeed as StructFeed,
   eyestruct: liveEyestructFeed as StructFeed,
   poststruct: livePoststructFeed as StructFeed,
+  depstruct: liveDepsFeed as StructFeed,
 };
 const FEEDS: StructFeed[] = MOCK_STRUCT_FEEDS.map((f) => LIVE[f.source] ?? f);
 
@@ -40,11 +43,12 @@ export default function StructAudit() {
     <div>
       <h1 className="text-lg font-semibold">Struct audit</h1>
       <p className="mt-1 text-sm text-ink-soft">
-        The four STRUCT families' findings, combined. All four cards ride
+        The five STRUCT families' findings, combined. All five cards ride
         their live stamped feeds (the crashtest verdict ledger, the
-        packstruct dual emit, the eyestruct gate, and the poststruct
-        shipped audit over the baked home dist) — nothing here is fetched
-        or graded beyond what a stamp measured.
+        packstruct dual emit, the eyestruct gate, the poststruct shipped
+        audit over the baked home dist, and depstruct's dependency ledger
+        census) — nothing here is fetched or graded beyond what a stamp
+        measured.
       </p>
 
       <Help text="The kit's contract: a feed is { source, ok, version?, generatedAt?, counts?, findings?, mock?, error? }; verdicts derive pure — PASS / FINDINGS / ABSENT (there is no DRIFT band until a feed carries drift semantics); an unknown source is a typed E_STRUCT_SOURCE refusal, never a guess. poststruct's adapter parses the landed package's real --json emit ({ schema: 1, counts: { fail, warn }, findings: [{ page, id, level, message }] }), refusing shape drift typed.">

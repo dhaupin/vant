@@ -2,12 +2,13 @@
  * test/struct-feeds.test.mjs (vant-home)
  * ======================================
  * The struct-audit board's data laws (vant issue #264; steps a + b landed
- * at 2026-10-28, steps c + d landed 2026-11-02). Pins:
- *   1. four sources AND ONLY four (the E_STRUCT_SOURCE law mirrored)
+ * at 2026-10-28, steps c + d landed 2026-11-02; depstruct joined wave 19·31).
+ * Pins:
+ *   1. five sources AND ONLY five (the E_STRUCT_SOURCE law mirrored)
  *   2. the skeleton epoch is CLOSED: every inline-skeleton row has been
  *      replaced by its LIVE stamped emit (steps b/c/d + the poststruct
- *      landing), so NO row carries a mock flag and the board has no
- *      MOCK SKELETON badge left to render
+ *      landing + the depstruct census row), so NO row carries a mock flag
+ *      and the board has no MOCK SKELETON badge left to render
  *   3. the ABSENT rows state their absence in words, and the anchor
  *      laws hold (check-home rule 4 admits only the links a row states)
  *   4. verdictOf: PASS / FINDINGS / ABSENT escalation exactly
@@ -33,6 +34,7 @@ import liveCrashFeed from '../src/generated/struct-feed.json'
 import livePackstructFeed from '../src/generated/struct-feed-packstruct.json'
 import liveEyestructFeed from '../src/generated/struct-feed-eyestruct.json'
 import livePoststructFeed from '../src/generated/struct-feed-poststruct.json'
+import liveDepsFeed from '../src/generated/struct-feed-deps.json'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const GENERATED = path.join(HERE, '..', 'src', 'generated')
@@ -40,12 +42,12 @@ const GENERATED = path.join(HERE, '..', 'src', 'generated')
 const REQUIRED = ['source', 'ok']
 
 describe('struct-feeds (the /audit board laws)', () => {
-    it('carries four sources and only four', () => {
-        expect(STRUCT_SOURCES).toEqual(['packstruct', 'crashtest', 'eyestruct', 'poststruct'])
-        expect(STRUCT_FEEDS).toHaveLength(4)
+    it('carries five sources and only five', () => {
+        expect(STRUCT_SOURCES).toEqual(['packstruct', 'crashtest', 'eyestruct', 'poststruct', 'depstruct'])
+        expect(STRUCT_FEEDS).toHaveLength(5)
         for (const feed of STRUCT_FEEDS) expect(STRUCT_SOURCES).toContain(feed.source)
         const names = STRUCT_FEEDS.map(f => f.source)
-        expect(new Set(names).size).toBe(4)
+        expect(new Set(names).size).toBe(5)
         for (const s of STRUCT_SOURCES) expect(STRUCT_LABELS[s]).toBeTruthy()
     })
 
@@ -111,7 +113,7 @@ describe('struct-feeds (the /audit board laws)', () => {
     })
 })
 
-describe('the LIVE stamped rows (issue #264 steps b, c, d)', () => {
+describe('the LIVE stamped rows (issue #264 steps b, c, d + the depstruct census)', () => {
     // The ring law applied to data: each row is byte-equal to its stamp,
     // each stamp has its .sha256 pin sidecar beside BOTH flavor copies,
     // provenance is stated, and the counts are internally consistent.
@@ -120,7 +122,19 @@ describe('the LIVE stamped rows (issue #264 steps b, c, d)', () => {
         ['packstruct', livePackstructFeed],
         ['eyestruct', liveEyestructFeed],
         ['poststruct', livePoststructFeed],
+        ['depstruct', liveDepsFeed],
     ]
+
+    // The stamp row's filename suffix vs its source id: the crashtest row
+    // owns the bare struct-feed.json (the original), and the depstruct
+    // SOURCE stamps as -deps (the census lane's own row key).
+    const STAMP_SUFFIX = {
+        crashtest: '',
+        packstruct: '-packstruct',
+        eyestruct: '-eyestruct',
+        poststruct: '-poststruct',
+        depstruct: '-deps',
+    }
 
     it.each(LIVE)(`%s: byte-equal to its stamp, pin sidecars on disk, badge off`, (source, feed) => {
         expect(feed.source).toBe(source)
@@ -131,7 +145,7 @@ describe('the LIVE stamped rows (issue #264 steps b, c, d)', () => {
         // pins exist next to both flavor copies written by the stamp
         const ROOT = path.join(HERE, '..', '..', '..')
         for (const flavor of ['home', 'dashboard']) {
-            const stamp = path.join(ROOT, 'web', flavor, 'src', 'generated', `struct-feed${source === 'crashtest' ? '' : '-' + source}.json`)
+            const stamp = path.join(ROOT, 'web', flavor, 'src', 'generated', `struct-feed${STAMP_SUFFIX[source]}.json`)
             expect(readFileSync(stamp + '.sha256', 'utf8')).toMatch(/^[0-9a-f]{64}\n?$/)
             expect(readFileSync(stamp, 'utf8')).toBe(JSON.stringify(feed, null, 2) + '\n')
         }
@@ -174,6 +188,19 @@ describe('the LIVE stamped rows (issue #264 steps b, c, d)', () => {
             expect((c.fail ?? 0) + (c.warn ?? 0)).toBe(feed.findings.length)
             expect(feed.version).toBe('poststruct-audit/1')
             expect(feed.sourceHref).toBe('https://www.npmjs.com/package/poststruct')
+        }
+        if (source === 'depstruct') {
+            // the census's own arithmetic: 14 deps declared, 14 ledger
+            // rows (package.json and the ledger agree both directions),
+            // zero fails on a green lane, and fail + warn <= rows (the
+            // census can emit info rows that ride neither counter)
+            expect(c.deps).toBeGreaterThanOrEqual(1)
+            expect(c.ledger).toBe(c.deps)
+            expect(c.fail).toBe(0)
+            expect((c.fail ?? 0) + (c.warn ?? 0)).toBeLessThanOrEqual(feed.findings.length)
+            expect(feed.version).toBe('depstruct-census/1')
+            // a green lane: no fail row may ride the card
+            expect(feed.findings.every((f) => f.level !== 'fail')).toBe(true)
         }
     })
 

@@ -120,6 +120,19 @@ jobs:
         # base battery - --network stays opt-in, this call is socket-free).
         run: npx govstruct lint && npx govstruct check && npx govstruct surface --verify && npx govstruct doctor
 
+      - name: Dependency ledger census (depstruct - the never-add-deps law)
+        # Vant basically never adds dependencies; this lane makes that a
+        # check instead of a vibe (wave 19.31). The ledger inside
+        # scripts/audit-deps.js is the only door a dependency rides
+        # through: a conscious row with lane + honest note, real evidence
+        # of that lane in the tree, the family pin the compliance map
+        # records, and package-lock resolution. Fully offline; the
+        # compliance cross-check keeps govstruct's evidence map unable to
+        # drift from the tree it describes. gistory-sync gets a typed
+        # pre-npm guard: declaring a 404 dep breaks npm ci for every
+        # consumer (the registry-ladder law, packs/README.md).
+        run: npm run lint:deps
+
       - name: changelog parity gate (site json vs CHANGELOG.md byte-compare, version truth)
         run: npm run lint:changelog
 

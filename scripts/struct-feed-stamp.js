@@ -40,9 +40,15 @@
  * error}) and the script exits 1: a wedged endpoint is a finding, never a
  * silent green. Values that could be invented are left out entirely.
  *
+ * deps (19.31)   - `node scripts/audit-deps.js --json` (the ledger census
+ *                     emit: { schema: 1, counts: { fail, warn, info, deps,
+ *                     ledger }, findings }). The never-add-deps law graded
+ *                     over the declared manifest; exit 1 is a verdict row
+ *                     like the poststruct flavor's.
+ *
  * Usage:
  *   node scripts/struct-feed-stamp.js [--from-json dump.json] [--check]
- *                                     [--rows crashtest,packstruct,eyestruct,poststruct]
+ *                                     [--rows crashtest,packstruct,eyestruct,poststruct,deps]
  */
 
 'use strict';
@@ -86,6 +92,13 @@ const ROWS = {
         targets: [
             'web/home/src/generated/struct-feed-poststruct.json',
             'web/dashboard/src/generated/struct-feed-poststruct.json',
+        ],
+    },
+    deps: {
+        name: 'struct-feed-deps.json',
+        targets: [
+            'web/home/src/generated/struct-feed-deps.json',
+            'web/dashboard/src/generated/struct-feed-deps.json',
         ],
     },
 };
@@ -391,6 +404,72 @@ function absentPoststruct(when, reason) {
     };
 }
 
+// ---- deps row (wave 19.31: depstruct, the dependency ledger census) ----
+// The census runs offline over the declared manifest: scripts/audit-deps.js
+// --json emits { schema: 1, source: 'depstruct', version:
+// 'depstruct-census/1', generatedAt, counts: { fail, warn, info, deps,
+// ledger }, findings: [...] }. Exit 1 is a VERDICT (the census judged and
+// found fail findings), not a tool fault - the stamp records the verdict and
+// the CI census gate still fails the job. counts ride VERBATIM so the board
+// shows the census's own arithmetic (deps declared, ledger rows).
+function deriveDepsFeed(when) {
+    const run = spawnSync(process.execPath, ['scripts/audit-deps.js', '--json'], {
+        cwd: ROOT,
+        encoding: 'utf8',
+        timeout: 2 * 60 * 1000,
+        env: { ...process.env, NO_COLOR: '1' },
+        maxBuffer: 64 * 1024 * 1024,
+    });
+    const out = (run.stdout || '').trim();
+    let emit = null;
+    try { emit = JSON.parse(out); } catch (e) { emit = null; }
+    const shaped = emit && typeof emit === 'object' && emit.schema === 1
+        && emit.counts && typeof emit.counts.fail === 'number'
+        && Array.isArray(emit.findings);
+    if (run.error || run.status != null && run.status !== 0 && run.status !== 1 || !shaped) {
+        return absentDeps(when, `depstruct gave no schema-1 emit (exit ${run.error ? String(run.error) : run.status}, ${out.slice(0, 200) || 'no output'})`);
+    }
+    const rows = emit.findings.map((f) => ({
+        id: String(f.id || ''),
+        page: typeof f.page === 'string' ? f.page : undefined,
+        level: f.level === 'fail' || f.level === 'warn' || f.level === 'info' ? f.level : 'info',
+        message: String(f.message || ''),
+    })).filter((f) => f.id);
+    return {
+        source: 'depstruct',
+        ok: true,
+        version: 'depstruct-census/1',
+        generatedAt: when,
+        counts: {
+            fail: emit.counts.fail,
+            warn: emit.counts.warn,
+            deps: emit.counts.deps,
+            ledger: emit.counts.ledger,
+        },
+        findings: rows,
+        _stamp: {
+            by: 'scripts/struct-feed-stamp.js',
+            from: 'node scripts/audit-deps.js --json (the ledger is the law: the never-add-deps census runs offline over the declared manifest; re-stamp with npm run struct:stamp -- --rows deps after any package.json/ledger wave)',
+            legend: 'values derive from the census emit (schema 1, counts + findings personified by their own ids); restamp: npm run struct:stamp -- --rows deps',
+        },
+    };
+}
+
+function absentDeps(when, reason) {
+    return {
+        source: 'depstruct',
+        ok: false,
+        version: 'depstruct-census/1',
+        generatedAt: when,
+        error: `absent: ${reason}. The page states the absence; nothing is graded.`,
+        _stamp: {
+            by: 'scripts/struct-feed-stamp.js',
+            from: 'node scripts/audit-deps.js --json',
+            legend: `typed ABSENCE recorded ${when}: the census lane gave no ingestable emit - fix the lane, then restamp`,
+        },
+    };
+}
+
 function main() {
     const args = process.argv.slice(2);
     const check = args.includes('--check');
@@ -398,7 +477,7 @@ function main() {
     const fromFile = fromIdx >= 0 ? args[fromIdx + 1] : null;
     const rowsArg = args.includes('--rows')
         ? args[args.indexOf('--rows') + 1] || ''
-        : 'crashtest,packstruct,eyestruct,poststruct';
+        : 'crashtest,packstruct,eyestruct,poststruct,deps';
     const wanted = rowsArg.split(',').map((s) => s.trim()).filter(Boolean);
     for (const key of wanted) {
         if (!ROWS[key]) {
@@ -495,6 +574,18 @@ function main() {
             console.log(`stamped: poststruct feed - audit of web/home/dist: ${c.fail} FAIL / ${c.warn} warn over ${feed.findings.length} finding row(s), as of ${feed.generatedAt}`);
         } else {
             console.error('stamped: poststruct feed is an honest ABSENCE - ' + String(feed.error).slice(0, 160));
+            stampFailed = true;
+        }
+    }
+
+    if (wanted.includes('deps')) {
+        const feed = deriveDepsFeed(when);
+        writeRow('deps', feed);
+        if (feed.ok) {
+            const c = feed.counts;
+            console.log(`stamped: deps feed - the dependency ledger census: ${c.deps} declared / ${c.ledger} ledger rows, ${c.fail} FAIL / ${c.warn} warn over ${feed.findings.length} finding row(s), as of ${feed.generatedAt}`);
+        } else {
+            console.error('stamped: deps feed is an honest ABSENCE - ' + String(feed.error).slice(0, 160));
             stampFailed = true;
         }
     }
