@@ -97,6 +97,19 @@ jobs:
       - name: web/home config pin suite (vitest, pass 338 — the pins never ride CI until now)
         run: npm ci --prefix web/home && npm --prefix web/home run test:run
 
+      - name: Poststruct audit (poststruct@0.9 — the baked-HTML shipped contract)
+        # The four-STRUCT board closes its loop (issue #264's last family).
+        # poststruct walks the BAKED web/home dist post-build and verifies
+        # head/site/links/i18n/a11y/feeds + the language profile; FAIL
+        # findings exit non-zero and gate the job. Files on disk only:
+        # browserless, zero-dep, no network. The repo config
+        # (poststruct.config.js) demotes the dash-class law to warn — the
+        # house copy writes em/en dashes by design; every other check
+        # rides the family default. Restamp the feed row in the same
+        # change as any copy change: npm run build:home && npm run
+        # struct:stamp -- --rows poststruct (struct:check pins it).
+        run: npm run build:home && npx poststruct audit web/home/dist --json
+
       - name: changelog parity gate (site json vs CHANGELOG.md byte-compare, version truth)
         run: npm run lint:changelog
 

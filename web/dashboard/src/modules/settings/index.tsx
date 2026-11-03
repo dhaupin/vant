@@ -853,6 +853,18 @@ export default function Settings() {
         <RelayPosture />
       </Section>
 
+      {/* (wave 19.28, owner) the OSS lander setting: the admin's own HTML
+          and/or markdown becomes the signed-out landing page. Admin-only
+          read+write by the route's gate (the ONE admin gate); the built-in
+          gloss stays the default until the admin writes something. */}
+      {app.account?.role === "admin" ? (
+        <Section title="Lander content (the signed-out page)">
+          <Help text="wave 19.28: your own words become the signed-out landing page. The html lane is sanitized at save (no script/iframe/on* — pasted widgets stay tame); the markdown lane is parsed by the repo's own lilmd renderer (escaped-everything). The combo: html renders, then the markdown block below it.">
+            <LanderCard />
+          </Help>
+        </Section>
+      ) : null}
+
       <Section title="Session & properties">
         <p className="text-sm text-ink-soft">
           Property <span className="font-mono text-ink">{app.property}</span>;
@@ -960,6 +972,128 @@ function PodTokenCard() {
       </form>
       {note ? <p className="mt-2 text-xs text-ink-soft">{note}</p> : null}
       {err ? <p className="mt-2 text-xs text-err">{err}</p> : null}
+    </div>
+  );
+}
+
+/**
+ * (wave 19.28) The admin's lander editor: two textareas (html + md),
+ * save + reset, served by /api/lander. The GET is public, the write and
+ * reset are admin-gated at the route; this card only ever fetches with
+ * the session the admin already has. Typed refusals render verbatim.
+ */
+function LanderCard() {
+  const [html, setHtml] = useState<string | null>(null);
+  const [md, setMd] = useState<string | null>(null);
+  const [note, setNote] = useState<string | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    setBusy(true);
+    fetch("/api/lander")
+      .then(async (res) => {
+        const data = (await res.json().catch(() => null)) as
+          | { custom?: { html?: string; md?: string } | null }
+          | null;
+        if (!alive || !data?.custom) return;
+        setHtml(data.custom.html ?? "");
+        setMd(data.custom.md ?? "");
+      })
+      .catch(() => undefined) // undeployed functions: the untouched state is the honest UI
+      .finally(() => {
+        if (alive) setBusy(false);
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const save = async () => {
+    setErr(null);
+    setNote(null);
+    setBusy(true);
+    try {
+      const res = await fetch("/api/lander", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ html: html ?? "", md: md ?? "" }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string; detail?: string };
+      if (res.ok && data.ok) {
+        setNote("Saved — the signed-out page now carries it. Open the dashboard signed out to read it.");
+      } else {
+        setErr(data.error ?? data.detail ?? "the save was refused");
+      }
+    } catch {
+      setErr("Functions not reachable (undeployed or offline).");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const reset = async () => {
+    setErr(null);
+    setNote(null);
+    setBusy(true);
+    try {
+      const res = await fetch("/api/lander", { method: "DELETE" });
+      if (res.ok) {
+        setHtml(null);
+        setMd(null);
+        setNote("Reset — the built-in gloss is back.");
+      } else {
+        setErr("the reset was refused");
+      }
+    } catch {
+      setErr("Functions not reachable (undeployed or offline).");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const pristine = html === null && md === null;
+  return (
+    <div className="space-y-2" data-testid="lander-card">
+      <textarea
+        aria-label="Lander HTML"
+        className="h-24 w-full rounded-md border border-line bg-paper px-2 py-1.5 font-mono text-xs outline-none focus:border-accent"
+        placeholder="<p>Your own opening line(s), raw html</p>"
+        value={html ?? ""}
+        onChange={(e) => setHtml(e.target.value)}
+      />
+      <textarea
+        aria-label="Lander markdown"
+        className="h-24 w-full rounded-md border border-line bg-paper px-2 py-1.5 font-mono text-xs outline-none focus:border-accent"
+        placeholder={"## Your own heading\n\nYour own words in markdown — **bold**, `code`, [links](https://…), lists"}
+        value={md ?? ""}
+        onChange={(e) => setMd(e.target.value)}
+      />
+      <p className="text-xs text-ink-soft">
+        Combo: the html block renders, then the markdown block below it. Caps:
+        12k chars each; the html lane is sanitized at save.
+      </p>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => void save()}
+          className="rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-paper hover:bg-accent-deep disabled:opacity-50"
+        >
+          Save lander
+        </button>
+        <button
+          type="button"
+          disabled={busy || pristine}
+          onClick={() => void reset()}
+          className="rounded-md border border-line px-3 py-1.5 text-sm text-ink-soft hover:bg-ink/5 disabled:opacity-50"
+        >
+          Reset to built-in
+        </button>
+      </div>
+      {note ? <p className="text-xs text-moss">{note}</p> : null}
+      {err ? <p className="text-xs text-err">{err}</p> : null}
     </div>
   );
 }
