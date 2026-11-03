@@ -110,6 +110,16 @@ jobs:
         # struct:stamp -- --rows poststruct (struct:check pins it).
         run: npm run build:home && npx poststruct audit web/home/dist --json
 
+      - name: govstruct identity gate (one-member adopter manifest, offline)
+        # The governance layer lands (govstruct@0.9.0): this repo's own
+        # identity/conformance manifest - one member (vant), a real member
+        # block, and an evidence-map compliance block pointing at the CI
+        # lanes that actually run (no invented statuses). Fully offline:
+        # lint (manifest grammar), check (the compliance shape packs),
+        # surface --verify (the promised-field contract), doctor (the
+        # base battery - --network stays opt-in, this call is socket-free).
+        run: npx govstruct lint && npx govstruct check && npx govstruct surface --verify && npx govstruct doctor
+
       - name: changelog parity gate (site json vs CHANGELOG.md byte-compare, version truth)
         run: npm run lint:changelog
 

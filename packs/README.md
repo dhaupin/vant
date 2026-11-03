@@ -28,6 +28,23 @@ pixels SHOW, and **poststruct** probes what actually SHIPPED. All four
 share the honesty contract: absence degrades to an explicit typed skip,
 never a silent pass, and same-commit same-findings is a law, not a hope.
 
+## The governance + mint + sync layer (2026-11-03)
+
+The struct family's wider set is now npm-live and pinned in devDependencies,
+but only what measures THIS repo rides a CI lane:
+
+| Layer | Tool + pin | What it does here |
+|-------|-----------|-------------------|
+| **governance** | `govstruct@0.9.0` | the one-member adopter manifest (`govstruct.config.json` + `govstruct/members/vant.json` + an evidence-map compliance block pointing at the CI lanes that actually run) — `npx govstruct lint && npx govstruct check && npx govstruct surface --verify && npx govstruct doctor` gates offline in test.yml;`--network` stays opt-in and is never set |
+| **mint (the factory)** | `monoforge@0.9.0` | stamps NEW fleet repos from proven blocks and doctors them for truth at mint time; its doctor is a mint-time instrument (dash-law: none, ever) and is wired into NO lane over this living tree (waves 19.29) |
+| **sync** | `gistory-sync` | the E2EE multi-device sync engine behind the gistory prompt keeper, built at 0.9.0 in dhaupin/gistory; publishes from its first tag (registry-ladder law, still pre-npm as of this wave) — no vant runtime use |
+
+The full multi-member fleet roster belongs to the COMPOSER (railyard), not
+to any one member repo: govstruct says who a member is, the composer's
+mount registry says where its bytes come from. Vant's in-repo manifest is
+the adopter self-check — never a second roster claiming the fleet.
+
+
 ## What crashtest is
 
 **Crashtest** is an in-process, verdict-driven adversarial QA harness for

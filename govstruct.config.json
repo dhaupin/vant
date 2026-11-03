@@ -1,0 +1,31 @@
+{
+    "schemaVersion": 1,
+    "family": {
+        "name": "vant",
+        "title": "Vant — the memory-first agent OS"
+    },
+    "members": {
+        "dir": "govstruct/members"
+    },
+    "compliance": {
+        "dir": "govstruct/compliance"
+    },
+    "manifest": {
+        "out": "govstruct/apps.json"
+    },
+    "surfaces": {
+        "registry": "govstruct/registry.json"
+    },
+    "gates": {
+        "packstruct": false,
+        "crashtest": false,
+        "poststruct": false
+    },
+    "names": {
+        "reserved": []
+    },
+    "lock": {
+        "out": "govstruct",
+        "name": "vant"
+    }
+}
