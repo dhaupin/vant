@@ -1,0 +1,18 @@
+{
+  "source": "depstruct",
+  "ok": true,
+  "version": "depstruct-census/1",
+  "generatedAt": "2026-11-03",
+  "counts": {
+    "fail": 0,
+    "warn": 0,
+    "deps": 14,
+    "ledger": 14
+  },
+  "findings": [],
+  "_stamp": {
+    "by": "scripts/struct-feed-stamp.js",
+    "from": "node scripts/audit-deps.js --json (the ledger is the law: the never-add-deps census runs offline over the declared manifest; re-stamp with npm run struct:stamp -- --rows deps after any package.json/ledger wave)",
+    "legend": "values derive from the census emit (schema 1, counts + findings personified by their own ids); restamp: npm run struct:stamp -- --rows deps"
+  }
+}

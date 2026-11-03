@@ -26,7 +26,10 @@
  * carrying NO mock flag. poststruct's row rides its real --json emit
  * over the BAKED home dist (poststruct.config.js keeps the dash-class
  * law demoted to warn: the house copy writes dashes; every other check
- * rides the family default). There are four and only four sources -
+ * rides the family default). Wave 19·31 added the fifth: depstruct,
+ * the dependency ledger census (the never-add-deps law graded over the
+ * declared manifest by scripts/audit-deps.js, glued into the stamp's
+ * deps row). There are five and only five sources -
  * the kit's own typed refusal law, mirrored here: E_STRUCT_SOURCE on
  * anything else.
  */
@@ -35,14 +38,16 @@ import liveCrashFeed from './generated/struct-feed.json'
 import livePackstructFeed from './generated/struct-feed-packstruct.json'
 import liveEyestructFeed from './generated/struct-feed-eyestruct.json'
 import livePoststructFeed from './generated/struct-feed-poststruct.json'
+import liveDepsFeed from './generated/struct-feed-deps.json'
 
-export const STRUCT_SOURCES = ['packstruct', 'crashtest', 'eyestruct', 'poststruct']
+export const STRUCT_SOURCES = ['packstruct', 'crashtest', 'eyestruct', 'poststruct', 'depstruct']
 
 export const STRUCT_LABELS = {
     packstruct: 'packstruct - pack conformance',
     crashtest: 'crashtest - the packs floor',
     eyestruct: 'eyestruct - the vision battery',
     poststruct: 'poststruct - the shipped audit',
+    depstruct: 'depstruct - the dependency ledger',
 }
 
 /** Pure verdict family, pinned to the kit's verdictOf. */
@@ -62,10 +67,11 @@ export function evidenceSlice(feed, n) {
 }
 
 /**
- * The board's feed rows - one per family. All four are LIVE stamps
+ * The board's feed rows - one per family. All five are LIVE stamps
  * written byte-identically by scripts/struct-feed-stamp.js (a shape
  * drift there breaks its own --check gate in CI); no inline mock row
- * remains - the skeleton epoch ended when poststruct's npm landed.
+ * remains - the skeleton epoch ended when poststruct's npm landed, and
+ * the census row joined the board in wave 19·31.
  */
 export const STRUCT_FEEDS = [
     {
@@ -96,5 +102,13 @@ export const STRUCT_FEEDS = [
         // config; h1/description notes state themselves); a FAIL would
         // show FINDINGS and still fail the CI audit gate.
         ...livePoststructFeed,
+    },
+    {
+        // (wave 19·31, LIVE) the depstruct row: the dependency ledger
+        // census (the never-add-deps law graded offline over the
+        // declared manifest, the ledger is the law). No mock flag;
+        // counts.deps/ledger are the census's own arithmetic and a fail
+        // here shows FINDINGS while the CI census gate fails the job.
+        ...liveDepsFeed,
     },
 ]
