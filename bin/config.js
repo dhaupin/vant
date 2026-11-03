@@ -33,7 +33,13 @@ async function main() {
             // has no runtime flags, so get() without the brain option always
             // returned null for anything the CLI itself had set.
             const val = config.get(key, null, { brain: currentBrain() });
-            console.log(`${key}=${val}`);
+            // (round-2 audit) Secret keys are masked in terminal output, the
+            // same posture the MCP config door (vant_config_get) and
+            // `config list env` already take. config.get() stays raw for
+            // internal callers; only this echo changes, so a secret never
+            // lands in a scrollback buffer or a CI log.
+            const shownVal = config.maskIfSecret(key, val);
+            console.log(`${key}=${shownVal === null || shownVal === undefined ? val : shownVal}`);
             break;
 
         case 'set':
@@ -49,12 +55,25 @@ async function main() {
                 console.log(theme.status.err('Set failed: ' + setRes.error));
                 process.exit(1);
             }
-            console.log(theme.status.ok('Set ' + key + ' ' + value + (setRes.persisted ? ' (persisted to ' + setRes.brain + ')' : ' (runtime only)')));
+            // (round-2 audit) Echo the value masked for secret keys — the
+            // confirmation still names the key, but a rotated token does not
+            // land in scrollback or a CI log.
+            const echoVal = config.maskIfSecret(key, value);
+            console.log(theme.status.ok('Set ' + key + ' ' + (echoVal === null || echoVal === undefined ? value : echoVal) + (setRes.persisted ? ' (persisted to ' + setRes.brain + ')' : ' (runtime only)')));
             break;
 
         case 'list':
         case 'ls':
             const all = config.getAll();
+            // (round-2 audit) Mask secret-valued keys (github.token,
+            // mcp.apiKey, server.key …) before printing. `config list` used
+            // to dump them in cleartext while `config list env` masked the
+            // same values — a live token on screen is a disclosure even
+            // locally (scrollback, shared terminal, CI log).
+            const maskVal = (key, value) => {
+                const m = config.maskIfSecret(key, value);
+                return m === null || m === undefined ? value : m;
+            };
             Object.entries(all).forEach(([k, v]) => {
                 // (Issue #169 QC) Object-valued config keys printed literally
                 // as "[object Object]" — unreadable and useless. Flatten one
@@ -62,12 +81,12 @@ async function main() {
                 // and scalars stay inline.
                 if (v && typeof v === 'object' && !Array.isArray(v)) {
                     for (const [sk, sv] of Object.entries(v)) {
-                        console.log(`${k}.${sk}=${typeof sv === 'object' ? JSON.stringify(sv) : sv}`);
+                        console.log(`${k}.${sk}=${typeof sv === 'object' ? JSON.stringify(sv) : maskVal(`${k}.${sk}`, sv)}`);
                     }
                 } else if (Array.isArray(v)) {
                     console.log(`${k}=${JSON.stringify(v)}`);
                 } else {
-                    console.log(`${k}=${v}`);
+                    console.log(`${k}=${maskVal(k, v)}`);
                 }
             });
             // env  — the pass-179 registry view: every VANT_* env var vant
