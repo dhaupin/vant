@@ -157,6 +157,17 @@ function check(name, ok, detail) {
     try { symStore._checkContainment(path.join(symRoot, 'root', 'link', 'escaped.txt')); } catch (e) { contErr = e.code; }
     check('E3: store containment refuses a symlinked component with SECURITY_SYMLINK_ATTACK',
         contErr === 'SECURITY_SYMLINK_ATTACK', `code=${JSON.stringify(contErr)}`);
+    // has()/list() skipped containment entirely — has() answered `true` for a
+    // path outside the store through the symlink (an existence oracle), and
+    // list() enumerated the outside dir. Both now fail closed.
+    let hasLeak = null;
+    try { hasLeak = symStore.has('root/link/secret.txt'); } catch (e) { hasLeak = 'threw:' + e.code; }
+    check('E4: storage.has() refuses a symlinked-component path (no existence oracle)',
+        hasLeak === false, `-> ${JSON.stringify(hasLeak)}`);
+    let listLeak = null;
+    try { listLeak = symStore.list('root/link/*'); } catch (e) { listLeak = 'threw:' + e.code; }
+    check('E5: storage.list() refuses a symlinked-component dir (no enumeration escape)',
+        Array.isArray(listLeak) && listLeak.length === 0, `-> ${JSON.stringify(listLeak)}`);
     fs.rmSync(symRoot, { recursive: true, force: true });
 
     // ---- F. Door verb classification: a tool whose name ends in the read
