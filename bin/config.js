@@ -69,26 +69,30 @@ async function main() {
             // mcp.apiKey, server.key …) before printing. `config list` used
             // to dump them in cleartext while `config list env` masked the
             // same values — a live token on screen is a disclosure even
-            // locally (scrollback, shared terminal, CI log).
-            const maskVal = (key, value) => {
-                const m = config.maskIfSecret(key, value);
-                return m === null || m === undefined ? value : m;
-            };
-            Object.entries(all).forEach(([k, v]) => {
-                // (Issue #169 QC) Object-valued config keys printed literally
-                // as "[object Object]" — unreadable and useless. Flatten one
-                // level: nested keys print as `section.key=value`, arrays
-                // and scalars stay inline.
-                if (v && typeof v === 'object' && !Array.isArray(v)) {
-                    for (const [sk, sv] of Object.entries(v)) {
-                        console.log(`${k}.${sk}=${typeof sv === 'object' ? JSON.stringify(sv) : maskVal(`${k}.${sk}`, sv)}`);
-                    }
-                } else if (Array.isArray(v)) {
-                    console.log(`${k}=${JSON.stringify(v)}`);
-                } else {
-                    console.log(`${k}=${maskVal(k, v)}`);
+            // locally (scrollback, shared terminal, CI log). Flatten the
+            // tree to dotted leaf paths and redact EVERY leaf with
+            // redactSecrets, so secrets buried more than one level deep or
+            // sitting inside arrays (providers.github.token, keys:[{token}])
+            // are masked too — the old one-level flatten printed those
+            // verbatim.
+            const redacted = config.redactSecrets(all);
+            const walk = (node, prefix) => {
+                // Arrays stay on one line (redactSecrets already masked any
+                // secret leaves inside), matching the old output shape.
+                if (Array.isArray(node)) {
+                    console.log(`${prefix}=${JSON.stringify(node)}`);
+                    return;
                 }
-            });
+                if (node !== null && typeof node === 'object') {
+                    for (const [k, v] of Object.entries(node)) {
+                        walk(v, prefix ? `${prefix}.${k}` : k);
+                    }
+                    if (Object.keys(node).length === 0) console.log(`${prefix}=${JSON.stringify(node)}`);
+                    return;
+                }
+                console.log(`${prefix}=${node}`);
+            };
+            walk(redacted, '');
             // env  — the pass-179 registry view: every VANT_* env var vant
             // consumes, resolved with source (env vs fallback) + typo flags
             if (args[1] === 'env') {

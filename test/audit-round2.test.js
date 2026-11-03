@@ -204,6 +204,61 @@ function check(name, ok, detail) {
     check('G3: maskIfSecret leaves a non-secret key untouched',
         cfg.maskIfSecret('plain.key', 'ok') === 'ok',
         `-> ${JSON.stringify(cfg.maskIfSecret('plain.key', 'ok'))}`);
+    check('G4: redactSecrets masks nested secret leaves without mutating the input',
+        (() => {
+            const src = { github: { token: 'ghp_x' }, mcp: { apiKey: 'k' }, ok: { plain: 'v' } };
+            const out = cfg.redactSecrets(src);
+            return out.github.token.includes('****') && out.mcp.apiKey.includes('****')
+                && out.ok.plain === 'v' && src.github.token === 'ghp_x';
+        })(), `-> ${JSON.stringify(cfg.redactSecrets({ github: { token: 'ghp_x' } }))}`);
+    check('G5: redactSecrets masks secret leaves buried deep and inside arrays',
+        (() => {
+            const out = cfg.redactSecrets({ providers: { github: { token: 'ghp_deep' } }, keys: [{ apiKey: 'k_arr' }] });
+            return out.providers.github.token.includes('****') && out.keys[0].apiKey.includes('****');
+        })(), `-> ${JSON.stringify(cfg.redactSecrets({ providers: { github: { token: 'ghp_deep' } }, keys: [{ apiKey: 'k_arr' }] }))}`);
+
+    // ---- H. The read-class, capless `vant_storage_read` door served the
+    //         persisted config file (models/private/*/config.json) VERBATIM,
+    //         leaking github.token / mcp.apiKey in cleartext — bypassing both
+    //         the config door's mask and the CLI mask added in G. An observer
+    //         guest reaches this door, so the raw read is a disclosure.
+    //         Run in a child process: the file-store singleton anchors its
+    //         basePath to process.cwd() at first use.
+    const HROOT = fs.mkdtempSync(path.join(ROOT, 'models', 'private', 'r2h-'));
+    try {
+        fs.mkdirSync(path.join(HROOT, 'models', 'private', 'vant'), { recursive: true });
+        fs.writeFileSync(path.join(HROOT, 'models', 'private', 'vant', 'config.json'),
+            JSON.stringify({ github: { token: 'ghp_SECRET_DO_NOT_LEAK_0001' }, mcp: { apiKey: 'vant_key_do_not_leak_0002' } }));
+        fs.mkdirSync(path.join(HROOT, 'models', 'private', 'other'), { recursive: true });
+        const plainBody = JSON.stringify({ hello: 'world', n: 1 });
+        fs.writeFileSync(path.join(HROOT, 'models', 'private', 'other', 'notes.json'), plainBody);
+        const outFile = path.join(HROOT, 'r2-out.json');
+        const probe = `
+            const fs = require('fs');
+            const mcp = require(${JSON.stringify(path.join(ROOT, 'lib', 'mcp'))});
+            (async () => {
+                const cfgRes = await Promise.resolve(mcp.call('vant_storage_read', { path: 'models/private/vant/config.json' }));
+                const plainRes = await Promise.resolve(mcp.call('vant_storage_read', { path: 'models/private/other/notes.json' }));
+                fs.writeFileSync(${JSON.stringify(outFile)}, JSON.stringify({ cfg: cfgRes, plain: plainRes }));
+            })().catch((e) => { fs.writeFileSync(${JSON.stringify(outFile)}, JSON.stringify({ error: e.code || e.message })); });
+        `;
+        spawnSync(process.execPath, ['-e', probe], { cwd: HROOT, encoding: 'utf8' });
+        // The child emits module logs on stdout, so read the result from a file
+        // rather than parsing the stream.
+        let out = {};
+        try { out = JSON.parse(fs.readFileSync(outFile, 'utf8')); } catch (e) { out = { error: 'no-child-output' }; }
+        const cfgText = typeof out.cfg === 'string' ? out.cfg : JSON.stringify(out.cfg);
+        check('H1: vant_storage_read does not leak a config-file secret in cleartext',
+            !cfgText.includes('ghp_SECRET_DO_NOT_LEAK_0001') && !cfgText.includes('vant_key_do_not_leak_0002'),
+            `leaked=${cfgText.includes('ghp_SECRET_DO_NOT_LEAK_0001') || cfgText.includes('vant_key_do_not_leak_0002')}`);
+        check('H2: vant_storage_read still surfaces the (masked) secret key names',
+            cfgText.includes('token') && cfgText.includes('apiKey') && cfgText.includes('****'),
+            `-> ${cfgText.slice(0, 120)}`);
+        check('H3: vant_storage_read returns a non-secret JSON file unchanged',
+            out.plain === plainBody, `-> ${JSON.stringify(out.plain)}`);
+    } finally {
+        fs.rmSync(HROOT, { recursive: true, force: true });
+    }
 
     console.log(`\n${failures === 0 ? '✓ all pins hold' : `✗ ${failures} pin(s) failed`}`);
     process.exit(failures === 0 ? 0 : 1);
