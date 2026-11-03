@@ -7,16 +7,19 @@
  * (the pure-data law), so crawlers and no-JS visitors read the whole
  * board and no network call ships to the browser.
  *
- * The four STRUCT families, combined:
+ * The five STRUCT families, combined:
  *   packstruct  - pack conformance gate
  *   crashtest   - the packs floor (rows, contract, native suites)
  *   eyestruct   - the vision battery's findings (npm-live)
  *   poststruct  - the shipped audit's findings (npm-live 2026-11-02)
+ *   depstruct   - the dependency ledger census (the never-add-deps
+ *                 law, wave 19·31: the ledger in scripts/audit-deps.js
+ *                 is the only door a dependency rides through)
  *
  * EPOCH LAW (honest by construction): every card that is inline data
  * carries the MOCK SKELETON badge next to its verdict; with issue #264's
  * steps b + c + d landed AND poststruct's npm package live (2026-11-02),
- * all four cards ride live stamped emits (src/generated/struct-feed*.json)
+ * all five cards ride live stamped emits (src/generated/struct-feed*.json)
  * and no mock row remains. The skeleton epoch ended with the poststruct
  * landing; the shape stays fixed (kit head:
  * web/kit/components/struct-audit.tsx - the single shape source the
@@ -47,14 +50,15 @@ export default function StructAudit() {
             <div className="container">
                 <div className="sec-head"><span className="sec-idx">07</span><h2>Struct audit</h2></div>
                 <p className="sub">
-                    The four STRUCT families' findings, combined on one page:
+                    The five STRUCT families' findings, combined on one page:
                     the pack conformance gate, the crashtest packs floor, the
-                    eyestruct vision battery, and the poststruct shipped
-                    audit. All four cards ride live stamped emits over the
-                    tools' own outputs (issue #264 steps b - d landed, and
-                    poststruct's npm landed 2026-11-02): nothing is fetched
-                    at page time, and nothing is graded beyond what a stamp
-                    measured.
+                    eyestruct vision battery, the poststruct shipped audit,
+                    and the depstruct dependency ledger. All five cards ride
+                    live stamped emits over the tools' own outputs (issue
+                    #264 steps b - d landed, poststruct's npm landed
+                    2026-11-02, and depstruct's census row landed wave 19·31):
+                    nothing is fetched at page time, and nothing is graded
+                    beyond what a stamp measured.
                 </p>
 
                 <div className="struct-grid">

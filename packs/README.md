@@ -38,11 +38,17 @@ but only what measures THIS repo rides a CI lane:
 | **governance** | `govstruct@0.9.0` | the one-member adopter manifest (`govstruct.config.json` + `govstruct/members/vant.json` + an evidence-map compliance block pointing at the CI lanes that actually run) — `npx govstruct lint && npx govstruct check && npx govstruct surface --verify && npx govstruct doctor` gates offline in test.yml;`--network` stays opt-in and is never set |
 | **mint (the factory)** | `monoforge@0.9.0` | stamps NEW fleet repos from proven blocks and doctors them for truth at mint time; its doctor is a mint-time instrument (dash-law: none, ever) and is wired into NO lane over this living tree (waves 19.29) |
 | **sync** | `gistory-sync` | the E2EE multi-device sync engine behind the gistory prompt keeper, built at 0.9.0 in dhaupin/gistory; publishes from its first tag (registry-ladder law, still pre-npm as of this wave) — no vant runtime use |
+| **ledger (depstruct, in-repo)** | `scripts/audit-deps.js` (root `lint:deps`) | the never-add-deps law (wave 19.31): the LEDGER inside the census script is the only door a dependency rides through — a conscious row with lane + honest note, real evidence of that lane in the tree, the family pin, and package-lock parity, all offline over files on disk; it cross-checks that the pins the other rows record stay true (a `depstruct-census/1` row rides the STRUCT audit board) |
 
 The full multi-member fleet roster belongs to the COMPOSER (railyard), not
 to any one member repo: govstruct says who a member is, the composer's
 mount registry says where its bytes come from. Vant's in-repo manifest is
 the adopter self-check — never a second roster claiming the fleet.
+
+**Where the wider set could take vant next (recorded honestly — ideas only, nothing wired):**
+
+- **monoforge** could fingerprint the ledger at mint time: a future `verify-release` step archives a factory receipt over the census's schema-1 emit, so a release proves the tree it shipped carried the exact dependency ledger the audit graded — and the factory stands ready to stamp the fleet's next member repo (the railyard composer) from the same proven blocks vant's pins already ride.
+- **gistory-sync**, once its registry ladder publishes, could back vant's memory-first soul with a sync door: the brain corpus E2EE-synced across installs over a gistory-compatible channel (its SyncAgent / mergePayload engines), the piece today's git-based persistence deliberately does not cover when two installs ride different remotes. Adoption waits for the first npm tag — until then the pre-npm guard in `scripts/audit-deps.js` refuses any declared dep (a 404ing `npm ci` is a break, not a feature).
 
 
 ## What crashtest is

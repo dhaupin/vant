@@ -10,14 +10,16 @@ import * as React from "react";
  *   crashtest   — the packs floor (rows, contract, native suites)
  *   eyestruct   — the vision battery's findings npm feed
  *   poststruct  — the baked-HTML audit's findings feed (npm-live)
+ *   depstruct   — the dependency ledger census (the never-add-deps law, wave 19·31)
  *
  * EPOCH LAW (honest by construction): every inline feed here carries
  * `mock: true` and renders a MOCK identity chip; nothing reads a
  * network, nothing fabricates a green. LIVE feeds replace their mock
- * twins in the SAME shape — all four now do (steps b + c + d landed,
- * and poststruct's npm landed 2026-11-02): the crashtest verdict ledger,
+ * twins in the SAME shape — all five now do (steps b + c + d landed,
+ * poststruct's npm landed 2026-11-02, and depstruct's census row landed wave
+ * 19·31): the crashtest verdict ledger,
  * the packstruct dual emit (lint --deep --json + the audit gate's own
- * verdict line), the eyestruct gate row, and the poststruct baked-dist
+ * verdict line), the eyestruct gate row, the poststruct baked-dist
  * audit row — all written byte-identically by scripts/struct-feed-stamp.js
  * (.sha256-pinned) and consumed per flavor: web/dashboard substitutes
  * them in modules/struct-audit over the vendored pinned frame copy,
@@ -30,13 +32,15 @@ import * as React from "react";
  * The poststruct adapter: parsePoststructFeed below, built against
  * poststruct@0.9.0's REAL --json emit (the staging PRD predicted a
  * top-level version string; the landed package carries `schema: 1` —
- * the adapter states the contract the tool actually ships).
+ * the adapter states the contract the tool actually ships). The
+ * depstruct adapter: parseDepsFeed below, built against the census's
+ * own --json emit (scripts/audit-deps.js — the ledger is the law).
  */
 
-export type StructSource = "packstruct" | "crashtest" | "eyestruct" | "poststruct";
+export type StructSource = "packstruct" | "crashtest" | "eyestruct" | "poststruct" | "depstruct";
 
 /** The only sources the board renders; unknown is a typed refusal, never a guess. */
-export const STRUCT_SOURCES: StructSource[] = ["packstruct", "crashtest", "eyestruct", "poststruct"];
+export const STRUCT_SOURCES: StructSource[] = ["packstruct", "crashtest", "eyestruct", "poststruct", "depstruct"];
 
 export interface StructFinding {
   /** the finding's own id in the emitting tool's namespace */
@@ -138,6 +142,70 @@ export function parsePoststructFeed(raw: unknown): { feed?: StructFeed; error?: 
 }
 
 /**
+ * The depstruct adapter. Input contract per the census's --json emit
+ * (scripts/audit-deps.js — the never-add-deps law's own emit):
+ *   { schema: 1, source: 'depstruct', version: 'depstruct-census/1',
+ *     generatedAt, counts: { fail, warn, info, deps, ledger },
+ *     findings: [{ id, page?, level, message }] }
+ * The verdict-fail/count arithmetic is the census's own; deps + ledger
+ * ride verbatim (the census's declared/ledger-row arithmetic). Typed
+ * refusals only, never a shape guess: E_DEPSTRUCT_SHAPE states the
+ * field that failed.
+ */
+export function parseDepsFeed(raw: unknown): { feed?: StructFeed; error?: string } {
+  if (typeof raw !== "object" || raw === null) {
+    return { error: "E_DEPSTRUCT_SHAPE: emit is not an object" };
+  }
+  const r = raw as Record<string, unknown>;
+  if (r.schema !== 1) {
+    return { error: `E_DEPSTRUCT_SHAPE: emit carries schema ${String(r.schema)} — the census contract is schema 1` };
+  }
+  const counts = r.counts;
+  if (typeof counts !== "object" || counts === null) {
+    return { error: "E_DEPSTRUCT_SHAPE: emit carries no counts block" };
+  }
+  if (!Array.isArray(r.findings)) {
+    return { error: "E_DEPSTRUCT_SHAPE: emit carries no findings array" };
+  }
+  const findings: StructFinding[] = [];
+  for (const f of r.findings) {
+    if (typeof f !== "object" || f === null) {
+      return { error: "E_DEPSTRUCT_SHAPE: a finding row is not an object" };
+    }
+    const fr = f as Record<string, unknown>;
+    if (typeof fr.id !== "string" || typeof fr.level !== "string") {
+      return { error: "E_DEPSTRUCT_SHAPE: a finding row lacks id or level" };
+    }
+    const level = fr.level;
+    if (level !== "fail" && level !== "warn" && level !== "info") {
+      return { error: `E_DEPSTRUCT_SHAPE: finding ${String(fr.id)} has unknown level ${level}` };
+    }
+    findings.push({
+      id: fr.id,
+      page: typeof fr.page === "string" ? fr.page : undefined,
+      level,
+      message: typeof fr.message === "string" ? fr.message : "",
+    });
+  }
+  const c = counts as Record<string, unknown>;
+  return {
+    feed: {
+      source: "depstruct",
+      ok: true,
+      version: "depstruct-census/1",
+      generatedAt: typeof r.generatedAt === "string" ? r.generatedAt : undefined,
+      counts: {
+        fail: typeof c.fail === "number" ? c.fail : undefined,
+        warn: typeof c.warn === "number" ? c.warn : undefined,
+        deps: typeof c.deps === "number" ? c.deps : undefined,
+        ledger: typeof c.ledger === "number" ? c.ledger : undefined,
+      },
+      findings,
+    },
+  };
+}
+
+/**
  * The skeleton epoch's inline mocks — one per family, shaped EXACTLY as
  * the real feeds will land (the adapter contract above is poststruct's;
  * the others mirror the tools' stamped README surfaces as of 2026-10-28).
@@ -199,6 +267,12 @@ export const MOCK_STRUCT_FEEDS: StructFeed[] = [
     error: "mock: the kit's shape preview — poststruct's LIVE row rides the stamped emit in each flavor (web/*/src/generated/struct-feed-poststruct.json); the preview pins the contract, nothing is graded.",
     sourceHref: "https://www.npmjs.com/package/poststruct",
   },
+  {
+    source: "depstruct",
+    ok: false,
+    mock: true,
+    error: "mock: the kit's shape preview — depstruct's LIVE row rides the stamped census emit in each flavor (web/*/src/generated/struct-feed-deps.json); the preview pins the contract, nothing is graded.",
+  },
 ];
 
 /** Evidence slice: the first N findings, capped so a page stays a slice. */
@@ -220,6 +294,7 @@ const SOURCE_LABEL: Record<StructSource, string> = {
   crashtest: "crashtest (the packs floor)",
   eyestruct: "eyestruct (the vision battery)",
   poststruct: "poststruct (the shipped audit)",
+  depstruct: "depstruct (the dependency ledger)",
 };
 
 function VerdictChip({ verdict }: { verdict: StructVerdict }) {
@@ -244,8 +319,8 @@ export function StructAuditRefuse({ reason }: { reason: string }) {
     <div className="rounded-lg border border-err/40 bg-err/5 p-3 text-sm">
       <p className="font-medium text-err">{reason}</p>
       <p className="mt-1 text-xs text-ink-soft">
-        The board renders only the four STRUCT sources (packstruct, crashtest,
-        eyestruct, poststruct); the caller names the family, never the renderer.
+        The board renders only the five STRUCT sources (packstruct, crashtest,
+        eyestruct, poststruct, depstruct); the caller names the family, never the renderer.
       </p>
     </div>
   );

@@ -38,6 +38,11 @@
             "where": "test.yml ci job"
         },
         {
+            "banner": "the dependency ledger census (depstruct: the never-add-deps law — every declared dep rides a ledger row, a lane's evidence, the family pin, and lockfile parity; cross-checks the pins this map records)",
+            "runs": ["npm run lint:deps"],
+            "where": "test.yml ci job - Dependency ledger census"
+        },
+        {
             "banner": "this family's own identity + conformance (the manifest you are reading's gate)",
             "runs": ["npx govstruct lint", "npx govstruct check", "npx govstruct surface --verify", "npx govstruct doctor"],
             "where": "test.yml ci job - govstruct identity gate",
