@@ -69,11 +69,16 @@ function checkModel() {
     // honors VANT_BRAIN env > currentBrain; MODEL_PATH / VANT_BRAIN_PATH /
     // VANT_STORAGE_PATH remain explicit escapes.
     let brainPath = process.env.MODEL_PATH || process.env.VANT_BRAIN_PATH || process.env.VANT_STORAGE_PATH || null;
+    // An explicit MODEL_PATH/VANT_BRAIN_PATH escape pins the path AND opts out
+    // of the #297 public starter-layer overlay: the caller named this exact
+    // tree and wants it measured as-is (a genuinely empty dir stays "not
+    // initialized" — the prime #111 pin).
+    const pinnedPath = brainPath != null;
     if (!brainPath) {
         try { brainPath = require('../lib/brain').getBrainPath(); } catch (e) { brainPath = 'models/private'; }
     }
     const brainFs = _brainStore(brainPath);
-    const markerFound = checks.some(pair => pair.some(f => brainFs.has(f)));
+    let markerFound = checks.some(pair => pair.some(f => brainFs.has(f)));
     // (pass 89 — prime #111) Template markers are NOT the definition of
     // "initialized": a brain grown by real use (orgchart/, state/, learned
     // docs) may never create identity.md/meta.json/lessons.md at its root,
@@ -93,23 +98,46 @@ function checkModel() {
         // Missing/unreadable dir → no content → genuinely uninitialized
         contentCount = 0;
     }
+    // (issue #297) Public-underneath: a FRESH private brain (no markers AND no
+    // content of its own) reads as the shipped public template layered beneath
+    // it. Read the template's markers so health reports the layered brain as
+    // initialized and names the public source, instead of "not initialized".
+    // The private dir stays the runtime pointer/write target. A brain with any
+    // content of its own is NEVER overlaid (prime #111 stays intact).
+    let layeredPublicPath = null;
+    if (!pinnedPath && !markerFound && contentCount === 0) {
+        try {
+            const pub = require('../lib/brain').getPublicPath();
+            if (pub && path.resolve(pub) !== path.resolve(brainPath) && fs.existsSync(pub)) {
+                const pubFs = _brainStore(pub);
+                if (checks.some(pair => pair.some(f => pubFs.has(f)))) {
+                    markerFound = true;
+                    layeredPublicPath = pub;
+                }
+            }
+        } catch (e) { /* no public layer - stay honest */ }
+    }
     const found = markerFound || contentCount > 0;
 
     if (found) {
         console.log('  ' + theme.status.ok('Brain exists at ' + brainPath));
-        if (!markerFound) {
+        if (layeredPublicPath) {
+            console.log('  ' + theme.status.ok('Starter content layered from public template ' + layeredPublicPath));
+        } else if (!markerFound) {
             console.log('  ' + theme.status.warn('No template markers at root (wanted: ' + wantedMarkers + ') — brain is in use, scaffold skipped'));
         }
-        
-        // Try to read identity
-        const identityRel = brainFs.has('identity.md') 
-            ? 'identity.md' 
-            : brainFs.has('identity.txt') 
-                ? 'identity.txt' 
+
+        // Try to read identity (private first, then the layered public template)
+        const readRoot = (brainFs.has('identity.md') || brainFs.has('identity.txt'))
+            ? brainFs : _brainStore(layeredPublicPath || brainPath);
+        const identityRel = readRoot.has('identity.md')
+            ? 'identity.md'
+            : readRoot.has('identity.txt')
+                ? 'identity.txt'
                 : null;
-        
+
         if (identityRel) {
-            const content = brainFs.read(identityRel, 'utf8');
+            const content = readRoot.read(identityRel, 'utf8');
             const modelMatch = content.match(/MODEL:\s*(.+)/);
             if (modelMatch) {
                 console.log('  → ' + theme.value(modelMatch[1]));
