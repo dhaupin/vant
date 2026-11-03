@@ -1,0 +1,17 @@
+{
+    "id": "vant",
+    "name": "Vant",
+    "role": "product",
+    "url": "https://vant.creadev.org",
+    "repo": "dhaupin/vant",
+    "npm": "vant-os",
+    "aliases": [],
+    "home": null,
+    "blurb": "Vant: Versatile Autonomous Networked Tool — the memory-first agent OS. Durable agent OS + memory + cold storage + runtime, with generational evolution, stored with version control; built for long-running autonomous sessions, using git-based persistence.",
+    "icon": "vant",
+    "order": 1,
+    "status": "Live",
+    "section": "open-source",
+    "needs": [],
+    "grants": []
+}

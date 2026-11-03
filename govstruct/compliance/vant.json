@@ -1,0 +1,47 @@
+{
+    "member": "vant",
+    "v": 1,
+    "law": "An evidence map, not a certificate: each row names the CI lane that actually proves it (the gates wall + the crashtest job in .github/workflows/test.yml), with the pinned tool that runs it. govstruct certifies nothing; this block only records what the battery measures.",
+    "gates": [
+        {
+            "banner": "the pod battery",
+            "runs": ["npm test", "node test/run-all.js"],
+            "where": "test.yml ci job - Run tests + Run standalone suites"
+        },
+        {
+            "banner": "the crashtest packs floor (contract table + real-harness run root)",
+            "runs": ["node test/ci-crashtest-gate.js", "npx crashtest lint-determinism"],
+            "where": "test.yml crashtest job",
+            "pin": "crashtest@1.1.0"
+        },
+        {
+            "banner": "packstruct author-time pack lint + the §7 conformance audit",
+            "runs": ["npm run packs:lint", "npm run packs:audit"],
+            "where": "test.yml ci job",
+            "pin": "packstruct@1.0.0"
+        },
+        {
+            "banner": "eyestruct visual ledger gate (browserless, the meanings not the pixels)",
+            "runs": ["npx eyestruct gate"],
+            "where": "test.yml ci job",
+            "pin": "eyestruct@1.0.0"
+        },
+        {
+            "banner": "poststruct shipped audit over the baked home dist",
+            "runs": ["npm run build:home", "npx poststruct audit web/home/dist --json"],
+            "where": "test.yml ci job - Poststruct audit",
+            "pin": "poststruct@0.9.0"
+        },
+        {
+            "banner": "docs + home + claims truth gates",
+            "runs": ["npm run lint:docs", "npm run lint:home", "npm run lint:claims", "npm run lint:changelog", "npm run lint:surface", "npm run ledger:gate"],
+            "where": "test.yml ci job"
+        },
+        {
+            "banner": "this family's own identity + conformance (the manifest you are reading's gate)",
+            "runs": ["npx govstruct lint", "npx govstruct check", "npx govstruct surface --verify", "npx govstruct doctor"],
+            "where": "test.yml ci job - govstruct identity gate",
+            "pin": "govstruct@0.9.0"
+        }
+    ]
+}
