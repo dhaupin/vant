@@ -81,9 +81,10 @@ export default function Home() {
                         <p style={{ margin: '13px 0 0' }}><a className="btn outline" href="https://docs.creadev.org/vant/getting-started/agent-onboarding">Agent onboarding</a></p>
                     </div>
                 </div>
-                <p className="drag-hint">
-                    The firing web behind this text is your agent's brain: every spike is a mem learned, rippling out to its neighbours.
-                </p>
+                <div className="stats-head fx-reveal">
+                    <h2>What ships, counted</h2>
+                    <p>The real numbers for everything below: the shipped CLI surface, the MCP tools, the lib modules, the doc pages, the test suites. Generated from this repository at build time — no hand-pinned counts left to rot.</p>
+                </div>
             </div>
         </header>
             <main id="main">
@@ -107,11 +108,11 @@ export default function Home() {
             <section>
                 <div className="container">
                     <div className="sec-head fx-reveal"><span className="sec-idx">01</span><h2>The rhythm is yours</h2></div>
-                    <p className="sub fx-reveal">Three moves, at whatever pace suits: every session, once a week, or only when something is worth keeping. Vant suggests a cadence, it never demands one.</p>
+                    <p className="sub fx-reveal">Three moves, at whatever pace suits: every session, once a week, or only when something is worth keeping. Vant suggests a cadence, it never demands one. The first pass takes five minutes: no dashboard to configure, no account to make.</p>
                     <div className="loop">
                         <div className="card fx-reveal">
                             <h3>Open the brain</h3>
-                            <p>A session begins by reading what earlier sessions left behind: identity, goals, lessons, errors. Whoever starts next arrives already knowing things.</p>
+                            <p>A session begins by reading what earlier sessions left behind: identity, goals, lessons, errors. Whoever starts next arrives already knowing things. It is just markdown: onboard walks the files, and any editor opens them.</p>
                             <Term copyLabel="Copy session start commands">
                                 <span className="prompt">$ </span><span className="cmd">vant</span> start{'\n'}
                                 <span className="prompt">$ </span><span className="cmd">vant</span> onboard wake
@@ -139,39 +140,7 @@ export default function Home() {
 
             <section>
                 <div className="container">
-                    <div className="sec-head fx-reveal"><span className="sec-idx">02</span><h2>Five minutes to a first win</h2></div>
-                    <p className="sub fx-reveal">No dashboard to configure, no account to make. The CLI is the product and the memory is files, so the first session can be this short.</p>
-                    <div className="loop">
-                        <div className="card fx-reveal">
-                            <h3>Install and start</h3>
-                            <p>One clone, one install. vant start checks the brain layout and runs health checks before it hands over.</p>
-                            <Term copyLabel="Copy install and start" ><span className="prompt">$ </span>git clone https://github.com/dhaupin/vant.git &amp;&amp; cd vant &amp;&amp; npm ci &amp;&amp; npm link{'\n'}
-<span className="prompt">$ </span><span className="cmd">vant</span> start
-                            </Term>
-                        </div>
-                        <div className="card fx-reveal fx-d1">
-                            <h3>Meet the brain</h3>
-                            <p>It is just markdown. Read it, edit it, keep your own notes in it. vant onboard walks the files for you.</p>
-                            <Term copyLabel="Copy onboard commands" >
-                                <span className="prompt">$ </span><span className="cmd">vant</span> onboard{'\n'}
-                                <span className="prompt">$ </span>cat models/public/vant/identity.md
-                            </Term>
-                        </div>
-                        <div className="card fx-reveal fx-d2">
-                            <h3>Write the first lesson</h3>
-                            <p>From here it just repeats: learn during the session, commit what is worth keeping, and the next session starts knowing it.</p>
-                            <Term copyLabel="Copy first lesson commands" >
-                                <span className="prompt">$ </span><span className="cmd">vant</span> learn first-lesson <span className="cmt">"Vant works."</span>{'\n'}
-                                <span className="prompt">$ </span><span className="cmd">git</span> add models/ &amp;&amp; <span className="cmd">git</span> commit -m <span className="cmt">"first lesson"</span>
-                            </Term>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section>
-                <div className="container">
-                    <div className="sec-head fx-reveal"><span className="sec-idx">03</span><h2>Works with your agents, not against them</h2></div>
+                    <div className="sec-head fx-reveal"><span className="sec-idx">02</span><h2>Works with your agents, not against them</h2></div>
                     <p className="sub fx-reveal">Any agent that can read a file or speak MCP can use Vant. Bring the model and the framework you like; the memory layer does not care.</p>
                     <div className="grid-3">
                         <div className="card fx-reveal">
@@ -195,7 +164,7 @@ export default function Home() {
 
             <section>
                 <div className="container">
-                    <div className="sec-head fx-reveal"><span className="sec-idx">04</span><h2>Three memory systems, one home</h2></div>
+                    <div className="sec-head fx-reveal"><span className="sec-idx">03</span><h2>Three memory systems, one home</h2></div>
                     <p className="sub fx-reveal">Not one memory: three, with different jobs. All of them are files under models/ in your repository.</p>
                     <div className="grid-3">
                         <div className="card fx-reveal">
@@ -222,7 +191,7 @@ export default function Home() {
 
             <section>
                 <div className="container">
-                    <div className="sec-head fx-reveal"><span className="sec-idx">05</span><h2>Git is the feature</h2></div>
+                    <div className="sec-head fx-reveal"><span className="sec-idx">04</span><h2>Git is the feature</h2></div>
                     <p className="sub fx-reveal">Your memory is files in your repo, so every Git workflow is a memory workflow.</p>
                     <div className="grid-3">
                         <div className="card fx-reveal">
@@ -243,7 +212,7 @@ export default function Home() {
 
             <section>
                 <div className="container">
-                    <div className="sec-head fx-reveal"><span className="sec-idx">06</span><h2>The whole surface, one screen</h2></div>
+                    <div className="sec-head fx-reveal"><span className="sec-idx">05</span><h2>The whole surface, one screen</h2></div>
                     <p className="sub fx-reveal">Vant is a memory layer with a platform hiding inside it. Everything below ships today, and each card points at its docs door. Nobody needs all of it: start with one card, the rest wait.</p>
                     <div className="grid-3">
                         <div className="card fx-reveal">
@@ -332,7 +301,7 @@ export default function Home() {
 
             <section>
                 <div className="container">
-                    <div className="sec-head fx-reveal"><span className="sec-idx">07</span><h2>One agent today, a fleet tomorrow</h2></div>
+                    <div className="sec-head fx-reveal"><span className="sec-idx">06</span><h2>One agent today, a fleet tomorrow</h2></div>
                     <p className="sub fx-reveal">Everyone starts in the same place: one brain, one repo. How far you go is an option, not a migration.</p>
                     <div className="tiers">
                         <div className="tier fx-reveal">
@@ -374,7 +343,7 @@ export default function Home() {
 
             <section>
                 <div className="container">
-                    <div className="sec-head fx-reveal"><span className="sec-idx">08</span><h2>The enterprise mesh, already in the box</h2></div>
+                    <div className="sec-head fx-reveal"><span className="sec-idx">07</span><h2>The enterprise mesh, already in the box</h2></div>
                     <p className="sub fx-reveal">This is not a roadmap slide. The distributed pieces ship today, with security and failure modes designed the same as the local ones.</p>
                     <div className="grid-3">
                         <div className="card fx-reveal">
@@ -393,11 +362,6 @@ export default function Home() {
                             <a href="https://docs.creadev.org/vant/operations/federation-playbooks" className="learn-more">Federation →</a>
                         </div>
                         <div className="card fx-reveal">
-                            <h3>Fail-closed security chain</h3>
-                            <p>Sandbox capabilities, input validation, rate limiting, escrow approval on every brain operation. Refusals come back as typed codes, never silent half-writes.</p>
-                            <a href="https://docs.creadev.org/vant/security/" className="learn-more">Security →</a>
-                        </div>
-                        <div className="card fx-reveal fx-d1">
                             <h3>Headless and Docker</h3>
                             <p>REST mode for CI and containers. The brain outlives the container, because it is files in a volume or a repo.</p>
                             <a href="https://docs.creadev.org/vant/reference/rest-api" className="learn-more">REST API →</a>
@@ -415,7 +379,7 @@ export default function Home() {
 
             <section>
                 <div className="container">
-                    <div className="sec-head fx-reveal"><span className="sec-idx">09</span><h2>Where Vant fits</h2></div>
+                    <div className="sec-head fx-reveal"><span className="sec-idx">08</span><h2>Where Vant fits</h2></div>
                     <p className="sub fx-reveal">Saying what Vant is not, because your time matters more than our conversion rate.</p>
                     <div className="fits">
                         <div className="card fx-reveal">
@@ -441,7 +405,7 @@ export default function Home() {
 
             <section>
                 <div className="container faq">
-                    <div className="sec-head fx-reveal"><span className="sec-idx">10</span><h2>Questions agents actually ask</h2></div>
+                    <div className="sec-head fx-reveal"><span className="sec-idx">09</span><h2>Questions agents actually ask</h2></div>
                     <p className="sub fx-reveal">The same questions your agent will ask on its first session, answered.</p>
                     {FAQ.map(([q, a, href, noopener]) => (
                         <details key={q} className="fx-reveal">

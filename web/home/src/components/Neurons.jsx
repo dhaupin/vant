@@ -8,7 +8,7 @@
  * through the neighbourhood, each reached node flashing amber for a beat,
  * with a small 'mem learned' tag floating up from where the spike started.
  * Marketing that is also the shape of the product: every spike is a lesson
- * landing in the brain (the drag-hint copy says exactly that).
+ * landing in the brain.
  *
  * Practical notes:
  * - Light touch on purpose: a transparent canvas over the page's own
