@@ -1,0 +1,120 @@
+{
+  "source": "poststruct",
+  "ok": true,
+  "version": "poststruct-audit/1",
+  "generatedAt": "2026-11-03",
+  "counts": {
+    "fail": 0,
+    "warn": 17
+  },
+  "findings": [
+    {
+      "id": "language/dash-class",
+      "page": "ailments/index.html",
+      "level": "warn",
+      "message": "3 em dashs in prose (use a hyphen)"
+    },
+    {
+      "id": "language/dash-class",
+      "page": "audit/index.html",
+      "level": "warn",
+      "message": "1 em dash in prose (use a hyphen)"
+    },
+    {
+      "id": "language/dash-class",
+      "page": "changelog/index.html",
+      "level": "warn",
+      "message": "81 em dashs in prose (use a hyphen)"
+    },
+    {
+      "id": "language/dash-class",
+      "page": "changelog/index.html",
+      "level": "warn",
+      "message": "4 en dashs in prose (use a hyphen)"
+    },
+    {
+      "id": "head/h1-absent",
+      "page": "ailments/index.html",
+      "level": "warn",
+      "message": "no non-empty <h1>"
+    },
+    {
+      "id": "head/description-length",
+      "page": "audit/index.html",
+      "level": "warn",
+      "message": "description 201 chars (outside 70-165, may truncate)"
+    },
+    {
+      "id": "head/h1-absent",
+      "page": "audit/index.html",
+      "level": "warn",
+      "message": "no non-empty <h1>"
+    },
+    {
+      "id": "head/h1-absent",
+      "page": "brain/index.html",
+      "level": "warn",
+      "message": "no non-empty <h1>"
+    },
+    {
+      "id": "head/h1-absent",
+      "page": "changelog/index.html",
+      "level": "warn",
+      "message": "no non-empty <h1>"
+    },
+    {
+      "id": "head/h1-absent",
+      "page": "contact/index.html",
+      "level": "warn",
+      "message": "no non-empty <h1>"
+    },
+    {
+      "id": "head/description-length",
+      "page": "index.html",
+      "level": "warn",
+      "message": "description 249 chars (outside 70-165, may truncate)"
+    },
+    {
+      "id": "head/h1-absent",
+      "page": "install/index.html",
+      "level": "warn",
+      "message": "no non-empty <h1>"
+    },
+    {
+      "id": "head/h1-absent",
+      "page": "privacy/index.html",
+      "level": "warn",
+      "message": "no non-empty <h1>"
+    },
+    {
+      "id": "head/h1-absent",
+      "page": "security/index.html",
+      "level": "warn",
+      "message": "no non-empty <h1>"
+    },
+    {
+      "id": "head/h1-absent",
+      "page": "showcase/index.html",
+      "level": "warn",
+      "message": "no non-empty <h1>"
+    },
+    {
+      "id": "head/h1-absent",
+      "page": "status/index.html",
+      "level": "warn",
+      "message": "no non-empty <h1>"
+    },
+    {
+      "id": "head/h1-absent",
+      "page": "terms/index.html",
+      "level": "warn",
+      "message": "no non-empty <h1>"
+    }
+  ],
+  "sourceHref": "https://www.npmjs.com/package/poststruct",
+  "_stamp": {
+    "by": "scripts/struct-feed-stamp.js",
+    "from": "npx poststruct audit web/home/dist --json (poststruct.config.js: the dash-class law demoted to warn - the house copy writes dashes; every other check rides the family default)",
+    "legend": "values derive from the baked-dist audit emit (schema 1, counts + findings); restamp: npm run build:home && npm run struct:stamp -- --rows poststruct"
+  }
+}

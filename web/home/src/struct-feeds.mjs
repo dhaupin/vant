@@ -16,21 +16,25 @@
  *   findings: [{ id, page?, level: 'fail'|'warn'|'info', message }]
  *   verdict derivation: verdictOf - PASS | FINDINGS | ABSENT
  *
- * EPOCH LAW: inline data wears its MOCK SKELETON badge. THREE rows are
- * now LIVE (issue #264 steps b, c, d): the crashtest stamped verdict
- * ledger, the packstruct dual-emit row (lint --deep --json + the audit
- * gate's own verdict line) and the eyestruct gate row -- all written by
- * scripts/struct-feed-stamp.js into src/generated/struct-feed*.json with
- * .sha256 pin sidecars, all carrying NO mock flag. poststruct is PRD-
- * staged until its npm lands: its row is the honest inline absence and
- * still rides the badge, because it is the skeleton's shape, not a tool's
- * emit. There are four and only four sources - the kit's own typed
- * refusal law, mirrored here: E_STRUCT_SOURCE on anything else.
+ * EPOCH LAW: inline data wears its MOCK SKELETON badge. ALL FOUR rows
+ * are now LIVE (issue #264 steps b, c, d, + the poststruct npm landing
+ * 2026-11-02): the crashtest stamped verdict ledger, the packstruct
+ * dual-emit row (lint --deep --json + the audit gate's own verdict
+ * line), the eyestruct gate row, and the poststruct baked-dist audit
+ * row -- all written by scripts/struct-feed-stamp.js into
+ * src/generated/struct-feed*.json with .sha256 pin sidecars, all
+ * carrying NO mock flag. poststruct's row rides its real --json emit
+ * over the BAKED home dist (poststruct.config.js keeps the dash-class
+ * law demoted to warn: the house copy writes dashes; every other check
+ * rides the family default). There are four and only four sources -
+ * the kit's own typed refusal law, mirrored here: E_STRUCT_SOURCE on
+ * anything else.
  */
 
 import liveCrashFeed from './generated/struct-feed.json'
 import livePackstructFeed from './generated/struct-feed-packstruct.json'
 import liveEyestructFeed from './generated/struct-feed-eyestruct.json'
+import livePoststructFeed from './generated/struct-feed-poststruct.json'
 
 export const STRUCT_SOURCES = ['packstruct', 'crashtest', 'eyestruct', 'poststruct']
 
@@ -38,7 +42,7 @@ export const STRUCT_LABELS = {
     packstruct: 'packstruct - pack conformance',
     crashtest: 'crashtest - the packs floor',
     eyestruct: 'eyestruct - the vision battery',
-    poststruct: 'poststruct - the render audit',
+    poststruct: 'poststruct - the shipped audit',
 }
 
 /** Pure verdict family, pinned to the kit's verdictOf. */
@@ -58,11 +62,10 @@ export function evidenceSlice(feed, n) {
 }
 
 /**
- * The board's feed rows - one per family. Three are LIVE stamps written
- * byte-identically by scripts/struct-feed-stamp.js (a shape drift there
- * breaks its own --check gate in CI); the poststruct row is the inline
- * honest absence until the npm package publishes (the badge stays on:
- * it is the skeleton's shape previewing the feed, not a tool's data).
+ * The board's feed rows - one per family. All four are LIVE stamps
+ * written byte-identically by scripts/struct-feed-stamp.js (a shape
+ * drift there breaks its own --check gate in CI); no inline mock row
+ * remains - the skeleton epoch ended when poststruct's npm landed.
  */
 export const STRUCT_FEEDS = [
     {
@@ -85,14 +88,13 @@ export const STRUCT_FEEDS = [
         ...liveEyestructFeed,
     },
     {
-        source: 'poststruct',
-        ok: false,
-        mock: true,
-        // Gate note (check-home rule 4): the home gate only admits github
-        // links under dhaupin/vant, so this row states the repo in words
-        // and carries NO cross-repo anchor; the tool's link lands with its
-        // npm feed (steps b-d) as an npmjs.com sourceHref instead.
-        error: 'absent: the poststruct npm package is pre-publish (staged 0.9.0 in the dhaupin/poststruct repo, PRD-staged). The page states the absence; nothing is graded.',
-        sourceHref: null,
+        // (step e, LIVE as of the poststruct npm landing) the shipped
+        // audit: poststruct walked the BAKED home dist and graded the
+        // head/site/links/i18n/a11y/feeds contract. No mock flag; the
+        // counts and findings are the tool's own emit (schema 1). Warns
+        // are honest and stated (dash-class rides demoted per the repo
+        // config; h1/description notes state themselves); a FAIL would
+        // show FINDINGS and still fail the CI audit gate.
+        ...livePoststructFeed,
     },
 ]

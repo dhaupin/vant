@@ -9,27 +9,28 @@ import * as React from "react";
  *   packstruct  — pack conformance (the audit-conformance gate)
  *   crashtest   — the packs floor (rows, contract, native suites)
  *   eyestruct   — the vision battery's findings npm feed
- *   poststruct  — the render/docs audit's findings feed (PRD-staged)
+ *   poststruct  — the baked-HTML audit's findings feed (npm-live)
  *
  * EPOCH LAW (honest by construction): every inline feed here carries
  * `mock: true` and renders a MOCK identity chip; nothing reads a
  * network, nothing fabricates a green. LIVE feeds replace their mock
- * twins in the SAME shape — and three now have (steps b + c + d landed):
- * the crashtest verdict ledger, the packstruct dual emit (lint --deep
- * --json + the audit gate's own verdict line), and the eyestruct gate
- * row — all written byte-identically by scripts/struct-feed-stamp.js
+ * twins in the SAME shape — all four now do (steps b + c + d landed,
+ * and poststruct's npm landed 2026-11-02): the crashtest verdict ledger,
+ * the packstruct dual emit (lint --deep --json + the audit gate's own
+ * verdict line), the eyestruct gate row, and the poststruct baked-dist
+ * audit row — all written byte-identically by scripts/struct-feed-stamp.js
  * (.sha256-pinned) and consumed per flavor: web/dashboard substitutes
  * them in modules/struct-audit over the vendored pinned frame copy,
  * web/home reads them in its pure-data struct-feeds.mjs. The MOCK arrays
- * below stay as the kit's skeleton baseline and shape preview; only
- * poststruct still renders from one in both flavors (its npm package is
- * staged 0.9.0, pre-publish — the honest inline absence).
+ * below stay as the kit's skeleton baseline and shape preview: with all
+ * four rows LIVE in the flavors, the mocks render nowhere — they pin the
+ * contract shapes so a shape drift is caught by the mocks' own reviewers,
+ * never rendered as data.
  *
- * The one pre-staged adapter: parsePoststructFeed below, built against
- * the PRD contract -- poststruct graduated from its gistory staging
- * branch to dhaupin/poststruct (still pre-npm, staged 0.9.0); the emit
- * shape is versioned and pinned there, so the endpoint stands ready
- * for the npm landing.
+ * The poststruct adapter: parsePoststructFeed below, built against
+ * poststruct@0.9.0's REAL --json emit (the staging PRD predicted a
+ * top-level version string; the landed package carries `schema: 1` —
+ * the adapter states the contract the tool actually ships).
  */
 
 export type StructSource = "packstruct" | "crashtest" | "eyestruct" | "poststruct";
@@ -78,9 +79,10 @@ export function verdictOf(feed: StructFeed): StructVerdict {
 }
 
 /**
- * The poststruct adapter stub. Input contract per the staging PRD's
- * --json emit (versioned, top-level):
- *   { version, counts: { fail, warn }, findings: [{ page, id, level, message }] }
+ * The poststruct adapter. Input contract per poststruct@0.9.0's --json
+ * emit (the published schema-1 contract, verified against the tool):
+ *   { schema: 1, counts: { fail, warn }, findings: [{ level, page, id,
+ *     message, count?, snippet? }] }
  * Typed refusals only, never a shape guess: E_POSTSTRUCT_SHAPE states the
  * field that failed. `ok:false` feeds stay ABSENT on the board honestly.
  */
@@ -89,8 +91,8 @@ export function parsePoststructFeed(raw: unknown): { feed?: StructFeed; error?: 
     return { error: "E_POSTSTRUCT_SHAPE: emit is not an object" };
   }
   const r = raw as Record<string, unknown>;
-  if (typeof r.version !== "string" || r.version.length === 0) {
-    return { error: "E_POSTSTRUCT_SHAPE: emit carries no version string" };
+  if (r.schema !== 1) {
+    return { error: `E_POSTSTRUCT_SHAPE: emit carries schema ${String(r.schema)} — the landed contract is schema 1` };
   }
   const counts = r.counts;
   if (typeof counts !== "object" || counts === null) {
@@ -124,7 +126,7 @@ export function parsePoststructFeed(raw: unknown): { feed?: StructFeed; error?: 
     feed: {
       source: "poststruct",
       ok: true,
-      version: r.version,
+      version: "poststruct-audit/1",
       generatedAt: typeof r.generatedAt === "string" ? r.generatedAt : undefined,
       counts: {
         fail: typeof c.fail === "number" ? c.fail : undefined,
@@ -194,8 +196,8 @@ export const MOCK_STRUCT_FEEDS: StructFeed[] = [
     source: "poststruct",
     ok: false,
     mock: true,
-    error: "absent: the poststruct npm package is pre-publish (staged 0.9.0; PRD-staged in dhaupin/poststruct). The page states the absence; nothing is graded.",
-    sourceHref: "https://github.com/dhaupin/poststruct",
+    error: "mock: the kit's shape preview — poststruct's LIVE row rides the stamped emit in each flavor (web/*/src/generated/struct-feed-poststruct.json); the preview pins the contract, nothing is graded.",
+    sourceHref: "https://www.npmjs.com/package/poststruct",
   },
 ];
 
@@ -217,7 +219,7 @@ const SOURCE_LABEL: Record<StructSource, string> = {
   packstruct: "packstruct (pack conformance)",
   crashtest: "crashtest (the packs floor)",
   eyestruct: "eyestruct (the vision battery)",
-  poststruct: "poststruct (the render audit)",
+  poststruct: "poststruct (the shipped audit)",
 };
 
 function VerdictChip({ verdict }: { verdict: StructVerdict }) {
