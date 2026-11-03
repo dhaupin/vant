@@ -83,7 +83,7 @@ export default function Home() {
                 </div>
                 <div className="stats-head fx-reveal">
                     <h2>What ships, counted</h2>
-                    <p>The real numbers for everything below: the shipped CLI surface, the MCP tools, the lib modules, the doc pages, the test suites. Generated from this repository at build time — no hand-pinned counts left to rot.</p>
+                    <p>The real numbers for everything below: the shipped CLI surface, the MCP tools, the lib modules, the doc pages, the test suites. Generated from this repository at build time, no hand-pinned counts left to rot.</p>
                 </div>
             </div>
         </header>
