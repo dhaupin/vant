@@ -159,6 +159,24 @@ function check(name, ok, detail) {
         contErr === 'SECURITY_SYMLINK_ATTACK', `code=${JSON.stringify(contErr)}`);
     fs.rmSync(symRoot, { recursive: true, force: true });
 
+    // ---- F. Door verb classification: a tool whose name ends in the read
+    //         suffix `_state` but whose handler STORES must not be read-class.
+    //         `vant_memory_state` ("Store state (key-value with TTL)") rode
+    //         the read canon and an observer guest (no canWrite) could reach
+    //         it. Every other memory verb is write-class.
+    const guests = require(path.join(ROOT, 'lib', 'guests'));
+    check('F1: vant_memory_state is write-class, not read (it stores)',
+        guests.classifyTool('vant_memory_state') === 'write',
+        `class=${guests.classifyTool('vant_memory_state')}`);
+    const observer = { isGuest: true, guest: { id: 'g-obs', role: 'observer' }, caps: ['canRead', 'canLoad', 'canList'] };
+    const obsGate = guests.authorize('vant_memory_state', observer);
+    check('F2: an observer guest is refused vant_memory_state (no canWrite)',
+        obsGate.allowed === false, `allowed=${obsGate.allowed} code=${obsGate.reasonCode}`);
+    // brain_state is a genuine read (getNeuronState) and must stay read.
+    check('F3: brain_state stays read-class (a real read)',
+        guests.classifyTool('brain_state') === 'read',
+        `class=${guests.classifyTool('brain_state')}`);
+
     console.log(`\n${failures === 0 ? '✓ all pins hold' : `✗ ${failures} pin(s) failed`}`);
     process.exit(failures === 0 ? 0 : 1);
 })();
