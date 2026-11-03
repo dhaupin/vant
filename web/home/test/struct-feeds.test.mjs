@@ -4,10 +4,10 @@
  * The struct-audit board's data laws (vant issue #264; steps a + b landed
  * at 2026-10-28, steps c + d landed 2026-11-02). Pins:
  *   1. four sources AND ONLY four (the E_STRUCT_SOURCE law mirrored)
- *   2. every inline-skeleton row self-declares mock: true (the epoch
- *      badge) - after steps (b)(c)(d) the ONLY such row left is
- *      poststruct (pre-npm); packstruct / crashtest / eyestruct ride
- *      LIVE stamped emits with no mock flag
+ *   2. the skeleton epoch is CLOSED: every inline-skeleton row has been
+ *      replaced by its LIVE stamped emit (steps b/c/d + the poststruct
+ *      landing), so NO row carries a mock flag and the board has no
+ *      MOCK SKELETON badge left to render
  *   3. the ABSENT rows state their absence in words, and the anchor
  *      laws hold (check-home rule 4 admits only the links a row states)
  *   4. verdictOf: PASS / FINDINGS / ABSENT escalation exactly
@@ -32,6 +32,7 @@ import {
 import liveCrashFeed from '../src/generated/struct-feed.json'
 import livePackstructFeed from '../src/generated/struct-feed-packstruct.json'
 import liveEyestructFeed from '../src/generated/struct-feed-eyestruct.json'
+import livePoststructFeed from '../src/generated/struct-feed-poststruct.json'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const GENERATED = path.join(HERE, '..', 'src', 'generated')
@@ -48,15 +49,11 @@ describe('struct-feeds (the /audit board laws)', () => {
         for (const s of STRUCT_SOURCES) expect(STRUCT_LABELS[s]).toBeTruthy()
     })
 
-    it('every INLINE skeleton row self-declares mock: true; the live rows carry none', () => {
+    it('the skeleton epoch closed: no row carries a mock flag (all four ride tool emits)', () => {
         const mocks = STRUCT_FEEDS.filter(f => f.mock)
-        for (const feed of mocks) {
-            for (const key of REQUIRED) expect(feed, feed.source).toHaveProperty(key)
-            expect(feed.mock, feed.source).toBe(true)
-        }
-        // poststruct is the skeleton's only inline row left (the honest
-        // absence until its npm lands); the three stamped rows run badge-free
-        expect(mocks.map(f => f.source)).toEqual(['poststruct'])
+        expect(mocks.map(f => f.source)).toEqual([])
+        // and every row is genuinely ok:true - no hidden absence sneaks in
+        for (const feed of STRUCT_FEEDS) expect(feed.ok, feed.source).toBe(true)
     })
 
     it('absent rows name their absence in words (nothing is graded)', () => {
@@ -122,6 +119,7 @@ describe('the LIVE stamped rows (issue #264 steps b, c, d)', () => {
         ['crashtest', liveCrashFeed],
         ['packstruct', livePackstructFeed],
         ['eyestruct', liveEyestructFeed],
+        ['poststruct', livePoststructFeed],
     ]
 
     it.each(LIVE)(`%s: byte-equal to its stamp, pin sidecars on disk, badge off`, (source, feed) => {
@@ -167,6 +165,15 @@ describe('the LIVE stamped rows (issue #264 steps b, c, d)', () => {
             expect(c.artifacts).toBeGreaterThanOrEqual(0)
             expect(c.rows).toBeGreaterThanOrEqual(0)
             expect(feed.findings.length).toBe(1)
+        }
+        if (source === 'poststruct') {
+            // the audit's arithmetic is its own emit: every finding is a
+            // row and every row is a finding - fail + warn == rows
+            expect(c.fail).toBeGreaterThanOrEqual(0)
+            expect(c.warn).toBeGreaterThanOrEqual(0)
+            expect((c.fail ?? 0) + (c.warn ?? 0)).toBe(feed.findings.length)
+            expect(feed.version).toBe('poststruct-audit/1')
+            expect(feed.sourceHref).toBe('https://www.npmjs.com/package/poststruct')
         }
     })
 

@@ -11,15 +11,14 @@
  *   packstruct  - pack conformance gate
  *   crashtest   - the packs floor (rows, contract, native suites)
  *   eyestruct   - the vision battery's findings (npm-live)
- *   poststruct  - the render audit's findings (PRD-staged, pre-npm)
+ *   poststruct  - the shipped audit's findings (npm-live 2026-11-02)
  *
  * EPOCH LAW (honest by construction): every card that is inline data
- * carries the MOCK SKELETON badge next to its verdict; the crashtest
- * card is LIVE (issue #264 step b - the stamped verdict ledger,
- * src/generated/struct-feed.json, no badge) and the ABSENT card
- * (poststruct, pre-npm) states its absence and grades nothing. When
- * the remaining feeds land (issue steps c-d) their cards flip the
- * same way; the shape stays fixed (kit head:
+ * carries the MOCK SKELETON badge next to its verdict; with issue #264's
+ * steps b + c + d landed AND poststruct's npm package live (2026-11-02),
+ * all four cards ride live stamped emits (src/generated/struct-feed*.json)
+ * and no mock row remains. The skeleton epoch ended with the poststruct
+ * landing; the shape stays fixed (kit head:
  * web/kit/components/struct-audit.tsx - the single shape source the
  * dashboard flavor already consumes vendored + hash-pinned).
  */
@@ -50,12 +49,12 @@ export default function StructAudit() {
                 <p className="sub">
                     The four STRUCT families' findings, combined on one page:
                     the pack conformance gate, the crashtest packs floor, the
-                    eyestruct vision battery, and the poststruct render audit.
-                    The crashtest card rides the live stamped verdict ledger
-                    (issue #264 step b); the rest are inline mock data shaped
-                    exactly as the real feeds will land (steps c - d) - nothing
-                    is fetched, nothing is graded, and the mock badge rides an
-                    unlanded card until then.
+                    eyestruct vision battery, and the poststruct shipped
+                    audit. All four cards ride live stamped emits over the
+                    tools' own outputs (issue #264 steps b - d landed, and
+                    poststruct's npm landed 2026-11-02): nothing is fetched
+                    at page time, and nothing is graded beyond what a stamp
+                    measured.
                 </p>
 
                 <div className="struct-grid">
@@ -99,11 +98,13 @@ export default function StructAudit() {
                 </div>
 
                 <p className="contact-note" style={{ marginTop: 26 }}>
-                    Two honest guarantees while this page is in its skeleton epoch: every
-                    mock-sourced card wears its badge, and the pre-npm family (poststruct)
-                    renders an absent statement instead of a verdict. When a real feed
-                    replaces a card, the card's own page (docs + packs README) states what
-                    the feed reads; nothing on this page calls a network.
+                    The guarantees hold past the skeleton epoch: every card's stamp
+                    date and provenance render here in the card, and the poststruct
+                    card's warn rows state themselves exactly as the audit graded
+                    them (dash-class is demoted to warn by the repo config because
+                    this site's copy writes dashes by design). Each card's page
+                    (docs + packs README) states what its feed reads; nothing on
+                    this page calls a network.
                 </p>
             </div>
         </section>

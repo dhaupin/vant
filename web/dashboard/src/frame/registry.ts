@@ -217,7 +217,8 @@ export const MODULES = [
   },
   {
     // (vant issue #264) the combined STRUCT families page: packstruct +
-    // crashtest + eyestruct + poststruct. Skeleton epoch (mock feeds,
+    // crashtest + eyestruct + poststruct. All four ride live stamped
+    // feeds (the skeleton epoch closed with the poststruct npm landing;
     // kit contract vendored + pinned); observe section since it is a
     // read-only facts board.
     id: "struct-audit",

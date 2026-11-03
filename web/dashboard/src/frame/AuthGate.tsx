@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { actions, useApp, type DashRole } from "../state";
 import { Help } from "./Tooltip";
+import { Lander } from "./Lander";
 
 /**
  * Login gate (prd-web.md 3.5, P2): email + one-time code is THE
@@ -12,6 +13,12 @@ import { Help } from "./Tooltip";
  * server-side (`bsess_` HttpOnly cookie) - the browser never holds the
  * pod token or the email. On load we PROBE /api/auth/session so a live
  * session is restored without flashing the login screen.
+ *
+ * (wave 19.28, owner) the signed-out page is the LANDER now: a real
+ * landing page (header + right-side Sign in CTA + gloss/flow) whose CTA
+ * opens the SAME sign-in component in a modal. The gate itself shrinks
+ * to the session probe + the swap: live session -> children (the board);
+ * none -> <Lander/>; probing -> a quiet splash, never a flash of either.
  */
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
@@ -64,12 +71,12 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   if (token === null && account === null) {
     if (probeState === "probing") {
       return (
-        <GateShell>
+        <div className="grid min-h-screen place-items-center p-6">
           <p className="text-sm text-ink-soft">Checking for a live session...</p>
-        </GateShell>
+        </div>
       );
     }
-    return <Login />;
+    return <Lander />;
   }
   return children;
 }
@@ -86,7 +93,14 @@ type Step =
   | { s: "email" }
   | { s: "sent"; email: string; resendIn: number };
 
-function Login() {
+/**
+ * THE sign-in component (wave 19.28): the email-code flow + the honest
+ * paste-token fallback, hoisted so the lander's header CTA can open it
+ * in a modal. Same internals the old gate rendered (email request/verify,
+ * cooldowns, typed refusals); only the mount point changed - module scope
+ * stays name-typed (the panels above are module-scope for focus law).
+ */
+export function SignInPanel() {
   const [step, setStep] = useState<Step>({ s: "email" });
   const [mode, setMode] = useState<"email" | "token">("email");
   const [email, setEmail] = useState("");
@@ -171,24 +185,20 @@ function Login() {
     }
   };
 
-  return (
-    <GateShell>
-      {mode === "email" ? (
-        <EmailMode
-          step={step}
-          email={email}
-          code={code}
-          err={err}
-          setEmail={setEmail}
-          setCode={setCode}
-          request={request}
-          verify={verify}
-          onResetEmail={() => setStep({ s: "email" })}
-        />
-      ) : (
-        <TokenMode err={err} setErr={setErr} />
-      )}
-    </GateShell>
+  return mode === "email" ? (
+    <EmailMode
+      step={step}
+      email={email}
+      code={code}
+      err={err}
+      setEmail={setEmail}
+      setCode={setCode}
+      request={request}
+      verify={verify}
+      onResetEmail={() => setStep({ s: "email" })}
+    />
+  ) : (
+    <TokenMode err={err} setErr={setErr} />
   );
 }
 
@@ -411,71 +421,4 @@ function TokenMode({ err, setErr }: { err: string | null; setErr: (value: string
         {err ? <SupportErr err={err} /> : null}
       </div>
     );
-}
-
-function GateShell({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="grid min-h-screen place-items-center p-6">
-      <div className="w-full max-w-xl">
-        <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
-          {/* (wave 19.25) same 96px cut as the top bar - the gate logo and
-              the in-app logo are the SAME file, never a second copy. */}
-          <img
-            alt=""
-            className="size-7 inline-block rounded-lg"
-            src="/vant-bolete-logo-sm.png"
-          />
-          Bolete
-        </h1>
-        <p className="mt-1 text-sm text-ink-soft">the Vant dashboard</p>
-        {/* Logged-out landing: people hit this cold. Say what they are
-            looking at, what they will see once they are in, and where the
-            seat comes from - then the sign-in card. */}
-        <div className="mt-5 grid gap-3 sm:grid-cols-3">
-          <div className="rounded-lg border border-line bg-surface p-3">
-            <p className="text-xs font-semibold">Sessions, live</p>
-            <p className="mt-1 text-xs text-ink-soft">
-              Agent work as it happens: tool calls, budgets, refusals.
-            </p>
-          </div>
-          <div className="rounded-lg border border-line bg-surface p-3">
-            <p className="text-xs font-semibold">Crews and carriers</p>
-            <p className="mt-1 text-xs text-ink-soft">
-              Rosters, brains, and sealed packets in flight between pods.
-            </p>
-          </div>
-          <div className="rounded-lg border border-line bg-surface p-3">
-            <p className="text-xs font-semibold">Ledgers with doors on them</p>
-            <p className="mt-1 text-xs text-ink-soft">
-              Audit trails and forum verdicts, scoped by your guest role.
-            </p>
-          </div>
-        </div>
-        <p className="mt-3 text-xs text-ink-soft">
-          A seat comes from a running Vant pod: the operator issues a
-          <code className="mx-1 rounded border border-line bg-paper px-1 font-mono">vguest_</code>
-          token with <code className="font-mono">vant guest issue</code>, and the dashboard reads that pod over the
-          gated dashboard bridge. New to Vant? Start at the{" "}
-          <a
-            href="https://vant.creadev.org"
-            rel="noopener"
-            target="_blank"
-            className="underline hover:text-ink"
-          >
-            Vant home page
-          </a>{" "}
-          or open the{" "}
-          <a
-            href="https://docs.creadev.org/vant"
-            rel="noopener"
-            target="_blank"
-            className="underline hover:text-ink"
-          >
-            docs
-          </a>.
-        </p>
-        <div className="mx-auto mt-6 w-full max-w-sm">{children}</div>
-      </div>
-    </div>
-  );
 }

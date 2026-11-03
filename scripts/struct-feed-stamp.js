@@ -17,10 +17,17 @@
  *                     the stamp only records what it measured).
  *   eyestruct (d)   - `npx eyestruct@1 gate --json` (the browserless gate
  *                     emit: {ok, verdict, artifacts, rows, pin}).
+ *   poststruct (e)  - `npx poststruct audit web/home/dist --json`
+ *                     (the landed npm package's emit: {schema: 1, counts:
+ *                     {fail, warn}, findings}). Audits the BAKED home dist
+ *                     post-build; the repo config (poststruct.config.js)
+ *                     demotes the dash-class law to warn (the house copy
+ *                     writes em/en dashes by design); FAIL findings still
+ *                     fail the audit exit code.
  *
- * poststruct stays the flavors' inline absent row: the npm package is
- * pre-publish (staged 0.9.0), so there is no emit to stamp and the page
- * states that absence honestly. Never stamped here.
+ * Run npm run build:home before stamping the poststruct row: it audits
+ * what SHIPPED, so the dist bytes it graded must be the same waves the
+ * rest of the feed row rides.
  *
  * Rows write byte-identically into every flavor (the vendoring-ring law,
  * applied to data):
@@ -35,7 +42,7 @@
  *
  * Usage:
  *   node scripts/struct-feed-stamp.js [--from-json dump.json] [--check]
- *                                     [--rows crashtest,packstruct,eyestruct]
+ *                                     [--rows crashtest,packstruct,eyestruct,poststruct]
  */
 
 'use strict';
@@ -72,6 +79,13 @@ const ROWS = {
         targets: [
             'web/home/src/generated/struct-feed-eyestruct.json',
             'web/dashboard/src/generated/struct-feed-eyestruct.json',
+        ],
+    },
+    poststruct: {
+        name: 'struct-feed-poststruct.json',
+        targets: [
+            'web/home/src/generated/struct-feed-poststruct.json',
+            'web/dashboard/src/generated/struct-feed-poststruct.json',
         ],
     },
 };
@@ -308,6 +322,75 @@ function writeRow(key, feed) {
     console.log('[stamped] ' + ROWS[key].name + ' (' + feed.source + ', pin ' + crypto.createHash('sha256').update(bytes).digest('hex').slice(0, 12) + '...' + ')');
 }
 
+// ---- poststruct row (step e, 2026-11-02: the npm package landed) ----
+// poststruct audits what SHIPPED: it walks the baked web/home dist and
+// verifies head/site/links/i18n/a11y/feeds against its contract. The
+// emit contract is the landed package's --json: { schema: 1, counts:
+// { fail, warn }, findings: [{ level, page, id, message, count?, snippet? }] }.
+// Findings map to the kit's struct contract keys ({ id, page?, level,
+// message }) - count/snippet stay in the tool's own console story.
+
+function derivePoststructFeed(when) {
+    const run = spawnSync('npx', ['poststruct', 'audit', 'web/home/dist', '--json'], {
+        cwd: ROOT,
+        encoding: 'utf8',
+        timeout: 10 * 60 * 1000,
+        env: { ...process.env, NO_COLOR: '1' },
+        maxBuffer: 64 * 1024 * 1024,
+    });
+    const out = (run.stdout || '').trim();
+    let emit = null;
+    try { emit = JSON.parse(out); } catch (e) { emit = null; }
+    const shaped = emit && typeof emit === 'object' && emit.schema === 1
+        && emit.counts && typeof emit.counts.fail === 'number'
+        && Array.isArray(emit.findings);
+    if (run.error || run.status != null && run.status !== 0 && run.status !== 1 || !shaped) {
+        // exit 1 is a VERDICT (FAIL findings), not a tool fault - the audit
+        // judged and the stamp records what it judged (the CI gate still
+        // fails the job on that verdict). Anything else is a real absence.
+        return absentPoststruct(when, `poststruct audit gave no schema-1 emit (exit ${run.error ? String(run.error) : run.status}, ${out.slice(0, 200) || 'no output'})`);
+    }
+    const findings = emit.findings.map((f) => ({
+        id: String(f.id || ''),
+        page: typeof f.page === 'string' ? f.page : undefined,
+        level: f.level === 'fail' || f.level === 'warn' || f.level === 'info' ? f.level : 'info',
+        message: String(f.message || ''),
+    })).filter((f) => f.id);
+    return {
+        source: 'poststruct',
+        ok: true,
+        version: 'poststruct-audit/1',
+        generatedAt: when,
+        counts: {
+            fail: emit.counts.fail,
+            warn: emit.counts.warn,
+        },
+        findings,
+        sourceHref: 'https://www.npmjs.com/package/poststruct',
+        _stamp: {
+            by: 'scripts/struct-feed-stamp.js',
+            from: 'npx poststruct audit web/home/dist --json (poststruct.config.js: the dash-class law demoted to warn - the house copy writes dashes; every other check rides the family default)',
+            legend: 'values derive from the baked-dist audit emit (schema 1, counts + findings); restamp: npm run build:home && npm run struct:stamp -- --rows poststruct',
+        },
+    };
+}
+
+function absentPoststruct(when, reason) {
+    return {
+        source: 'poststruct',
+        ok: false,
+        version: 'poststruct-audit/1',
+        generatedAt: when,
+        error: `absent: ${reason}. The page states the absence; nothing is graded.`,
+        sourceHref: 'https://www.npmjs.com/package/poststruct',
+        _stamp: {
+            by: 'scripts/struct-feed-stamp.js',
+            from: 'npx poststruct audit web/home/dist --json',
+            legend: `typed ABSENCE recorded ${when}: the audit lane gave no ingestable emit - fix the lane, then restamp`,
+        },
+    };
+}
+
 function main() {
     const args = process.argv.slice(2);
     const check = args.includes('--check');
@@ -315,11 +398,11 @@ function main() {
     const fromFile = fromIdx >= 0 ? args[fromIdx + 1] : null;
     const rowsArg = args.includes('--rows')
         ? args[args.indexOf('--rows') + 1] || ''
-        : 'crashtest,packstruct,eyestruct';
+        : 'crashtest,packstruct,eyestruct,poststruct';
     const wanted = rowsArg.split(',').map((s) => s.trim()).filter(Boolean);
     for (const key of wanted) {
         if (!ROWS[key]) {
-            console.error('struct-feed-stamp: unknown row "' + key + '" (stamped rows: ' + Object.keys(ROWS).join(', ') + '; poststruct is NEVER stamped - the npm package is pre-publish and stays an inline absent row)');
+            console.error('struct-feed-stamp: unknown row "' + key + '" (stamped rows: ' + Object.keys(ROWS).join(', ') + ')');
             process.exit(1);
         }
     }
@@ -404,8 +487,17 @@ function main() {
         }
     }
 
-    // poststruct is deliberately never stamped: the npm package is
-    // pre-publish; the page's inline absent row states that honestly.
+    if (wanted.includes('poststruct')) {
+        const feed = derivePoststructFeed(when);
+        writeRow('poststruct', feed);
+        if (feed.ok) {
+            const c = feed.counts;
+            console.log(`stamped: poststruct feed - audit of web/home/dist: ${c.fail} FAIL / ${c.warn} warn over ${feed.findings.length} finding row(s), as of ${feed.generatedAt}`);
+        } else {
+            console.error('stamped: poststruct feed is an honest ABSENCE - ' + String(feed.error).slice(0, 160));
+            stampFailed = true;
+        }
+    }
 
     if (stampFailed) {
         console.error('struct-feed-stamp: one or more rows stamped an honest ABSENCE (exit 1) - fix the wedged tool and restamp that row.');
