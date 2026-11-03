@@ -37,9 +37,16 @@ async function main() {
             // same posture the MCP config door (vant_config_get) and
             // `config list env` already take. config.get() stays raw for
             // internal callers; only this echo changes, so a secret never
-            // lands in a scrollback buffer or a CI log.
-            const shownVal = config.maskIfSecret(key, val);
-            console.log(`${key}=${shownVal === null || shownVal === undefined ? val : shownVal}`);
+            // lands in a scrollback buffer or a CI log. A SECTION key
+            // (`github`) yields the nested object — deep-redact it and print
+            // JSON (the old `[object Object]` was both unreadable and, worse,
+            // unredacted).
+            if (val !== null && typeof val === 'object') {
+                console.log(`${key}=${JSON.stringify(config.redactSecrets(val))}`);
+            } else {
+                const shownVal = config.maskIfSecret(key, val);
+                console.log(`${key}=${shownVal === null || shownVal === undefined ? val : shownVal}`);
+            }
             break;
 
         case 'set':

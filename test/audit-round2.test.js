@@ -333,6 +333,96 @@ function check(name, ok, detail) {
         if (savedTok === undefined) delete process.env.GITHUB_TOKEN; else process.env.GITHUB_TOKEN = savedTok;
     }
 
+    // ---- K. The CLI `config get <section>` printed `[object Object]` (the
+    //         same unreadable shape #169 fixed for `list`) AND skipped the
+    //         secret mask entirely. It now deep-redacts and prints JSON.
+    const kEnv = Object.assign({}, process.env, { GITHUB_TOKEN: 'ghp_CLI_SECTION_LEAK' });
+    const kSection = spawnSync(process.execPath, [path.join(ROOT, 'bin', 'config.js'), 'get', 'github'], { encoding: 'utf8', env: kEnv, cwd: ROOT });
+    const kOut = (kSection.stdout || '') + (kSection.stderr || '');
+    check('K1: CLI `config get <section>` does not print [object Object]',
+        !kOut.includes('[object Object]'), `-> ${kOut.split('\n').find(l => l.startsWith('github='))}`);
+    check('K2: CLI `config get <section>` masks the nested secret',
+        !kOut.includes('ghp_CLI_SECTION_LEAK') && /github=\{[^}]*\*\*\*\*/.test(kOut),
+        `-> ${kOut.split('\n').find(l => l.startsWith('github='))}`);
+
+    // ---- L. SSRF wall bypasses in lib/network.js + the network door.
+    //         (L1-L4) An IPv4-mapped/compatible/NAT64 IPv6 literal reaches
+    //         the same v4 endpoint as its dotted form, but only the dotted
+    //         form matched the INTERNAL_IP_PATTERNS: `127.0.0.1` refused,
+    //         `[::ffff:127.0.0.1]` allowed -> loopback. (L5) resolve4 alone
+    //         let a v6-only internal AAAA answer through. (L6) the MCP door
+    //         forwarded caller `options` verbatim, so `skipDomainCheck:true`
+    //         walked the whole wall.
+    const lNet = require(path.join(ROOT, 'lib', 'network'));
+    const lHost = (u) => new URL(u).hostname;
+    check('L1: isInternalIP refuses an IPv4-mapped IPv6 loopback literal',
+        lNet.isInternalIP(lHost('http://[::ffff:127.0.0.1]/')) === true,
+        `-> ${lNet.isInternalIP(lHost('http://[::ffff:127.0.0.1]/'))}`);
+    check('L2: isInternalIP refuses the hex-group mapped form [::ffff:7f00:1]',
+        lNet.isInternalIP(lHost('http://[::ffff:7f00:1]/')) === true,
+        `-> ${lNet.isInternalIP(lHost('http://[::ffff:7f00:1]/'))}`);
+    check('L3: isInternalIP refuses a mapped cloud-metadata address',
+        lNet.isInternalIP(lHost('http://[::ffff:169.254.169.254]/')) === true,
+        `-> ${lNet.isInternalIP(lHost('http://[::ffff:169.254.169.254]/'))}`);
+    check('L4: isInternalIP refuses a NAT64-wrapped loopback literal',
+        lNet.isInternalIP(lHost('http://[64:ff9b::7f00:1]/')) === true,
+        `-> ${lNet.isInternalIP(lHost('http://[64:ff9b::7f00:1]/'))}`);
+    check('L5: isInternalIP still allows a genuine public host',
+        lNet.isInternalIP(lHost('http://8.8.8.8/')) === false && lNet.isInternalIP('api.github.com') === false,
+        `-> 8.8.8.8=${lNet.isInternalIP('8.8.8.8')}`);
+
+    // L6: the door must pin the SSRF escape hatches even when the caller asks.
+    const lDoor = require(path.join(ROOT, 'lib', 'mcp'));
+    const lSb = require(path.join(ROOT, 'lib', 'sandbox'));
+    const lSrv = require('http').createServer((q, r) => r.end('INTERNAL'));
+    await new Promise((res) => lSrv.listen(0, '127.0.0.1', res));
+    const lPort = lSrv.address().port;
+    const lPrevCaps = lSb.defaultSandbox.getCapabilities ? lSb.defaultSandbox.getCapabilities() : null;
+    try {
+        if (typeof lSb.defaultSandbox.setCapabilities === 'function') {
+            lSb.defaultSandbox.setCapabilities({ canRead: true, canWrite: true, canNetwork: true, canExec: true });
+        }
+        const lFetch = async (u, o) => {
+            try { const r = await Promise.resolve(lDoor.call('vant_network_fetch', { url: u, options: o })); return { reached: true, body: String(r) }; }
+            catch (e) { return { reached: false, msg: e.message }; }
+        };
+        const lPlain = await lFetch(`http://127.0.0.1:${lPort}/`);
+        const lSkip = await lFetch(`http://127.0.0.1:${lPort}/`, { skipDomainCheck: true });
+        const lMapped = await lFetch(`http://[::ffff:127.0.0.1]:${lPort}/`, { skipDomainCheck: true });
+        const lLan = await lFetch(`http://127.0.0.1:${lPort}/`, { internalPolicy: 'privateLan' });
+        check('L6: the network door refuses loopback (plain and with caller bypass options)',
+            !lPlain.reached && !lSkip.reached && !lMapped.reached && !lLan.reached,
+            `plain=${JSON.stringify(lPlain)} skip=${JSON.stringify(lSkip)} mapped=${JSON.stringify(lMapped)} lan=${JSON.stringify(lLan)}`);
+    } finally {
+        lSrv.close();
+        if (lPrevCaps && typeof lSb.defaultSandbox.setCapabilities === 'function') lSb.defaultSandbox.setCapabilities(lPrevCaps);
+    }
+
+    // ---- N. The sync test-provider DI seam must be EXCLUSIVE.
+    //         getConfiguredProviders() used to APPEND registered fakes to the
+    //         real providers. In a working tree GITHUB_TOKEN is set and the
+    //         origin remote resolves, so GitHubProvider.isConfigured() is
+    //         true — a test that injected a fake therefore ALSO drove the
+    //         real connector, whose commit() runs `git add -A && git commit`
+    //         on the live repo. That is how a stray "p2-25 cap test" commit
+    //         landed on this branch mid-audit. A registered fake must now be
+    //         the ONLY provider the sync fan-out sees.
+    const nSync = require(path.join(ROOT, 'lib', 'sync'));
+    const nFake = { getType: () => 'n-audit-fake', isConfigured: () => true };
+    nSync._setTestProvider('n-audit-fake', nFake);
+    try {
+        const nList = nSync.getConfiguredProviders();
+        const nTypes = nList.map(p => (typeof p.getType === 'function' ? p.getType() : '?'));
+        check('N1: a registered test provider is the ONLY configured provider (no real connector rides along)',
+            nTypes.length === 1 && nTypes[0] === 'n-audit-fake',
+            `-> ${JSON.stringify(nTypes)}`);
+    } finally {
+        nSync._clearTestProviders();
+    }
+    check('N2: with no test provider the production path is unchanged (list is an array)',
+        Array.isArray(nSync.getConfiguredProviders()),
+        `-> ${typeof nSync.getConfiguredProviders()}`);
+
     console.log(`\n${failures === 0 ? '✓ all pins hold' : `✗ ${failures} pin(s) failed`}`);
     process.exit(failures === 0 ? 0 : 1);
 })();
