@@ -5,6 +5,37 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 362 (round-7 ledger entry + the STRUCT toolchain on latest)
+
+### Round-7 audit landed: merge `d141d739` (PR #325, Openhands) — entry the round itself never wrote
+
+- Three auth-door defects fixed: `auth_create` handed back the live Auth
+  instance (tokenSecret disclosure -> token forgery for any identity);
+  `auth_require` failed OPEN (verifyToken resolves to a verdict object, so
+  `if (!verified)` never fired on an invalid token); seven guest-authority
+  verbs (`trust_record`, `trust_setRequired`, `teams_createOrg/Dept/Team/
+  Role`, `teams_assign`) joined `GUEST_AUTHORITY_TOOLS` plus
+  `_assertNotGuestAuthority` guards in every handler.
+- Verification before merge (independent, this repo's law): round-7 suite
+  0/14 pre-fix vs 14/14 post-fix (stashing sources); mcp + crashtest-packs
+  green; the full 227-file battery green locally (109 via run-all + 30 + 88
+  batched, 0 failures); vant-spine row REFUSED post-fix.
+
+### The STRUCT toolchain re-pinned to the latest npm truth (measured via `npm view`, not memory)
+
+- packstruct 1.0.0, eyestruct 1.0.0, crashtest 1.2.0: already ON latest —
+  untouched.
+- poststruct 0.9.0 -> 1.0.0 and govstruct 0.9.0 -> 1.0.0 (both 1.0.0s are
+  2026-11 releases). The real lanes re-ran green on the new majors:
+  `govstruct lint` 1 member(s) clean, `check` 0 pack(s) over,
+  `surface --verify` every promised field honored + compliance-blocks
+  1 member(s) + network offline, `doctor` clean; poststruct audit over a
+  fresh `build:home` dist: exit 0, schema 1, counts 0 FAIL / 17 warns.
+- Version-truth spots updated to match: `poststruct.config.js` header,
+  the two CI lane comments in `.github/workflows/test.yml`, and the two
+  CURRENT rows of the packs/README STRUCT table (historical wave
+  narratives keep their as-was pins).
+
 ## [Unreleased] - pass 361 (docs nitpick round: the checkout-docs fiction
 measured out, the reference lists verified clean, duplication absorbed)
 

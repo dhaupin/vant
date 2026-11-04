@@ -1,6 +1,6 @@
 // poststruct.config.js (vant)
 // ============================
-// The repo-level poststruct audit contract (poststruct@0.9.0, - the fourth
+// The repo-level poststruct audit contract (poststruct@1.0.0, - the fourth
 // STRUCT family: poststruct audits what SHIPPED). Config is a .js (not .json)
 // because the whole point is a comment for a human: what we tuned and why.
 //
