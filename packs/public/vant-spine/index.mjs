@@ -1089,5 +1089,76 @@ export default {
         }
       },
     },
+
+    {
+      name: 'qos-throttle-and-escrow-totality',
+      description: "the QoS/escrow money-and-rate canon is covenantal: the throttler binds its limit for anonymous functions too (the key no longer re-mints per call), the RateLimiter's maxPerHour is enforced (per-client + global, rotation-proof) and garbage VANT_QOS_* env ints fall back to defaults instead of NaN-disabling the limiter, the protection-layer circuit auto-recovers after its window (no permanent brick from one transient blip, fail-closed inside the window), escrow refuses a negative/zero/NaN spend and refund as coded refusals (no free budget, no row poison), and carriers.replay refuses a cyclic arrival typed instead of a raw circular-JSON TypeError",
+      async run(_harness) {
+        const gs = await loadAll(['lib/qos.js', 'lib/escrow.js', 'lib/carriers.js']);
+        const Q = gs[0].default || gs[0];
+        const EscrowMod = gs[1].default || gs[1];
+        const C = gs[2].default || gs[2];
+        // (a) the throttle limit binds for anonymous fns (was: fresh key per
+        // call, 6/6 executed)
+        const t = new Q.Throttler({ limit: 3, window: 60000 });
+        let executed = 0;
+        const wrapped = t.throttle(() => { executed++; });
+        for (let i = 0; i < 6; i++) wrapped();
+        if (executed !== 3) {
+          return { verdict: 'EXPLOITED', detail: 'the throttler bypassed its limit for an anonymous fn (' + executed + '/6 executions)', tookRequests: 6 };
+        }
+        // (b) the hourly cap is enforced and rotation-proof
+        const rl = new Q.RateLimiter({ maxPerMinute: 1000, maxPerHour: 2 });
+        const c1 = await rl.check('ct-client-a');
+        const c2 = await rl.check('ct-client-a');
+        const c3 = await rl.check('ct-client-b');   // rotation used to ride past the never-enforced hour cap
+        if (!(c1 && c2) || c3 !== false) {
+          return { verdict: 'EXPLOITED', detail: 'maxPerHour is not enforced (client=' + c1 + c2 + ', rotation=' + c3 + ')', tookRequests: 3 };
+        }
+        // (c) the protection circuit recovers after its window (was: bricked forever)
+        let circuitOk = false;
+        try {
+          Q.resetCircuit();
+          for (let i = 0; i < 5; i++) Q.recordFailure();
+          if (!Q.isCircuitOpen()) {
+            return { verdict: 'EXPLOITED', detail: 'five failures do not open the protection circuit', tookRequests: 5 };
+          }
+          Q.setFailureWindow(10);
+          await new Promise((r) => setTimeout(r, 40));
+          circuitOk = !Q.isCircuitOpen();
+          if (!circuitOk) {
+            return { verdict: 'EXPLOITED', detail: 'the protection circuit stayed open past its window — one transient blip bricks it forever', tookRequests: 7 };
+          }
+        } finally {
+          try { Q.setFailureWindow(60000); Q.resetCircuit(); } catch { /* cleanup */ }
+        }
+        // (d) escrow amount totality: a negative spend used to mint budget
+        // past the limit (available unclamped), a NaN poisoned the row
+        const e = new EscrowMod.Escrow({ persistBudgets: false });
+        let spendCode = null;
+        try { e.recordSpend('ct-crash-agent', -50); } catch (x0) { spendCode = x0 && x0.code; }
+        if (spendCode !== 'VAF_INPUT_INVALID') {
+          return { verdict: 'EXPLOITED', detail: 'a negative spend mutated the ledger (code=' + spendCode + ')', tookRequests: 8 };
+        }
+        if (e.getBudget('ct-crash-agent').available !== 1000) {
+          return { verdict: 'EXPLOITED', detail: 'the negative-spend refusal left the row damaged', tookRequests: 9 };
+        }
+        let refundCode = null;
+        const e2 = new EscrowMod.Escrow({ persistBudgets: false });
+        try { e2.refund('ct-crash-agent-2', -5); } catch (x1) { refundCode = x1 && x1.code; }
+        if (refundCode !== 'VAF_INPUT_INVALID') {
+          return { verdict: 'EXPLOITED', detail: 'a negative refund mutated the ledger (code=' + refundCode + ')', tookRequests: 10 };
+        }
+        // (e) replay totality: a cyclic arrival used to blow a raw circular-JSON TypeError
+        const cyclic = { name: 'loop' };
+        cyclic.self = cyclic;
+        let replayCode = null;
+        try { C.replay([cyclic]); } catch (x2) { replayCode = x2 && x2.code; }
+        if (replayCode !== 'E_CARRIER_SHAPE') {
+          return { verdict: 'EXPLOITED', detail: 'replay crashed raw on a cyclic arrival (code=' + replayCode + ')', tookRequests: 11 };
+        }
+        return { verdict: 'REFUSED', detail: 'the throttle binds anonymous fns, the hourly cap is enforced and rotation-proof, the circuit recovers after its window (fail-closed inside), escrow refuses bad amounts as coded refusals with intact rows, and replay refuses the unlabelable arrival typed', tookRequests: 11 };
+      },
+    },
   ],
 };

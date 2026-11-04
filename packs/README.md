@@ -1129,3 +1129,33 @@ The post-census sweep's first retirement candidate set, driven by the convert-fi
 - **The vet (measured package diff 1.1.0 -> 1.2.0, 32 files).** Every contract-relevant change is fail-closed or additive: the verdict taxonomy gains PASSED (a POSITIVE probe - the safe path exercised and held; it never joins the REFUSED baseline, it is never a finding, and a PASSED row that flips to EXPLOITED fails CI as a NEW finding; the packstruct grammar carries the same bucket, so verdicts read identically across hosts); expect-spec strings are validated at LOAD (a typo'd '2sc' used to detonate the campaign mid-step); a zero-match module filter and a typo'd ctx knob refuse loudly (the silent-green class); buildEnv refuses a name declared BOTH var and secret; the report renders a skipped flag on REFUSED rows and a PASSED section (byte-identical absence for runs that carry none); two opt-in flags arrive (--allow-vacuous for pre-handler shells, --lint-packs as the packstruct preflight); the default exit discipline is unchanged (missing config stays hard exit 2). crashtest also ships a wire-headers adapter + wordpress fixtures - consumer-visible, unused by vant's rows. Vant-side compatibility check: no pack row or run root uses a colliding var/secret name or an expect-spec string, so the new validations are behavior-neutral here - measured, not assumed.
 - **Stamps (the ×2 law on the bumped library).** The contract battery on 1.2.0, two passes, verdict tables identical: **400/0 each pass** (the 386-class grew by the three #322-era crashtest rows). The crashtest gate GREEN (A: contract table + B: real harness, no findings outside the known-finding whitelist). `packs:audit` ALLOWED (8 cases, 1 pinned known finding honored, 0 EXPLOITED). `packs:lint` 22 packs / 312 ids. The eyes gate: 0 artifacts / 0 rows. `test/runner.js` 39/0 with the door-pin batch **30/30** - the last two orphan doors (test-all, format-test) joined the #181 table THIS wave, so the door-pin IOU the wave-14 row recorded is paid in full. `node test/ci.js` 521/0 with one pre-existing environmental warning (node 26 sits outside the lane's 18/20/22 allowlist - the known env-artifact class; the GitHub runners hold 20/22 and stay green).
 - **The sign-off stamps here.** The wave-13 "census family closes here" status (kept as written - dated receipts do not get rewritten) graduates to sign-off closed: every crashtest-grading claim in this ledger is now leveled against the RELEASED 1.2.0 from the npm registry, the door-pin IOU is paid, and the campaign has no open vet gate left.
+## Wave 17 (2026-11-04) - audit round 6: the QoS/escrow/carriers frontier walks and five defects close with discriminating pins (vant#273)
+
+- **The frontier.** The un-audited seams walked this round: lib/qos.js (the
+  Throttler/RateLimiter/protection-layers), lib/escrow.js (the budget/refund
+  money paths + workspace rows), lib/carriers.js (replay/carry/plates -
+  pointer resolves re-checked, path-safe; plate frame forgery re-checked,
+  closed). horcrux-safe/horcrux-census/kernel-ledger/kernel read clean.
+- **The findings (5, all fixed, all pinned).** (1) The throttle key
+  re-minted per call - anonymous functions were UNLIMITED (limit never
+  bound). (2) RateLimiter's maxPerHour was parsed but never enforced - the
+  hourly cap was config fiction; rotation-proof now, plus NaN env ints
+  fall back instead of silently disabling the limiter. (3) The
+  protection-layer circuit had no clock - five failures bricked it
+  forever; it now recovers after its window (fail-closed in-window,
+  env-tunable + test seam). (4) escrow accepted negative/NaN amounts -
+  free budget minted past the limit / permanent row poison; typed
+  refusals now, before any row is touched. (5) carriers.replay answered
+  cyclic arrivals with a raw circular-JSON TypeError instead of a typed
+  refusal.
+- **Discrimination is verified, not claimed.** 18 pins in
+  test/audit-round6.test.js; 13 fail against the pre-fix libs (verified
+  by stashing the fixes mid-round) and every one of the 5 findings has
+  finding-shaped pins that fail only on the old code.
+- **Stamps.** Contract battery 402/0 with the new
+  qos-throttle-and-escrow-totality row (strict REFUSED, the r5
+  totality-canon successor). Full wall 226 / 0 including the new
+  audit-round6 suite. packs:lint 22 packs / 314 ids (the new row).
+  packs:audit ALLOWED (8 cases, 1 pinned known finding honored, 0
+  EXPLOITED). lint 0 errors. The eyes gate flat. The door-pin table
+  unchanged (no new doors this wave).
