@@ -1160,5 +1160,63 @@ export default {
         return { verdict: 'REFUSED', detail: 'the throttle binds anonymous fns, the hourly cap is enforced and rotation-proof, the circuit recovers after its window (fail-closed inside), escrow refuses bad amounts as coded refusals with intact rows, and replay refuses the unlabelable arrival typed', tookRequests: 11 };
       },
     },
+
+    {
+      name: 'auth-instance-and-guest-authority-totality',
+      description: "the MCP auth + guest-authority canon is covenantal: auth_create MINTS a credential ({token,userId,roles}) instead of returning the live Auth instance (which carried options.tokenSecret — the process signing key — so a caller could read it and forge a token for any identity), auth_require reads the verifyToken VERDICT field (a bad token resolves to a truthy {valid:false,...} object, which the old `if (!verified)` answered allowed:true), and the trust/teams authority verbs (trust_record/trust_setRequired/teams_create*/teams_assign) are admin-classified so a default human guest can neither self-inflate its trust score nor drop a threshold nor create orgs/roles",
+      async run(_harness) {
+        const gs = await loadAll(['lib/mcp.js', 'lib/guests.js', 'lib/auth.js']);
+        const mcp = gs[0].default || gs[0];
+        const guests = gs[1].default || gs[1];
+        const auth = gs[2].default || gs[2];
+
+        // Pin the signing secret for this row so every `new Auth()` agrees on
+        // the key (unset -> each instance would mint its own ephemeral key and
+        // the mint/verify round-trip would look broken). Restored in finally.
+        const prevSecret = process.env.VANT_TOKEN_SECRET;
+        process.env.VANT_TOKEN_SECRET = prevSecret || 'ct-crash-signing-key-32-bytes-ok!!';
+        try {
+        // (a) auth_create must not leak the signing secret nor return the instance
+        const r1 = await mcp.execute('auth_create', { userId: 'ct-crash-auth', roles: ['admin'] });
+        const ser = JSON.stringify(r1);
+        const secret = process.env.VANT_TOKEN_SECRET;
+        if ((secret && ser.includes(secret)) || ser.includes('"tokenSecret"')) {
+          return { verdict: 'EXPLOITED', detail: 'auth_create leaked the token-signing secret in its result', tookRequests: 1 };
+        }
+        if (r1 && (r1.options || r1._failedAttempts)) {
+          return { verdict: 'EXPLOITED', detail: 'auth_create returned the live Auth instance (secret + lockout map)', tookRequests: 2 };
+        }
+        const v = auth.verifyToken(r1 && r1.token);
+        if (!(v && v.valid === true)) {
+          return { verdict: 'EXPLOITED', detail: 'auth_create did not mint a usable credential (result=' + ser.slice(0, 60) + ')', tookRequests: 3 };
+        }
+
+        // (b) auth_require must refuse a garbage token (verdict object is truthy)
+        const r2 = await mcp.execute('auth_require', { token: 'ct-crash-garbage-token' });
+        if (!(r2 && r2.allowed === false)) {
+          return { verdict: 'EXPLOITED', detail: 'auth_require failed open on an invalid token (' + JSON.stringify(r2).slice(0, 60) + ')', tookRequests: 4 };
+        }
+
+        // (c) the trust/teams authority verbs are admin at the guest door
+        const mustBeAdmin = ['trust_record', 'trust_setRequired', 'teams_createOrg', 'teams_createDept', 'teams_createTeam', 'teams_createRole', 'teams_assign', 'auth_create'];
+        const notAdmin = mustBeAdmin.filter((t) => guests.classifyTool(t) !== 'admin');
+        if (notAdmin.length > 0) {
+          return { verdict: 'EXPLOITED', detail: 'authority verbs reachable by a canWrite guest: ' + notAdmin.join(', '), tookRequests: 5 };
+        }
+
+        // (d) a default human guest is refused those verbs (the door verdict)
+        const human = { guest: { id: 'ct-crash-guest', role: 'human' }, caps: ['canRead', 'canLoad', 'canList', 'canWrite', 'canSpawn'], isGuest: true };
+        const opened = mustBeAdmin.filter((t) => guests.authorize(t, human).allowed === true);
+        if (opened.length > 0) {
+          return { verdict: 'EXPLOITED', detail: 'a human guest is allowed authority verbs: ' + opened.join(', '), tookRequests: 6 };
+        }
+
+        return { verdict: 'REFUSED', detail: 'auth_create mints a credential (no instance/secret leak), auth_require reads the verdict field (no fail-open), and the trust/teams authority verbs are admin-only for guests', tookRequests: 6 };
+        } finally {
+          if (prevSecret === undefined) delete process.env.VANT_TOKEN_SECRET;
+          else process.env.VANT_TOKEN_SECRET = prevSecret;
+        }
+      },
+    },
   ],
 };
