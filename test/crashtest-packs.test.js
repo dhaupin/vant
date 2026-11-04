@@ -1958,6 +1958,13 @@ const EXPECTED = {
         // non-string body). Both fixed to typed-refusal/false. Self-contained
         // lib row, strict REFUSED.
         'envelope-seal-and-hmac-totality': 'REFUSED',
+        // (round-6 audit, 2026-11-04) QoS/escrow totality: the throttle key
+        // was re-minted per call (anonymous fns were unlimited), maxPerHour
+        // was parsed but never enforced, the protection circuit had no clock
+        // (one blip bricked it forever), escrow accepted negative/NaN amounts
+        // (free budget / row poison), and replay answered cyclic arrivals
+        // with a raw circular-JSON TypeError instead of a typed refusal.
+        'qos-throttle-and-escrow-totality': 'REFUSED',
         // ARMED 2026-10-27 (spine slice 2): GEOMETRY, WORLD/CLOCK,
         // MESH/BRAINS (#154-#166) convert - the 1:4 fold laws, the ONE PRF
         // chain (fragmenter + GitHub adapter), the RAID carrier + precision

@@ -1,8 +1,27 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 89,
+  "_headingCount": 90,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 360 (audit round 6: the QoS/escrow money-and-rate canon",
+      "sections": [
+        {
+          "name": "Fixed: audit round 6 across the un-audited QoS/escrow/carriers frontier (5 findings, 13 discriminating pins, 402/402 crashtest battery)",
+          "items": [
+            "The throttle key re-minted on EVERY call, so an anonymous function drew",
+            "RateLimiter's maxPerHour was parsed and surfaced in its config but",
+            "The protection-layer circuit exported FAILURE_WINDOW_MS but had no",
+            "escrow.recordSpend/refund mutated the ledger on NEGATIVE amounts:",
+            "carriers.replay built its typed refusal label with a raw",
+            "Verification: test/audit-round6.test.js - 18 pins, every finding has"
+          ]
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,
