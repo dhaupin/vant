@@ -166,7 +166,7 @@ vant_health
 
 ---
 
-## Extended Tools (12)
+## Extended Tools
 
 ### vant_get_islands
 
@@ -234,7 +234,7 @@ brain_remove(name="learnings/old")
 brain_corpus()
 brain_list(); brain_state(); brain_stack(wait=true)
 brain_push(name="axolotl", type="private")   # hop the stack
-brain_pop(); brain_switch(name="vant")
+brain_current(); brain_switch(name="vant")  # unwind is EXPLICIT: no pop tool exists in the registry
 
 # Files
 # (the Files family is the PREFIXED dropbox/my-stuff block below —
@@ -275,7 +275,7 @@ vant_boot_reset()
 
 ```bash
 vant_list_branches(); vant_create_branch(name="feature-1"); vant_switch_branch(name="main")
-brain_push(name="feature-1"); brain_pop()
+brain_push(name="feature-1"); brain_switch(name="<previous>")   # no pop tool in the registry - unwind explicitly
 vant_branch_auto(prefix="agent/"); vant_branch_is_dirty(); vant_branch_changed_brains()
 ```
 
