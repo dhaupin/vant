@@ -623,4 +623,11 @@ discriminating by stashing the src fixes (11/11 fail pre-fix). Full wall green:
   decrypt edges).
 - Environment note: `live-fire-regressions.test.js` needs `ss` (iproute2) for
   its loopback-bind assertion; it was absent here (`apt-get install iproute2`).
+- Replay walk (no new defect): verify runs BEFORE `_replayCheck` (order is
+  correct), the dedupe key is the signature itself, and the seal path uses its
+  own `:seal` namespace. Residual design limit (documented, not a bug): a
+  source whose payload carries no numeric `ts` (GitHub-style) skips the
+  freshness half, so a *captured* signed request can replay once its signature
+  ages out of the bounded `REPLAY_SEEN_MAX` pool — inherent to HMAC over bytes
+  with no timestamp. Worth a follow-up if such a source is wired.
 
