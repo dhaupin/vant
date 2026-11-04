@@ -1,8 +1,25 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 88,
+  "_headingCount": 89,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 359 (the crashtest 1.2.0 sign-off: the census campaign",
+      "sections": [
+        {
+          "name": "Changed: crashtest bumps to the released 1.2.0 and the vet gate pays out",
+          "items": [
+            "The devDependency pin moves `^1.1.0` -> `^1.2.0` (package.json +",
+            "The vet measured the 1.1.0 -> 1.2.0 package diff (32 files): every",
+            "Post-vet gates x2 on the bumped library: contract battery 400/0 both",
+            "The two orphan doors (test-all, format-test) join the #181 door-pin"
+          ]
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

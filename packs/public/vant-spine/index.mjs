@@ -973,6 +973,59 @@ export default {
     },
 
     {
+      name: 'envelope-seal-and-hmac-totality',
+      description: "the shared envelope + HMAC canon is TOTAL and its verification refuses everything it cannot prove: signEnvelope/verifyEnvelope round-trip a well-formed envelope, a tampered payload / wrong secret / non-string body all answer false (never a raw TypeError), and a non-JSON-serializable envelope refuses typed on sign and false on verify; and the HMAC canon itself names a missing/non-string key (coded refusal, was a raw ERR_INVALID_ARG_TYPE) while a legitimate round-trip still verifies",
+      async run(_harness) {
+        const gs = await loadAll(['lib/messaging.js', 'lib/encrypt.js']);
+        const M = gs[0];
+        const E = gs[1].default || gs[1];
+        const KEY = 'crashtest-env-' + 'z'.repeat(20);
+        // (a) envelope sign/verify round-trip + tamper refusal (pure)
+        const env = M.makeEnvelope('crashtest.topic', { hello: 'world' }, { from: 'node-a' });
+        const sig = M.signEnvelope(env, KEY);
+        if (M.verifyEnvelope(env, KEY, sig) !== true) {
+          return { verdict: 'EXPLOITED', detail: 'a well-formed envelope failed its own verify', tookRequests: 1 };
+        }
+        if (M.verifyEnvelope({ ...env, payload: { hello: 'evil' } }, KEY, sig) !== false) {
+          return { verdict: 'EXPLOITED', detail: 'a tampered payload still verified', tookRequests: 2 };
+        }
+        if (M.verifyEnvelope(env, 'wrong-secret-' + 'w'.repeat(20), sig) !== false) {
+          return { verdict: 'EXPLOITED', detail: 'a wrong secret still verified', tookRequests: 3 };
+        }
+        if (M.verifyEnvelope(env, KEY, undefined) !== false) {
+          return { verdict: 'EXPLOITED', detail: 'an absent signature still verified', tookRequests: 4 };
+        }
+        // (b) totality: a non-serializable envelope must NOT throw out of verify
+        let threw = false;
+        try { M.verifyEnvelope({ payload: 1n }, KEY, 'deadbeef'); } catch (e) { threw = true; }
+        if (threw) {
+          return { verdict: 'EXPLOITED', detail: 'verifyEnvelope threw on a non-serializable envelope (raw TypeError out of the ceremony)', tookRequests: 5 };
+        }
+        let signCode = null;
+        try { M.signEnvelope({ payload: 1n }, KEY); } catch (e) { signCode = e && e.code; }
+        if (signCode !== 'E_INPUT') {
+          return { verdict: 'EXPLOITED', detail: 'signEnvelope did not name its non-serializable refusal (code=' + signCode + ')', tookRequests: 6 };
+        }
+        // (c) the HMAC canon: coded refusal on a missing key, total verify
+        let keyCode = null;
+        try { E.hmacSign('data', undefined); } catch (e) { keyCode = e && e.code; }
+        if (keyCode !== 'ENCRYPT_KEY_REQUIRED') {
+          return { verdict: 'EXPLOITED', detail: 'hmacSign did not refuse a missing key typed (code=' + keyCode + ')', tookRequests: 7 };
+        }
+        let vThrew = false;
+        try { E.hmacVerify({ a: 1 }, KEY, 'aabb'); } catch (e) { vThrew = true; }
+        if (vThrew) {
+          return { verdict: 'EXPLOITED', detail: 'hmacVerify threw on a non-string body instead of answering false', tookRequests: 8 };
+        }
+        // (d) a legitimate HMAC round-trip still verifies
+        if (E.hmacVerify('payload', KEY, E.hmacSign('payload', KEY)) !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the HMAC canon over-refused a legitimate signature', tookRequests: 9 };
+        }
+        return { verdict: 'REFUSED', detail: 'the envelope + HMAC canon verifies what it can prove (round-trip holds) and answers false/typed-refusal on everything else - tampered, wrong-secret, non-string body, non-serializable envelope, and missing key - with no raw TypeError escaping any verifier', tookRequests: 9 };
+      },
+    },
+
+    {
       name: 'brain-verify-and-horcrux',
       description: "the brain verify chain holds: a fresh brain anchors and verifies, tamper behind the anchor DIVERGES typed, a horcrux forge + restore re-verifies to the SAME root (the restored brain equals the forged one byte-for-byte at root), and an unreadable file (a dangling symlink where a file must be) refuses currentRoot DENIED and surfaces in the manifest as NOT-ok - corruption is caught before read into context",
       async run(_harness) {

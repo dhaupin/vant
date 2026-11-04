@@ -5,6 +5,32 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 359 (the crashtest 1.2.0 sign-off: the census campaign
+closes against the released library)
+
+### Changed: crashtest bumps to the released 1.2.0 and the vet gate pays out
+
+- The devDependency pin moves `^1.1.0` -> `^1.2.0` (package.json +
+  package-lock.json, registry tarball, integrity-checked) now that
+  crashtest 1.2.0 is published on npm - the fix-range that sat dev-only
+  on GitHub released, so the deliberate-pin veto (#273) lifts. npm ci
+  verifies the manifest end to end.
+- The vet measured the 1.1.0 -> 1.2.0 package diff (32 files): every
+  contract-relevant change is fail-closed or additive - the PASSED
+  verdict bucket (a positive probe, never a defense claim), load-time
+  expect-spec validation, loud refusals for zero-match filters and
+  typo-d ctx knobs, a var/secrets name-collision check in buildEnv,
+  skipped-flag rendering on REFUSED rows, and two opt-in flags
+  (--allow-vacuous, --lint-packs). Default exit discipline unchanged.
+- Post-vet gates x2 on the bumped library: contract battery 400/0 both
+  passes with verdict tables identical, crashtest gate GREEN, packs
+  audit ALLOWED (1 pinned known finding, 0 EXPLOITED), packs:lint 22
+  packs / 312 ids, the eyes gate flat, the runner 39/0.
+- The two orphan doors (test-all, format-test) join the #181 door-pin
+  table (28 -> 30 doors, all held), paying the door-pin IOU the wave-14
+  row recorded. The #273 sign-off is stamped in packs/README.md wave
+  16: the census-family-closed status graduates to sign-off closed.
+
 ## [Unreleased] - pass 358 (the cron truth: Pages has no cron triggers, and the docs stop pretending it does)
 
 ### Fixed: the setup docs taught a dashboard section that does not exist

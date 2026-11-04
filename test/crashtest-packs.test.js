@@ -1952,6 +1952,12 @@ const EXPECTED = {
         // Both fixed; self-contained lib row (one ephemeral loopback socket,
         // the vant-relay precedent), strict REFUSED.
         'webhook-intake-secret-and-filter-posture': 'REFUSED',
+        // (round-5 audit, 2026-11-02) envelope + HMAC totality: verifyEnvelope
+        // threw a raw TypeError on a non-serializable envelope and hmacSign
+        // threw ERR_INVALID_ARG_TYPE on a missing key (hmacVerify on a
+        // non-string body). Both fixed to typed-refusal/false. Self-contained
+        // lib row, strict REFUSED.
+        'envelope-seal-and-hmac-totality': 'REFUSED',
         // ARMED 2026-10-27 (spine slice 2): GEOMETRY, WORLD/CLOCK,
         // MESH/BRAINS (#154-#166) convert - the 1:4 fold laws, the ONE PRF
         // chain (fragmenter + GitHub adapter), the RAID carrier + precision
