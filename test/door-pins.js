@@ -183,6 +183,20 @@ const PINS = [
         bin: 'backup.js', args: ['--help'], exit: 0,
         match: [/backup create/, /backup list/]
     },
+
+    // ---- the two orphan doors closed by the crashtest 1.2.0 sign-off (vant#273)
+    // wave 15: the last two unpinned doors (test-all, format-test) join the
+    // #181 table so every door is a pin, not a census row.
+    {
+        name: 'test-all --help shows the 17-check door usage',
+        bin: 'test-all.js', args: ['--help'], exit: 0,
+        match: [/Usage: vant test-all/]
+    },
+    {
+        name: 'format-test --help runs the smoke and exits 0',
+        bin: 'format-test.js', args: ['--help'], exit: 0,
+        match: [/Format\.js Test Suite/, /format\.detect/]
+    },
 ];
 
 module.exports = { PINS };
