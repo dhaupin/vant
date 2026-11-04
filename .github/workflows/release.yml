@@ -46,6 +46,9 @@ name: release
 #                   `git archive` of that release commit - zero drift.
 #                 Both tars judged: the npm tar (served, contents+ladder)
 #                 and the GH source tar (byte-drift vs the release commit).
+#                 The GH release carries the EXACT served tarball as its asset;
+#                 --asset asserts its sha512 == registry integrity, so the GH
+#                 release and the npm artifact are the SAME bytes.
 #
 # verify-only dispatch mode: no publish, no release minting - the verify
 # job re-runs the trust ladder against what is ALREADY published and
@@ -141,6 +144,8 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with: { fetch-depth: 0 }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with: { node-version: 22 }
       # BLOCK_* arrive through env from the publish job's outputs - the same
       # no-inline-interpolation rule the gate obeys. notes.md lives in
       # RUNNER_TEMP: never a silent overwrite of a repo file that happens
@@ -161,6 +166,24 @@ jobs:
           else
             gh release create "$TAG" --title "vant-os $BLOCK_VERSION" --notes-file "$RUNNER_TEMP/notes.md"
           fi
+
+      # The GH release gets the EXACT tarball the registry serves (family
+      # item 3): the registry read replica can lag the publish by seconds, so
+      # npm pack FROM the registry is polled (bounded) instead of racing it -
+      # a re-run re-uploads (--clobber) rather than fighting the claim.
+      - name: attach the served tarball to the release (polled, idempotent)
+        env:
+          BLOCK_VERSION: ${ needs.publish.outputs.version }
+          BLOCK_TAG: ${ needs.publish.outputs.tag }
+        run: |
+          set -e
+          for i in $(seq 1 24); do
+            if npm pack "vant-os@$BLOCK_VERSION" --pack-destination "$RUNNER_TEMP" > /dev/null 2>&1; then break; fi
+            if [ "$i" = "24" ]; then echo "the registry never served vant-os@$BLOCK_VERSION (24 attempts)"; exit 1; fi
+            echo "waiting for vant-os@$BLOCK_VERSION on the registry (attempt $i/24)"; sleep 5
+          done
+          gh release upload "$BLOCK_TAG" "$RUNNER_TEMP/vant-os-$BLOCK_VERSION.tgz" --clobber
+
 
   # No `needs` on release here by design under the if: the verify leg runs
   # after release on a real cut, but ALSO stands alone in verify-only mode
@@ -191,4 +214,4 @@ jobs:
           node scripts/verify-release.cjs --npm --version "$V" --probe "$PROBE" \
             --allowed 'web/' \
             --forbidden 'models/,tmp/,labs/,test/,packs/'
-          node scripts/verify-release.cjs --gh --tag "v$V"
+          node scripts/verify-release.cjs --gh --tag "v$V" --asset "vant-os-$V.tgz"
