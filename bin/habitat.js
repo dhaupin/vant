@@ -70,10 +70,17 @@ function run() {
         // (pass 82) RLS decision for a plain user context: roles come from
         // the habitat registry in the CURRENT workspace.
         const [mode, resource, userId] = [args[1], args[2], args[3]];
-        if (!mode || !resource || !userId) { console.error('Usage: vant habitat can <read|write> <resource> <userId>'); process.exit(1); }
+        // (round-9 audit, R9-3) VALIDATE the mode word. The old guard only
+        // checked presence, then coerced `mode === 'write' ? 'write' : 'read'`
+        // — so `vant habitat can delete <res> <user>` (a write verb) and even
+        // `... can garbage ...` answered against the LOOSER read policy and
+        // printed ALLOWED. The mode is read|write or it is a usage error; the
+        // coercion is gone (no silent downgrade to read).
+        if (mode !== 'read' && mode !== 'write') { console.error('Usage: vant habitat can <read|write> <resource> <userId>'); process.exit(1); }
+        if (!resource || !userId) { console.error('Usage: vant habitat can <read|write> <resource> <userId>'); process.exit(1); }
         const ws = h.getCurrentWorkspace();
         const ctx = { userId, roles: h.getUserRoles(ws, userId), workspace: ws };
-        h.can(ctx, resource, mode === 'write' ? 'write' : 'read').then(allowed => {
+        h.can(ctx, resource, mode).then(allowed => {
             console.log(allowed ? 'ALLOWED' : 'DENIED');
             process.exit(allowed ? 0 : 1);
         }).catch(e => { console.error('Error:', e.message); process.exit(1); });

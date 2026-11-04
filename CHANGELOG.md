@@ -5,6 +5,50 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 365 (audit round 9: the verdict surfaces stop failing open — an
+unclassified operation word is a refusal, not a pass)
+
+### Fixed: audit round 9 across the access-control/enforcement seam (3 findings, 16 discriminating pins)
+
+The class: a surface classifies an operation WORD against a small hardcoded
+list and falls back to the LOOSER class. Every one of them is a gate whose
+verdict reads ALLOWED for a word it never heard of — the opposite of the
+house's own "unknown = write" law (`lib/guests.js classifyTool`). An
+unclassified word is now a refusal.
+
+- **`lib/rls.js isOperationAllowed` (R9-1)** mapped `op` with
+  `['write','create','update','delete','commit'].includes(op) ? 'write' : 'read'`,
+  so EVERY unlisted word resolved to the LOOSER `read` policy:
+  `vant rls allow grant <resource>` printed ALLOWED while the identical
+  write verb `delete` printed DENIED, and a typo (`raed`) read as a pass.
+  The READ canon is now explicit (`read`/`get`/`list`/`status`/…) and
+  everything else is WRITE — fail-closed on the verb the way the guest
+  door already is.
+- **`lib/system.js isOperationAllowed` + `bin/system.js` (R9-2)** — the
+  stub returned `{ allowed: true }` for ANY string, and the CLI
+  truthy-tested that OBJECT (`allowed ? 'ALLOWED' : 'DENIED'`), so
+  `vant system allow totally-bogus-op` printed ALLOWED and exited 0. The
+  stub now refuses an unknown/empty word, and the CLI reads the `.allowed`
+  field and sets the exit code (the shape `bin/rls.js` already used).
+- **`bin/habitat.js` `can` (R9-3)** — the mode guard checked presence then
+  coerced `mode === 'write' ? 'write' : 'read'`, so
+  `vant habitat can delete <res> <user>` (a write verb) and
+  `vant habitat can garbage …` both answered against the LOOSER read
+  policy and printed ALLOWED. The mode is `read|write` or it is a usage
+  error; the silent downgrade is gone.
+- Verification: `test/rls-op-classification.test.js` — 16 pins, both
+  directions. Stashing the fixes flips 9 finding-shaped pins (grant/set/
+  mint/record/assign/spawn/revoke/issue + typo + bogus/empty + the two
+  `habitat can` coercions); the read-canon and explicit-write controls
+  hold BOTH ways by design. Adjacent suites green: system 12/0,
+  habitat-rls 23/0, habitat-rls-qc 13/0, rls-hookups 19/0,
+  security-hardening 22/0; seed `test/ci.js` 521 passed / 0 failed.
+- Swept the rest of the class: `lib/mcp.js` (level→scope, comment-correct),
+  `lib/tmp.js`, `lib/server.js`, `lib/pipeline.js` all fall back to WRITE
+  (safe direction); `lib/rules.js evaluate` is total; `lib/guests.js
+  classifyTool` is the law the above now match. A crashtest pack for this
+  family is a follow-up pass (the round-8 `vant-authority` precedent).
+
 ## [Unreleased] - pass 363 (CI speed lane: the suite wall fans out, gates stop queueing behind it)
 
 ### Where the wall was measured (2026-11-04, this tree)
