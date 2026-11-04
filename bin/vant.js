@@ -467,6 +467,8 @@ Usage: vant <command> [options]
 
 Core:
   vant start        Full startup (health → sync → load → run)
+                    first run asks to seed a brain; --brain-name <x> names it,
+                    --seed-starter seeds silently, --no-seed opts out
   vant health      System diagnostics
   vant sync        Pull/push brain
   vant load       Load brain

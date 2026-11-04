@@ -56,7 +56,7 @@ function printEra(e) {
     }
 }
 
-function nextHint(id) {
+function nextHint(_id) {
     console.log('');
     console.log('Next steps:');
     console.log('  • Do your work — subscribed bus events fold in automatically.');
@@ -80,6 +80,7 @@ async function run() {
                 console.log('Integrity:   ' + (c.integrity ? 'OK (checksum matches)' : 'DRIFTED — last write may have been torn'));
             }
             process.exit(0);
+            break;
         }
         case 'start': {
             const intent = args.slice(1).filter(a => !a.startsWith('-')).join(' ');
@@ -97,6 +98,7 @@ async function run() {
                 nextHint(r.era.id);
             }
             process.exit(0);
+            break;
         }
         case 'close': {
             const nextIdx = args.indexOf('--next');
@@ -113,6 +115,7 @@ async function run() {
                 console.log('the next wake inherits `next` as its boot prompt (the #175 hook).');
             }
             process.exit(0);
+            break;
         }
         case 'list': {
             const rows = era.list();
@@ -125,6 +128,7 @@ async function run() {
                 }
             }
             process.exit(0);
+            break;
         }
         case 'verify': {
             const id = args.slice(1).filter(a => !a.startsWith('-')).join(' ').trim();
@@ -134,6 +138,7 @@ async function run() {
             if (wantJson) console.log(JSON.stringify(r, null, 2));
             else console.log((r.match ? '✓ checksum MATCHES: ' : '✗ checksum DRIFTED: ') + r.id);
             process.exit(r.match ? 0 : 1);
+            break;
         }
         default:
             console.error('Unknown era verb: ' + cmd + ' (try: start | current | close | list | verify)');

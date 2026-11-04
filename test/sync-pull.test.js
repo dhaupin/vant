@@ -140,6 +140,29 @@ test('pullAny: no providers configured → structured refusal', async () => {
     return { success: refused, error: JSON.stringify(r).slice(0, 100) };
 });
 
+// ---------- pullAny all-providers-fail path (regression: shadowed `errors`) ----
+test('pullAny: every provider fails → coded VantError, never a bare TypeError', async () => {
+    sync._clearTestProviders();
+    sync._setTestProvider('deadgit', {
+        getType: () => 'deadgit',
+        isConfigured: () => true,
+        async getRepoInfo() { throw new Error('Provider API error: HTTP 403'); }
+    });
+    let threw = null;
+    try { await sync.pullAny({ preference: 'deadgit' }); } catch (e) { threw = e; }
+    const coded = threw && threw.code === 'GITHUB_SYNC_FAIL';
+    // restore the flow fake for the tests below
+    sync._clearTestProviders();
+    sync._setTestProvider('fakegit', {
+        getType: () => 'fakegit',
+        isConfigured: () => true,
+        async getRepoInfo() { return { owner: 'test', repo: 'brain' }; },
+        async pull(branch) { pulls.push(branch); return branch || 'main'; },
+        async push() { return 'pushed'; }
+    });
+    return { success: coded, error: threw ? (threw.constructor.name + ': ' + threw.message) : 'did not throw' };
+});
+
 // ---------- pullAny flow with a fake provider ----------
 const pulls = [];
 sync._setTestProvider('fakegit', {

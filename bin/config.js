@@ -33,7 +33,20 @@ async function main() {
             // has no runtime flags, so get() without the brain option always
             // returned null for anything the CLI itself had set.
             const val = config.get(key, null, { brain: currentBrain() });
-            console.log(`${key}=${val}`);
+            // (round-2 audit) Secret keys are masked in terminal output, the
+            // same posture the MCP config door (vant_config_get) and
+            // `config list env` already take. config.get() stays raw for
+            // internal callers; only this echo changes, so a secret never
+            // lands in a scrollback buffer or a CI log. A SECTION key
+            // (`github`) yields the nested object — deep-redact it and print
+            // JSON (the old `[object Object]` was both unreadable and, worse,
+            // unredacted).
+            if (val !== null && typeof val === 'object') {
+                console.log(`${key}=${JSON.stringify(config.redactSecrets(val))}`);
+            } else {
+                const shownVal = config.maskIfSecret(key, val);
+                console.log(`${key}=${shownVal === null || shownVal === undefined ? val : shownVal}`);
+            }
             break;
 
         case 'set':
@@ -49,27 +62,44 @@ async function main() {
                 console.log(theme.status.err('Set failed: ' + setRes.error));
                 process.exit(1);
             }
-            console.log(theme.status.ok('Set ' + key + ' ' + value + (setRes.persisted ? ' (persisted to ' + setRes.brain + ')' : ' (runtime only)')));
+            // (round-2 audit) Echo the value masked for secret keys — the
+            // confirmation still names the key, but a rotated token does not
+            // land in scrollback or a CI log.
+            const echoVal = config.maskIfSecret(key, value);
+            console.log(theme.status.ok('Set ' + key + ' ' + (echoVal === null || echoVal === undefined ? value : echoVal) + (setRes.persisted ? ' (persisted to ' + setRes.brain + ')' : ' (runtime only)')));
             break;
 
         case 'list':
         case 'ls':
             const all = config.getAll();
-            Object.entries(all).forEach(([k, v]) => {
-                // (Issue #169 QC) Object-valued config keys printed literally
-                // as "[object Object]" — unreadable and useless. Flatten one
-                // level: nested keys print as `section.key=value`, arrays
-                // and scalars stay inline.
-                if (v && typeof v === 'object' && !Array.isArray(v)) {
-                    for (const [sk, sv] of Object.entries(v)) {
-                        console.log(`${k}.${sk}=${typeof sv === 'object' ? JSON.stringify(sv) : sv}`);
-                    }
-                } else if (Array.isArray(v)) {
-                    console.log(`${k}=${JSON.stringify(v)}`);
-                } else {
-                    console.log(`${k}=${v}`);
+            // (round-2 audit) Mask secret-valued keys (github.token,
+            // mcp.apiKey, server.key …) before printing. `config list` used
+            // to dump them in cleartext while `config list env` masked the
+            // same values — a live token on screen is a disclosure even
+            // locally (scrollback, shared terminal, CI log). Flatten the
+            // tree to dotted leaf paths and redact EVERY leaf with
+            // redactSecrets, so secrets buried more than one level deep or
+            // sitting inside arrays (providers.github.token, keys:[{token}])
+            // are masked too — the old one-level flatten printed those
+            // verbatim.
+            const redacted = config.redactSecrets(all);
+            const walk = (node, prefix) => {
+                // Arrays stay on one line (redactSecrets already masked any
+                // secret leaves inside), matching the old output shape.
+                if (Array.isArray(node)) {
+                    console.log(`${prefix}=${JSON.stringify(node)}`);
+                    return;
                 }
-            });
+                if (node !== null && typeof node === 'object') {
+                    for (const [k, v] of Object.entries(node)) {
+                        walk(v, prefix ? `${prefix}.${k}` : k);
+                    }
+                    if (Object.keys(node).length === 0) console.log(`${prefix}=${JSON.stringify(node)}`);
+                    return;
+                }
+                console.log(`${prefix}=${node}`);
+            };
+            walk(redacted, '');
             // env  — the pass-179 registry view: every VANT_* env var vant
             // consumes, resolved with source (env vs fallback) + typo flags
             if (args[1] === 'env') {
