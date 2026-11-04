@@ -137,6 +137,21 @@ The EXPLOITED ledger for this pack is EMPTY as of 2026-10-22: the trust row meas
 | `tool-schema-enforced` | declared inputSchemas reject invalid params BEFORE any side effect (the lib/mcp.js P1 #14 contract — 269 schemas went decorative once) | validated — REFUSED |
 | `brain-write-scope-hardness` | hostile `brain_write` params stay inside the brain tree — an escape is an arbitrary-file write inside the door | validated — REFUSED |
 
+### `public/vant-authority` — the MCP auth + privilege-AUTHORITY canon (6 oracles; all validated 2026-11-04)
+
+**What it does.** The `vant-mcp` pack grades the tool LAYER (schema/scope/registry/security-chain); this pack grades WHO may mint credentials, grant/revoke capability, and mutate trust/teams — the authority lane. The round-7 audit's MCP auth + guest-authority row landed in `vant-spine` (a catch-all); this is its honest home, and the packstruct census counts it. Every row is self-contained (drives the real `lib/mcp`, `lib/guests`, `lib/auth` in-process — no route arm), so each earns a strict verdict in every run root. The handler-guard row runs the handler inside a guest `AsyncLocalStorage` store — the same store the real door builds — so the guard is measured on its own, not merely the door gate.
+
+Filed with the round-7 audit (2026-11-04, vant PR #325) that found the defects it now pins. Each row FAILS against the pre-fix code (5/6 flip to EXPLOITED; the sixth is a narrowness guard that holds both ways).
+
+| Attack | What it shakes | Status |
+|---|---|---|
+| `auth-create-mints-credential-not-instance` | `auth_create` returned the LIVE `Auth` instance — which carries `options.tokenSecret` (the process token-signing key), so a caller could read the secret and forge a token for ANY identity (verified by the same `verifyToken` the door trusts). Must mint `{token,userId,roles}` and leak neither the instance nor the secret (R7-1) | validated — REFUSED |
+| `auth-require-reads-verdict-field` | `auth_require` checked `if (!verified)`, but `verifyToken` resolves to a truthy verdict object (`{valid:false,...}`, never null), so an INVALID token answered `allowed:true`. Every invalid token must answer `allowed:false` (R7-2) | validated — REFUSED |
+| `trust-teams-authority-admin-classified` | the trust/teams authority verbs are the same seam the round-4 blocklist closed for sudo/habitat but were never listed — a default `human` guest (canWrite+canSpawn) could self-inflate trust (0.5→1.0 in one call) or drop a threshold to 0, and create orgs/depts/teams/roles. All 23 authority verbs must be admin-class and refused at the door (R7-3) | validated — REFUSED |
+| `authority-handlers-refuse-guest-context` | defense in depth: each authority HANDLER (12 probed, incl. the `_verifiedAdminGate`/`_assertNotGuest` family) refuses a guest `AsyncLocalStorage` context with a typed throw, so the door gate is not the only line | validated — REFUSED |
+| `authority-classification-totality` | the forward-looking invariant: EVERY verb whose handler calls `_assertNotGuestAuthority` is ALSO admin-class at the door — a new authority verb cannot ship guarded-in-the-handler but door-reachable. The scan is proven live by asserting it detects the known family (scan-rot guard) | validated — REFUSED |
+| `authority-guard-does-not-overreach` | the authority block is NARROW: ordinary read verbs stay read-class and ordinary write verbs stay write-class | validated — REFUSED |
+
 ### `public/vant-network-wall` — the outbound-network SSRF wall (5 oracles; all validated)
 
 **What it does.** Attacks the wall UNDER the network doors — `lib/network.js`'s `isInternalIP` / `isPrivateLanIP` / `isDomainAllowed` / `fetch` are plain in-process code, and the MCP `vant_network_fetch` tool (driven through `lib/mcp.execute`, the exact `/mcp/exec` dispatcher) is the guest-reachable network door. Four rows are self-contained (they drive lib/network.js directly, no route — the vant-brain batch-2 precedent), so they earn strict verdicts in every run root; the door row rides the shared `mcp-exec` arm. **Zero external sockets**: the door row dials a test-owned loopback listener and asserts it is never reached (the vant-relay real-upstream precedent, inverted), and the DNS row stubs `dns.resolve4`/`resolve6` in-process.
