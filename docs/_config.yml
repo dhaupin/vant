@@ -29,7 +29,10 @@ gems:
 plugins:
   - jekyll-redirect-from
 
-# Auto-generate nav from folder structure (no manual nav)
+# Manual nav (docs/_data/nav.yml) is consumed by the layout's site.data.nav
+# loop. nav_generator.rb's auto nav (site.config.nav) is NOT read by any
+# template; nav_order/nav_sections below only feed that plugin + per-page
+# nav_order.
 # Section order in nav (lower = higher)
 nav_order:
   getting-started: 10

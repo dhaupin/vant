@@ -11,7 +11,7 @@ nav_order: 113
 
 Reference for the core MCP tools. The live registry is larger and grows automatically (core libs are auto-wired): a running server exposes the full, current list via `tools/list` or `curl http://localhost:3457/tools`.
 
-Cross-org surfaces have their own sections below: [Agora and Mesh Tools](#agora-and-mesh-tools-11) (remote votes, ledger sync, consensus), [Market and Msg Tools](#market-and-msg-tools-8), and [Escrow Tools](#escrow-tools-5) (budgets, holds, ledger status). Escrow semantics in depth: [Escrow API](/reference/escrow). Task-first usage: [Federation Playbooks](/vant/operations/federation-playbooks).
+Cross-org surfaces have their own sections below: [Agora and Mesh Tools](#agora-and-mesh-tools-11) (remote votes, ledger sync, consensus), [Market and Msg Tools](#market-and-msg-tools-8), and [Escrow Tools](#escrow-tools-5) (budgets, holds, ledger status). Escrow semantics in depth: [Escrow API](/vant/reference/escrow). Task-first usage: [Federation Playbooks](/vant/operations/federation-playbooks).
 
 ## Core Tools (9)
 
@@ -198,11 +198,11 @@ Everything after this point is grouped by domain. Params listed are the **requir
 ### Agents (Vant-to-Vant spawns)
 
 ```bash
-vant_agent_kill(id="x")                # terminate a spawned agent
-vant_agent_list()                       # active agents
-vant_agent_proto_list()                 # agent templates
-vant_agent_proto_load(name="x")
-vant_agent_spawn(name="A", role="Asst") # runtime spawn (agents.maxAgents quota)
+agent_kill(id="x")                # terminate a spawned agent
+agent_list()                       # active agents
+agent_proto_list()                 # agent templates
+agent_proto_load(name="x")
+agent_spawn(name="A", role="Asst") # runtime spawn (agents.maxAgents quota)
 ```
 
 ### Work orders (pass 212, #185 H4)
@@ -210,10 +210,10 @@ vant_agent_spawn(name="A", role="Asst") # runtime spawn (agents.maxAgents quota)
 `work_assign` is the composed verb: one call hands off work end-to-end.
 
 ```bash
-vant_work_assign(task="sweep the map", name="Scout", budget=5)
+work_assign(task="sweep the map", name="Scout", budget=5)
 # -> { ok:true, workId, agentId, delegated:true, eraFolded:true, hold:{...} }
 
-vant_work_assign(task="grow the map", agentId="agent_...")  # reuse an existing agent
+work_assign(task="grow the map", agentId="agent_...")  # reuse an existing agent
 # explicit agentId is honored exactly - never silently replaced by a spawn
 ```
 
@@ -237,7 +237,9 @@ brain_push(name="axolotl", type="private")   # hop the stack
 brain_pop(); brain_switch(name="vant")
 
 # Files
-brain_list_files(); brain_get_file(name="x"); brain_delete_file(name="x")
+# (the Files family is the PREFIXED dropbox/my-stuff block below —
+#  vant_brain_list_files / vant_brain_get_file / vant_brain_delete_file;
+#  only brain_read / brain_write exist unprefixed)
 
 # Geometry-coded memory (NSC9 addresses)
 brain_geo_store(key="k", data=<json>); brain_geo_load(barcode="bc"); brain_geo_list()
@@ -417,7 +419,7 @@ Complete tool/param lists in [the tables below](#domains-a--z-tables).
 
 ### vant_load_island
 
-Load island. Islands with a habitat boundary policy (`_island:<name>`) are RLS-gated at load (see [RLS island boundaries](/reference/rls)): optional `userCtx` / `options` carry the caller's context; the current agent's habitat identity is used otherwise. Row-level filter/mask applies to island data.
+Load island. Islands with a habitat boundary policy (`_island:<name>`) are RLS-gated at load (see [RLS island boundaries](/vant/reference/rls)): optional `userCtx` / `options` carry the caller's context; the current agent's habitat identity is used otherwise. Row-level filter/mask applies to island data.
 
 **Params:**
 
@@ -589,7 +591,7 @@ vant_universe_resume(id="09a4…", actor="steward-agent")
 ```
 Typed refusals: `E_SNAPSHOT_ABSENT` (unknown id), `E_SNAPSHOT_AMBIGUOUS` (id prefix matches several), `E_STATE_LOCKED` (fail-closed). CLI: `vant universe resume`.
 
-U3 addition: pass `materialize: true` to run the escrow-backed byte-restoring executor - recorded cell VALUES are restored through the arch-A store, billed 1 credit per cell against `scenario:materialize:<actor>`, and a broke actor is refused typed (`E_SNAPSHOT_BUDGET`) before any write. See the [Scenario Playbook](/operations/scenario-playbook).
+U3 addition: pass `materialize: true` to run the escrow-backed byte-restoring executor - recorded cell VALUES are restored through the arch-A store, billed 1 credit per cell against `scenario:materialize:<actor>`, and a broke actor is refused typed (`E_SNAPSHOT_BUDGET`) before any write. See the [Scenario Playbook](/vant/operations/scenario-playbook).
 
 ---
 
@@ -1369,7 +1371,7 @@ See each tool section for its exact return shape. Conventions across the registr
 
 ## Escrow Tools (5)
 
-Escrow is the accountability layer: budgets, holds, and the ledger behind them. These tools were undocumented before pass 77 - and three of them were broken (see the [Escrow API export note](/reference/escrow)).
+Escrow is the accountability layer: budgets, holds, and the ledger behind them. These tools were undocumented before pass 77 - and three of them were broken (see the [Escrow API export note](/vant/reference/escrow)).
 
 ### escrow_create
 
@@ -1413,7 +1415,7 @@ Read the escrow ledger. No params: budgets, holds, approvals, quotas counts, and
 
 ## Workspace Budget Tools (6)
 
-Org pools + member caps over habitat workspaces (pass 83) - see [Escrow workspace budgets](/reference/escrow). RLS: draws fail closed on unknown workspaces; setting a pool or cap is admin-gated (the admin role is verified against the habitat registry, never self-declared).
+Org pools + member caps over habitat workspaces (pass 83) - see [Escrow workspace budgets](/vant/reference/escrow). RLS: draws fail closed on unknown workspaces; setting a pool or cap is admin-gated (the admin role is verified against the habitat registry, never self-declared).
 
 ### escrow_setWorkspaceBudget
 
