@@ -199,5 +199,33 @@ export default {
         return { verdict: 'REFUSED', detail: 'the roster is 347 entries shaped and deterministic, vant_call refuses unknown + module identifiers typed with the roster named, the handoff rides the same schema gate (content-less brain_write typed-refused, nothing landed), the honest call runs the real tool onto the disk verbatim, and brain_load loads honestly in both declared arms (string verbatim, array fan-out with per-slot nulls) - the registry is measured', tookRequests: 6 };
       },
     },
+    {
+      name: 'security-chain-enforced',
+      description: 'the dispatcher itself must run the security chain (sandbox capability gate + VAF + QoS): after the registry-census rewrite the chain lived only in an orphaned _executeWithSecurity and every door call dispatched straight to the handler, so a locked sandbox never gated a write and sudo_grant self-escalated. The write classifier must also be honest (fail-closed) - pre-fix only 34 of 347 tools classified WRITE',
+      async run(harness) {
+        const r = await tryRun(harness, 'mcp-chain', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({}),
+        });
+        if (r._absent) return skip('no mcp-chain route');
+        if (r.threw) return { verdict: 'REFUSED', skipped: true, detail: `mcp-chain threw in the shim: ${r.error?.name}` };
+        const j = parseJson(await bodyText(r));
+        if (!j || j.error || j.fatal) return { verdict: 'REFUSED', skipped: true, detail: 'mcp-chain not armed: ' + ((j && (j.error || j.fatal)) || 'no payload') };
+        if (j.classifierExport !== true || j.mutatingWrite !== true || j.readRead !== true || j.unknownWrite !== true) {
+          return { verdict: 'EXPLOITED', detail: `write classifier dishonest: export=${j.classifierExport} mutating=${j.mutatingWrite} read=${j.readRead} unknown=${j.unknownWrite} - a mutating tool riding the read-only pipeline runs outside canWrite`, tookRequests: 1 };
+        }
+        if (j.chainWriteRefused !== true) {
+          return { verdict: 'EXPLOITED', detail: 'a chain-only-gated write tool RAN under a locked sandbox (canWrite=false) - the security chain is not on the dispatch path', tookRequests: 1 };
+        }
+        if (j.escalationRefused !== true || j.execFloorUnchanged !== true) {
+          return { verdict: 'EXPLOITED', detail: `privilege escalation through the door: escalationRefused=${j.escalationRefused} floorUnchanged=${j.execFloorUnchanged} - sudo_grant must not widen the sandbox that denies it`, tookRequests: 1 };
+        }
+        if (j.typeGuard !== true) {
+          return { verdict: 'EXPLOITED', detail: 'a non-string method escaped as an untyped TypeError instead of a typed MCP_INPUT_INVALID refusal', tookRequests: 1 };
+        }
+        return { verdict: 'REFUSED', detail: 'the security chain runs on every dispatch (a chain-only-gated write is refused under a locked sandbox with CAPABILITY_NOT_ALLOWED), the write classifier is honest and fail-closed, sudo_grant cannot self-escalate, and a non-string method is a typed refusal - the door is gated', tookRequests: 1 };
+      },
+    },
   ],
 };
