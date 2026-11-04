@@ -398,6 +398,27 @@ function check(name, ok, detail) {
         if (lPrevCaps && typeof lSb.defaultSandbox.setCapabilities === 'function') lSb.defaultSandbox.setCapabilities(lPrevCaps);
     }
 
+    // ---- O. IPv6 CIDR holes in the SSRF wall (same INTERNAL_IP_PATTERNS).
+    //         The internal patterns matched only the literal base prefix, so
+    //         `fe80:` admitted fe81-febf (most of fe80::/10), `fc00:`/`fd00:`
+    //         admitted fc01-fdff (most of fc00::/7), and v6 multicast
+    //         (ff00::/8) had no pattern at all - every one reaches an
+    //         internal endpoint. Match the whole CIDR; do not over-block the
+    //         out-of-range near-misses (`fd0::`, `fec0::`).
+    check('O1: isInternalIP refuses the full fe80::/10 link-local range (not just fe80:)',
+        lNet.isInternalIP('fe81::1') === true && lNet.isInternalIP('fe9f::1') === true
+        && lNet.isInternalIP('fea0::1') === true && lNet.isInternalIP('febf::1') === true,
+        `-> fe81=${lNet.isInternalIP('fe81::1')} febf=${lNet.isInternalIP('febf::1')}`);
+    check('O2: isInternalIP refuses the full fc00::/7 ULA range (not just fc00:/fd00:)',
+        lNet.isInternalIP('fc01::1') === true && lNet.isInternalIP('fcff::1') === true
+        && lNet.isInternalIP('fd12::1') === true && lNet.isInternalIP('fdff::1') === true
+        && lNet.isInternalIP('ff02::1') === true,
+        `-> fc01=${lNet.isInternalIP('fc01::1')} fdff=${lNet.isInternalIP('fdff::1')} ff02=${lNet.isInternalIP('ff02::1')}`);
+    check('O3: the widened CIDRs do not over-block (fd0:: and fec0:: are out of range)',
+        lNet.isInternalIP('fd0::1') === false && lNet.isInternalIP('fe8::1') === false
+        && lNet.isInternalIP('fec0::1') === false && lNet.isInternalIP('2606:4700:4700::1111') === false,
+        `-> fd0=${lNet.isInternalIP('fd0::1')} fec0=${lNet.isInternalIP('fec0::1')} pub=${lNet.isInternalIP('2606:4700:4700::1111')}`);
+
     // ---- N. The sync test-provider DI seam must be EXCLUSIVE.
     //         getConfiguredProviders() used to APPEND registered fakes to the
     //         real providers. In a working tree GITHUB_TOKEN is set and the
