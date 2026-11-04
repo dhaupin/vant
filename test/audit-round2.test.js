@@ -95,13 +95,25 @@ function check(name, ok, detail) {
     //         and the PATH_OUTSIDE_ALLOWED_DIRECTORY refusal was unreachable
     //         (the local try/catch swallowed it into INVALID_PATH).
     const vaf = require(path.join(ROOT, 'lib', 'vaf'));
+    // (CI host law, wave 19.36) The probe inputs stay cwd-RELATIVE on
+    // purpose: vaf.checkPathTraversal fails CLOSED on any absolute path that
+    // begins with a sensitive system prefix (/home/, /tmp/, ...) — and this
+    // suite's checkout may itself live under one (/home/runner/work/vant on
+    // CI), so absolute-path inputs would trip the veto before the containment
+    // logic under test even runs (C1/C2/C3/E1 reported VAF_VALIDATION_FAILED
+    // in wave 19.35 CI). run-all.js runs every suite with cwd=ROOT (harness
+    // contract), and direct one-off runs happen from the repo root too, so
+    // relative inputs resolve the same targets while their raw string can
+    // never start with a system prefix. `base` stays ABSOLUTE: containment is
+    // measured against the real tree.
+    const relToRoot = (p) => path.relative(ROOT, p);
     const base = path.join(ROOT, 'models', 'private', 'vant');
     const vafCases = [
         ['C1: sibling prefix outside the root is refused',
-            path.join(ROOT, 'models', 'private', 'vant-evil', 'x.md'), 'PATH_OUTSIDE_ALLOWED_DIRECTORY'],
+            relToRoot(path.join(ROOT, 'models', 'private', 'vant-evil', 'x.md')), 'PATH_OUTSIDE_ALLOWED_DIRECTORY'],
         ['C2: a path in another tree is refused',
-            path.join(ROOT, 'models', 'private', 'other', 'x.md'), 'PATH_OUTSIDE_ALLOWED_DIRECTORY'],
-        ['C3: a real child path is accepted', path.join(base, 'x.md'), null],
+            relToRoot(path.join(ROOT, 'models', 'private', 'other', 'x.md')), 'PATH_OUTSIDE_ALLOWED_DIRECTORY'],
+        ['C3: a real child path is accepted', relToRoot(path.join(base, 'x.md')), null],
     ];
     for (const [name, p, want] of vafCases) {
         let got = null;
@@ -137,7 +149,7 @@ function check(name, ok, detail) {
     fs.symlinkSync(path.join(symRoot, 'outside'), path.join(symRoot, 'root', 'link'));
     const inner = path.join(symRoot, 'root');
     let symVaf = null;
-    try { vaf.validateSafePath(path.join(inner, 'link', 'secret.txt'), inner); } catch (e) { symVaf = e.code; }
+    try { vaf.validateSafePath(relToRoot(path.join(inner, 'link', 'secret.txt')), inner); } catch (e) { symVaf = e.code; }
     check('E1: vaf refuses a path through a symlinked component',
         symVaf === 'PATH_OUTSIDE_ALLOWED_DIRECTORY', `code=${JSON.stringify(symVaf)}`);
     const Storage = require(path.join(ROOT, 'lib', 'storage')).FileStorage;
