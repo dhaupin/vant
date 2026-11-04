@@ -143,7 +143,7 @@ Notes:
 
 ## Web Dashboard
 
-A React dashboard ("a guest identity with a browser") ships under `web/dashboard` (codename Bolete) - 19 modules (status, brains, agents, guests, chat, forum, carriers, chain, market, work, traveler, users, ...) with Cloudflare Pages Functions proxying `/api/*` to the pod's MCP door. (One-way boundary: frontends never require the pod's lib graph and vice versa.) The module/frame contract and its phases live in [labs/prd-web.md](labs/prd-web.md): `web/<app>` self-contained frontends, identity tiers, a multi-install property switcher, and the in-dashboard module frame.
+A React dashboard ("a guest identity with a browser") ships under `web/dashboard` (codename Bolete) - 21 modules (status, brains, agents, guests, chat, forum, carriers, chain, market, work, traveler, users, ...) with Cloudflare Pages Functions proxying `/api/*` to the pod's MCP door. (One-way boundary: frontends never require the pod's lib graph and vice versa.) The module/frame contract and its phases live in [labs/prd-web.md](labs/prd-web.md): `web/<app>` self-contained frontends, identity tiers, a multi-install property switcher, and the in-dashboard module frame.
 
 The second shipped frontend is `web/relay` - the sealed relay hop face (the blind ciphertext forwarder, `relay.hop`; see [Relay](docs/operations/relay.md)).
 

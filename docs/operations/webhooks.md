@@ -28,7 +28,8 @@ No prebuilt GitHub-push route ships - the server takes routes YOU register. To s
 ## Webhook Server (Vant's)
 
 Vant ships its own webhook system (`bin/webhooks.js` + `lib/webhooks.js`), serving on port 3467 by default. It is an INTAKE: custom routes register via the library (`register({ name, source, secret, dispatch, ... })`), requests POST to `<url>/<source>` with an HMAC signature header, and the ack honestly reports `{ received, event, source, handlers, dispatched }`
-- identical signed bytes replay as 409, stale envelopes refuse 401.
+- identical signed bytes replay as 409 (the dedupe is DURABLE: a fleet-grade JSON ledger per brain — `VANT_WEBHOOK_REPLAY_LEDGER` override; retention TTL default 24h via `webhookReplayTtlMs`, one-week ceiling), stale envelopes refuse 401 (5-minute ts window on timed sources).
+- `GET /info/<name>` returns NON-SECRET route metadata only, and CORS echoes an origin only from the explicit opt-in list (`VANT_WEBHOOK_CORS_ORIGINS`; default empty = no browser cross-origin access).
 
 The CLI manages the outbound/side list:
 

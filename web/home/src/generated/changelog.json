@@ -1,8 +1,26 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 93,
+  "_headingCount": 94,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 365 (audit round 9: the verdict surfaces stop failing open — an",
+      "sections": [
+        {
+          "name": "Fixed: audit round 9 across the access-control/enforcement seam (3 findings, 16 discriminating pins)",
+          "items": [
+            "**`lib/rls.js isOperationAllowed` (R9-1)** mapped `op` with",
+            "**`lib/system.js isOperationAllowed` + `bin/system.js` (R9-2)** — the",
+            "**`bin/habitat.js` `can` (R9-3)** — the mode guard checked presence then",
+            "Verification: `test/rls-op-classification.test.js` — 16 pins, both",
+            "Swept the rest of the class: `lib/mcp.js` (level→scope, comment-correct),"
+          ]
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

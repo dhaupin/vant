@@ -35,7 +35,7 @@ Steps for a successful release.
 - [ ] All tests pass
 - [ ] No lint errors
 - [ ] Update CHANGELOG.md
-- [ ] Update version in lib/version.js
+- [ ] Bump the version in package.json (the source of truth; `lib/version.js` reads it dynamically and emits on every read)
 
 ### 2. Release
 

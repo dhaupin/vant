@@ -100,6 +100,6 @@ The materialization bills **1 escrow credit per restored cell** against the acto
 ## Related
 
 - Universe engine and manifests: [`lib/state/genesis-snapshot.js`](https://github.com/dhaupin/vant/blob/main/lib/state/genesis-snapshot.js) (`labs/prd-universe.md` U1-U3)
-- Escrow budgets and workspace pools: [Escrow](/security/escrow)
-- Consensus voting: [Consensus](/reference/consensus)
-- Trust quarantine: [Succession](/multi-agent/succession)
+- Escrow budgets and workspace pools: [Escrow](/vant/security/escrow)
+- Consensus voting: [Consensus](/vant/reference/consensus)
+- Trust quarantine: [Succession](/vant/multi-agent/succession)
