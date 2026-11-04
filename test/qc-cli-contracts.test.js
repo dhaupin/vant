@@ -71,6 +71,20 @@ test('#169 config list flattens nested keys one level (section.key=value)', () =
     if (!out.includes('github.repo=')) throw new Error('nested keys not flattened (github.repo missing)');
 });
 
+// (round-2 audit) config list/get used to echo secret values in cleartext
+// while `config list env` masked the same values. A live token on screen is
+// a disclosure (scrollback, shared terminal, CI log). Both now mask.
+test('#169/round2 config list + get mask secret values (no cleartext token)', () => {
+    const SECRET = 'qc-round2-secret-9f3a7c';
+    const env = Object.assign({}, process.env, { VANT_MCP_API_KEY: SECRET });
+    const list = cli('config.js', ['list'], { env });
+    if (list.includes(SECRET)) throw new Error('config list printed the raw secret');
+    if (!/mcp\.apiKey=\S*\*\*\*\*/.test(list)) throw new Error('secret key not masked in list: ' + list);
+    const got = cli('config.js', ['get', 'mcp.apiKey'], { env });
+    if (got.includes(SECRET)) throw new Error('config get printed the raw secret');
+    if (!/\*\*\*\*/.test(got)) throw new Error('config get did not mask the secret: ' + got);
+});
+
 // ---- #170: msg verbs ----------------------------------------------------
 require(path.join(ROOT, 'lib', 'sandbox')).defaultSandbox.setCapabilities({ canRead: true, canWrite: true });
 

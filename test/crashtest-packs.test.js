@@ -1399,6 +1399,23 @@ const EXPECTED = {
         'tool-schema-enforced': 'REFUSED',
         'brain-write-scope-hardness': 'REFUSED',
     },
+    // (round-2 audit, 2026-11-03) the outbound-network SSRF wall itself.
+    // The four lib-level rows are self-contained (drive lib/network.js
+    // directly, no route) and earn strict REFUSED in every run root; the
+    // door row rides the mcp-exec arm (a REAL probe child) and its
+    // loopback listener is test-owned, so it also earns strict REFUSED
+    // here. Every row pins a bypass found and fixed this round: the
+    // IPv4-mapped/compatible/NAT64 wrappers (finding L), the fc00::/7 +
+    // fe80::/10 + ff00::/8 CIDR holes (finding O), the resolve4-only AAAA
+    // gap (finding L, DNS half), and the door's caller-supplied escape
+    // hatches (finding L, door half).
+    'vant-network-wall': {
+        'ipv4-mapped-and-nat64-refuse': 'REFUSED',
+        'ula-and-link-local-cidr-refuse': 'REFUSED',
+        'lan-carve-out-not-widened': 'REFUSED',
+        'v6-only-internal-target-refuses': 'REFUSED',
+        'mcp-door-pins-escape-hatches': 'REFUSED',
+    },
     // The vant-rest/vant-stones rows are VALIDATED 2026-10-24; the stones
     // lineage row was a LIVE FINDING pin (lib/transform.gather scoped the
     // brain inventory but left the live currentBrain unfiltered) — FIXED
