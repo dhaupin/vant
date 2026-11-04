@@ -86,13 +86,7 @@ The intranet posture is the mesh-on-a-LAN default recommendation: pods relay to 
 
 ## Bring-up (the pod IS the relay + the endpoint)
 
-```bash
-vant config set relay.enabled true   # persisted to the current brain
-vant relay gate                      # mint the HMAC secret (shown ONCE)
-vant relay channel                   # mint the e2e channel key (shown ONCE)
-vant server                          # (or all / headless) - the boot mounts the face
-vant relay status                    # posture truth
-```
+The recipes live ONCE, in the [Relay Playbook](/vant/operations/relay-playbook) (Recipe 1: `vant relay gate` / `vant relay channel` / server boot; Recipe 2 the dashboard piggyback; Recipes 3-4 the solo host and the user side). The mechanism this page owns:
 
 The boot mounts the face onto the webhook transport (its own port, 3467 default, loopback-bound like every listener; widen deliberately with `VANT_WEBHOOK_*`). OFF is first-class: no register, no server, no route. ON without a gate secret binds NOTHING (fail-closed).
 
