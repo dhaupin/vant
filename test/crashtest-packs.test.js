@@ -1965,6 +1965,15 @@ const EXPECTED = {
         // (free budget / row poison), and replay answered cyclic arrivals
         // with a raw circular-JSON TypeError instead of a typed refusal.
         'qos-throttle-and-escrow-totality': 'REFUSED',
+        // (round-7 audit, 2026-11-04) MCP auth + guest-authority totality:
+        // auth_create returned the live Auth instance (carrying
+        // options.tokenSecret — the process signing key — so a caller could
+        // forge a token for any identity), auth_require checked a truthy
+        // verdict object (invalid token -> allowed:true), and the trust/teams
+        // authority verbs were reachable by a default human guest (self-inflate
+        // trust / drop a threshold / create orgs+roles). Self-contained lib
+        // row, strict REFUSED.
+        'auth-instance-and-guest-authority-totality': 'REFUSED',
         // ARMED 2026-10-27 (spine slice 2): GEOMETRY, WORLD/CLOCK,
         // MESH/BRAINS (#154-#166) convert - the 1:4 fold laws, the ONE PRF
         // chain (fragmenter + GitHub adapter), the RAID carrier + precision
