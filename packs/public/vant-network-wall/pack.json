@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "vant-network-wall",
+  "description": "The outbound-network SSRF wall itself, graded in-process against lib/network.js and its MCP door (vant_network_fetch): the standing wall refuses loopback/link-local/cloud-metadata/RFC1918 through EVERY IPv6 spelling of the same v4 endpoint (IPv4-mapped ::ffff:0:0/96, IPv4-compatible ::/96, NAT64 64:ff9b::/96, both the dotted and hex-group tails), refuses a v6-only internal target whose A record is public/absent (the resolve4-only gap), and the door pins its caller-supplied escape hatches (skipDomainCheck / system / internalPolicy) so a guest cannot opt itself past the wall. Zero external sockets: the door rows dial a test-owned loopback server, the DNS row stubs resolve4/resolve6.",
+  "version": "0.1.0",
+  "entry": "index.mjs"
+}

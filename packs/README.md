@@ -107,6 +107,7 @@ that rides real OS processes or its own module plane stays native):
 | `vant-kit` | 3 | web/kit contracts + the vendoring ring + the CarrierShare plate census |
 | `vant-leisure` | 6 | `test/leisure.test.js` (retired whole) |
 | `vant-mcp` | 4 | MCP tool census (run-root arm) |
+| `vant-network-wall` | 5 | the outbound-network SSRF wall itself (`lib/network.js` + the `vant_network_fetch` door; lib-level rows + the mcp-exec door row) |
 | `vant-migrations` | 24 | `test/migrations.test.js` (retired whole 2026-10-27) |
 | `vant-pass-ledger` | 4 | pass-ledger doc surfaces (`test/pass-ledger.test.js` keeps the ledger plane) |
 | `vant-recursion-wall` | 3 | trace/recursion walls (lib-level) |
@@ -236,6 +237,29 @@ instance over the run root's brain fixture and reports every result verbatim.
 | `unknown-tool-honesty` | unknown tools answer a typed "not found" — never an uncaught throw out of the executor | validated — REFUSED |
 | `tool-schema-enforced` | declared inputSchemas reject invalid params BEFORE any side effect (the lib/mcp.js P1 #14 contract — 269 schemas went decorative once) | validated — REFUSED |
 | `brain-write-scope-hardness` | hostile `brain_write` params stay inside the brain tree — an escape is an arbitrary-file write inside the door | validated — REFUSED |
+
+### `public/vant-network-wall` — the outbound-network SSRF wall (5 oracles; all validated)
+
+**What it does.** Attacks the wall UNDER the network doors — `lib/network.js`'s
+`isInternalIP` / `isPrivateLanIP` / `isDomainAllowed` / `fetch` are plain
+in-process code, and the MCP `vant_network_fetch` tool (driven through
+`lib/mcp.execute`, the exact `/mcp/exec` dispatcher) is the guest-reachable
+network door. Four rows are self-contained (they drive lib/network.js
+directly, no route — the vant-brain batch-2 precedent), so they earn strict
+verdicts in every run root; the door row rides the shared `mcp-exec` arm.
+**Zero external sockets**: the door row dials a test-owned loopback listener
+and asserts it is never reached (the vant-relay real-upstream precedent,
+inverted), and the DNS row stubs `dns.resolve4`/`resolve6` in-process.
+
+Filed with the round-2 audit (2026-11-03) that found the bypasses it now pins.
+
+| Attack | What it shakes | Status |
+|---|---|---|
+| `ipv4-mapped-and-nat64-refuse` | an IPv4-mapped (`::ffff:0:0/96`), IPv4-compatible (`::/96`) or NAT64 (`64:ff9b::/96`) literal reaches the SAME v4 endpoint as its dotted form — loopback/metadata were reachable while the plain address was refused (finding L) | validated — REFUSED |
+| `ula-and-link-local-cidr-refuse` | the IPv6 patterns must match the whole CIDR, not the literal base prefix: `fc00::/7` (fc01-fdff), `fe80::/10` (fe81-febf) and v6 multicast `ff00::/8` all reach internal endpoints and must refuse, with the out-of-range near-misses (`fd0::`, `fec0::`) still allowed (finding O) | validated — REFUSED |
+| `lan-carve-out-not-widened` | the `privateLan` intranet carve-out admits exactly loopback + RFC1918 + v6 ULA, and never metadata/multicast/link-local — the embedded-v4 fix must not let a mapped metadata literal ride the LAN posture (finding L) | validated — REFUSED |
+| `v6-only-internal-target-refuses` | `resolveAndCheckIP` must resolve BOTH families: a hostname whose A is public/absent but whose AAAA is internal must refuse, or Node dials the v6 address past the v4-only check (finding L, DNS half) | validated — REFUSED |
+| `mcp-door-pins-escape-hatches` | the `vant_network_fetch` door must not forward caller-supplied `skipDomainCheck` / `system` / `internalPolicy` — a guest could send `skipDomainCheck:true` and walk the wall to loopback/metadata (finding L, door half) | validated — REFUSED |
 
 ### `public/vant-rest` — REST-door discipline (3 oracles; all validated)
 
