@@ -5,6 +5,91 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 362 (round-7 ledger entry + the STRUCT toolchain on latest)
+
+### Round-7 audit landed: merge `d141d739` (PR #325, Openhands) — entry the round itself never wrote
+
+- Three auth-door defects fixed: `auth_create` handed back the live Auth
+  instance (tokenSecret disclosure -> token forgery for any identity);
+  `auth_require` failed OPEN (verifyToken resolves to a verdict object, so
+  `if (!verified)` never fired on an invalid token); seven guest-authority
+  verbs (`trust_record`, `trust_setRequired`, `teams_createOrg/Dept/Team/
+  Role`, `teams_assign`) joined `GUEST_AUTHORITY_TOOLS` plus
+  `_assertNotGuestAuthority` guards in every handler.
+- Verification before merge (independent, this repo's law): round-7 suite
+  0/14 pre-fix vs 14/14 post-fix (stashing sources); mcp + crashtest-packs
+  green; the full 227-file battery green locally (109 via run-all + 30 + 88
+  batched, 0 failures); vant-spine row REFUSED post-fix.
+
+### The STRUCT toolchain re-pinned to the latest npm truth (measured via `npm view`, not memory)
+
+- packstruct 1.0.0, eyestruct 1.0.0, crashtest 1.2.0: already ON latest —
+  untouched.
+- poststruct 0.9.0 -> 1.0.0 and govstruct 0.9.0 -> 1.0.0 (both 1.0.0s are
+  2026-11 releases). The real lanes re-ran green on the new majors:
+  `govstruct lint` 1 member(s) clean, `check` 0 pack(s) over,
+  `surface --verify` every promised field honored + compliance-blocks
+  1 member(s) + network offline, `doctor` clean; poststruct audit over a
+  fresh `build:home` dist: exit 0, schema 1, counts 0 FAIL / 17 warns.
+- Version-truth spots updated to match: `poststruct.config.js` header,
+  the two CI lane comments in `.github/workflows/test.yml`, the two
+  CURRENT rows of the packs/README STRUCT table (historical wave
+  narratives keep their as-was pins), the family-pins ledger in
+  `scripts/audit-deps.js`, and the compliance map
+  `govstruct/compliance/vant.json` — the depstruct census caught the
+  first push's missing pair (pin:family + lock:family majors must
+  agree) and this pass corrects it; `npm run lint:deps` now reports
+  14 declared deps all ledgered, evidenced, and lockfile-resolved.
+
+## [Unreleased] - pass 361 (docs nitpick round: the checkout-docs fiction
+measured out, the reference lists verified clean, duplication absorbed)
+
+### Fixed: docs/drift sweep - every change below measured against live truth (no claims restated from memory)
+
+- The CI page's embedded workflow copy was FICTION against
+  .github/workflows/test.yml: it still showed the retired `develop`
+  trigger branch, a single job, `timeout-minutes: 8`, node 20, checkout
+  v4, and a fabricated standalone-suites-for-loop with evals/coverage
+  steps. Rewritten to the measured truth: branches [main, staging,
+  'agent-*', axolotl] (staging-rule canon; develop retired, axolotl
+  covered pre-PR), `ci` + the separate `crashtest` job (determinism
+  preflight `npx crashtest lint-determinism` + `node
+  test/ci-crashtest-gate.js`, NOT a re-run of the battery inline), the
+  full REAL gate list (security + scoped npm audit `--omit=dev`, eyes
+  gate, packs deep lint + conformance audit, surface/home/changelog/
+  fiction/language/truthfulness/ledger gates, poststruct + govstruct +
+  depstruct lanes incl. the two --probe spot fires, standalone suites
+  via `node test/run-all.js`), and the workflow table rebuilt with the
+  jobs column. The runner command list and its troubleshooting twin now
+  live ONCE (operations/testing.md absorbs it - ci.md points, never
+  restates).
+- relay-playbook.md quoted suite-pin counts that had quietly rotted:
+  it claimed relay.test.js 26 / relay-parity 16 / mcp 17; the MEASURED
+  runs answer 61 / 19 / 34 (the exact numbers that made the page a lie
+  the moment a pin landed). The page now names WHAT each suite covers
+  and states that the suite output is the count of record; kept the one
+  count that has not drifted (no-legacy-bloat 13, re-measured).
+- scenario-playbook.md claimed `test/scenario-crew.test.js` (8 pins);
+  measured 13 (the U3 wave grew it). Updated with the measured number.
+- relay.md's Bring-up section restated the playbook's Recipe 1 verbatim;
+  now points at the playbook (recipes live once) and keeps only the
+  mechanism paragraphs (posture, fail-closed binding).
+- rpc.md's MCP-door section omitted `GET /mcp/events` (the pass-212 SSE
+  tap - an advertised, authed, throttled route with dashboard family
+  filtering) from the endpoints table, and claimed the door's 404
+  "echoes the two real endpoints" when the live 404 names FOUR
+  (/mcp/tools, /mcp/exec, /mcp/events, /health). Both corrected.
+- The verification sweep found the OTHER numeric lists clean: the MCP
+  catalog table has ZERO duplicated rows and no phantom tool rows
+  (347 registry tools, each mentioned per the coverage gate); the CLI
+  reference resolves every routed bin claim (the cli/binary gates were
+  green before and after); compute.md's connector list matches the
+  seven languages the loader mounts; errors.md, era.md (7 pins),
+  genesis-ring (8 checks), reference/tmp.md all verified as claimed.
+- Gates after the edits: frontmatter, links, style (127 files), 
+  language, fiction signatures, docs-truthfulness, surface consistency
+  all PASS.
+
 ## [Unreleased] - pass 360 (audit round 6: the QoS/escrow money-and-rate canon
 becomes covenantal - a throttle bypass, two dead caps, a bricked circuit,
 and free budget all close)

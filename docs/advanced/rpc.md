@@ -29,8 +29,9 @@ The primary door. One endpoint executes every registered tool, so clients never 
 |--------|------|------|
 | GET | `/mcp/tools` | List registered tools with input schemas |
 | POST | `/mcp/exec` | Execute one tool |
+| GET | `/mcp/events` | SSE tap of the pod's event bus - the dashboard feed (authed when `mcp.requireKey` is on; dashboard-ui event families only, sanitized + throttled) |
 
-Two legacy aliases are kept on the same server for older clients: `GET /tools` (tool list) and `GET /health` (liveness). Anything else gets a 404 that echoes the two real endpoints.
+Two legacy aliases are kept on the same server for older clients: `GET /tools` (tool list) and `GET /health` (liveness). Anything else gets a 404 that echoes the real endpoints: `GET /mcp/tools`, `POST /mcp/exec`, `GET /mcp/events`, `GET /health`.
 
 ### Executing a tool
 

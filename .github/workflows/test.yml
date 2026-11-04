@@ -97,7 +97,7 @@ jobs:
       - name: web/home config pin suite (vitest, pass 338 — the pins never ride CI until now)
         run: npm ci --prefix web/home && npm --prefix web/home run test:run
 
-      - name: Poststruct audit (poststruct@0.9 — the baked-HTML shipped contract)
+      - name: Poststruct audit (poststruct@1.0 — the baked-HTML shipped contract)
         # The four-STRUCT board closes its loop (issue #264's last family).
         # poststruct walks the BAKED web/home dist post-build and verifies
         # head/site/links/i18n/a11y/feeds + the language profile; FAIL
@@ -111,7 +111,7 @@ jobs:
         run: npm run build:home && npx poststruct audit web/home/dist --json
 
       - name: govstruct identity gate (one-member adopter manifest, offline)
-        # The governance layer lands (govstruct@0.9.0): this repo's own
+        # The governance layer lands (govstruct@1.0.0): this repo's own
         # identity/conformance manifest - one member (vant), a real member
         # block, and an evidence-map compliance block pointing at the CI
         # lanes that actually run (no invented statuses). Fully offline:

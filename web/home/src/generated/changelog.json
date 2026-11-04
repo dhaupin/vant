@@ -1,8 +1,51 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 90,
+  "_headingCount": 92,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 362 (round-7 ledger entry + the STRUCT toolchain on latest)",
+      "sections": [
+        {
+          "name": "Round-7 audit landed: merge `d141d739` (PR #325, Openhands) — entry the round itself never wrote",
+          "items": [
+            "Three auth-door defects fixed: `auth_create` handed back the live Auth",
+            "Verification before merge (independent, this repo's law): round-7 suite"
+          ]
+        },
+        {
+          "name": "The STRUCT toolchain re-pinned to the latest npm truth (measured via `npm view`, not memory)",
+          "items": [
+            "packstruct 1.0.0, eyestruct 1.0.0, crashtest 1.2.0: already ON latest —",
+            "poststruct 0.9.0 -> 1.0.0 and govstruct 0.9.0 -> 1.0.0 (both 1.0.0s are",
+            "Version-truth spots updated to match: `poststruct.config.js` header,"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 361 (docs nitpick round: the checkout-docs fiction",
+      "sections": [
+        {
+          "name": "Fixed: docs/drift sweep - every change below measured against live truth (no claims restated from memory)",
+          "items": [
+            "The CI page's embedded workflow copy was FICTION against",
+            "relay-playbook.md quoted suite-pin counts that had quietly rotted:",
+            "scenario-playbook.md claimed `test/scenario-crew.test.js` (8 pins);",
+            "relay.md's Bring-up section restated the playbook's Recipe 1 verbatim;",
+            "rpc.md's MCP-door section omitted `GET /mcp/events` (the pass-212 SSE",
+            "The verification sweep found the OTHER numeric lists clean: the MCP",
+            "Gates after the edits: frontmatter, links, style (127 files),"
+          ]
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,
