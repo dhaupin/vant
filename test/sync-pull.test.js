@@ -125,11 +125,20 @@ test('corpus refresh: new brain file visible after invalidate', async () => {
 
 // ---------- pullAny guards (no DI / no providers) ----------
 test('pullAny: no providers configured → structured refusal', async () => {
-    // The DI map may already hold fakes from top-level registration — clear
-    // it for this check, then restore fakegit for the flow tests below.
+    // Hermetic "zero providers": `_clearTestProviders()` empties the DI map,
+    // which makes getConfiguredProviders() fall through to the REAL providers
+    // — in a working tree (origin remote + GITHUB_TOKEN) GitHubProvider is
+    // configured, so the old pin drove a real provider and asserted the wrong
+    // branch. Registering an UNCONFIGURED fake keeps the map authoritative
+    // (size > 0) while yielding zero configured providers (round-4 audit).
     sync._clearTestProviders();
+    sync._setTestProvider('__none__', {
+        getType: () => '__none__',
+        isConfigured: () => false
+    });
     const r = await sync.pullAny({});
     const refused = r && r.success === false && /No providers configured/.test(r.error || '');
+    sync._clearTestProviders();
     sync._setTestProvider('fakegit', {
         getType: () => 'fakegit',
         isConfigured: () => true,

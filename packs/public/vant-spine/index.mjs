@@ -431,6 +431,60 @@ export default {
       },
     },
 
+    {
+      name: 'revocation-scope-coverage-and-restore',
+      description: "grant revocation is fail-closed on SCOPE and a revoke is never permanent-by-accident: a scoped revoke tombstones a WILDCARD grant (the old exact-key compare left it live), a wildcard revoke tombstones a scoped grant, an exact-scope revoke leaves a sibling scope live, a LATER explicit re-grant restores a revoked capability (a tombstone is not a dead end), and an unrelated revoke touches nothing",
+      async run(_harness) {
+        const gs = await loadAll(['lib/persistent-grants.js']);
+        const { PersistentGrants } = gs[0];
+        const dir = await tmpdir();
+        const path = dir.path, fs = dir.fs;
+        try {
+          const mk = (label) => new PersistentGrants({ ledgerPath: path.join(dir.p, label + '.jsonl'), now: () => 1000 });
+          // (a) a SCOPED revoke must cover a WILDCARD grant
+          const a = mk('scope-vs-wild');
+          a.persist({ capability: 'canExec', grantor: 'operator' });
+          a.revoke({ capability: 'canExec', scope: 'exec', actor: 'operator' });
+          if (a.allows('canExec').allowed !== false) {
+            return { verdict: 'EXPLOITED', detail: 'a scoped revoke left a wildcard grant LIVE - the revoke silently did nothing', tookRequests: 1 };
+          }
+          // (b) a WILDCARD revoke must cover a scoped grant
+          const b = mk('wild-vs-scope');
+          b.persist({ capability: 'canExec', scope: 'exec', grantor: 'operator' });
+          b.revoke({ capability: 'canExec', actor: 'operator' });
+          if (b.allows('canExec').allowed !== false) {
+            return { verdict: 'EXPLOITED', detail: 'a wildcard revoke left a scoped grant LIVE', tookRequests: 2 };
+          }
+          // (c) an exact-scope revoke must leave a sibling scope live
+          const c = mk('sibling');
+          c.persist({ capability: 'canExec', scope: 'exec', grantor: 'operator' });
+          c.persist({ capability: 'canExec', scope: 'network', grantor: 'operator' });
+          c.revoke({ capability: 'canExec', scope: 'exec', actor: 'operator' });
+          if (c.allows('canExec').allowed !== true) {
+            return { verdict: 'EXPLOITED', detail: 'an exact-scope revoke over-reached and killed a sibling scope', tookRequests: 3 };
+          }
+          // (d) a LATER explicit re-grant must restore a revoked capability
+          const d = mk('regrant');
+          d.persist({ capability: 'canExec', grantor: 'operator' });
+          d.revoke({ capability: 'canExec', actor: 'operator' });
+          d.persist({ capability: 'canExec', grantor: 'operator' });
+          if (d.allows('canExec').allowed !== true) {
+            return { verdict: 'EXPLOITED', detail: 'a revoked capability could never be restored - a tombstone became a dead end', tookRequests: 4 };
+          }
+          // (e) an unrelated revoke must not touch other capabilities
+          const e = mk('unrelated');
+          e.persist({ capability: 'canWrite', grantor: 'operator' });
+          e.revoke({ capability: 'canExec', actor: 'operator' });
+          if (e.allows('canWrite').allowed !== true) {
+            return { verdict: 'EXPLOITED', detail: 'an unrelated revoke suppressed a different capability', tookRequests: 5 };
+          }
+          return { verdict: 'REFUSED', detail: 'revocation is fail-closed on scope (wildcard<->scoped both directions, siblings untouched, unrelated untouched) AND a later explicit re-grant restores a revoked capability', tookRequests: 5 };
+        } finally {
+          try { fs.rmSync(dir.p, { recursive: true, force: true }); } catch { /* cleanup */ }
+        }
+      },
+    },
+
     // ------------------------------------------------------------------
     // Slice 2 - GEOMETRY (#154 #155 #156 #157).
     // ------------------------------------------------------------------

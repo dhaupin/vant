@@ -1868,6 +1868,11 @@ const EXPECTED = {
         'checkpoint-recovery-bounded-and-deny': 'REFUSED',
         'anchor-ledger-and-hotset-durability': 'REFUSED',
         'persistent-grants-and-wal-deny-posture': 'REFUSED',
+        // (round-4 audit, 2026-11-02) revocation scope coverage + restore:
+        // a scoped revoke must tombstone a wildcard grant (the old exact-key
+        // compare left it LIVE) and a later explicit re-grant must restore a
+        // revoked capability. Self-contained lib row, strict REFUSED.
+        'revocation-scope-coverage-and-restore': 'REFUSED',
         // ARMED 2026-10-27 (spine slice 2): GEOMETRY, WORLD/CLOCK,
         // MESH/BRAINS (#154-#166) convert - the 1:4 fold laws, the ONE PRF
         // chain (fragmenter + GitHub adapter), the RAID carrier + precision
