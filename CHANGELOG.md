@@ -5,6 +5,48 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 360 (audit round 6: the QoS/escrow money-and-rate canon
+becomes covenantal - a throttle bypass, two dead caps, a bricked circuit,
+and free budget all close)
+
+### Fixed: audit round 6 across the un-audited QoS/escrow/carriers frontier (5 findings, 13 discriminating pins, 402/402 crashtest battery)
+
+- The throttle key re-minted on EVERY call, so an anonymous function drew
+  a fresh random key per invocation and the limit never bound - the
+  throttle was a silent no-op for exactly the inline arrows callers
+  throttle. The key is now computed once at throttle() time.
+- RateLimiter's maxPerHour was parsed and surfaced in its config but
+  NEVER enforced - the hourly cap was config fiction and a client (or a
+  rotation of client ids) could burn its minute quota every minute. The
+  hour cap is enforced per-client and globally (the minute window's
+  anti-rotation law), and garbage VANT_QOS_* env integers fall back to
+  their defaults instead of producing NaN limits (an env-only route to
+  silently disabling the limiter).
+- The protection-layer circuit exported FAILURE_WINDOW_MS but had no
+  clock: five failures bricked the module-level circuit forever (no
+  auto-close, no decay) - an availability denial one transient blip
+  could leave behind. An open circuit now recovers closed on the first
+  read after its window (fail-closed stays inside the window); the
+  window is env-tunable (VANT_QOS_FAILURE_WINDOW_MS) with a
+  setFailureWindow() test seam.
+- escrow.recordSpend/refund mutated the ledger on NEGATIVE amounts:
+  spent decremented and available re-derived without an upper clamp, so
+  a negative spend minted budget past the limit - free credits in the
+  money seam; a NaN poisoned the row into permanent denial. Spend now
+  requires a strictly positive finite number and refund a nonnegative
+  one, as typed refusals before any row is touched (workspace rows
+  included).
+- carriers.replay built its typed refusal label with a raw
+  JSON.stringify, so a cyclic arrival crashed the helper with a raw
+  circular-JSON TypeError instead of the typed E_CARRIER_SHAPE it exists
+  to name. The refusal no longer crashes.
+- Verification: test/audit-round6.test.js - 18 pins, every finding has
+  at least one pin that FAILS pre-fix (verified by stashing the lib
+  fixes: 13/18 fail as finding-shaped) and passes after; full wall 226
+  passed / 0 failed; contract battery 402/0 with the new
+  qos-throttle-and-escrow-totality row (strict REFUSED); packs:lint 22
+  packs / 314 ids; lint 0 errors; audit gate ALLOWED (0 EXPLOITED).
+
 ## [Unreleased] - pass 359 (the crashtest 1.2.0 sign-off: the census campaign
 closes against the released library)
 
