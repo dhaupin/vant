@@ -1,6 +1,17 @@
 name: VANT CI
 
-# Minutes-efficient CI: ONE job does everything (tests + security + validate).
+# CI split so wall time is a MAX, not a sum. Measured 2026-11-04: the old one
+# job serialized ~14 independent gates behind the suite wall (227 suites /
+# 450s serial on this tree, all green; the 20 slowest suites are 73% of the
+# wall — forum-decisions-persistence alone 86.6s, the livefire timers ~110s).
+# Two jobs now run IN PARALLEL:
+#   ci    — the gates: security, smoke doors, packs/poststruct/govstruct/
+#           dep-ledger/changelog/claims/language/docs/ledger checks.
+#   sweep — the suite wall as a 4-way round-robin shard matrix
+#           (test/run-all.js --shard=N/4). Each shard is its own runner with
+#           its own checkout, so the order-independence seam (test/slate.js)
+#           never has two suites racing one workspace; the per-suite count of
+#           each shard's own receipts proves the split covers every suite.
 # Concurrency cancels in-flight runs when a newer push lands on the same
 # branch/PR so stale runs don't burn Actions minutes.
 on:
@@ -19,7 +30,7 @@ on:
   pull_request:
     branches: [main, staging]
   schedule:
-    - cron: '0 0 * * 0'  # Weekly (default branch only, single job = cheap)
+    - cron: '0 0 * * 0'  # Weekly (default branch only); the gates + shards fanout re-measures drift
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -28,9 +39,10 @@ concurrency:
 jobs:
   ci:
     runs-on: ubuntu-latest
-    # (pass 293) 8 → 12: the same suite wall as the old bare loop PLUS the
-    # per-suite baseline restore (~0.2s × 217) and live-fire timer suites
-    # (lock/lease ~15-20s each) must survive a slow runner's worst shuffle.
+    # (pass 293) 8 → 12: the per-suite baseline restore (~0.2s × 217) and
+    # live-fire timer suites (lock/lease ~15-20s each) must survive a slow
+    # runner's worst shuffle. The gates below are independent of the sweep
+    # shards and run alongside them for free.
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
@@ -55,7 +67,7 @@ jobs:
           # tree stays clean-0-high, and that is the surface CI promises.
           npm audit --omit=dev --audit-level=high
 
-      - name: Run tests
+      - name: Smoke doors (runner + 39-pin smoke batch)
         run: |
           node -e "console.log('vant', require('./package.json').version)"
           node test/ci.js
@@ -116,8 +128,8 @@ jobs:
         # block, and an evidence-map compliance block pointing at the CI
         # lanes that actually run (no invented statuses). Fully offline:
         # lint (manifest grammar), check (the compliance shape packs),
-        # surface --verify (the promised-field contract), doctor (the
-        # base battery - --network stays opt-in, this call is socket-free).
+        # surface --verify (the promised-field contract), doctor (the base
+        # battery - --network stays opt-in, this call is socket-free).
         run: npx govstruct lint && npx govstruct check && npx govstruct surface --verify && npx govstruct doctor
 
       - name: Dependency ledger census (depstruct - the never-add-deps law)
@@ -163,16 +175,52 @@ jobs:
         # even when the week's commits never touched a ledger.
         run: npm run ledger:gate
 
-      - name: Run standalone suites
-        # (pass 293) THE HARNESS, not a bare loop: the old `for f in …`
-        # chain ran 217 suites in ONE shared environment, so suite N's
-        # brain-pointer/roster residue became suite N+1's environment and
-        # sweep results depended on ordering (live-fire repro: guests
-        # tripped agents.maxAgents on a roster the prior suite left;
-        # teams-refresh ENOENTed on a mutated state.json). run-all gives
-        # every suite the same baseline (per-suite slate restore, see
-        # test/slate.js) and exits 1 on failures / 2 on timeouts.
-        run: node test/run-all.js
+  # The suite wall, NOT a bare serial run: (pass 293) the old `for f in …`
+  # chain ran 217 suites in ONE shared environment, so suite N's
+  # brain-pointer/roster residue became suite N+1's environment and sweep
+  # results depended on ordering (live-fire repro: guests tripped
+  # agents.maxAgents on a roster the prior suite left; teams-refresh
+  # ENOENTed on a mutated state.json). run-all gives every suite the same
+  # baseline (per-suite slate restore, see test/slate.js) and exits 1 on
+  # failures / 2 on timeouts.
+  # (pass 363) THE WALL ITSELF FANS OUT: a 4-way shard matrix cuts the
+  # measured 450s serial wall to its longest shard (top-20 slowest suites =
+  # 73% of the wall, so shards round-robin the sorted list to spread the
+  # slow clusters — test/run-all.js --shard). fail-fast is off on purpose:
+  # a red shard must not cancel the others' receipts.
+  sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Setup Node
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Baseline seed (the wall's precondition)
+        # The sweep's health. In the pre-shard lane this seeding happened
+        # IMPLICITLY because `node test/ci.js` always ran first inside the
+        # one big job, so `run-all` never saw a bare checkout
+        # (fresh-install-resolution.test.js documents the dependency).
+        # Shards start from a bare checkout, so the seed is now an explicit
+        # step — without it the state-dependent pins fail on missing
+        # artifacts (measured on the 5b88257c run: init-wizard rerun-grant
+        # and state-persistence #224 in shard 1, kernel-wiring census
+        # ENOENT in shard 2, all green once seeded).
+        run: node test/ci.js
+
+      - name: Suite wall shard ${{ matrix.shard }}/4
+        run: node test/run-all.js --shard=${{ matrix.shard }}/4
 
   # The crashtest pack matrix as its OWN gate (separate runner budget from
   # the main suite wall): the strict contract table + the REAL harness run

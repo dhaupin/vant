@@ -1465,6 +1465,25 @@ const EXPECTED = {
         // the fixed dispatcher (chain wired + honest fail-closed classifier).
         'security-chain-enforced': 'REFUSED',
     },
+    // (round-8 audit, 2026-11-04) the MCP auth + privilege-AUTHORITY canon
+    // in its own home. The round-7 auth/guest-authority row landed in
+    // vant-spine (a catch-all); this pack is the honest home and the
+    // packstruct census counts it. Every row is self-contained (drives the
+    // real lib modules in-process, no route arm) and strict REFUSED:
+    // auth_create mints a credential (never the live Auth instance whose
+    // options.tokenSecret was the process signing key), auth_require reads
+    // the verifyToken verdict field (not a boolean), the trust/teams/sudo/
+    // habitat authority verbs are admin-class AND guarded in the handlers,
+    // the guard does not over-reach, and the classification is TOTAL (every
+    // handler-guarded authority verb is also admin at the door).
+    'vant-authority': {
+        'auth-create-mints-credential-not-instance': 'REFUSED',
+        'auth-require-reads-verdict-field': 'REFUSED',
+        'trust-teams-authority-admin-classified': 'REFUSED',
+        'authority-handlers-refuse-guest-context': 'REFUSED',
+        'authority-classification-totality': 'REFUSED',
+        'authority-guard-does-not-overreach': 'REFUSED',
+    },
     // (round-2 audit, 2026-11-03) the outbound-network SSRF wall itself.
     // The four lib-level rows are self-contained (drive lib/network.js
     // directly, no route) and earn strict REFUSED in every run root; the
