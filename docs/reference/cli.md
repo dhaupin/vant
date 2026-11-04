@@ -13,6 +13,8 @@ Every user-facing `vant` command. Signatures were verified against the command i
 
 Core commands live in `bin/vant.js`. Everything else is `bin/<command>.js`, dispatched by the main entrypoint.
 
+Alias map (same handler, several spellings; kept truth-listed): `bot` is the Telegram bot runner (documented as `vant telegram`); `mcp`/`api`/`all`/`headless`/`distributed` share one inline serving-pod path (`vant headless` and `vant mcp` below are the documented faces).
+
 ## Start here
 
 | Command | Description |
@@ -367,10 +369,10 @@ vant server --host 0.0.0.0               # Bind host
 vant server --cert <path> --key <path>   # HTTPS
 
 vant msg send <user> <msg>
-vant msg --read
+vant msg read            # positional verbs: send / read (aliases show, view)
 
-vant event --emit <name>
-vant event --listen
+vant event emit <name> <data>   # positional verbs (flags would be an unknown command)
+vant event listen <name>
 
 vant telegram
 ```
@@ -558,7 +560,7 @@ Experimental social, governance, and meta surfaces. Each is a real module with i
 
 | Command | Description |
 |---------|-------------|
-| `vant teams` | Organization and team management (org, dept, team, assign) |
+| `vant teams` | Organization and team management (create, list, get, dept, team, role, assign, perms) |
 | `vant governance` | Governance decision making |
 | `vant market` | Knowledge trading (list, bid, trade, search, stats) + paid skills (Wave U6.5/6.6 productized: `skill-list/buy/deliver/settle/status/sweep/gate` - delivery-confirmed settlement over real escrow, TTL evidence sweep for stale holds, shill-resistant pre-trade reputation; `skill-list --supply N|Infinity` opts a skill into scarcity (default unlimited labor, enforced `E_SKILL_SOLD_OUT`); settlement identity: only the buyer of record settles; gated by `market.skillsEnabled`, env alias `VANT_MARKET_SKILLS_ENABLED`, sweep TTL `VANT_MARKET_SKILLS_TRADE_TTL_MS`) ([reference](/vant/reference/escrow), [playbook](/vant/operations/skills-marketplace)) |
 | `vant forum` | Forum and discussion (list, post, view, message) - tenancy-aware: anonymous sees the global commons only; votes ride consensus; `decisions <barcode>` inspects a thread's deliberation->decision trail (link, ballots, escrow holds, voted outcome - Wave U4) |
@@ -576,18 +578,18 @@ Experimental social, governance, and meta surfaces. Each is a real module with i
 | `vant brain-registry` | Brain registration |
 | `vant node-registry` | Node registration (list, register, unregister, status - the real peer registry) |
 | `vant nodes` | Peer discovery view of the same registry (list/discover, ping, info, status) |
-| `vant habitat` | Workspace/RLS management (workspaces, roles, boundaries, identity, tokens) |
+| `vant habitat` | Workspace/RLS management (status, list, init, use, roles, grant, policy, boundaries, can, identity, token) |
 | `vant framework` | Agent framework |
 | `vant runop` | Run operator |
 | `vant skills` | Skill management |
 | `vant theme` | The CLI/MCP rendering surface (show, status, set) - not a theme picker |
 | `vant branch` | Branch management (routes bin/branch-manager.js) |
-| `vant events` | Event-bus observability (tail, stats, enable/disable) |
-| `vant qos` | Quality of service (status, enable, disable) |
+| `vant event` | Event bus (emit, listen, list, history, clear) |
+| `vant qos` | Quality of service (status, limits, stats, reset) |
 | `vant rate` | Rate limiter (status, reset clientId) |
-| `vant nature` | Nature module (status, simulate) |
-| `vant rules` | Rule engine (list, test, reload) |
-| `vant mesh-status` | The coordinator's one-command mesh view (Wave F) |
+| `vant nature` | Nature module (status, config) |
+| `vant rules` | Rule engine (list, add, check, validate, export) |
+| `vant mesh` | The coordinator's one-command mesh view (Wave F) |
 | `vant islands-boot` | Boot as a componentized brain with lazy-loading |
 | `vant canvas` | Brain data visualization |
 
