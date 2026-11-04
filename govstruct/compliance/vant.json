@@ -30,7 +30,7 @@
             "banner": "poststruct shipped audit over the baked home dist",
             "runs": ["npm run build:home", "npx poststruct audit web/home/dist --json"],
             "where": "test.yml ci job - Poststruct audit",
-            "pin": "poststruct@0.9.0"
+            "pin": "poststruct@1.0.0"
         },
         {
             "banner": "docs + home + claims truth gates",
@@ -46,7 +46,7 @@
             "banner": "this family's own identity + conformance (the manifest you are reading's gate)",
             "runs": ["npx govstruct lint", "npx govstruct check", "npx govstruct surface --verify", "npx govstruct doctor"],
             "where": "test.yml ci job - govstruct identity gate",
-            "pin": "govstruct@0.9.0"
+            "pin": "govstruct@1.0.0"
         }
     ]
 }

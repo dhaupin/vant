@@ -32,9 +32,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   1 member(s) + network offline, `doctor` clean; poststruct audit over a
   fresh `build:home` dist: exit 0, schema 1, counts 0 FAIL / 17 warns.
 - Version-truth spots updated to match: `poststruct.config.js` header,
-  the two CI lane comments in `.github/workflows/test.yml`, and the two
+  the two CI lane comments in `.github/workflows/test.yml`, the two
   CURRENT rows of the packs/README STRUCT table (historical wave
-  narratives keep their as-was pins).
+  narratives keep their as-was pins), the family-pins ledger in
+  `scripts/audit-deps.js`, and the compliance map
+  `govstruct/compliance/vant.json` — the depstruct census caught the
+  first push's missing pair (pin:family + lock:family majors must
+  agree) and this pass corrects it; `npm run lint:deps` now reports
+  14 declared deps all ledgered, evidenced, and lockfile-resolved.
 
 ## [Unreleased] - pass 361 (docs nitpick round: the checkout-docs fiction
 measured out, the reference lists verified clean, duplication absorbed)
