@@ -5,6 +5,31 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 363 (CI speed lane: the suite wall fans out, gates stop queueing behind it)
+
+### Where the wall was measured (2026-11-04, this tree)
+
+- Full sweep: 227 suites / all green / 450s serial; the 20 slowest suites
+  carry 73% of the wall (`forum-decisions-persistence` alone 86.6s, the
+  livefire timer family ~110s). The single `ci` job serialized ~14
+  independent lint/struct gates behind that whole wall.
+
+### The lane (test/run-all.js #363 · .github/workflows/test.yml)
+
+- `node test/run-all.js --shard=N/T`: round-robin split of the sorted suite
+  list across T workers, composing with --only/--skip/--from/--to. Chosen
+  over contiguous alphabet chunks because suite cost is not uniform along
+  the alphabet — interleaving spreads the slow clusters evenly.
+- test.yml splits the serial job: `ci` keeps the gates, a `sweep` matrix
+  runs the wall as 4 parallel shards (fresh runner + checkout each, so the
+  order-independence seam never has two suites racing one workspace).
+  fail-fast off: a red shard must not cancel the others' receipts. The
+  crashtest job is unchanged.
+- Measured locally before landing: shards are disjoint and cover all 227
+  suites exactly (4 × ~57, set-union check); worst projected shard 196s
+  (the old wall was 450s); shard 2/4 re-ran end-to-end green at 213.7s
+  with exit 0.
+
 ## [Unreleased] - pass 362 (round-7 ledger entry + the STRUCT toolchain on latest)
 
 ### Round-7 audit landed: merge `d141d739` (PR #325, Openhands) — entry the round itself never wrote

@@ -10,6 +10,7 @@
  *   node test/run-all.js                 # run all, print summary
  *   node test/run-all.js --only=market   # comma-separated substrings
  *   node test/run-all.js --skip=telegram # skip suites matching substrings
+ *   node test/run-all.js --shard=2/4     # round-robin shard 2 of 4 (CI fan-out)
  *   node test/run-all.js --json          # machine-readable output
  *   node test/run-all.js --list          # list suites, run nothing
  *
@@ -49,6 +50,32 @@ const skip = getOpt('skip') ? getOpt('skip').split(',') : [];
 // running through the SAME harness (baseline restore before and after).
 const fromOpt = getOpt('from');
 const toOpt = getOpt('to');
+// (pass 363) --shard=N/T: round-robin split of the SORTED suite list across
+// T workers. Exists for CI fan-out (test.yml runs the wall as parallel sweep
+// matrix jobs); each shard runs on its own runner with its own checkout, so
+// the order-independence seam (test/slate.js) never has two suites racing
+// one workspace. ROUND-ROBIN, not contiguous alphabet chunks, because suite
+// cost is not uniform along the alphabet (measured 2026-11-04: the 20
+// slowest suites = 73% of the 450s wall, clustered by family name — livefire
+// *, forum-*, nervous-*; interleaving spreads the clusters evenly). It
+// composes with --only/--skip/--from/--to: those filter first, the shard
+// then round-robins whatever is left of the sorted remainder.
+const shardOpt = getOpt('shard');
+let shardNo = 0;
+let shardCount = 0;
+if (shardOpt) {
+    const shardMatch = shardOpt.match(/^([1-9]\d*)\/([1-9]\d*)$/);
+    if (!shardMatch) {
+        console.error(`--shard expects N/T with 1 <= N <= T (got "${shardOpt}")`);
+        process.exit(2);
+    }
+    shardNo = parseInt(shardMatch[1], 10);
+    shardCount = parseInt(shardMatch[2], 10);
+    if (shardNo > shardCount) {
+        console.error(`--shard out of range: ${shardOpt}`);
+        process.exit(2);
+    }
+}
 const asJson = args.includes('--json');
 const listOnly = args.includes('--list');
 
@@ -57,16 +84,18 @@ const suites = fs.readdirSync(TEST_DIR)
     .filter((f) => !only || only.some((s) => f.includes(s)))
     .filter((f) => !skip.some((s) => f.includes(s)))
     .filter((f) => (!fromOpt || f >= fromOpt) && (!toOpt || f <= toOpt))
-    .sort();
+    .sort()
+    .filter((f, i) => !shardCount || i % shardCount === shardNo - 1);
 
 if (listOnly) {
     console.log(suites.join('\n'));
     console.error(`\n${suites.length} suites`);
+    if (shardCount) console.error(`shard ${shardNo}/${shardCount}`);
     process.exit(0);
 }
 
 const results = [];
-console.log(`\n🧪 VANT FULL-SUITE SWEEP — ${suites.length} suites\n`);
+console.log(`\n🧪 VANT FULL-SUITE SWEEP — ${suites.length} suites${shardCount ? ` (shard ${shardNo}/${shardCount})` : ''}\n`);
 
 // Pristine baseline BEFORE the first suite runs — never inside the loop, so
 // a suite's own pre-loop mutations are captured, not discarded.
@@ -166,6 +195,7 @@ if (asJson) {
         failed: failed.length,
         timeouts: timeouts.length,
         totalMs,
+        shard: shardCount ? `${shardNo}/${shardCount}` : undefined,
         failures: failed.concat(timeouts).map((r) => ({ suite: r.suite, status: r.status, detail: r.detail }))
     }, null, 2));
 } else {
