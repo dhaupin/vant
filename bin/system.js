@@ -44,8 +44,15 @@ function run() {
             console.error('Usage: vant system allow <operation>');
             process.exit(1);
         }
-        const allowed = system.isOperationAllowed(op);
+        // (round-9 audit, R9-2) isOperationAllowed returns a VERDICT OBJECT
+        // ({ allowed, ... }), never a boolean. The old `allowed ? 'ALLOWED'`
+        // truthy-tested the object — always true — so every word, including
+        // a typo, printed ALLOWED. Read the field and set the exit code the
+        // way bin/rls.js already does.
+        const verdict = system.isOperationAllowed(op);
+        const allowed = !!(verdict && verdict.allowed === true);
         console.log(allowed ? 'ALLOWED' : 'DENIED');
+        if (!allowed) process.exit(1);
     } else {
         console.log('Available: status, healthy, layers, allow');
         process.exit(1);
