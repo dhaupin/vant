@@ -151,6 +151,7 @@ async function main() {
         const si = args.indexOf('--scopes');
         const ci = args.indexOf('--capabilities');
         const sessionOnly = args.includes('--session-only');
+        const persist = args.includes('--persist');
         const scopes = si !== -1 ? parseList(args[si + 1])
             : (getOperatorScopes() || OPERATOR_DEFAULT);
         const caps = ci !== -1 ? parseList(args[ci + 1]) : CAP_DEFAULT;
@@ -167,6 +168,20 @@ async function main() {
         console.log('  scopes:', JSON.stringify(scopes));
         console.log('  capabilities:', JSON.stringify(caps));
         console.log('  sudo task: org-operator');
+
+        // (#162) DURABLE TIER: `--persist` writes each capability into the
+        // append-only grants ledger that lib/sandbox.can() re-hydrates across
+        // processes (the persistent-grants reader). The documented flag had
+        // no writer — the durable tier was inert. Explicit opt-in, so the
+        // default `vant org grant` behavior is unchanged.
+        if (persist) {
+            const { PersistentGrants } = require('../lib/persistent-grants');
+            const ledger = new PersistentGrants();
+            for (const c of caps) {
+                ledger.persist({ capability: c, scope: scopes.join(','), grantor: 'org-operator' });
+            }
+            console.log('  persisted to durable grants ledger: ' + ledger.ledgerPath);
+        }
 
         // (pass 88 — prime #108/#105) Persist the grant by default. The
         // grant used to die with the process ("for this process" output,
@@ -201,7 +216,7 @@ async function main() {
     console.log(`Vant Org CLI
 
 Usage:
-  vant org grant [--scopes a,b,c] [--capabilities x,y] [--session-only]  Grant operator scopes+caps (persists unless --session-only)
+  vant org grant [--scopes a,b,c] [--capabilities x,y] [--session-only] [--persist]  Grant operator scopes+caps (persists unless --session-only; --persist also writes the durable grants ledger)
   vant org status                                        Show sandbox scopes/caps + persisted config
   vant org config --set-operator-scopes a,b,c            Persist default grant scopes
   vant org config --set-operator-caps canRead,canWrite   Persist default grant capabilities
