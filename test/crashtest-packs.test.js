@@ -1873,6 +1873,12 @@ const EXPECTED = {
         // compare left it LIVE) and a later explicit re-grant must restore a
         // revoked capability. Self-contained lib row, strict REFUSED.
         'revocation-scope-coverage-and-restore': 'REFUSED',
+        // (round-4 audit, 2026-11-02) guest privilege-authority escalation:
+        // a canWrite human guest could call the write-class sudo/habitat
+        // authority verbs and widen its own task to admin/compute:eval. The
+        // door gate now classifies every authority verb admin and the
+        // handlers repeat the check. Self-contained lib row, strict REFUSED.
+        'guest-authority-verbs-admin-only': 'REFUSED',
         // ARMED 2026-10-27 (spine slice 2): GEOMETRY, WORLD/CLOCK,
         // MESH/BRAINS (#154-#166) convert - the 1:4 fold laws, the ONE PRF
         // chain (fragmenter + GitHub adapter), the RAID carrier + precision

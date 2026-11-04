@@ -396,3 +396,133 @@ PURPOSE: Exploring Vant's codebase
 
 === LEARNED ===
 ```
+
+## Discovery: 2026-11-02 - Audit Round 3 (MCP security chain)
+
+### Findings + fixes (PR #320, branch audit-round3-security)
+- **R3-1 (critical):** the MCP security chain was DEAD CODE. `_executeWithSecurity`
+  was orphaned by the registry-census rewrite (9413ff8b); every door call
+  (`mcp.execute` / `mcp.call` / HTTP `/mcp/exec`) goes through `_executeTool`,
+  which called `tool.handler(params)` directly. Measured: pipeline.run /
+  vaf.check / qos.check ran 0 times per tool call. Fixed: chain now runs in
+  `_executeTool`; dead functions removed (one dispatch path).
+- **R3-2:** write classifier (prefix allowlist + substring net) marked only
+  34/347 tools WRITE; ~71 mutating tools rode the read-only PUBLIC pipeline.
+  Rebuilt fail-closed: mutating verb anywhere wins, READ only on a read-verb
+  tail, unknown -> WRITE. Exported as `_isMcpWriteMethod`.
+- **R3-3:** sudo_grant was read-classified, so a locked sandbox could
+  self-escalate. Chain gate + honest classifier close it; capability/sudo floor
+  unchanged after a refused grant.
+- **R3-4:** non-string method threw a raw TypeError; now typed MCP_INPUT_INVALID.
+- **R3-5:** bin/era.js no-fallthrough breaks + unused arg.
+
+### Testing laws learned this round
+- Pins live in test/audit-round3.test.js; they are DISCRIMINATING (6 fail if
+  lib/mcp.js is reverted).
+- Crashtest scenario contributed: packs/public/vant-mcp `security-chain-enforced`
+  row + `mcp-chain` shim route in test/crashtest-packs.test.js (probe child
+  locks the sandbox, measures chain + classifier + escalation floor).
+- Full wall: `nohup node test/run-all.js` (background; foreground cap ~1080s).
+  Baseline green = 223 suites / 222 passed; the one failure
+  (live-fire-regressions.test.js) is the pre-existing `ss`-binary-missing env
+  artifact, NOT a regression.
+- PR must target the `axolotl` branch. `create_pr` tool errored; create via
+  `curl -X POST https://api.github.com/repos/dhaupin/vant/pulls` instead.
+- `git remote set-url origin https://${GITHUB_TOKEN}@github.com/dhaupin/vant.git`
+  before push (token may need refresh).
+
+## Discovery: 2026-11-02 - Audit Round 4 (vm boundaries + grants durable tier)
+
+### Findings + fixes (branch audit-round4)
+- **R4-1 (critical):** `lib/connectors/node.js` `eval`/`invoke` ran untrusted
+  code via `vm.runInNewContext(code, { console: fakeConsole })`. Injecting a
+  HOST object (`console`) as a context global makes the host realm reachable:
+  `this.constructor.constructor('return process')()` -> host Function ->
+  `process.getBuiltinModule('child_process').execSync('id')` = full RCE
+  (probe-verified `uid=10001(openhands)`). `eval` also had NO timeout. Fixed:
+  one `_runIsolated` path — null-prototype context root, no host objects,
+  console defined INSIDE the context, `codeGeneration:{strings:false}`,
+  5000ms timeout. `Function()` was already blocked by codeGeneration, but the
+  constructor path is the vector; a null-prototype root closes it.
+- **R4-2 (high):** `lib/config.js` + `lib/storage/config.js` loaded
+  `vant.config.js` in a vm context seeded with `{ module: { exports: {} } }`
+  (a host object) — `module.constructor.constructor('return process')()`
+  escaped. Same fix (module shim now lives inside a null-prototype context);
+  legit configs still load. NOTE: `codeGeneration:{strings:false}` blocks
+  `Function()` but NOT the `constructor.constructor` path — only removing host
+  objects from the context closes it. The existing P0-7 pins (require/process
+  direct access) did not catch this.
+- **R4-3 (high):** `lib/persistent-grants.js` revocation was exact-key. A
+  scoped revoke (`revoke({capability, scope:'exec'})`) left a wildcard grant
+  (`scope:'*'`) LIVE — the revoke silently did nothing (fail-open), and a
+  re-grant after a revoke could never restore the capability (tombstone =
+  dead end). Fixed: sequential tombstone replay + fail-closed scope coverage
+  (wildcard<->scoped both directions), a later explicit persist lifts the
+  tombstone, unrelated capabilities untouched.
+- **R4-4 (medium):** the `#162` durable-grant tier was inert — the
+  `org grant --persist` flag was documented (`lib/persistent-grants.js` header,
+  `lib/sandbox.js:728`) and the READER existed (`lib/sandbox.js:734`), but no
+  WRITER existed anywhere. Fixed: `bin/org.js` `--persist` writes each
+  capability into the grants ledger; reader now hydrates it. Default
+  `vant org grant` unchanged.
+- **R4-5 (low, hermeticity):** `test/sync-pull.test.js` "no providers
+  configured" pin was non-hermetic — `_clearTestProviders()` falls through to
+  REAL providers, and in a working tree (origin + GITHUB_TOKEN) GitHubProvider
+  is configured, so the pin drove a real provider and asserted the wrong
+  branch (fails for any normal dev checkout, incl. clean axolotl). Fixed by
+  registering an UNCONFIGURED fake (map stays authoritative, zero configured).
+
+### Testing laws learned this round
+- Pins live in test/audit-round4.test.js; 9 of 11 are DISCRIMINATING
+  (verified by stashing the src fixes: 8 fail pre-fix, all pass post-fix).
+- Crashtest scenario contributed: packs/public/vant-spine
+  `revocation-scope-coverage-and-restore` row (+ EXPECTED entry in
+  test/crashtest-packs.test.js) — self-contained lib row, strict REFUSED.
+- `ss` (iproute2) was missing in the sandbox; `apt-get install -y iproute2`
+  after `apt-get update` turns live-fire-regressions green (env artifact).
+- Full wall baseline green = 223 suites / 223 passed once iproute2 + the
+  sync-pull hermeticity fix land.
+
+### Non-findings (by design, verified)
+- pipeline "fail-open" when sandbox is unconfigured is the documented
+  safe-by-default standalone posture (boot configures it); lib/gate.js.
+- `sudo.can` is SYNC (not async) — non-await in the shell gate is correct.
+- guests classifier solid: 3 false positives only (guest-READ but mutating
+  verb: agora_sync_status, vant_boot_status, vant_sync_status).
+
+## Discovery: 2026-11-02 - Audit Round 4b (guest privilege-authority escalation)
+
+### R4-6 (HIGH): a canWrite guest self-escalates to admin / host RCE
+- **Root cause:** the #185 guest door gate (`guests.classifyTool`) refuses
+  guest-ISSUED reads and exec, but the sudo/habitat AUTHORITY verbs are
+  write-class. The default `human` guest role has `canWrite`, so it passed the
+  door. `vant_sudo_grant({taskId:'default', scope:'admin'})` calls
+  `sudo.grant` directly; `vant_sudo_createTask({scopes:['admin']})` calls
+  `sudo.createTask` (writes scopes with NO whitelist). Both widen the guest's
+  own / the door's `default` task to the requested scope, honored by
+  `sudo.can` / `sandbox.can` on the next call.
+- **Exploit chain (probe10, verified):** guest → `vant_sudo_grant(compute:eval)`
+  (200 `{granted:'compute:eval'}`) → `compute_eval({language:'python'})` now
+  passes its `sudo.can('default','compute:eval')` gate and runs arbitrary
+  Python. Same primitive grants `admin`, `exec`, `network`.
+- **Fix (two doors, one policy):**
+  - `lib/guests.js`: new `GUEST_AUTHORITY_TOOLS` set classified `admin`, so
+    the door refuses (403) before the handler.
+  - `lib/mcp.js`: new `_assertNotGuestAuthority(op)` guard (mirrors
+    `_assertNotGuest`) called at the top of every authority handler:
+    `sudo_grant/revoke/escalate`, `vant_sudo_grant/revoke/escalate/createTask`,
+    `vant_habitat_mintToken/revokeToken/createWorkspace/setWorkspace/addRole/setPolicy`,
+    `vant_scenario_crew`. Stdio/future exec paths inherit the verdict.
+  - Not touched: the tools' semantics for non-guests (unchanged).
+
+### Testing laws learned this round
+- Pins: `test/audit-round4.test.js` R4-5 block (6 pins) — ALL 6 fail pre-fix,
+  pass post-fix (verified by stashing lib/mcp.js + lib/guests.js). Includes a
+  real in-process guest door (child `mcp.start({port:0})`, `human` guest token,
+  `/mcp/exec`) asserting 403 on the authority verb.
+- Crashtest scenario contributed: `packs/public/vant-spine`
+  `guest-authority-verbs-admin-only` row (+ EXPECTED entry in
+  test/crashtest-packs.test.js) — self-contained lib row, strict REFUSED;
+  verified EXPLOITED pre-fix.
+- Probe scripts: /tmp/probe6 (grant), /tmp/probe9 (createTask+habitat),
+  /tmp/probe10 (compute_eval RCE chain).

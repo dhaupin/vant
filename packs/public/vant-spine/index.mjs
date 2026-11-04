@@ -485,6 +485,42 @@ export default {
       },
     },
 
+    {
+      name: 'guest-authority-verbs-admin-only',
+      description: "the guest door gate and the MCP handlers agree that privilege AUTHORITY is admin-only: every sudo/habitat authority verb (grant/revoke/escalate/createTask/mintToken/revokeToken/addRole/setPolicy/createWorkspace/setWorkspace/scenario_crew) classifies admin, so a canWrite guest (the default human role) is refused the write->authority->exec escalation, while the write verbs a human legitimately needs stay write-class and a plain guest read verb stays read-class",
+      async run(_harness) {
+        const { createRequire } = await import('node:module');
+        const { resolve } = await import('node:path');
+        const req = createRequire(resolve('lib/guests.js'));
+        const guests = req(resolve('lib/guests.js'));
+        // (a) every authority verb is admin-class (the door refuses it)
+        const authority = [
+          'sudo_grant', 'sudo_revoke', 'sudo_escalate', 'sudo_createTask',
+          'vant_sudo_grant', 'vant_sudo_revoke', 'vant_sudo_escalate', 'vant_sudo_createTask',
+          'vant_habitat_mintToken', 'vant_habitat_revokeToken',
+          'vant_habitat_createWorkspace', 'vant_habitat_setWorkspace',
+          'vant_habitat_addRole', 'vant_habitat_setPolicy', 'vant_scenario_crew'
+        ];
+        const misclassed = authority.filter((t) => guests.classifyTool(t) !== 'admin');
+        if (misclassed.length) {
+          return { verdict: 'EXPLOITED', detail: 'authority verbs not admin-class: ' + misclassed.join(', '), tookRequests: 1 };
+        }
+        // (b) a canWrite human guest is actually refused by the door gate
+        const human = { guest: { id: 'x', role: 'human' }, caps: ['canRead', 'canLoad', 'canList', 'canWrite', 'canSpawn'], isGuest: true };
+        for (const t of ['vant_sudo_grant', 'vant_sudo_createTask', 'sudo_grant']) {
+          const v = guests.authorize(t, human);
+          if (v.allowed !== false) {
+            return { verdict: 'EXPLOITED', detail: 'a human guest reached authority verb ' + t, tookRequests: 2 };
+          }
+        }
+        // (c) the change is NARROW: legitimate write + read verbs keep their class
+        if (guests.classifyTool('vant_memory_write') !== 'write' || guests.classifyTool('brain_state') !== 'read') {
+          return { verdict: 'EXPLOITED', detail: 'the authority guard over-reached and reclassified a legitimate write/read verb', tookRequests: 3 };
+        }
+        return { verdict: 'REFUSED', detail: 'privilege authority is admin-only across every sudo/habitat verb (door gate + handler agree), the human guest is refused, and legitimate write/read classes are untouched', tookRequests: 3 };
+      },
+    },
+
     // ------------------------------------------------------------------
     // Slice 2 - GEOMETRY (#154 #155 #156 #157).
     // ------------------------------------------------------------------

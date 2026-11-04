@@ -197,6 +197,134 @@ test('R4-4: `vant org grant --persist` writes the durable grants ledger', () => 
     return { success: g.allows('canWrite').allowed === true };
 });
 
+// ==================== R4-5: guest privilege-authority escalation =============
+// A canWrite guest (the default `human` role) could call the write-class
+// sudo/habitat authority verbs through the MCP door and widen its own (or the
+// door's 'default') task to `admin`/`compute:eval`/etc. The door gate
+// (guests.authorize) only refuses guest-ISSUED reads + exec, and
+// sudo.createTask writes scopes DIRECTLY (no whitelist), so the write grant
+// became an authority grant. Discriminating pins: the door refuses (403) and
+// the capability/scope verdict is unchanged after the attempt.
+
+const { spawn } = require('child_process');
+
+function _waitForPort(out, timeoutMs = 15000) {
+    return new Promise((resolve, reject) => {
+        const t = setTimeout(() => reject(new Error('door did not start')), timeoutMs);
+        const onData = (d) => {
+            const m = /Server on 127\.0\.0\.1:(\d+)/.exec(String(d));
+            if (m) { clearTimeout(t); resolve(parseInt(m[1], 10)); }
+        };
+        out.stdout.on('data', onData);
+        out.stderr.on('data', onData);
+    });
+}
+
+async function _withGuestDoor(fn) {
+    const script = `
+        const P = ${JSON.stringify(path.join(ROOT, 'lib'))} + '/';
+        const guests = require(P + 'guests');
+        const g = guests.issue('r4-human', { role: 'human' });
+        const mcp = require(P + 'mcp');
+        process.env.VANT_MCP_REQUIRE_KEY = 'true';
+        mcp.start({ port: 0 }).then(({ port }) => {
+            console.log('Server on 127.0.0.1:' + port);
+            process.on('message', async (msg) => {
+                if (!msg || msg.type !== 'call') return;
+                try {
+                    const res = await fetch('http://127.0.0.1:' + port + '/mcp/exec', {
+                        method: 'POST',
+                        headers: { 'content-type': 'application/json', authorization: 'Bearer ' + g.token },
+                        body: JSON.stringify({ tool: msg.tool, args: msg.args })
+                    });
+                    process.send({ type: 'result', id: msg.id, status: res.status, body: await res.text() });
+                } catch (e) { process.send({ type: 'result', id: msg.id, error: e.message }); }
+            });
+        });
+    `;
+    const child = spawn('node', ['-e', script], {
+        env: { ...process.env, VANT_GATE_QUIET: '1', VANT_BRAIN: 'r4-5-' + Date.now() },
+        stdio: ['ignore', 'pipe', 'pipe', 'ipc']
+    });
+    try {
+        const port = await _waitForPort(child);
+        const call = (tool, args) => new Promise((resolve, reject) => {
+            const id = Math.random();
+            const t = setTimeout(() => reject(new Error('call timeout')), 15000);
+            const onMsg = (m) => {
+                if (m && m.type === 'result' && m.id === id) {
+                    clearTimeout(t); child.off('message', onMsg);
+                    resolve({ status: m.status, body: m.body, error: m.error });
+                }
+            };
+            child.on('message', onMsg);
+            child.send({ type: 'call', id, tool, args });
+        });
+        return await fn(call, port);
+    } finally {
+        child.kill();
+    }
+}
+
+asyncTest('R4-5: a guest cannot self-grant admin via the door (sudo_grant refused)', async () => {
+    return await _withGuestDoor(async (call) => {
+        // Pre-fix: 200 {granted:'admin'} and sudo.can(default,admin) === true.
+        const r = await call('vant_sudo_grant', { taskId: 'default', scope: 'admin' });
+        const body = r.body || '';
+        // Post-fix: 403 (door gate) or 200 carrying a typed refusal.
+        const refused = r.status === 403 || /admin-only|E_GUEST|API_REQUEST_INVALID/i.test(body);
+        const notGranted = !/granted/.test(body);
+        return { success: refused && notGranted };
+    });
+});
+
+asyncTest('R4-5: a guest cannot self-grant exec via the door', async () => {
+    return await _withGuestDoor(async (call) => {
+        const r = await call('vant_sudo_grant', { taskId: 'default', scope: 'exec' });
+        const body = r.body || '';
+        return { success: (r.status === 403 || /admin-only|E_GUEST|API_REQUEST_INVALID/i.test(body)) && !/granted/.test(body) };
+    });
+});
+
+asyncTest('R4-5: a guest cannot create a task with admin scope (createTask refused)', async () => {
+    return await _withGuestDoor(async (call) => {
+        const r = await call('vant_sudo_createTask', { taskId: 'default', scopes: ['admin'] });
+        const body = r.body || '';
+        return { success: (r.status === 403 || /admin-only|E_GUEST|API_REQUEST_INVALID/i.test(body)) };
+    });
+});
+
+asyncTest('R4-5: the door refuses (403) the authority verb before the handler runs', async () => {
+    return await _withGuestDoor(async (call) => {
+        const r = await call('vant_sudo_grant', { taskId: 'default', scope: 'admin' });
+        // The door gate classifies authority verbs admin, so a guest is
+        // refused at the door (403), not merely by the handler.
+        return { success: r.status === 403 };
+    });
+});
+
+test('R4-5: guests.classifyTool marks the authority verbs admin', () => {
+    const guests = require(path.join(ROOT, 'lib', 'guests'));
+    const mustBeAdmin = [
+        'sudo_grant', 'sudo_revoke', 'sudo_escalate', 'sudo_createTask',
+        'vant_sudo_grant', 'vant_sudo_revoke', 'vant_sudo_escalate', 'vant_sudo_createTask',
+        'vant_habitat_mintToken', 'vant_habitat_revokeToken',
+        'vant_habitat_createWorkspace', 'vant_habitat_setWorkspace',
+        'vant_habitat_addRole', 'vant_habitat_setPolicy', 'vant_scenario_crew'
+    ];
+    const wrong = mustBeAdmin.filter((t) => guests.classifyTool(t) !== 'admin');
+    return { success: wrong.length === 0, why: wrong.length ? 'not admin: ' + wrong.join(', ') : '' };
+});
+
+test('R4-5: a human guest is still refused exec/sudo verbs at the door', () => {
+    const guests = require(path.join(ROOT, 'lib', 'guests'));
+    // Sanity: the classification change does not open the exec lane.
+    const human = { guest: { id: 'x', role: 'human' }, caps: ['canRead', 'canLoad', 'canList', 'canWrite', 'canSpawn'], isGuest: true };
+    const g1 = guests.authorize('vant_shell_exec', human);
+    const g2 = guests.authorize('vant_sudo_grant', human);
+    return { success: g1.allowed === false && g2.allowed === false };
+});
+
 // ==================== RUN ====================
 
 (async () => {
