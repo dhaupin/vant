@@ -5,6 +5,40 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 364 (round-8 ledger entry: the dedicated vant-authority crashtest pack)
+
+### Round-8 audit landed: cherry-pick `506fa600` (PR #326, Openhands) — entry the round itself never wrote
+
+- The MCP auth + guest-authority lane gets its own crashtest pack
+  (`packs/public/vant-authority`, 6 self-contained socket-free rows driving
+  the real `lib/mcp` / `lib/guests` / `lib/auth` in-process) instead of
+  riding the `vant-spine` catch-all: `auth_create` must mint
+  `{token,userId,roles}` and never hand back the live Auth instance /
+  `options.tokenSecret` (the process token-signing key); `auth_require`
+  must read the verdict field (a bad token is a truthy `{valid:false}`
+  object, so `if (!verified)` failed open); all 23 authority verbs are
+  admin-class and refused to a default `human` guest; 12 authority handlers
+  refuse a guest `AsyncLocalStorage` context with a typed throw; a NEW
+  forward-looking invariant asserts every verb whose handler calls
+  `_assertNotGuestAuthority` is also admin-class at the door (with a
+  scan-rot guard proving the scan detects the known family); and the block
+  stays narrow (ordinary read/write verbs unchanged).
+- Discrimination (independent, this repo's law): reverting the round-7
+  fixes flips 5/6 rows to EXPLOITED, each naming a distinct finding; the
+  sixth (the narrowness guard) holds both ways by design.
+- Landed by cherry-picking the branch head rather than merging it: a plain
+  merge would have reverted the two newer axolotl changes (the changelog
+  receipts + the pass-363 CI speed lane; the poststruct/govstruct 1.0.0
+  bumps). Content is otherwise byte-identical.
+- Gates: `packs:lint` 23 packs / 322 ids clean; `packs:audit` clean (1
+  ALLOWED-pinned); `struct:check` green; contract suite 414 passed / 0
+  failed; `crashtest-run --pack=vant-authority` REFUSED 6 / EXPLOITED 0.
+  The STRUCT feed rows were restamped as part of the pack (crashtest 23
+  packs / 299 rows / 116 REFUSED / 0 EXPLOITED; packstruct 23 packs / 322
+  ids), both flavors + `.sha256` pins.
+- Round-8 also filed **#327** (docs onto the family docs-lane) — tracked
+  there.
+
 ## [Unreleased] - pass 363 (CI speed lane: the suite wall fans out, gates stop queueing behind it)
 
 ### Where the wall was measured (2026-11-04, this tree)
