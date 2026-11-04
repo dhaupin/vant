@@ -87,7 +87,7 @@ The materialization bills **1 escrow credit per restored cell** against the acto
 | U3.2 quarantine drill | refusal recorded who/why; drawn **before** the budget gate | drill pins (one-q + all-q) |
 | U3.3 voted closeout | quorum ballot + `resolution.logDelta` | no-single-bless pin |
 | U3.4 this page | playbook doc | coverage gates |
-| U3.5 pin suite | `test/scenario-crew.test.js` (8 pins) | CI sweep |
+| U3.5 pin suite | `test/scenario-crew.test.js` (13 pins, measured) | CI sweep |
 
 ## Crew budgets and hygiene
 

@@ -1,8 +1,28 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 90,
+  "_headingCount": 91,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 361 (docs nitpick round: the checkout-docs fiction",
+      "sections": [
+        {
+          "name": "Fixed: docs/drift sweep - every change below measured against live truth (no claims restated from memory)",
+          "items": [
+            "The CI page's embedded workflow copy was FICTION against",
+            "relay-playbook.md quoted suite-pin counts that had quietly rotted:",
+            "scenario-playbook.md claimed `test/scenario-crew.test.js` (8 pins);",
+            "relay.md's Bring-up section restated the playbook's Recipe 1 verbatim;",
+            "rpc.md's MCP-door section omitted `GET /mcp/events` (the pass-212 SSE",
+            "The verification sweep found the OTHER numeric lists clean: the MCP",
+            "Gates after the edits: frontmatter, links, style (127 files),"
+          ]
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,
