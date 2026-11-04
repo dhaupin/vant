@@ -25,6 +25,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   order-independence seam never has two suites racing one workspace).
   fail-fast off: a red shard must not cancel the others' receipts. The
   crashtest job is unchanged.
+- First CI receipts (push 5b88257c): gates + shards 3/4 green; shards 1/2
+  exposed an implicit lane dependency — the old single job always ran
+  `node test/ci.js` BEFORE the wall, seeding the models/state.json baseline
+  the state-dependent pins expect (init-wizard rerun-grant, state-
+  persistence #224, kernel-wiring census ENOENT). The seed is now an
+  explicit `Baseline seed` step in the sweep job; invisible locally, this
+  workspace already carries it.
 - Measured locally before landing: shards are disjoint and cover all 227
   suites exactly (4 × ~57, set-union check); worst projected shard 196s
   (the old wall was 450s); shard 2/4 re-ran end-to-end green at 213.7s

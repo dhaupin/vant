@@ -20,6 +20,7 @@
           "items": [
             "`node test/run-all.js --shard=N/T`: round-robin split of the sorted suite",
             "test.yml splits the serial job: `ci` keeps the gates, a `sweep` matrix",
+            "First CI receipts (push 5b88257c): gates + shards 3/4 green; shards 1/2",
             "Measured locally before landing: shards are disjoint and cover all 227"
           ]
         }

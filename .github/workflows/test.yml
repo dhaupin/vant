@@ -207,6 +207,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Baseline seed (the wall's precondition)
+        # The sweep's health. In the pre-shard lane this seeding happened
+        # IMPLICITLY because `node test/ci.js` always ran first inside the
+        # one big job, so `run-all` never saw a bare checkout
+        # (fresh-install-resolution.test.js documents the dependency).
+        # Shards start from a bare checkout, so the seed is now an explicit
+        # step — without it the state-dependent pins fail on missing
+        # artifacts (measured on the 5b88257c run: init-wizard rerun-grant
+        # and state-persistence #224 in shard 1, kernel-wiring census
+        # ENOENT in shard 2, all green once seeded).
+        run: node test/ci.js
+
       - name: Suite wall shard ${{ matrix.shard }}/4
         run: node test/run-all.js --shard=${{ matrix.shard }}/4
 
