@@ -157,6 +157,9 @@ jobs:
       - name: changelog parity gate (site json vs CHANGELOG.md byte-compare, version truth)
         run: npm run lint:changelog
 
+      - name: prestruct pins gate (family floor ^1.2.0 + vendored islands.js freshness, vant#328)
+        run: npm run lint:prestruct
+
       - name: Fiction signatures (repo-wide, wrong-claims regression gate)
         run: npm run lint:claims
 
