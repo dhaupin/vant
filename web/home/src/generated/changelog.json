@@ -1,8 +1,31 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 92,
+  "_headingCount": 93,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 363 (CI speed lane: the suite wall fans out, gates stop queueing behind it)",
+      "sections": [
+        {
+          "name": "Where the wall was measured (2026-11-04, this tree)",
+          "items": [
+            "Full sweep: 227 suites / all green / 450s serial; the 20 slowest suites"
+          ]
+        },
+        {
+          "name": "The lane (test/run-all.js #363 · .github/workflows/test.yml)",
+          "items": [
+            "`node test/run-all.js --shard=N/T`: round-robin split of the sorted suite",
+            "test.yml splits the serial job: `ci` keeps the gates, a `sweep` matrix",
+            "First CI receipts (push 5b88257c): gates + shards 3/4 green; shards 1/2",
+            "Measured locally before landing: shards are disjoint and cover all 227"
+          ]
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

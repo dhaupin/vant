@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "vant-authority",
+  "description": "The MCP auth + privilege-AUTHORITY canon in its own home: the vant-mcp pack grades the tool layer's schema/scope/registry/security-chain; this pack grades WHO may mint credentials, grant/revoke capability, and mutate trust/teams. In-process, no sockets: auth_create MINTS a credential and never the live Auth instance (so the token-signing secret cannot leak), auth_require reads the verifyToken VERDICT field (a bad token resolves to a truthy {valid:false,...} object, never null), the trust/teams authority verbs are admin-classified at the guest door, every authority handler refuses a guest ALS context on its own, and the classification is TOTAL — every handler-guarded privilege-authority verb is also admin-class at the door.",
+  "version": "0.1.0",
+  "entry": "index.mjs"
+}
