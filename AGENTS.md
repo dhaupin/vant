@@ -526,3 +526,19 @@ PURPOSE: Exploring Vant's codebase
   verified EXPLOITED pre-fix.
 - Probe scripts: /tmp/probe6 (grant), /tmp/probe9 (createTask+habitat),
   /tmp/probe10 (compute_eval RCE chain).
+
+### R3 fold (2026-11-02)
+- The R3 security-chain fix (PR #320, branch `audit-round3-security`) was
+  cherry-picked onto `audit-round4` (commit 56781e90) so PR #322 carries both
+  rounds against `axolotl`. R3 touches a different region of `lib/mcp.js`
+  (classifier + `_executeTool`) than R4-6 (authority guards at the top of
+  handlers) — no conflict; both fixes coexist (15 `_assertNotGuestAuthority`
+  call sites + the wired `_isMcpWriteMethod`/pipeline.run chain).
+- Full wall after the fold: 224 suites / 224 passed (R3 adds
+  test/audit-round3.test.js = the 224th).
+- R3's `security-chain-enforced` crashtest row (packs/public/vant-mcp) and
+  R4's two vant-spine rows all coexist in the EXPECTED table.
+- Note for review: R3's honest classifier marks `sudo_grant` (and the other
+  authority verbs) WRITE, so under a LOCKED sandbox they are refused by the
+  chain; R4-6 additionally refuses them for GUESTS. Two distinct boundaries,
+  one direction.
