@@ -325,6 +325,143 @@ test('R4-5: a human guest is still refused exec/sudo verbs at the door', () => {
     return { success: g1.allowed === false && g2.allowed === false };
 });
 
+// ==================== R4-7: webhook info-route secret disclosure ====================
+//
+// The unauthenticated GET /info/<name> route returned the whole route object
+// (secret + sealKeys) behind a wildcard CORS header, so any browser page could
+// read a loopback route's HMAC secret and forge envelopes. Post-fix the route
+// returns non-secret metadata only and no wildcard ACAO is emitted.
+
+function _withWebhookServer(routeConfig, fn) {
+    return new Promise((resolve) => {
+        const webhooks = require(path.join(ROOT, 'lib', 'webhooks'));
+        webhooks.register(routeConfig);
+        const server = webhooks.startServer(0); // ephemeral port — no collisions
+        let settled = false;
+        const finish = (r) => { if (!settled) { settled = true; try { server.close(); } catch (e) { /* */ } resolve(r); } };
+        server.on('error', () => finish(true)); // cannot bind — nothing to assert
+        server.once('listening', () => {
+            const port = server.address().port;
+            setTimeout(() => { fn(`http://localhost:${port}`).then(finish, (e) => finish({ success: false, error: e.message })); }, 60);
+        });
+    });
+}
+
+asyncTest('R4-7: unauthenticated /info does not disclose the signing secret', () => {
+    const SECRET = 'r47-' + 'z'.repeat(28);
+    const name = 'r47-' + process.pid;
+    return _withWebhookServer({ name, source: 'r47src-' + process.pid, eventKeyExpr: 'event', secret: SECRET }, async (base) => {
+        const r = await fetch(`${base}/info/${name}`);
+        const body = await r.text();
+        if (body.includes(SECRET) || /"secret"/.test(body) || /sealKeys/.test(body)) {
+            return { success: false, error: 'info route leaked the route secret: ' + body.slice(0, 160) };
+        }
+        return { success: true };
+    });
+});
+
+asyncTest('R4-7: webhook intake sends no wildcard CORS origin', () => {
+    const name = 'r47cors-' + process.pid;
+    return _withWebhookServer({ name, source: 'r47corssrc-' + process.pid, eventKeyExpr: 'event', secret: 'S'.repeat(24) }, async (base) => {
+        const r = await fetch(`${base}/health`, { headers: { Origin: 'https://evil.example' } });
+        const acao = r.headers.get('access-control-allow-origin');
+        return { success: acao !== '*', error: 'wildcard ACAO present: ' + acao };
+    });
+});
+
+// ==================== R4-8: webhook filter fail-open ====================
+
+const _webhooksMod = require(path.join(ROOT, 'lib', 'webhooks'));
+const _mfHit = { repository: { full_name: 'myorg/myrepo' }, comment: { body: 'ping @openhands' }, action: 'create' };
+const _mfMiss = { repository: { full_name: 'evil/other' }, comment: { body: 'nothing here' }, action: 'delete' };
+
+test('R4-8: glob filter refuses a non-matching payload (was: matched everything)', () => {
+    return { success: _webhooksMod.matchFilter("glob(repository.full_name, 'myorg/*')", _mfMiss) === false,
+        error: 'glob matched a non-matching repo' };
+});
+
+test('R4-8: icontains filter refuses a non-matching payload (was: returned true)', () => {
+    return { success: _webhooksMod.matchFilter("icontains(comment.body, '@openhands')", _mfMiss) === false,
+        error: 'icontains matched a non-matching body' };
+});
+
+test('R4-8: an unrecognized filter expression refuses (fail-closed)', () => {
+    // Pre-fix this expression (no ==/glob/contains/icontains substring) fell
+    // through to `return true` — the event was authorized. Post-fix it refuses.
+    return { success: _webhooksMod.matchFilter("starts_with(ref, 'refs/heads/')", _mfHit) === false,
+        error: 'unparseable filter authorized the event' };
+});
+
+test('R4-8: matching filters still match (truth intact)', () => {
+    const ok =
+        _webhooksMod.matchFilter("glob(repository.full_name, 'myorg/*')", _mfHit) === true &&
+        _webhooksMod.matchFilter("icontains(comment.body, '@OpenHands')", _mfHit) === true &&
+        _webhooksMod.matchFilter("contains(comment.body, 'openhands')", _mfHit) === true &&
+        _webhooksMod.matchFilter("contains(comment.body, 'openhands')", _mfMiss) === false &&
+        _webhooksMod.matchFilter("action == 'create'", _mfHit) === true &&
+        _webhooksMod.matchFilter("action == 'nope'", _mfHit) === false;
+    return { success: ok };
+});
+
+// ==================== R4-9: token secret fail-open ====================
+
+test('R4-9: signToken refuses an empty secret (was: signed under the empty key)', () => {
+    const E = require(path.join(ROOT, 'lib', 'encrypt'));
+    let code = null;
+    try { E.signToken({ a: 1 }, '', 1000); } catch (e) { code = e.code; }
+    return { success: code === 'ENCRYPT_KEY_REQUIRED', error: 'no typed refusal (code=' + code + ')' };
+});
+
+test('R4-9: verifyToken refuses an empty secret (token minted under the empty key no longer validates)', () => {
+    const E = require(path.join(ROOT, 'lib', 'encrypt'));
+    const crypto = require('crypto');
+    const p = Buffer.from(JSON.stringify({ role: 'admin', exp: Date.now() + 9e9 })).toString('base64');
+    const sig = crypto.createHmac('sha256', '').update(p).digest('base64');
+    return { success: E.verifyToken(p + '.' + sig, '') === null, error: 'empty-key token still validated' };
+});
+
+// ==================== R4-10: hmacVerify crashes on hostile signature ====================
+
+test('R4-10: hmacVerify answers false (never throws) on a hostile signature', () => {
+    const E = require(path.join(ROOT, 'lib', 'encrypt'));
+    const key = 'k'.repeat(16);
+    let threw = null, r1, r2;
+    try { r1 = E.hmacVerify('d', key, undefined); r2 = E.hmacVerify('d', key, {}); } catch (e) { threw = e; }
+    return { success: threw === null && r1 === false && r2 === false,
+        error: threw ? 'threw: ' + threw.message : `r1=${r1} r2=${r2}` };
+});
+
+// ==================== R4-11: decrypt untyped crash on bad argument ====================
+
+test('R4-11: decrypt refuses a non-string cipher with a typed error (never a raw TypeError)', () => {
+    const E = require(path.join(ROOT, 'lib', 'encrypt'));
+    const key = 'k'.repeat(16);
+    let threw = null, code = null;
+    try { E.decrypt(12345, key); } catch (e) { threw = e; code = e.code; }
+    return { success: threw !== null && code === 'E_DECRYPT_FORMAT', error: threw ? 'code=' + code : 'did not throw' };
+});
+
+test('R4-11: decrypt refuses a null cipher with a typed error (never a raw TypeError)', () => {
+    const E = require(path.join(ROOT, 'lib', 'encrypt'));
+    let threw = null, code = null;
+    try { E.decrypt(null, 'k'.repeat(16)); } catch (e) { threw = e; code = e.code; }
+    return { success: threw !== null && code === 'E_DECRYPT_FORMAT', error: threw ? 'code=' + code : 'did not throw' };
+});
+
+// ==================== R4-12: shell validator/spawn divergence ====================
+
+asyncTest('R4-12: a whitelisted command with leading whitespace is runnable (was: raw TypeError out of spawn)', () => {
+    const shell = require(path.join(ROOT, 'lib', 'shell'));
+    const sudo = require(path.join(ROOT, 'lib', 'sudo'));
+    try { sudo.grant('default', 'exec'); } catch (e) { /* already granted */ }
+    return shell.exec('   echo r412-probe', { timeout: 5000 }).then(
+        (r) => (r && r.code === 0 && String(r.stdout).trim() === 'r412-probe')
+            ? { success: true }
+            : { success: false, error: 'unexpected result: ' + JSON.stringify(r).slice(0, 120) },
+        (e) => ({ success: false, error: 'threw ' + e.constructor.name + ': ' + e.message.slice(0, 60) })
+    );
+});
+
 // ==================== RUN ====================
 
 (async () => {

@@ -542,3 +542,85 @@ PURPOSE: Exploring Vant's codebase
   authority verbs) WRITE, so under a LOCKED sandbox they are refused by the
   chain; R4-6 additionally refuses them for GUESTS. Two distinct boundaries,
   one direction.
+
+## Discovery: 2026-11-02 - Audit Round 4c (webhook intake, crypto edges, shell validator)
+
+Untested-frontier walk (webhooks replay/intake, lib/encrypt, lib/shell). All
+findings pinned in `test/audit-round4.test.js` (R4-7..R4-12) — verified
+discriminating by stashing the src fixes (11/11 fail pre-fix). Full wall green:
+224/224.
+
+### R4-7 (HIGH): unauthenticated webhook `/info` disclosed the HMAC secret
+- **Root cause:** `lib/webhooks.js` `startServer` served `GET /info/<name>`
+  with NO auth and returned the WHOLE route object via
+  `JSON.stringify(webhook)` — including `secret` and `sealKeys`, the HMAC key
+  that authenticates every inbound envelope. The same handler set
+  `Access-Control-Allow-Origin: *`, so any web page the operator visited could
+  read a loopback route's signing secret cross-origin and then forge signed
+  envelopes (replay-protected only by a 5-min window on a stolen secret).
+- **Verified:** probe11 — `GET /info/<name>` → 200 with
+  `"secret":"super-secret-…"`; with `Origin: https://evil.example` the ACAO
+  header was `*` and the body contained the secret.
+- **Fix:** the route now returns NON-SECRET metadata only (id/name/source/
+  eventKeyExpr/signatureHeader/replyCapable/sealMode/enabled/createdAt); CORS
+  is no longer wildcard — only an explicit opt-in origin list echoes an origin
+  (`VANT_WEBHOOK_CORS_ORIGINS` via new `config.webhookCorsOrigins()`), default
+  empty = no browser cross-origin access.
+
+### R4-8 (HIGH): webhook event filters failed OPEN
+- **Root cause:** `matchFilter` never returned a real boolean. The glob branch
+  destructured the regex MATCH ARRAY (`const [path, pattern] = match`) instead
+  of the capture groups, so `path`/`pattern` held the whole match string and
+  `new RegExp('^glob(repository.full_name, \'myorg/*\')$')` matched EVERYTHING;
+  `icontains` returned `true` for non-matching payloads; and any expression the
+  parser did not recognize fell through to `return true`. A filter is the one
+  thing meant to NARROW which events reach a handler, so a wrong `true`
+  dispatches events the operator meant to exclude.
+- **Verified:** probe14 — `glob(...)` and `icontains(...)` returned true for a
+  non-matching payload; `starts_with(...)` (unrecognized) returned true.
+- **Fix:** rewrote `matchFilter` — real boolean per branch, anchored + escaped
+  glob compile, `_filterLookup` null-safe path, and an unrecognized expression
+  now REFUSES (fail-closed).
+
+### R4-9 (HIGH): `signToken`/`verifyToken` failed open on an empty secret
+- **Root cause:** `Encrypt.signToken(payload, '')` produced a valid token and
+  `Encrypt.verifyToken(tok, '')` validated it — `createHmac` accepts the empty
+  key, so any caller that failed to thread the real secret both signed and
+  accepted tokens under a predictable key. `undefined` threw a raw TypeError.
+- **Fix:** both refuse a non-string/empty secret — `signToken` throws typed
+  `ENCRYPT_KEY_REQUIRED`, `verifyToken` returns null (a token minted under the
+  empty key no longer validates). `lib/auth.js` always threads a real secret
+  (`config.tokenSecret()` or a generated 32-byte one), so the wire is intact.
+
+### R4-10 (medium): `hmacVerify` threw on a hostile signature
+- A non-string `signature` (undefined/object) hit `Buffer.from(..., 'hex')`
+  and threw `ERR_INVALID_ARG_TYPE` out of the webhook/messaging/crew-bus verify
+  paths. A verifier must answer "invalid", never throw. Now returns `false`
+  for non-string/empty/non-hex signatures and an empty key.
+
+### R4-11 (medium): `decrypt` threw a raw TypeError on a bad argument
+- `decrypt(12345)` / `decrypt(null)` hit `cipher.split` → raw TypeError,
+  violating the module's own "plaintext or typed VantError" contract. Now a
+  typed `E_DECRYPT_FORMAT` refusal (checked before `split`), plus a required
+  non-empty string key.
+
+### R4-12 (low): shell validator accepted a command `spawn` then rejected
+- `_validateCommand` trims to find the command word but returned the UNTRIMMED
+  VAF output, so `exec('  git status')` passed the whitelist and then
+  `cpSpawn('', …)` threw a raw `ERR_INVALID_ARG_VALUE`. The returned command is
+  now trimmed — what the validator accepts is runnable.
+
+### Testing laws learned this round
+- Pins: `test/audit-round4.test.js` R4-7..R4-12 (11 pins + 1 for R4-12) — ALL
+  fail pre-fix, pass post-fix (verified by stashing lib/{encrypt,webhooks,
+  config,shell}.js). R4-7 includes two live-socket pins (ephemeral port 0);
+  the rest are pure.
+- Crashtest scenario contributed: `packs/public/vant-spine`
+  `webhook-intake-secret-and-filter-posture` row (+ EXPECTED entry) —
+  self-contained lib row + one ephemeral loopback socket (the vant-relay
+  precedent), strict REFUSED; verified EXPLOITED pre-fix.
+- Probe scripts: /tmp/probe11/p11..p17 (info leak, CORS, filters, token/hmac/
+  decrypt edges).
+- Environment note: `live-fire-regressions.test.js` needs `ss` (iproute2) for
+  its loopback-bind assertion; it was absent here (`apt-get install iproute2`).
+

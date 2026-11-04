@@ -928,6 +928,51 @@ export default {
     },
 
     {
+      name: 'webhook-intake-secret-and-filter-posture',
+      description: "the webhook intake is fail-closed on BOTH the filter evaluator and the route metadata: a glob/icontains filter refuses a non-matching payload (the old evaluator matched everything) and an unrecognized expression refuses (never authorizes), while a matching payload still matches; and the unauthenticated /info route returns NON-SECRET metadata only (no `secret`, no `sealKeys`) with no wildcard CORS origin, so a browser page cannot read a loopback route's HMAC key and forge envelopes",
+      async run(_harness) {
+        const gs = await loadAll(['lib/webhooks.js']);
+        const wh = gs[0];
+        // (a) filter evaluator fails CLOSED (pure, no sockets)
+        const hit = { repository: { full_name: 'myorg/myrepo' }, comment: { body: 'ping @openhands' }, action: 'create' };
+        const miss = { repository: { full_name: 'evil/other' }, comment: { body: 'nothing here' }, action: 'delete' };
+        if (wh.matchFilter("glob(repository.full_name, 'myorg/*')", miss) !== false) {
+          return { verdict: 'EXPLOITED', detail: 'glob filter matched a non-matching repo - the event was authorized', tookRequests: 1 };
+        }
+        if (wh.matchFilter("icontains(comment.body, '@openhands')", miss) !== false) {
+          return { verdict: 'EXPLOITED', detail: 'icontains filter matched a non-matching body', tookRequests: 2 };
+        }
+        if (wh.matchFilter("starts_with(ref, 'refs/heads/')", hit) !== false) {
+          return { verdict: 'EXPLOITED', detail: 'an unrecognized filter expression AUTHORIZED the event (fail-open)', tookRequests: 3 };
+        }
+        if (wh.matchFilter("glob(repository.full_name, 'myorg/*')", hit) !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the glob filter over-refused a matching payload', tookRequests: 4 };
+        }
+        // (b) the live /info route must not serialize the secret (real socket)
+        const SECRET = 'crashtest-wh-' + 'q'.repeat(20);
+        const name = 'crashtest-wh';
+        wh.register({ name, source: 'crashtest-src', eventKeyExpr: 'event', secret: SECRET });
+        const server = wh.startServer(0);
+        await new Promise((res, rej) => { server.once('listening', res); server.once('error', rej); });
+        try {
+          const port = server.address().port;
+          const info = await fetch(`http://127.0.0.1:${port}/info/${name}`);
+          const body = await info.text();
+          if (body.includes(SECRET) || /"secret"/.test(body) || /sealKeys/.test(body)) {
+            return { verdict: 'EXPLOITED', detail: 'unauthenticated /info disclosed the route signing secret', tookRequests: 5 };
+          }
+          const health = await fetch(`http://127.0.0.1:${port}/health`, { headers: { Origin: 'https://evil.example' } });
+          if (health.headers.get('access-control-allow-origin') === '*') {
+            return { verdict: 'EXPLOITED', detail: 'webhook intake emitted a wildcard CORS origin - cross-origin reads are open', tookRequests: 6 };
+          }
+        } finally {
+          await new Promise((res) => server.close(res));
+        }
+        return { verdict: 'REFUSED', detail: 'the filter evaluator refuses non-matching and unrecognized expressions (fail-closed) while matching payloads still match, and the unauthenticated /info route returns non-secret metadata only behind no wildcard CORS', tookRequests: 6 };
+      },
+    },
+
+    {
       name: 'brain-verify-and-horcrux',
       description: "the brain verify chain holds: a fresh brain anchors and verifies, tamper behind the anchor DIVERGES typed, a horcrux forge + restore re-verifies to the SAME root (the restored brain equals the forged one byte-for-byte at root), and an unreadable file (a dangling symlink where a file must be) refuses currentRoot DENIED and surfaces in the manifest as NOT-ok - corruption is caught before read into context",
       async run(_harness) {
