@@ -550,18 +550,20 @@ Connector receipts (verified live, spec §3.9): Purelymail ALLOWS transactional 
 
 ## 13. The Docs Site (docs.creadev.org — CI-owned, zero panel work)
 
-The docs hub is the one Vant surface you never deploy by hand: every push to `main` runs `.github/workflows/docs.yml`, and the artifact publishes to GitHub Pages (which serves the docs.creadev.org domain). `workflow_dispatch` re-runs it on demand. Nothing to bind, no secrets to mint, no dashboard walk.
+The docs hub is the one Vant surface you never deploy by hand: `.github/workflows/docs.yml` is a THIN caller of THE one docs lane (`dhaupin/freestruct/.github/workflows/docs-lane.yml`, pinned at a 40-hex SHA), triggered on `main`, `staging`, and `axolotl`, and the artifact publishes to GitHub Pages (which serves the docs.creadev.org domain). `workflow_dispatch` re-runs it on demand. Nothing to bind, no secrets to mint, no dashboard walk.
+
+The runbook lives ONCE in the lane; this repo keeps only the trigger, `permissions`, `concurrency`, and its input pins. Coverage rides every integration lane but the lane's deploy job gates to `main` INSIDE the reusable workflow — once a lane is in a trigger list the trigger no longer keeps its content out of production; the branch check does (vant#272).
 
 ### The pipeline (the proven order — order matters)
 
 | Step | What it does | Note |
 |------|--------------|------|
-| 1. `bundle exec jekyll build` (Ruby 3.2, `bundler-cache: true`) | Jekyll renders every page into `docs/_site`, nested under `/vant/` (`baseurl`) | render-time nav and redirects plugins run HERE, inside Jekyll |
-| 2. `npx freestruct --strict` | the post-render SEO layer over the Jekyll output | config discovery finds `docs/freestruct.config.yml`; `--strict` FAILS CI on any broken internal link |
-| 3. `npx pagefind --site _site` | the search index is built AFTER freestruct | the engine rewrites the HTML, so the index must match what actually ships |
-| 4. upload artifact + deploy-pages | `docs/_site` goes live | the whole site lands as one GitHub Pages deployment |
+| 1. `bundle exec jekyll build` (Ruby 3.4) | Jekyll renders every page into `docs/_site`, nested under `/vant/` (`baseurl`) | render-time nav and redirects plugins run HERE, inside Jekyll |
+| 2. pinned `freestruct --strict` | the post-render SEO layer over the Jekyll output | the lane installs the EXACT pinned engine (never a floating `npx` — a range floats the deploy); config discovery finds `docs/freestruct.config.yml`; `--strict` FAILS CI on any broken internal link |
+| 3. pinned `pagefind --site _site` | the search index is built AFTER freestruct | the engine rewrites the HTML, so the index must match what actually ships |
+| 4. upload artifact + deploy-pages | `docs/_site` goes live (main only) | the whole site lands as one GitHub Pages deployment |
 
-What the freestruct layer generates over the Jekyll output (config: `docs/freestruct.config.yml`, engine pinned `freestruct@1.0.0` exact in `docs/package.json` alongside `pagefind@^1.5.2`): per-page canonical/OG metas (missing-only — the hand-written tags in `_layouts/default.html` are never touched), a full `sitemap.xml` with real lastmod, a basePath-aware `robots.txt` pointer, `feed.xml`, a noindex `404.html`, and the broken-link check. Search stays with Pagefind (`searchIndex: false` — same owner call as the freestruct docs site itself); `basePath: /vant` is trusted, never doubled.
+What the freestruct layer generates over the Jekyll output (config: `docs/freestruct.config.yml`; the lane pins the engine EXACT at `freestruct@1.2.0`, and `docs/package.json` mirrors that pin for local dev alongside `pagefind@^1.5.2`): per-page canonical/OG metas (missing-only — the hand-written tags in `_layouts/default.html` are never touched), a full `sitemap.xml` with real lastmod, a basePath-aware `robots.txt` pointer, `feed.xml`, a noindex `404.html`, and the broken-link check. Search stays with Pagefind (`searchIndex: false` — same owner call as the freestruct docs site itself); `basePath: /vant` is trusted, never doubled.
 
 ### Release stamping + local preview
 
@@ -574,13 +576,15 @@ vant docs-build --commit      # ...then git add -A + commit the stamp
 # Local docs preview (render layer):
 cd docs && bundle install && bundle exec jekyll serve
 
-# Replicate the CI order + its strict gate locally (cwd matters: the
+# Replicate the lane's order + its strict gate locally (cwd matters: the
 # engine's config discovery walks upward FROM your cwd, and glob the
-# output dir exactly like the workflow does):
+# output dir exactly like the lane does). The lane installs the pinned
+# tools with ONE `npm install --no-save`; a second install prunes the
+# first, so request freestruct + pagefind together:
 cd docs
-npm install --no-audit --no-fund
-npx freestruct --strict
-npx pagefind --site _site
+npm install --no-save --no-audit --no-fund freestruct@1.2.0 pagefind@1.5.2
+node node_modules/freestruct/bin/freestruct.mjs --strict
+node node_modules/pagefind/lib/runner/bin.cjs --site _site
 cd ..
 
 # The five docs gates (style, links, frontmatter, language, truthfulness):

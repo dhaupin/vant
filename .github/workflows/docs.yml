@@ -1,101 +1,42 @@
+# Vant docs - a THIN caller of THE one docs lane (dhaupin/freestruct).
+#
+# The runbook (Jekyll, the hardened pagefind scrape, the pinned freestruct
+# post-build layer, the Pages upload, the main-gated deploy) lives ONCE in the
+# lane. This file keeps only what is per-repo: the trigger, the permissions,
+# the concurrency group, and the input pins that are vant's. It used to inline
+# the whole runbook (one of the family hand-copies the consolidation removed).
+#
+# Coverage rides every integration lane (vant#272): staging and axolotl build
+# the docs battery but cannot publish - the lane's deploy job gates to main
+# INSIDE the reusable workflow, because once a lane is in a trigger list the
+# trigger no longer keeps its content out of production; the branch check does.
+#
+# Pins, never floats: the lane is called at a 40-hex SHA, and freestruct is
+# pinned EXACT (a range floats the engine = a random deploy). freestruct-cmd
+# stays the lane default (node node_modules/freestruct/bin/freestruct.mjs):
+# the lane installs the pinned npm engine itself, so the hand-rolled
+# docs/package.json pipeline retires and the deploy can no longer float to
+# `npx freestruct` latest.
 name: Deploy Docs
 
 on:
   push:
-    # CI coverage rides BOTH integration lanes (the staging rule,
-    # vant#272 point 2): staging builds run the docs battery but the
-    # deploy job below gates itself to main - a Pages publish may never
-    # ride a trigger list, only a branch check (point 3).
-    branches: [main, staging]
+    branches: [main, staging, axolotl]
+    paths: ['docs/**', '.github/workflows/docs.yml']
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment
 concurrency:
-  group: "pages"
+  group: pages
   cancel-in-progress: false
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
-
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@de492cf36cbab201753d720ce4f4e336cd688c94 # v1
-        with:
-          ruby-version: '3.2'
-          bundler-cache: true
-          working-directory: './docs'
-
-      - name: Setup Pages
-        id: pages
-        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
-
-      - name: Build Jekyll
-        run: |
-          cd docs
-          bundle exec jekyll build
-        env:
-          JEKYLL_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # Post-render SEO layer (the freestruct conversion): the hand-rolled
-      # sitemap.xml / robots.txt pages are retired - the engine generates a
-      # full sitemap with real lastmod, a basePath-aware robots pointer, a
-      # noindex 404.html and an RSS feed over the build output. The Vant
-      # docs were freestruct's prototype; docs/package.json consumes the
-      # npm v1.0.0 package (ADOPTED: freestruct@1.0.0 is confirmed live on
-      # the registry holding the `latest` dist-tag as of the pass-338
-      # sweep, so the old publish gate has settled; the exact pin stays).
-      # Config discovery walks upward from cwd and finds
-      # docs/freestruct.config.yml; the output dir resolves config-relative
-      # to docs/_site; render-time Jekyll nav/redirects plugins are
-      # untouched. --strict: broken internal links fail the build (--strict
-      # is what catches production 404s on the freestruct docs site).
-      - name: Setup Node
-        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
-        with:
-          node-version: '22'
-
-      - name: Install docs pipeline deps
-        working-directory: docs
-        run: npm install --no-audit --no-fund
-
-      - name: Run freestruct (post-render SEO layer, strict)
-        run: npx freestruct --strict
-
-      # Pagefind indexes AFTER freestruct: the engine rewrites the HTML
-      # (metas, cache-busting, lazy loading) and the index must match what
-      # ships. Same posture as the freestruct docs site itself.
-      - name: Create search index
-        working-directory: docs
-        run: npx pagefind --site _site
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
-        with:
-          path: './docs/_site'
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    # Production gate (vant#272 point 3): visibility in a trigger list
-    # never keeps content out of production - the branch check does.
-    if: github.ref == 'refs/heads/main'
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5
+  docs:
+    uses: dhaupin/freestruct/.github/workflows/docs-lane.yml@22bb7e9b2634d6cdd966963d9e25c7f892577276 # main
+    with:
+      ruby-version: '3.4'
+      freestruct-version: '1.2.0'
