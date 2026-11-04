@@ -8,7 +8,7 @@
  * into each renderer target and writes a .sha256 pin sidecar beside the
  * vendored copy. Apps stay self-contained: they never read each other's
  * sources, only the vendored, hash-pinned kit copies. The parity pins
- * (test/relay-parity.test.js) FAIL when a pin does not match kit head -
+ * (tests/relay-parity.test.js) FAIL when a pin does not match kit head -
  * re-run this script after changing the kit.
  *
  * TARGETS (cwd this repo):

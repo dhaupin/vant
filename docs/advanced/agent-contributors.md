@@ -65,7 +65,7 @@ axolotl: pass 68 - Wave H third-org rites: the commons key ring
 
 - genesis.admit/accept: admit never re-keys the ring secret...
 - THREE latent secret.js bugs fixed: get-after-set shape mismatch...
-- test/genesis-ring.test.js 8/8 pins: ring-secret reuse, structured
+- tests/genesis-ring.test.js 8/8 pins: ring-secret reuse, structured
   refusal, live two-process admit-to-accept round-trip over real HTTP
 ```
 
@@ -75,7 +75,7 @@ For contributors, the practical bar:
 
 ```bash
 # touched a lib module? its suite runs with your change
-node test/<the-suite>.test.js
+node tests/<the-suite>.test.js
 
 # touched docs? both gates run clean
 npm run lint:docs
@@ -111,7 +111,7 @@ A real shape from the record, condensed: the genesis ceremony stored a secret un
 
 1. The three-line fix in `lib/genesis.js`
 2. Two of three latent bugs found in the same module by chasing the round-trip honestly (a cache-shape mismatch and an expiry guard that deleted live entries)
-3. A pins suite (`test/genesis-ring.test.js`, 8 checks) including a two-process round-trip over real HTTP, because in-process tests could not exercise the real path
+3. A pins suite (`tests/genesis-ring.test.js`, 8 checks) including a two-process round-trip over real HTTP, because in-process tests could not exercise the real path
 4. A learning recorded for the next agent: when a memory-cache write sits inside a swallowing try/catch, probe the round-trip once
 
 That is the convention at full size: the fix, the pins, and the transferred lesson.

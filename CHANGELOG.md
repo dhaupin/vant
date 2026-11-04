@@ -8,6 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - pass 365 (audit round 9: the verdict surfaces stop failing open — an
 unclassified operation word is a refusal, not a pass)
 
+### Changed: the pod `test/` directory is now `tests/` - the convention flips (vant#277)
+
+The pod consolidates the web apps' own suites into the repo-root test lane, and
+that lane was spelled `test/` - the last tree-wide name that hid the integration
+lanes from spelling the same thing their siblings (crashtest, freestruct) do.
+This wave names the reversal of the deliberate consolidation in `4788a1a4`
+(the /tests stragglers fold into /test): the pod now spells it `tests/`, one
+convention for every member of the family. Everything load-bearing moved in
+the same commit: the CI workflow (`.github/workflows/test.yml`), the root
+`package.json` scripts, the ignore-rule scratch paths (`tests/tmp/`), the
+vendored `govstruct/compliance/vant.json` lane names, the
+`lib/audit-report.js` deep link, the harness self-headers, and a fresh
+`scripts/struct-feed-stamp.js` ring restamp (`--check` green on both web
+flavors). The web apps' own `test/` directories are their own trees and are
+untouched (the one-way domain law).
+
 ### Fixed: audit round 9 across the access-control/enforcement seam (3 findings, 16 discriminating pins)
 
 The class: a surface classifies an operation WORD against a small hardcoded

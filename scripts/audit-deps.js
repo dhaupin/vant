@@ -19,7 +19,7 @@
  * `npm ci` for every consumer — declaring it here fails typed.
  *
  * Evidence classes the scanner admits (occurrence with its class):
- *   code    — require()/import of the package in lib/, bin/, scripts/, test/
+ *   code    — require()/import of the package in lib/, bin/, scripts/, tests/
  *   cli     — npx invocation or @pin mention in package.json scripts,
  *             .github/workflows, or spawn argv in scripts/
  *   config  — consumed by root config: .eslintrc.json, poststruct.config.js,
@@ -313,7 +313,7 @@ function census() {
         const sites = evidenceFor(name);
         const total = sites.code.length + sites.cli.length + sites.config.length + sites.ledger.length;
         if (total === 0) {
-            fail('use:evidence', 'package.json', `"${name}" claims lane "${entry.lane}" but the census finds zero evidence in lib/ bin/ scripts/ test/ workflows/ config/ ledgers/ — an unwired dependency is a finding`);
+            fail('use:evidence', 'package.json', `"${name}" claims lane "${entry.lane}" but the census finds zero evidence in lib/ bin/ scripts/ tests/ workflows/ config/ ledgers/ — an unwired dependency is a finding`);
             continue;
         }
         const laneWaits = {

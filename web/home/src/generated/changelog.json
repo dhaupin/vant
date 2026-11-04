@@ -10,6 +10,10 @@
       "title": "pass 365 (audit round 9: the verdict surfaces stop failing open — an",
       "sections": [
         {
+          "name": "Changed: the pod `test/` directory is now `tests/` - the convention flips (vant#277)",
+          "items": []
+        },
+        {
           "name": "Fixed: audit round 9 across the access-control/enforcement seam (3 findings, 16 discriminating pins)",
           "items": [
             "**`lib/rls.js isOperationAllowed` (R9-1)** mapped `op` with",

@@ -74,8 +74,8 @@ jobs:
       - name: Run tests
         run: |
           node -e "console.log('vant', require('./package.json').version)"
-          node test/ci.js
-          node test/runner.js
+          node tests/ci.js
+          node tests/runner.js
       - name: Eyes gate (eyestruct@1.0 visual ledger, browserless)
         run: npx eyestruct gate
       - name: Packs deep lint (packstruct@1)
@@ -108,7 +108,7 @@ jobs:
       - name: Pass-ledger open-items gate
         run: npm run ledger:gate
       - name: Run standalone suites
-        run: node test/run-all.js
+        run: node tests/run-all.js
 
   # The SECOND job of the same workflow, independent of ci: the contract
   # battery rides the INSTALLED crashtest package (no clone step).
@@ -121,7 +121,7 @@ jobs:
       - name: Determinism preflight (the no-wall-clock law, flat-greps pack sources)
         run: npx crashtest lint-determinism
       - name: Crashtest gate (contract table + real-harness run root)
-        run: node test/ci-crashtest-gate.js
+        run: node tests/ci-crashtest-gate.js
 ```
 
 ---
@@ -136,7 +136,7 @@ npm install
 
 ### Run Tests
 
-The runner surface is documented ONCE, on [Testing](/vant/operations/testing) - the smoke test, the full runner, the coverage summary, and running one suite. CI runs `node test/ci.js` + `node test/runner.js` plus every standalone suite via `node test/run-all.js`; reproducing CI means running those three shapes locally.
+The runner surface is documented ONCE, on [Testing](/vant/operations/testing) - the smoke test, the full runner, the coverage summary, and running one suite. CI runs `node tests/ci.js` + `node tests/runner.js` plus every standalone suite via `node tests/run-all.js`; reproducing CI means running those three shapes locally.
 
 ### Lint
 

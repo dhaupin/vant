@@ -11,7 +11,7 @@
  * `vant qc` run on a live install is safe by construction.
  *
  * Wire-in: `vant qc` routes through bin/vant.js; the release path runs it
- * after the door pins (test/runner.js keeps its own lighter door batch).
+ * after the door pins (tests/runner.js keeps its own lighter door batch).
  *
  * Run: node bin/qc.js [--json]
  */
@@ -76,7 +76,7 @@ function main() {
     // the whole battery — including `--help`, which side-ran every probe
     // (brain/forum/escrow/config writes from a 'help' call) and exited 1
     // whenever a probe was environment-sensitive (what Actions caught).
-    // The cli-smoke contract (test/cli-smoke.test.js: '--help exits 0
+    // The cli-smoke contract (tests/cli-smoke.test.js: '--help exits 0
     // with usage') holds under ANY env now; the battery runs only when
     // actually asked for.
     if (process.argv.slice(2).some(a => a === '-h' || a === '--help')) {

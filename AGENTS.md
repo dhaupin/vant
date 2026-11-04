@@ -409,12 +409,12 @@ PURPOSE: Exploring Vant's codebase
 - **R3-5:** bin/era.js no-fallthrough breaks + unused arg.
 
 ### Testing laws learned this round
-- Pins live in test/audit-round3.test.js; they are DISCRIMINATING (6 fail if
+- Pins live in tests/audit-round3.test.js; they are DISCRIMINATING (6 fail if
   lib/mcp.js is reverted).
 - Crashtest scenario contributed: packs/public/vant-mcp `security-chain-enforced`
-  row + `mcp-chain` shim route in test/crashtest-packs.test.js (probe child
+  row + `mcp-chain` shim route in tests/crashtest-packs.test.js (probe child
   locks the sandbox, measures chain + classifier + escalation floor).
-- Full wall: `nohup node test/run-all.js` (background; foreground cap ~1080s).
+- Full wall: `nohup node tests/run-all.js` (background; foreground cap ~1080s).
   Baseline green = 223 suites / 222 passed; the one failure
   (live-fire-regressions.test.js) is the pre-existing `ss`-binary-missing env
   artifact, NOT a regression.
@@ -457,7 +457,7 @@ PURPOSE: Exploring Vant's codebase
   WRITER existed anywhere. Fixed: `bin/org.js` `--persist` writes each
   capability into the grants ledger; reader now hydrates it. Default
   `vant org grant` unchanged.
-- **R4-5 (low, hermeticity):** `test/sync-pull.test.js` "no providers
+- **R4-5 (low, hermeticity):** `tests/sync-pull.test.js` "no providers
   configured" pin was non-hermetic — `_clearTestProviders()` falls through to
   REAL providers, and in a working tree (origin + GITHUB_TOKEN) GitHubProvider
   is configured, so the pin drove a real provider and asserted the wrong
@@ -465,11 +465,11 @@ PURPOSE: Exploring Vant's codebase
   registering an UNCONFIGURED fake (map stays authoritative, zero configured).
 
 ### Testing laws learned this round
-- Pins live in test/audit-round4.test.js; 9 of 11 are DISCRIMINATING
+- Pins live in tests/audit-round4.test.js; 9 of 11 are DISCRIMINATING
   (verified by stashing the src fixes: 8 fail pre-fix, all pass post-fix).
 - Crashtest scenario contributed: packs/public/vant-spine
   `revocation-scope-coverage-and-restore` row (+ EXPECTED entry in
-  test/crashtest-packs.test.js) — self-contained lib row, strict REFUSED.
+  tests/crashtest-packs.test.js) — self-contained lib row, strict REFUSED.
 - `ss` (iproute2) was missing in the sandbox; `apt-get install -y iproute2`
   after `apt-get update` turns live-fire-regressions green (env artifact).
 - Full wall baseline green = 223 suites / 223 passed once iproute2 + the
@@ -508,13 +508,13 @@ PURPOSE: Exploring Vant's codebase
   - Not touched: the tools' semantics for non-guests (unchanged).
 
 ### Testing laws learned this round
-- Pins: `test/audit-round4.test.js` R4-5 block (6 pins) — ALL 6 fail pre-fix,
+- Pins: `tests/audit-round4.test.js` R4-5 block (6 pins) — ALL 6 fail pre-fix,
   pass post-fix (verified by stashing lib/mcp.js + lib/guests.js). Includes a
   real in-process guest door (child `mcp.start({port:0})`, `human` guest token,
   `/mcp/exec`) asserting 403 on the authority verb.
 - Crashtest scenario contributed: `packs/public/vant-spine`
   `guest-authority-verbs-admin-only` row (+ EXPECTED entry in
-  test/crashtest-packs.test.js) — self-contained lib row, strict REFUSED;
+  tests/crashtest-packs.test.js) — self-contained lib row, strict REFUSED;
   verified EXPLOITED pre-fix.
 - Probe scripts: /tmp/probe6 (grant), /tmp/probe9 (createTask+habitat),
   /tmp/probe10 (compute_eval RCE chain).
@@ -527,7 +527,7 @@ PURPOSE: Exploring Vant's codebase
   handlers) — no conflict; both fixes coexist (15 `_assertNotGuestAuthority`
   call sites + the wired `_isMcpWriteMethod`/pipeline.run chain).
 - Full wall after the fold: 224 suites / 224 passed (R3 adds
-  test/audit-round3.test.js = the 224th).
+  tests/audit-round3.test.js = the 224th).
 - R3's `security-chain-enforced` crashtest row (packs/public/vant-mcp) and
   R4's two vant-spine rows all coexist in the EXPECTED table.
 - Note for review: R3's honest classifier marks `sudo_grant` (and the other
@@ -538,7 +538,7 @@ PURPOSE: Exploring Vant's codebase
 ## Discovery: 2026-11-02 - Audit Round 4c (webhook intake, crypto edges, shell validator)
 
 Untested-frontier walk (webhooks replay/intake, lib/encrypt, lib/shell). All
-findings pinned in `test/audit-round4.test.js` (R4-7..R4-12) — verified
+findings pinned in `tests/audit-round4.test.js` (R4-7..R4-12) — verified
 discriminating by stashing the src fixes (11/11 fail pre-fix). Full wall green:
 224/224.
 
@@ -603,7 +603,7 @@ discriminating by stashing the src fixes (11/11 fail pre-fix). Full wall green:
   now trimmed — what the validator accepts is runnable.
 
 ### Testing laws learned this round
-- Pins: `test/audit-round4.test.js` R4-7..R4-12 (11 pins + 1 for R4-12) — ALL
+- Pins: `tests/audit-round4.test.js` R4-7..R4-12 (11 pins + 1 for R4-12) — ALL
   fail pre-fix, pass post-fix (verified by stashing lib/{encrypt,webhooks,
   config,shell}.js). R4-7 includes two live-socket pins (ephemeral port 0);
   the rest are pure.
@@ -628,7 +628,7 @@ discriminating by stashing the src fixes (11/11 fail pre-fix). Full wall green:
 Frontiers walked: the webhook reply/seal SEND path (`lib/api.js` `relaySend` +
 the pod seal lane), `lib/messaging.js` envelope seal verification end-to-end,
 and the `lib/habitat.js` token flows. Four findings, all fixed and pinned in
-`test/audit-round5.test.js` (R5-1..R5-4) — each pin verified to fail pre-fix by
+`tests/audit-round5.test.js` (R5-1..R5-4) — each pin verified to fail pre-fix by
 stashing the matching lib file.
 
 ### R5-1 (medium): the HMAC canon crashed raw on a non-string key or body
@@ -673,7 +673,7 @@ accept only the exact `Bearer <token>` form (case-insensitive scheme).
   rebinding re-check) refuses internal targets. Walled.
 
 ### Testing laws learned this round
-- Pins: `test/audit-round5.test.js` R5-1..R5-4 (11 pins) — each finding has at
+- Pins: `tests/audit-round5.test.js` R5-1..R5-4 (11 pins) — each finding has at
   least one pin that fails pre-fix, verified by stashing the matching
   lib/{encrypt,messaging,habitat,rls}.js. R5-4a/4b discriminate against an
   rls-only revert; R5-4c and R5-2 discriminate against a habitat-only revert
@@ -691,7 +691,7 @@ Frontier walked: the surfaces that ANSWER an allow/deny verdict to the operator
 classified against a small hardcoded list and the fallback is the LOOSER class,
 so a gate reads ALLOWED for a word it never heard of. That is the opposite of
 the house's own law (`lib/guests.js classifyTool`: unknown = write). Fixed and
-pinned in `test/rls-op-classification.test.js` (R9-1..R9-3, 16 pins).
+pinned in `tests/rls-op-classification.test.js` (R9-1..R9-3, 16 pins).
 
 ### R9-1 (medium): `lib/rls.js isOperationAllowed` failed open on unlisted verbs
 `['write','create','update','delete','commit'].includes(op) ? 'write' : 'read'`
@@ -723,7 +723,7 @@ Fixed: mode is `read|write` or usage error; the silent downgrade is gone.
   is total.
 
 ### Testing laws learned this round
-- Pins: `test/rls-op-classification.test.js` — 16 pins, BOTH directions.
+- Pins: `tests/rls-op-classification.test.js` — 16 pins, BOTH directions.
   Stashing the source fixes flips 9 finding-shaped pins; the read-canon and
   explicit-write controls hold both ways by design (a fix that over-tightens a
   real read would fail the controls).

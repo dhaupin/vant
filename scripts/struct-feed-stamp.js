@@ -5,7 +5,7 @@
  *
  * Three rows stamp from machine truth, never prose parsing:
  *
- *   crashtest (b)   - test/crashtest-packs.test.js's own verdict ledger
+ *   crashtest (b)   - tests/crashtest-packs.test.js's own verdict ledger
  *                     (the same sentinel dump CRASHTEST_PACKS_JSON=1 gives
  *                     the CI gate). Counters derive from the measured rows;
  *                     the stamp date is the day the ledger ran.
@@ -59,7 +59,7 @@ const path = require('path');
 const crypto = require('crypto');
 
 const ROOT = path.resolve(__dirname, '..');
-const SUITE = 'test/crashtest-packs.test.js';
+const SUITE = 'tests/crashtest-packs.test.js';
 const SENTINEL = /CRASHTEST_PACKS_GATE<<([\s\S]*?)>>END/;
 
 // Every stamped row and the byte-identical flavor copies it owns (the

@@ -46,7 +46,7 @@ const SKIP_TESTS = [
 ];
 
 function getFullSuite() {
-    // (pass 20) Fresh installs / npm packages ship without test/ — readdirSync
+    // (pass 20) Fresh installs / npm packages ship without tests/ — readdirSync
     // crashed with a raw ENOENT before the "No tests found" message could
     // help. Treat a missing test dir as an empty suite; the mode loop below
     // then reports a clean "no tests" result instead of stack-tracing.
@@ -96,10 +96,10 @@ async function runTests(mode = 'smoke') {
     
     printBanner(`Vant Test Suite: ${mode.toUpperCase()}`);
     if (tests.length === 0) {
-        // (pass 20) Install without test/ (npm package, fresh clone subset):
+        // (pass 20) Install without tests/ (npm package, fresh clone subset):
         // fail with guidance, not a stack trace.
         console.log(`No test files found in ${TEST_DIR}`);
-        console.log('\nThe test/ directory ships with the repo, not npm installs.');
+        console.log('\nThe tests/ directory ships with the repo, not npm installs.');
         console.log('Clone https://github.com/dhaupin/vant to run the suite.');
         process.exit(1);
     }

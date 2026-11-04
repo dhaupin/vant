@@ -38,7 +38,7 @@ name: release
 #                   own additions, served set == npm pack of this tree,
 #                   identity, consumer install + probe, bin --version).
 #                   vant rider: web/ is ALLOWED in the tarball (dashboards,
-#                   relay, home ride - vant#275) and models/tmp/labs/test/
+#                   relay, home ride - vant#275) and models/tmp/labs/tests/
 #                   packs/ are forbidden additions.
 #                   --gh: the release object exists for the tag, its target
 #                   commit == `git rev-parse tag^{commit}`, and the source
@@ -213,5 +213,5 @@ jobs:
           PROBE="const p=require('vant-os');if(p.getVersion()!=='$V')process.exit(1)"
           node scripts/verify-release.cjs --npm --version "$V" --probe "$PROBE" \
             --allowed 'web/' \
-            --forbidden 'models/,tmp/,labs/,test/,packs/'
+            --forbidden 'models/,tmp/,labs/,tests/,packs/'
           node scripts/verify-release.cjs --gh --tag "v$V" --asset "vant-os-$V.tgz"

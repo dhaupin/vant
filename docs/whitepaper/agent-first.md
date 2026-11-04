@@ -150,7 +150,7 @@ What made it come together was not a breakthrough; it was the accumulated floor:
 Agent-first fails loudly or not at all. Two mechanisms do the watching:
 
 1. **Surface consistency.** A checker compares every CLI command and MCP tool against its implementation and its docs. It has caught phantom endpoints - documented surfaces that did not exist - twice. In a project where agents write the docs, a doc that lies is a bug with a megaphone.
-2. **The regression suite as conscience.** `node test/runner.js` is the baseline before any work begins. The suite's structure mirrors the brain's: [brain tests](https://github.com/dhaupin/vant/blob/axolotl/test/brain.test.js), storage tests, mesh tests - each subsystem pinned independently, so a failure localizes itself.
+2. **The regression suite as conscience.** `node tests/runner.js` is the baseline before any work begins. The suite's structure mirrors the brain's: [brain tests](https://github.com/dhaupin/vant/blob/axolotl/tests/brain.test.js), storage tests, mesh tests - each subsystem pinned independently, so a failure localizes itself.
 
 The deeper point: these are not human-verification tools bolted onto agent work. They are **agent-verification tools** - built because a confident tool message once lied, and the lesson went into the brain: *trust a diff over a confident tool message.*
 
