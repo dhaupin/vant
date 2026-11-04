@@ -4,9 +4,9 @@
  *
  * 269 tools declare inputSchema but NOTHING validated params at dispatch —
  * the audit's "100+ tools define schemas but NONE validated at dispatch".
- * Now all three doors enforce the declared schema:
+ * Now all doors enforce the declared schema:
  *   - mcp.execute / mcp.call  → { error, problems } result
- *   - HTTP JSON-RPC (_executeWithSecurity) → coded VantError → error response
+ *   - HTTP /mcp/exec (the door rides mcp.execute) → same typed result
  *
  * Validator contract (fail-closed on DECLARED constraints, permissive on
  * undeclared keys so schemas without `properties` keep passing):

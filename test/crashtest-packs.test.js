@@ -277,6 +277,56 @@ const MCP_CHILD = `${CHILD_STDOUT_GUARD}
 })().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
 `;
 
+// MCP security-chain probe (round-3 audit): the door's chain was DEAD CODE
+// after the registry-census rewrite - execute/call dispatched straight to
+// tool.handler and skipped sandbox/VAF/QoS entirely, so a locked sandbox
+// never gated a write and sudo_grant self-escalated. This child LOCKS the
+// sandbox and measures the chain's presence + the (fail-closed) write
+// classifier directly; the pack row decides. Never sockets.
+const MCP_CHAIN_CHILD = `${CHILD_STDOUT_GUARD}
+(async () => {
+    const mcp = require('./lib/mcp.js');
+    const sandbox = require('./lib/sandbox.js');
+    const sudo = require('./lib/sudo.js');
+    const out = {};
+    try {
+        // Lock the door's sandbox: no write/exec/admin/spawn.
+        sandbox.defaultSandbox.setCapabilities({ canRead: true, canWrite: false, canExec: false, canAdmin: false, canSpawn: false });
+
+        // 1. The classifier must be honest (fail-closed): mutating verbs WRITE,
+        //    read verbs READ, unknown WRITE.
+        const isWrite = mcp._isMcpWriteMethod;
+        out.classifierExport = typeof isWrite === 'function';
+        if (out.classifierExport) {
+            out.mutatingWrite = ['vant_config_set', 'sudo_grant', 'agent_kill', 'cron_run', 'compute_eval', 'vant_set_memory', 'guest_revoke'].every(t => isWrite(t) === true);
+            out.readRead = ['vant_health', 'brain_read', 'brain_list', 'vant_config_get', 'msg_list', 'escrow_status'].every(t => isWrite(t) === false);
+            out.unknownWrite = isWrite('totally_unknown_verb') === true && isWrite('') === true;
+        }
+
+        // 2. A chain-ONLY-gated write tool must be refused by the capability
+        //    gate (pre-fix it was read-classified and RAN under the lock).
+        try { await mcp.execute('event_sink_enable', {}); out.chainWriteRefused = false; }
+        catch (e) { out.chainWriteRefused = !!(e && e.code === 'CAPABILITY_NOT_ALLOWED'); }
+
+        // 3. sudo_grant must NOT self-escalate under the lock, and the
+        //    capability/sudo floor must be unchanged afterwards.
+        const execBefore = sandbox.defaultSandbox.can('canExec');
+        try { await mcp.execute('sudo_grant', { agentId: 'default', capability: 'canExec' }); out.escalationRefused = false; }
+        catch (e) { out.escalationRefused = !!(e && e.code === 'CAPABILITY_NOT_ALLOWED'); }
+        out.execFloorUnchanged = (execBefore === false) && (sandbox.defaultSandbox.can('canExec') === false) && (sudo.can('default', 'exec') === false);
+
+        // 4. A non-string method must be a typed refusal, never a TypeError.
+        let typed = true;
+        for (const bad of [null, 0, {}, undefined]) {
+            try { const r = await mcp.execute(bad, {}); if (!(r && r.error === 'MCP_INPUT_INVALID')) typed = false; }
+            catch (e) { typed = false; }
+        }
+        out.typeGuard = typed;
+    } catch (e) { out.fatal = e.name + ': ' + e.message; }
+    process.stdout.write('VANT_CT_JSON<<' + JSON.stringify(out) + '>>END');
+})().catch((e) => { process.stdout.write(JSON.stringify({ error: e.name + ': ' + e.message })); });
+`;
+
 // Trust-floor probe: shapes mirror scripts/crashtest-run.js's TRUST_CHILD —
 // seeded succession context, low-trust successor's private read, facts only.
 const TRUST_CHILD = `${CHILD_STDOUT_GUARD}
@@ -871,6 +921,18 @@ function buildRoutes(sb) {
         }
         return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
     });
+    // (round-3 audit) mcp-chain: the security-chain probe child. Locks the
+    // sandbox and measures the chain + classifier directly; the pack row
+    // decides. Same fresh-module probe shape as mcp-exec.
+    routes.registerRoute('mcp-chain', async () => {
+        let outText;
+        try {
+            outText = execFileSync('node', ['-e', MCP_CHAIN_CHILD], { cwd: sb, timeout: 60000, encoding: 'utf8', env: { ...process.env, VANT_GATE_QUIET: '1' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ error: `mcp chain probe child failed: ${String(e.stderr || e.message).slice(0, 200)}` }), { status: 500 });
+        }
+        return new Response(extractCtJson(outText), { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    });
     // --- the vant-rest arm (2026-10-24): lib/server's REAL Edge chain, the
     // --- same route code scripts/crashtest-run.js runs.
 
@@ -1398,6 +1460,10 @@ const EXPECTED = {
 'unknown-tool-honesty': 'REFUSED',
         'tool-schema-enforced': 'REFUSED',
         'brain-write-scope-hardness': 'REFUSED',
+        // (round-3 audit, 2026-11-02) the security-chain row: pre-fix the
+        // chain was dead code and sudo_grant self-escalated; the row pins
+        // the fixed dispatcher (chain wired + honest fail-closed classifier).
+        'security-chain-enforced': 'REFUSED',
     },
     // (round-2 audit, 2026-11-03) the outbound-network SSRF wall itself.
     // The four lib-level rows are self-contained (drive lib/network.js
