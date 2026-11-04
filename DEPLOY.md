@@ -464,10 +464,7 @@ Whatever lands ships pre-gated: `web/home/test/config.test.mjs` (rides test.yml)
    Each new pair appears in the dashboard's property switcher (4 above, 4 entries) without redeploying app code. Switching keeps your route, module, and filters; everything data-side re-keys to the chosen pod and the SSE stream reconnects (prd-web.md 3.4).
 4. **Make the pod reachable from the edge** - pick ONE: - **Tunnel (recommended for home/VPS pods):** `cloudflared tunnel create vant-pod`, route a hostname like `pod-<murmur>.<your-domain>.com` to `http://localhost:3457`, run the connector on the pod host. Stable egress identity, no ports opened, no allowlist churn - this is the prd-web.md 8.3 fallback path and it dodges the IP-allowlist refresh problem entirely. - **IP allowlist path:** let pages origin fetches hit the door (fetch egress comes from Cloudflare IP ranges, https://www.cloudflare.com/ips/) and allowlist those ranges at the pod's firewall with a scheduled refresh - broad by nature, and refreshes are the owner-posture requirement (prd-web.md 8.3).
 5. **Mint an identity** on the pod: `vant guest issue --name <seat>` and copy the `vguest_` token.
-6. **Log in**: open the dashboard's subdomain and sign in with your dashboard email (one-time code); then open Settings
-   → Connect your pod and paste the `vguest_` token there - inside, after the email gate verified you (wave 19.17; the
-   login gate offers a token paste only when this deploy has no email/store config at all). The status page will name
-   anything still missing (functions, origin var, bridge), exactly as built.
+6. **Log in**: open the dashboard's subdomain and sign in with your dashboard email (one-time code); then open Settings → Connect your pod and paste the `vguest_` token there - inside, after the email gate verified you (wave 19.17; the login gate offers a token paste only when this deploy has no email/store config at all). The status page will name anything still missing (functions, origin var, bridge), exactly as built.
 7. **Point the lander's "Dashboard" link** at the new subdomain when satisfied.
 
 ### 12.2 Mode B — pod same-origin (the local-ops fallback, OFF by default)
@@ -517,14 +514,7 @@ Fail-closed in every posture: enabled without a gate key serves NOTHING (hops an
 
 ### 12.5 Provider mode (the community face — members pair their OWN pods)
 
-**What it is:** the dashboard-relay flavor gains a registration face — members sign in with an
-email one-time code (NO passwords exist), mint a single-use pairing voucher, and redeem it on
-THEIR OWN pod (`vant guest pair --code vhpair-...`). The pod dials OUT (Mode A, prd-relay.md) and
-a provider property slot mints itself as `g<guest id hex>` (kebab-safe; minted, never typed).
-The member then reaches their own pod through the sealed-ride lane — exactly the ride face
-prd-relay.md already built. Spec: [labs/prd-provider-mode.md](labs/prd-provider-mode.md).
-Nothing in provider mode opens edge-forwarding to user-named origins — the bridge stays
-env-origin-only.
+**What it is:** the dashboard-relay flavor gains a registration face — members sign in with an email one-time code (NO passwords exist), mint a single-use pairing voucher, and redeem it on THEIR OWN pod (`vant guest pair --code vhpair-...`). The pod dials OUT (Mode A, prd-relay.md) and a provider property slot mints itself as `g<guest id hex>` (kebab-safe; minted, never typed). The member then reaches their own pod through the sealed-ride lane — exactly the ride face prd-relay.md already built. Spec: [labs/prd-provider-mode.md](labs/prd-provider-mode.md). Nothing in provider mode opens edge-forwarding to user-named origins — the bridge stays env-origin-only.
 
 **The envelope (all in PAGES SETTINGS, Production AND Preview; Text unless marked **Secret**):**
 
@@ -550,24 +540,11 @@ env-origin-only.
 | `RESEND_API_KEY` | **PRIVATE: add as type Secret.** Connector #2 (the §12.1 P2 var — REUSED). The HTTP fallback; `api.resend.com/emails`, plain fetch, no SDK |
 | `VANT_EMAIL_SALT` | (the §12.1 P2 var — REUSED) | hashes codes; unset = unsalted hash — set it |
 
-Connector receipts (verified live, spec §3.9): Purelymail ALLOWS transactional mail (ToS bans
-marketing/unsolicited, not OTP) but has NO HTTP send API — connector #1 speaks SMTP
-(`smtp.purelymail.com:465`, implicit TLS) inside the Worker via `cloudflare:sockets` `connect()`
-(officially supported runtime API; Pages Functions run the same runtime — port 465 `secureTransport:
-"on"` is the reliable shape, the STARTTLS-on-587 path has an open flakiness issue in workerd).
-Purelymail's rate ceiling is ~3,000 external sends/day — orders of magnitude above the OTP
-volume a family of slots can generate. Resend = plain `fetch()`; free tier 3,000/mo but 100/day
-— a fine BACKUP, thin as a permanent primary.
+Connector receipts (verified live, spec §3.9): Purelymail ALLOWS transactional mail (ToS bans marketing/unsolicited, not OTP) but has NO HTTP send API — connector #1 speaks SMTP (`smtp.purelymail.com:465`, implicit TLS) inside the Worker via `cloudflare:sockets` `connect()` (officially supported runtime API; Pages Functions run the same runtime — port 465 `secureTransport: "on"` is the reliable shape, the STARTTLS-on-587 path has an open flakiness issue in workerd). Purelymail's rate ceiling is ~3,000 external sends/day — orders of magnitude above the OTP volume a family of slots can generate. Resend = plain `fetch()`; free tier 3,000/mo but 100/day — a fine BACKUP, thin as a permanent primary.
 
-**Member-facing quickstart (copy-paste for panel copy):** sign in with your email → type the
-6-digit code → mint a pairing voucher → run `vant guest pair --code vhpair-...` on YOUR pod →
-your pod appears in the property switcher as `g<hex>`. Slot caps, squatters, forgotten setups:
-a slot lives only while the pod keeps dialing (grace-window reap, edge-side only — the pod keeps
-its ledger); the panel lists YOUR slots with a detach action.
+**Member-facing quickstart (copy-paste for panel copy):** sign in with your email → type the 6-digit code → mint a pairing voucher → run `vant guest pair --code vhpair-...` on YOUR pod → your pod appears in the property switcher as `g<hex>`. Slot caps, squatters, forgotten setups: a slot lives only while the pod keeps dialing (grace-window reap, edge-side only — the pod keeps its ledger); the panel lists YOUR slots with a detach action.
 
-**Self-check (run from anywhere):** `GET /api/r/capabilities` answers
-`{"provider":"offering"}` when the gate is set (and OMITS the key when unset — an OFF posture has
-no surface); `GET /api/auth/session` answers a session or the typed store refusal, never a spin.
+**Self-check (run from anywhere):** `GET /api/r/capabilities` answers `{"provider":"offering"}` when the gate is set (and OMITS the key when unset — an OFF posture has no surface); `GET /api/auth/session` answers a session or the typed store refusal, never a spin.
 
 ---
 

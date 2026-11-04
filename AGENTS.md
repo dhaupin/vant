@@ -143,6 +143,9 @@ When uncertain, call `think` tool. List approaches, assess likelihood, start wit
 ### VERIFY STATE
 Always check: `git status`, current branch, existing tests, dependencies before making changes.
 
+### PROSE FLOW
+Living prose never hard-wraps at commit time: paragraphs flow (one line per paragraph, no mid-sentence breaks), and dated history keeps its era wording. `node scripts/unwrap-prose.cjs <file.md> ...` joins hard-wrapped prose before you commit (family canon, from eyestruct@bfb53b1; it never touches frontmatter, fenced or indented code, tables, headings, thematic breaks, or HTML blocks).
+
 ---
 
 ## Brain Files
@@ -175,24 +178,14 @@ cat models/private/vant/identity.md  # Who you are
 
 ## Branch Workflow
 
-The main <> staging flow (the staging rule — poststruct#32's canon, adopted
-fleet-wide; eyestruct#21 was the reuse at this repo, wave 16 of the axolotl
-campaign made the call deliberate per vant#272):
+The main <> staging flow (the staging rule — poststruct#32's canon, adopted fleet-wide; eyestruct#21 was the reuse at this repo, wave 16 of the axolotl campaign made the call deliberate per vant#272):
 
-- **`staging` is the permanent integration branch.** Never deleted. It is the
-  only lane into `main`: work branches off it, PRs target it, and promotion
-  (staging → main) is the only path out the other side.
-- **`main` stays the production truth.** Every deploy job (docs Pages,
-  docker) gates itself to main explicitly — `if: github.ref ==
-  'refs/heads/main'` — because being visible in a trigger list never keeps
-  content out of production.
-- **`axolotl` is the free-bird dev branch.** Batch passes land there before
-  any PR exists, so CI covers its pushes; nothing ships from it directly.
+- **`staging` is the permanent integration branch.** Never deleted. It is the only lane into `main`: work branches off it, PRs target it, and promotion (staging → main) is the only path out the other side.
+- **`main` stays the production truth.** Every deploy job (docs Pages, docker) gates itself to main explicitly — `if: github.ref == 'refs/heads/main'` — because being visible in a trigger list never keeps content out of production.
+- **`axolotl` is the free-bird dev branch.** Batch passes land there before any PR exists, so CI covers its pushes; nothing ships from it directly.
 - **`agent-*`** are per-agent working branches for memory work (below).
 
-**After every promotion, the sync is a required step, not a repair.** A
-merge-commit promotion puts a commit on `main` that `staging` lacks, so the
-two drift by one on every promotion even when the flow is followed exactly:
+**After every promotion, the sync is a required step, not a repair.** A merge-commit promotion puts a commit on `main` that `staging` lacks, so the two drift by one on every promotion even when the flow is followed exactly:
 
 ```bash
 git push origin origin/main:staging   # fast-forward, non-destructive
@@ -203,8 +196,7 @@ git push origin origin/main:staging   # fast-forward, non-destructive
 1. Create your branch: `git checkout -b agent-yourname`
 2. Do work — Edit files in `models/private/`
 3. Commit with prefix: `agent-yourname: Did thing X`
-4. Open a PR into `staging` (or push straight to `axolotl` for batch work —
-   CI covers both lanes)
+4. Open a PR into `staging` (or push straight to `axolotl` for batch work — CI covers both lanes)
 
 ---
 
@@ -396,3 +388,238 @@ PURPOSE: Exploring Vant's codebase
 
 === LEARNED ===
 ```
+
+## Discovery: 2026-11-02 - Audit Round 3 (MCP security chain)
+
+### Findings + fixes (PR #320, branch audit-round3-security)
+- **R3-1 (critical):** the MCP security chain was DEAD CODE. `_executeWithSecurity`
+  was orphaned by the registry-census rewrite (9413ff8b); every door call
+  (`mcp.execute` / `mcp.call` / HTTP `/mcp/exec`) goes through `_executeTool`,
+  which called `tool.handler(params)` directly. Measured: pipeline.run /
+  vaf.check / qos.check ran 0 times per tool call. Fixed: chain now runs in
+  `_executeTool`; dead functions removed (one dispatch path).
+- **R3-2:** write classifier (prefix allowlist + substring net) marked only
+  34/347 tools WRITE; ~71 mutating tools rode the read-only PUBLIC pipeline.
+  Rebuilt fail-closed: mutating verb anywhere wins, READ only on a read-verb
+  tail, unknown -> WRITE. Exported as `_isMcpWriteMethod`.
+- **R3-3:** sudo_grant was read-classified, so a locked sandbox could
+  self-escalate. Chain gate + honest classifier close it; capability/sudo floor
+  unchanged after a refused grant.
+- **R3-4:** non-string method threw a raw TypeError; now typed MCP_INPUT_INVALID.
+- **R3-5:** bin/era.js no-fallthrough breaks + unused arg.
+
+### Testing laws learned this round
+- Pins live in test/audit-round3.test.js; they are DISCRIMINATING (6 fail if
+  lib/mcp.js is reverted).
+- Crashtest scenario contributed: packs/public/vant-mcp `security-chain-enforced`
+  row + `mcp-chain` shim route in test/crashtest-packs.test.js (probe child
+  locks the sandbox, measures chain + classifier + escalation floor).
+- Full wall: `nohup node test/run-all.js` (background; foreground cap ~1080s).
+  Baseline green = 223 suites / 222 passed; the one failure
+  (live-fire-regressions.test.js) is the pre-existing `ss`-binary-missing env
+  artifact, NOT a regression.
+- PR must target the `axolotl` branch. `create_pr` tool errored; create via
+  `curl -X POST https://api.github.com/repos/dhaupin/vant/pulls` instead.
+- `git remote set-url origin https://${GITHUB_TOKEN}@github.com/dhaupin/vant.git`
+  before push (token may need refresh).
+
+## Discovery: 2026-11-02 - Audit Round 4 (vm boundaries + grants durable tier)
+
+### Findings + fixes (branch audit-round4)
+- **R4-1 (critical):** `lib/connectors/node.js` `eval`/`invoke` ran untrusted
+  code via `vm.runInNewContext(code, { console: fakeConsole })`. Injecting a
+  HOST object (`console`) as a context global makes the host realm reachable:
+  `this.constructor.constructor('return process')()` -> host Function ->
+  `process.getBuiltinModule('child_process').execSync('id')` = full RCE
+  (probe-verified `uid=10001(openhands)`). `eval` also had NO timeout. Fixed:
+  one `_runIsolated` path — null-prototype context root, no host objects,
+  console defined INSIDE the context, `codeGeneration:{strings:false}`,
+  5000ms timeout. `Function()` was already blocked by codeGeneration, but the
+  constructor path is the vector; a null-prototype root closes it.
+- **R4-2 (high):** `lib/config.js` + `lib/storage/config.js` loaded
+  `vant.config.js` in a vm context seeded with `{ module: { exports: {} } }`
+  (a host object) — `module.constructor.constructor('return process')()`
+  escaped. Same fix (module shim now lives inside a null-prototype context);
+  legit configs still load. NOTE: `codeGeneration:{strings:false}` blocks
+  `Function()` but NOT the `constructor.constructor` path — only removing host
+  objects from the context closes it. The existing P0-7 pins (require/process
+  direct access) did not catch this.
+- **R4-3 (high):** `lib/persistent-grants.js` revocation was exact-key. A
+  scoped revoke (`revoke({capability, scope:'exec'})`) left a wildcard grant
+  (`scope:'*'`) LIVE — the revoke silently did nothing (fail-open), and a
+  re-grant after a revoke could never restore the capability (tombstone =
+  dead end). Fixed: sequential tombstone replay + fail-closed scope coverage
+  (wildcard<->scoped both directions), a later explicit persist lifts the
+  tombstone, unrelated capabilities untouched.
+- **R4-4 (medium):** the `#162` durable-grant tier was inert — the
+  `org grant --persist` flag was documented (`lib/persistent-grants.js` header,
+  `lib/sandbox.js:728`) and the READER existed (`lib/sandbox.js:734`), but no
+  WRITER existed anywhere. Fixed: `bin/org.js` `--persist` writes each
+  capability into the grants ledger; reader now hydrates it. Default
+  `vant org grant` unchanged.
+- **R4-5 (low, hermeticity):** `test/sync-pull.test.js` "no providers
+  configured" pin was non-hermetic — `_clearTestProviders()` falls through to
+  REAL providers, and in a working tree (origin + GITHUB_TOKEN) GitHubProvider
+  is configured, so the pin drove a real provider and asserted the wrong
+  branch (fails for any normal dev checkout, incl. clean axolotl). Fixed by
+  registering an UNCONFIGURED fake (map stays authoritative, zero configured).
+
+### Testing laws learned this round
+- Pins live in test/audit-round4.test.js; 9 of 11 are DISCRIMINATING
+  (verified by stashing the src fixes: 8 fail pre-fix, all pass post-fix).
+- Crashtest scenario contributed: packs/public/vant-spine
+  `revocation-scope-coverage-and-restore` row (+ EXPECTED entry in
+  test/crashtest-packs.test.js) — self-contained lib row, strict REFUSED.
+- `ss` (iproute2) was missing in the sandbox; `apt-get install -y iproute2`
+  after `apt-get update` turns live-fire-regressions green (env artifact).
+- Full wall baseline green = 223 suites / 223 passed once iproute2 + the
+  sync-pull hermeticity fix land.
+
+### Non-findings (by design, verified)
+- pipeline "fail-open" when sandbox is unconfigured is the documented
+  safe-by-default standalone posture (boot configures it); lib/gate.js.
+- `sudo.can` is SYNC (not async) — non-await in the shell gate is correct.
+- guests classifier solid: 3 false positives only (guest-READ but mutating
+  verb: agora_sync_status, vant_boot_status, vant_sync_status).
+
+## Discovery: 2026-11-02 - Audit Round 4b (guest privilege-authority escalation)
+
+### R4-6 (HIGH): a canWrite guest self-escalates to admin / host RCE
+- **Root cause:** the #185 guest door gate (`guests.classifyTool`) refuses
+  guest-ISSUED reads and exec, but the sudo/habitat AUTHORITY verbs are
+  write-class. The default `human` guest role has `canWrite`, so it passed the
+  door. `vant_sudo_grant({taskId:'default', scope:'admin'})` calls
+  `sudo.grant` directly; `vant_sudo_createTask({scopes:['admin']})` calls
+  `sudo.createTask` (writes scopes with NO whitelist). Both widen the guest's
+  own / the door's `default` task to the requested scope, honored by
+  `sudo.can` / `sandbox.can` on the next call.
+- **Exploit chain (probe10, verified):** guest → `vant_sudo_grant(compute:eval)`
+  (200 `{granted:'compute:eval'}`) → `compute_eval({language:'python'})` now
+  passes its `sudo.can('default','compute:eval')` gate and runs arbitrary
+  Python. Same primitive grants `admin`, `exec`, `network`.
+- **Fix (two doors, one policy):**
+  - `lib/guests.js`: new `GUEST_AUTHORITY_TOOLS` set classified `admin`, so
+    the door refuses (403) before the handler.
+  - `lib/mcp.js`: new `_assertNotGuestAuthority(op)` guard (mirrors
+    `_assertNotGuest`) called at the top of every authority handler:
+    `sudo_grant/revoke/escalate`, `vant_sudo_grant/revoke/escalate/createTask`,
+    `vant_habitat_mintToken/revokeToken/createWorkspace/setWorkspace/addRole/setPolicy`,
+    `vant_scenario_crew`. Stdio/future exec paths inherit the verdict.
+  - Not touched: the tools' semantics for non-guests (unchanged).
+
+### Testing laws learned this round
+- Pins: `test/audit-round4.test.js` R4-5 block (6 pins) — ALL 6 fail pre-fix,
+  pass post-fix (verified by stashing lib/mcp.js + lib/guests.js). Includes a
+  real in-process guest door (child `mcp.start({port:0})`, `human` guest token,
+  `/mcp/exec`) asserting 403 on the authority verb.
+- Crashtest scenario contributed: `packs/public/vant-spine`
+  `guest-authority-verbs-admin-only` row (+ EXPECTED entry in
+  test/crashtest-packs.test.js) — self-contained lib row, strict REFUSED;
+  verified EXPLOITED pre-fix.
+- Probe scripts: /tmp/probe6 (grant), /tmp/probe9 (createTask+habitat),
+  /tmp/probe10 (compute_eval RCE chain).
+
+### R3 fold (2026-11-02)
+- The R3 security-chain fix (PR #320, branch `audit-round3-security`) was
+  cherry-picked onto `audit-round4` (commit 56781e90) so PR #322 carries both
+  rounds against `axolotl`. R3 touches a different region of `lib/mcp.js`
+  (classifier + `_executeTool`) than R4-6 (authority guards at the top of
+  handlers) — no conflict; both fixes coexist (15 `_assertNotGuestAuthority`
+  call sites + the wired `_isMcpWriteMethod`/pipeline.run chain).
+- Full wall after the fold: 224 suites / 224 passed (R3 adds
+  test/audit-round3.test.js = the 224th).
+- R3's `security-chain-enforced` crashtest row (packs/public/vant-mcp) and
+  R4's two vant-spine rows all coexist in the EXPECTED table.
+- Note for review: R3's honest classifier marks `sudo_grant` (and the other
+  authority verbs) WRITE, so under a LOCKED sandbox they are refused by the
+  chain; R4-6 additionally refuses them for GUESTS. Two distinct boundaries,
+  one direction.
+
+## Discovery: 2026-11-02 - Audit Round 4c (webhook intake, crypto edges, shell validator)
+
+Untested-frontier walk (webhooks replay/intake, lib/encrypt, lib/shell). All
+findings pinned in `test/audit-round4.test.js` (R4-7..R4-12) — verified
+discriminating by stashing the src fixes (11/11 fail pre-fix). Full wall green:
+224/224.
+
+### R4-7 (HIGH): unauthenticated webhook `/info` disclosed the HMAC secret
+- **Root cause:** `lib/webhooks.js` `startServer` served `GET /info/<name>`
+  with NO auth and returned the WHOLE route object via
+  `JSON.stringify(webhook)` — including `secret` and `sealKeys`, the HMAC key
+  that authenticates every inbound envelope. The same handler set
+  `Access-Control-Allow-Origin: *`, so any web page the operator visited could
+  read a loopback route's signing secret cross-origin and then forge signed
+  envelopes (replay-protected only by a 5-min window on a stolen secret).
+- **Verified:** probe11 — `GET /info/<name>` → 200 with
+  `"secret":"super-secret-…"`; with `Origin: https://evil.example` the ACAO
+  header was `*` and the body contained the secret.
+- **Fix:** the route now returns NON-SECRET metadata only (id/name/source/
+  eventKeyExpr/signatureHeader/replyCapable/sealMode/enabled/createdAt); CORS
+  is no longer wildcard — only an explicit opt-in origin list echoes an origin
+  (`VANT_WEBHOOK_CORS_ORIGINS` via new `config.webhookCorsOrigins()`), default
+  empty = no browser cross-origin access.
+
+### R4-8 (HIGH): webhook event filters failed OPEN
+- **Root cause:** `matchFilter` never returned a real boolean. The glob branch
+  destructured the regex MATCH ARRAY (`const [path, pattern] = match`) instead
+  of the capture groups, so `path`/`pattern` held the whole match string and
+  `new RegExp('^glob(repository.full_name, \'myorg/*\')$')` matched EVERYTHING;
+  `icontains` returned `true` for non-matching payloads; and any expression the
+  parser did not recognize fell through to `return true`. A filter is the one
+  thing meant to NARROW which events reach a handler, so a wrong `true`
+  dispatches events the operator meant to exclude.
+- **Verified:** probe14 — `glob(...)` and `icontains(...)` returned true for a
+  non-matching payload; `starts_with(...)` (unrecognized) returned true.
+- **Fix:** rewrote `matchFilter` — real boolean per branch, anchored + escaped
+  glob compile, `_filterLookup` null-safe path, and an unrecognized expression
+  now REFUSES (fail-closed).
+
+### R4-9 (HIGH): `signToken`/`verifyToken` failed open on an empty secret
+- **Root cause:** `Encrypt.signToken(payload, '')` produced a valid token and
+  `Encrypt.verifyToken(tok, '')` validated it — `createHmac` accepts the empty
+  key, so any caller that failed to thread the real secret both signed and
+  accepted tokens under a predictable key. `undefined` threw a raw TypeError.
+- **Fix:** both refuse a non-string/empty secret — `signToken` throws typed
+  `ENCRYPT_KEY_REQUIRED`, `verifyToken` returns null (a token minted under the
+  empty key no longer validates). `lib/auth.js` always threads a real secret
+  (`config.tokenSecret()` or a generated 32-byte one), so the wire is intact.
+
+### R4-10 (medium): `hmacVerify` threw on a hostile signature
+- A non-string `signature` (undefined/object) hit `Buffer.from(..., 'hex')`
+  and threw `ERR_INVALID_ARG_TYPE` out of the webhook/messaging/crew-bus verify
+  paths. A verifier must answer "invalid", never throw. Now returns `false`
+  for non-string/empty/non-hex signatures and an empty key.
+
+### R4-11 (medium): `decrypt` threw a raw TypeError on a bad argument
+- `decrypt(12345)` / `decrypt(null)` hit `cipher.split` → raw TypeError,
+  violating the module's own "plaintext or typed VantError" contract. Now a
+  typed `E_DECRYPT_FORMAT` refusal (checked before `split`), plus a required
+  non-empty string key.
+
+### R4-12 (low): shell validator accepted a command `spawn` then rejected
+- `_validateCommand` trims to find the command word but returned the UNTRIMMED
+  VAF output, so `exec('  git status')` passed the whitelist and then
+  `cpSpawn('', …)` threw a raw `ERR_INVALID_ARG_VALUE`. The returned command is
+  now trimmed — what the validator accepts is runnable.
+
+### Testing laws learned this round
+- Pins: `test/audit-round4.test.js` R4-7..R4-12 (11 pins + 1 for R4-12) — ALL
+  fail pre-fix, pass post-fix (verified by stashing lib/{encrypt,webhooks,
+  config,shell}.js). R4-7 includes two live-socket pins (ephemeral port 0);
+  the rest are pure.
+- Crashtest scenario contributed: `packs/public/vant-spine`
+  `webhook-intake-secret-and-filter-posture` row (+ EXPECTED entry) —
+  self-contained lib row + one ephemeral loopback socket (the vant-relay
+  precedent), strict REFUSED; verified EXPLOITED pre-fix.
+- Probe scripts: /tmp/probe11/p11..p17 (info leak, CORS, filters, token/hmac/
+  decrypt edges).
+- Environment note: `live-fire-regressions.test.js` needs `ss` (iproute2) for
+  its loopback-bind assertion; it was absent here (`apt-get install iproute2`).
+- Replay walk (no new defect): verify runs BEFORE `_replayCheck` (order is
+  correct), the dedupe key is the signature itself, and the seal path uses its
+  own `:seal` namespace. Residual design limit (documented, not a bug): a
+  source whose payload carries no numeric `ts` (GitHub-style) skips the
+  freshness half, so a *captured* signed request can replay once its signature
+  ages out of the bounded `REPLAY_SEEN_MAX` pool — inherent to HMAC over bytes
+  with no timestamp. Worth a follow-up if such a source is wired.
+

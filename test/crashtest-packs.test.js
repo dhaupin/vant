@@ -1934,6 +1934,24 @@ const EXPECTED = {
         'checkpoint-recovery-bounded-and-deny': 'REFUSED',
         'anchor-ledger-and-hotset-durability': 'REFUSED',
         'persistent-grants-and-wal-deny-posture': 'REFUSED',
+        // (round-4 audit, 2026-11-02) revocation scope coverage + restore:
+        // a scoped revoke must tombstone a wildcard grant (the old exact-key
+        // compare left it LIVE) and a later explicit re-grant must restore a
+        // revoked capability. Self-contained lib row, strict REFUSED.
+        'revocation-scope-coverage-and-restore': 'REFUSED',
+        // (round-4 audit, 2026-11-02) guest privilege-authority escalation:
+        // a canWrite human guest could call the write-class sudo/habitat
+        // authority verbs and widen its own task to admin/compute:eval. The
+        // door gate now classifies every authority verb admin and the
+        // handlers repeat the check. Self-contained lib row, strict REFUSED.
+        'guest-authority-verbs-admin-only': 'REFUSED',
+        // (round-4b audit, 2026-11-02) webhook intake posture: the filter
+        // evaluator failed OPEN (glob matched everything, icontains returned
+        // true, unrecognized -> true) and the unauthenticated /info route
+        // serialized the route HMAC secret behind a wildcard CORS origin.
+        // Both fixed; self-contained lib row (one ephemeral loopback socket,
+        // the vant-relay precedent), strict REFUSED.
+        'webhook-intake-secret-and-filter-posture': 'REFUSED',
         // ARMED 2026-10-27 (spine slice 2): GEOMETRY, WORLD/CLOCK,
         // MESH/BRAINS (#154-#166) convert - the 1:4 fold laws, the ONE PRF
         // chain (fragmenter + GitHub adapter), the RAID carrier + precision

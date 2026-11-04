@@ -22,12 +22,13 @@
  *      bytes (VERIFIED, exit 0), tampered served tarball vs mint-truth
  *      metadata (exit 1, integrity named).
  *
- * The registry ladder in the TREE copy hardcodes the npmjs URL, so case
- * 4 runs a byte-patched copy built IN THIS SUITE by the asserted
- * patch contract (four ops): the registry URL -> an in-child loopback URL
- * reading BATTERY_PORT inside the tree's own template literal, the two
- * require('https') -> require('http'), the distinguishing bootstrap block
- * prepended, and the tree's trailing bare main() -> a bind-gated start.
+ * The registry ladder in the TREE copy defaults to the npmjs URL through
+ * registryBase()'s env knob, so case 4 runs a byte-patched copy built IN THIS
+ * SUITE by the asserted patch contract (three ops): the registry default URL
+ * inside registryBase() -> an in-child loopback URL reading BATTERY_PORT (the
+ * protocol-aware fetches need no patch: a http:// URL selects require('http')
+ * by itself), the chaining tail .catch(...) -> + .then(batteryMidnight), and
+ * the trailing `if (require.main === module) main()` -> a bind-gated start.
  * If the tree file drifts from that contract, the suite refuses with a
  * NAMED error instead of testing a half-patched script - the method the
  * gantry walk proved (tmp/scratch/verify-release.scratch.cjs); the tree
@@ -43,8 +44,6 @@
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
-const http = require('http');
-const crypto = require('crypto');
 const { spawnSync } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..');
@@ -274,19 +273,25 @@ const BOOTSTRAP = [
     let patch = null;
     try {
         const src = fs.readFileSync(LADDER, 'utf8');
-        const REG = 'https://registry.npmjs.org/';
-        const HTTPS = "require('https').get";
+        // The family ladder is protocol-aware (httpGetJson/httpsBuffer pick
+        // their module from the URL), so a loopback http:// fixture needs NO
+        // require('https') patching -- the contract asserts there is none to
+        // bother with.
+        const REG = "|| 'https://registry.npmjs.org'";
+        const PROTO_AWARE = "url.startsWith('http://') ? require('http') : require('https')";
         const regHits = src.split(REG).length - 1;
-        const httpsHits = src.split(HTTPS).length - 1;
+        const protoHits = src.split(PROTO_AWARE).length - 1;
         const CHAIN_TAIL = '  })().catch((e) => cap(e.message))';
         const chainHits = src.split(CHAIN_TAIL).length - 1;
-        if (regHits !== 1 || httpsHits !== 2 || chainHits !== 1 || !/\nmain\(\)\n?$/.test(src)) {
-            throw new Error(`the tree ladder drifted from the patch contract (registry URL hits: ${regHits}, want 1; require('https').get hits: ${httpsHits}, want 2; chain-tail hits: ${chainHits}, want 1; trailing main() call: ${/\nmain\(\)\n?$/.test(src)}) - refusing to test a half-patched copy`);
+        const MAIN_TAIL = 'if (require.main === module) main()';
+        const mainTailHits = src.split(MAIN_TAIL).length - 1;
+        if (regHits !== 1 || protoHits !== 2 || chainHits !== 1 || mainTailHits !== 1) {
+            throw new Error(`the tree ladder drifted from the patch contract (registry default hits: ${regHits}, want 1; protocol-aware fetch sites: ${protoHits}, want 2; chain-tail hits: ${chainHits}, want 1; gated main() call: ${mainTailHits}, want 1) - refusing to test a half-patched copy`);
         }
-        // Pure interpolation: the tree's regUrl is a template literal, so
-        // the patch must slot a ${...} placeholder inside it - not a concatenation
-        // expression, which would print literally and yield an Invalid URL.
-        const LOOPBACK_URL = 'http://127.0.0.1:' + '$' + '{process.env.BATTERY_PORT || 4873}/';
+        // Pure interpolation: the tree's regUrl default is a template literal,
+        // so the patch must slot a ${...} placeholder inside it - not a
+        // concatenation expression, which would print literally and yield an
+        // Invalid URL.
         // The hook string: typeof, not a bare identifier reference - in a
         // plain (no-seed) copy batteryMidnight is undeclared, and a bare
         // identifier would throw ReferenceError at work time; typeof never does.
@@ -300,10 +305,9 @@ const BOOTSTRAP = [
             '',
         ].join('\n');
         patch = BOOTSTRAP + '\n' + src
-            .replace(REG, LOOPBACK_URL)
-            .split(HTTPS).join("require('http').get")
+            .replace(REG, "|| `http://127.0.0.1:" + '$' + "{process.env.BATTERY_PORT || 4873}`")
             .replace(CHAIN_TAIL, CHAIN_TAIL + MIDNIGHT_HOOK)
-            .replace(/\nmain\(\)\n?$/g, '\n' + gatedMain) + '\n';
+            .replace(MAIN_TAIL, gatedMain) + '\n';
     } catch (e) {
         for (const c of registryCases) flunk(c.name, `patch contract unavailable: ${e.message}`);
     }
@@ -330,6 +334,23 @@ const BOOTSTRAP = [
             }
         }
         fs.rmSync(work, { recursive: true, force: true });
+    }
+
+    // 5. the pure helpers the ladder exports for the battery (the family
+    //    canon gates main() behind require.main, so requiring the file is
+    //    side-effect free and the pins can run against the tree copy).
+    {
+        const { releaseTargetMatches, registryHasVersion } = require(LADDER);
+        const ok =
+            releaseTargetMatches('main', 'd84d13a') === true &&          // branch name is not a commit claim
+            releaseTargetMatches('d84d13a0', 'd84d13a') === true &&      // 40-hex branch-length 8 < 40: still not a commit claim
+            releaseTargetMatches('a'.repeat(40), 'b'.repeat(40)) === false && // a REAL SHA that disagrees refuses
+            releaseTargetMatches('b'.repeat(40), 'b'.repeat(40)) === true &&  // a real SHA that agrees passes
+            registryHasVersion({ 'dist-tags': { latest: '1.2.0' }, versions: { '1.2.0': {} } }, '1.2.0') === true &&
+            registryHasVersion({ 'dist-tags': { latest: '1.2.0' }, versions: {} }, '1.2.0') === false &&  // dist-tag without the version entry = not settled
+            registryHasVersion({ 'dist-tags': { latest: '1.1.0' }, versions: { '1.2.0': {} } }, '1.2.0') === false;
+        if (ok) pass('pure helpers: releaseTargetMatches + registryHasVersion pin the propagation/target_commitish fixes');
+        else flunk('pure helpers: releaseTargetMatches + registryHasVersion', 'a helper answered a case it must not');
     }
 
     // --- summary -----------------------------------------------------------

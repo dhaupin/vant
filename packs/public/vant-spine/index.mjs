@@ -431,6 +431,96 @@ export default {
       },
     },
 
+    {
+      name: 'revocation-scope-coverage-and-restore',
+      description: "grant revocation is fail-closed on SCOPE and a revoke is never permanent-by-accident: a scoped revoke tombstones a WILDCARD grant (the old exact-key compare left it live), a wildcard revoke tombstones a scoped grant, an exact-scope revoke leaves a sibling scope live, a LATER explicit re-grant restores a revoked capability (a tombstone is not a dead end), and an unrelated revoke touches nothing",
+      async run(_harness) {
+        const gs = await loadAll(['lib/persistent-grants.js']);
+        const { PersistentGrants } = gs[0];
+        const dir = await tmpdir();
+        const path = dir.path, fs = dir.fs;
+        try {
+          const mk = (label) => new PersistentGrants({ ledgerPath: path.join(dir.p, label + '.jsonl'), now: () => 1000 });
+          // (a) a SCOPED revoke must cover a WILDCARD grant
+          const a = mk('scope-vs-wild');
+          a.persist({ capability: 'canExec', grantor: 'operator' });
+          a.revoke({ capability: 'canExec', scope: 'exec', actor: 'operator' });
+          if (a.allows('canExec').allowed !== false) {
+            return { verdict: 'EXPLOITED', detail: 'a scoped revoke left a wildcard grant LIVE - the revoke silently did nothing', tookRequests: 1 };
+          }
+          // (b) a WILDCARD revoke must cover a scoped grant
+          const b = mk('wild-vs-scope');
+          b.persist({ capability: 'canExec', scope: 'exec', grantor: 'operator' });
+          b.revoke({ capability: 'canExec', actor: 'operator' });
+          if (b.allows('canExec').allowed !== false) {
+            return { verdict: 'EXPLOITED', detail: 'a wildcard revoke left a scoped grant LIVE', tookRequests: 2 };
+          }
+          // (c) an exact-scope revoke must leave a sibling scope live
+          const c = mk('sibling');
+          c.persist({ capability: 'canExec', scope: 'exec', grantor: 'operator' });
+          c.persist({ capability: 'canExec', scope: 'network', grantor: 'operator' });
+          c.revoke({ capability: 'canExec', scope: 'exec', actor: 'operator' });
+          if (c.allows('canExec').allowed !== true) {
+            return { verdict: 'EXPLOITED', detail: 'an exact-scope revoke over-reached and killed a sibling scope', tookRequests: 3 };
+          }
+          // (d) a LATER explicit re-grant must restore a revoked capability
+          const d = mk('regrant');
+          d.persist({ capability: 'canExec', grantor: 'operator' });
+          d.revoke({ capability: 'canExec', actor: 'operator' });
+          d.persist({ capability: 'canExec', grantor: 'operator' });
+          if (d.allows('canExec').allowed !== true) {
+            return { verdict: 'EXPLOITED', detail: 'a revoked capability could never be restored - a tombstone became a dead end', tookRequests: 4 };
+          }
+          // (e) an unrelated revoke must not touch other capabilities
+          const e = mk('unrelated');
+          e.persist({ capability: 'canWrite', grantor: 'operator' });
+          e.revoke({ capability: 'canExec', actor: 'operator' });
+          if (e.allows('canWrite').allowed !== true) {
+            return { verdict: 'EXPLOITED', detail: 'an unrelated revoke suppressed a different capability', tookRequests: 5 };
+          }
+          return { verdict: 'REFUSED', detail: 'revocation is fail-closed on scope (wildcard<->scoped both directions, siblings untouched, unrelated untouched) AND a later explicit re-grant restores a revoked capability', tookRequests: 5 };
+        } finally {
+          try { fs.rmSync(dir.p, { recursive: true, force: true }); } catch { /* cleanup */ }
+        }
+      },
+    },
+
+    {
+      name: 'guest-authority-verbs-admin-only',
+      description: "the guest door gate and the MCP handlers agree that privilege AUTHORITY is admin-only: every sudo/habitat authority verb (grant/revoke/escalate/createTask/mintToken/revokeToken/addRole/setPolicy/createWorkspace/setWorkspace/scenario_crew) classifies admin, so a canWrite guest (the default human role) is refused the write->authority->exec escalation, while the write verbs a human legitimately needs stay write-class and a plain guest read verb stays read-class",
+      async run(_harness) {
+        const { createRequire } = await import('node:module');
+        const { resolve } = await import('node:path');
+        const req = createRequire(resolve('lib/guests.js'));
+        const guests = req(resolve('lib/guests.js'));
+        // (a) every authority verb is admin-class (the door refuses it)
+        const authority = [
+          'sudo_grant', 'sudo_revoke', 'sudo_escalate', 'sudo_createTask',
+          'vant_sudo_grant', 'vant_sudo_revoke', 'vant_sudo_escalate', 'vant_sudo_createTask',
+          'vant_habitat_mintToken', 'vant_habitat_revokeToken',
+          'vant_habitat_createWorkspace', 'vant_habitat_setWorkspace',
+          'vant_habitat_addRole', 'vant_habitat_setPolicy', 'vant_scenario_crew'
+        ];
+        const misclassed = authority.filter((t) => guests.classifyTool(t) !== 'admin');
+        if (misclassed.length) {
+          return { verdict: 'EXPLOITED', detail: 'authority verbs not admin-class: ' + misclassed.join(', '), tookRequests: 1 };
+        }
+        // (b) a canWrite human guest is actually refused by the door gate
+        const human = { guest: { id: 'x', role: 'human' }, caps: ['canRead', 'canLoad', 'canList', 'canWrite', 'canSpawn'], isGuest: true };
+        for (const t of ['vant_sudo_grant', 'vant_sudo_createTask', 'sudo_grant']) {
+          const v = guests.authorize(t, human);
+          if (v.allowed !== false) {
+            return { verdict: 'EXPLOITED', detail: 'a human guest reached authority verb ' + t, tookRequests: 2 };
+          }
+        }
+        // (c) the change is NARROW: legitimate write + read verbs keep their class
+        if (guests.classifyTool('vant_memory_write') !== 'write' || guests.classifyTool('brain_state') !== 'read') {
+          return { verdict: 'EXPLOITED', detail: 'the authority guard over-reached and reclassified a legitimate write/read verb', tookRequests: 3 };
+        }
+        return { verdict: 'REFUSED', detail: 'privilege authority is admin-only across every sudo/habitat verb (door gate + handler agree), the human guest is refused, and legitimate write/read classes are untouched', tookRequests: 3 };
+      },
+    },
+
     // ------------------------------------------------------------------
     // Slice 2 - GEOMETRY (#154 #155 #156 #157).
     // ------------------------------------------------------------------
@@ -834,6 +924,51 @@ export default {
           return { verdict: 'EXPLOITED', detail: 'the epoch tiebreak lost its boolean verdict', tookRequests: 10 };
         }
         return { verdict: 'REFUSED', detail: 'the AOI filter leaks nothing outside the region, staleness is provable from the injected clock alone (verdict-free revive), the higher epoch wins deterministically, and the loser is RECORDED as rejected - never silent', tookRequests: 10 };
+      },
+    },
+
+    {
+      name: 'webhook-intake-secret-and-filter-posture',
+      description: "the webhook intake is fail-closed on BOTH the filter evaluator and the route metadata: a glob/icontains filter refuses a non-matching payload (the old evaluator matched everything) and an unrecognized expression refuses (never authorizes), while a matching payload still matches; and the unauthenticated /info route returns NON-SECRET metadata only (no `secret`, no `sealKeys`) with no wildcard CORS origin, so a browser page cannot read a loopback route's HMAC key and forge envelopes",
+      async run(_harness) {
+        const gs = await loadAll(['lib/webhooks.js']);
+        const wh = gs[0];
+        // (a) filter evaluator fails CLOSED (pure, no sockets)
+        const hit = { repository: { full_name: 'myorg/myrepo' }, comment: { body: 'ping @openhands' }, action: 'create' };
+        const miss = { repository: { full_name: 'evil/other' }, comment: { body: 'nothing here' }, action: 'delete' };
+        if (wh.matchFilter("glob(repository.full_name, 'myorg/*')", miss) !== false) {
+          return { verdict: 'EXPLOITED', detail: 'glob filter matched a non-matching repo - the event was authorized', tookRequests: 1 };
+        }
+        if (wh.matchFilter("icontains(comment.body, '@openhands')", miss) !== false) {
+          return { verdict: 'EXPLOITED', detail: 'icontains filter matched a non-matching body', tookRequests: 2 };
+        }
+        if (wh.matchFilter("starts_with(ref, 'refs/heads/')", hit) !== false) {
+          return { verdict: 'EXPLOITED', detail: 'an unrecognized filter expression AUTHORIZED the event (fail-open)', tookRequests: 3 };
+        }
+        if (wh.matchFilter("glob(repository.full_name, 'myorg/*')", hit) !== true) {
+          return { verdict: 'EXPLOITED', detail: 'the glob filter over-refused a matching payload', tookRequests: 4 };
+        }
+        // (b) the live /info route must not serialize the secret (real socket)
+        const SECRET = 'crashtest-wh-' + 'q'.repeat(20);
+        const name = 'crashtest-wh';
+        wh.register({ name, source: 'crashtest-src', eventKeyExpr: 'event', secret: SECRET });
+        const server = wh.startServer(0);
+        await new Promise((res, rej) => { server.once('listening', res); server.once('error', rej); });
+        try {
+          const port = server.address().port;
+          const info = await fetch(`http://127.0.0.1:${port}/info/${name}`);
+          const body = await info.text();
+          if (body.includes(SECRET) || /"secret"/.test(body) || /sealKeys/.test(body)) {
+            return { verdict: 'EXPLOITED', detail: 'unauthenticated /info disclosed the route signing secret', tookRequests: 5 };
+          }
+          const health = await fetch(`http://127.0.0.1:${port}/health`, { headers: { Origin: 'https://evil.example' } });
+          if (health.headers.get('access-control-allow-origin') === '*') {
+            return { verdict: 'EXPLOITED', detail: 'webhook intake emitted a wildcard CORS origin - cross-origin reads are open', tookRequests: 6 };
+          }
+        } finally {
+          await new Promise((res) => server.close(res));
+        }
+        return { verdict: 'REFUSED', detail: 'the filter evaluator refuses non-matching and unrecognized expressions (fail-closed) while matching payloads still match, and the unauthenticated /info route returns non-secret metadata only behind no wildcard CORS', tookRequests: 6 };
       },
     },
 

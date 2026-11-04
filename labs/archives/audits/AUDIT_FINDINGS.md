@@ -1,21 +1,12 @@
 # VANT axolotl Branch — Security & Code Audit Findings
 
-**Branch:** `axolotl` (origin/axolotl)  
-**Date:** 2026-09-18  
-**Auditor:** Kilo subagents  
-**Files Analyzed:** 8 core modules (~25K lines total)
+**Branch:** `axolotl` (origin/axolotl) **Date:** 2026-09-18 **Auditor:** Kilo subagents **Files Analyzed:** 8 core modules (~25K lines total)
 
 ---
 
 ## ✅ VERIFICATION LEDGER (2026-09-22, agent Buffy)
 
-All 23 criticals repro-checked against current `axolotl`. **22 confirmed closed**
-(hardened in earlier waves), **1 live bug found and fixed in this pass**
-(vaf C1 — see below). Evidence: `node test/ci.js` → **422 passed, 0 failed,
-0 warnings**; security suites: security 20, security-chain 9, security-hardening 22,
-vaf 12, sandbox 22, test-sandbox 14, storage 40, malicious-restore 7, brain 77,
-islands 14, mcp 6, agents 17+6, sync 18+6, backup 8, transform 5, remote 10,
-remote-storage 13, pipeline 9, sudo 7 — all green.
+All 23 criticals repro-checked against current `axolotl`. **22 confirmed closed** (hardened in earlier waves), **1 live bug found and fixed in this pass** (vaf C1 — see below). Evidence: `node test/ci.js` → **422 passed, 0 failed, 0 warnings**; security suites: security 20, security-chain 9, security-hardening 22, vaf 12, sandbox 22, test-sandbox 14, storage 40, malicious-restore 7, brain 77, islands 14, mcp 6, agents 17+6, sync 18+6, backup 8, transform 5, remote 10, remote-storage 13, pipeline 9, sudo 7 — all green.
 
 | # | Issue | Status | Evidence |
 |---|-------|--------|----------|
@@ -62,10 +53,7 @@ remote-storage 13, pipeline 9, sudo 7 — all green.
 | **backup 5** | Undefined password to encryption | ✅ CLOSED | transform.js:1186 throws `Password required` before encrypt; restore throws on undecryptable |
 | **remote 6** | `errors` not imported | ✅ CLOSED | `require('./error')` line 1; base methods throw coded VantError |
 
-**Verdict:** the P0/P1 wave is complete. The one live bug found (vaf C1) was a
-latent loader crash, not an injection vector — and it's now fixed with a
-regression pin. Remaining 🔶/design notes are documented residuals, none
-exploitable as described in the original audit.
+**Verdict:** the P0/P1 wave is complete. The one live bug found (vaf C1) was a latent loader crash, not an injection vector — and it's now fixed with a regression pin. Remaining 🔶/design notes are documented residuals, none exploitable as described in the original audit.
 
 *Original audit content below, unmodified.*
 

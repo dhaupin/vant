@@ -24,7 +24,7 @@
         "@vitejs/plugin-react": "^4.7.0",
         "eslint": "^8.57.1",
         "eslint-plugin-react": "^7.37.5",
-        "prestruct": "1.1.0",
+        "prestruct": "1.2.0",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
         "react-router-dom": "^6.30.6",

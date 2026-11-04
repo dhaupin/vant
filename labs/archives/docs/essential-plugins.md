@@ -69,8 +69,7 @@ vant.use(plugin);
 
 ## Use Plugin
 
-`vant.use(plugin)` wires the plugin's tools and islands into the runtime
-at init. List registered islands at runtime:
+`vant.use(plugin)` wires the plugin's tools and islands into the runtime at init. List registered islands at runtime:
 
 ```bash
 vant islands list

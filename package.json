@@ -67,6 +67,7 @@
     "lint:surface": "node scripts/check-surface-consistency.js",
     "lint:helpers": "node scripts/check-stateful-helpers.js && node scripts/check-bin-truthfulness.js",
     "lint:locks": "node scripts/audit-locks.js",
+    "lint:pins": "node scripts/check-action-pins.cjs",
     "lint:deps": "node scripts/audit-deps.js",
     "check": "for f in lib/*.js bin/*.js test/*.js; do node --check \"$f\" || exit 1; done && echo 'syntax OK'",
     "dev:stack": "node scripts/dev-stack.js",
@@ -77,7 +78,7 @@
     "pilot:pages": "node scripts/pilot-pages-deploy.js",
     "pilot:keyless-ride": "node scripts/pilot-keyless-ride.js",
     "dev:dashboard-build": "npm --prefix web/dashboard run build",
-    "check:battery": "npm run test && npm run test:crashtest && npm run lint:claims && npm run lint:docs",
+    "check:battery": "npm run test && npm run test:crashtest && npm run lint:claims && npm run lint:docs && npm run lint:pins",
     "prepublishOnly": "npm run check:battery"
   },
   "devDependencies": {

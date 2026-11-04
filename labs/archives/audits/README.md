@@ -1,10 +1,6 @@
 # Audits Archive
 
-Retired audit and wave-era working documents, preserved for history. Nothing
-here is a live tracker anymore - each file was a point-in-time audit, census,
-or ledger whose work is done. Code comments and test headers still cite
-section numbers from LOCKS.md and findings from the others; the paths here
-are where those citations now resolve.
+Retired audit and wave-era working documents, preserved for history. Nothing here is a live tracker anymore - each file was a point-in-time audit, census, or ledger whose work is done. Code comments and test headers still cite section numbers from LOCKS.md and findings from the others; the paths here are where those citations now resolve.
 
 | File | What it was |
 |------|-------------|
@@ -18,7 +14,4 @@ are where those citations now resolve.
 | STABILITY.md | v1.0.0 stability tracker (from pass 31): per-area status and the fire log for labs/node-crew/stress.js. The harness's triage comments still name it. |
 | WAVE_RETROSPECTIVE.md | 2026-09-22 retrospective of the audit-to-green arc: what was broken, what was done about it, what it cost, what it taught. |
 
-Archived: 2026-10-06 (pass 137, owner call). Move was `git mv`; content
-untouched, including the historical cross-references between these files.
-Restoring one? `git mv labs/archives/audits/<FILE>.md labs/` and update the
-citing comments (grep the file name first).
+Archived: 2026-10-06 (pass 137, owner call). Move was `git mv`; content untouched, including the historical cross-references between these files. Restoring one? `git mv labs/archives/audits/<FILE>.md labs/` and update the citing comments (grep the file name first).

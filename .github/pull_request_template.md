@@ -10,7 +10,7 @@
 - [ ] New feature
 - [ ] Documentation update
 - [ ] Refactoring
-- [ ] Other: 
+- [ ] Other:
 
 ## Testing
 
