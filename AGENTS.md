@@ -683,3 +683,58 @@ accept only the exact `Bearer <token>` form (case-insensitive scheme).
 - Probe scripts: /tmp/probe18/p1..p5 (habitat token path, envelope + hmac
   edges, encrypt core).
 
+## Discovery: 2026-11-02 - Audit Round 9 (access-control/enforcement verdict surfaces)
+
+Frontier walked: the surfaces that ANSWER an allow/deny verdict to the operator
+(`vant rls allow`, `vant system allow`, `vant habitat can`, plus the layer
+`isOperationAllowed` helpers). Three findings, all one class — a word is
+classified against a small hardcoded list and the fallback is the LOOSER class,
+so a gate reads ALLOWED for a word it never heard of. That is the opposite of
+the house's own law (`lib/guests.js classifyTool`: unknown = write). Fixed and
+pinned in `test/rls-op-classification.test.js` (R9-1..R9-3, 16 pins).
+
+### R9-1 (medium): `lib/rls.js isOperationAllowed` failed open on unlisted verbs
+`['write','create','update','delete','commit'].includes(op) ? 'write' : 'read'`
+sent EVERY unlisted word to the LOOSER `read` policy: `vant rls allow grant
+<res>` printed ALLOWED while the identical write verb `delete` printed DENIED,
+and a typo (`raed`) read as a pass. Fixed: explicit READ canon (Set), everything
+else WRITE.
+
+### R9-2 (medium): `lib/system.js` returned `{allowed:true}` for ANY string + CLI truthy-tested it
+The stub was `isOperationAllowed(_operation) { return { allowed: true, layer:
+'System' }; }` — truthy for any string — and `bin/system.js` did `allowed ?
+'ALLOWED' : 'DENIED'`, truthy-testing the OBJECT, so `vant system allow
+totally-bogus-op` printed ALLOWED, exit 0. Fixed: known words only (unknown/
+empty refuse); the CLI reads `.allowed` and sets the exit code (the shape
+`bin/rls.js` already used).
+
+### R9-3 (low): `bin/habitat.js can` coerced any non-'write' mode to 'read'
+The guard checked presence, then `mode === 'write' ? 'write' : 'read'` — so
+`vant habitat can delete <res> <user>` (a write verb) and `vant habitat can
+garbage …` both answered against the LOOSER read policy and printed ALLOWED.
+Fixed: mode is `read|write` or usage error; the silent downgrade is gone.
+
+### Non-findings (by design, verified)
+- `lib/gate.js` default-allow with a one-time warning; the sandbox
+  "not configured; allowing by default" notice — documented postures, not
+  verdict-surface fail-opens.
+- `lib/mcp.js` level→scope, `lib/tmp.js`, `lib/server.js`, `lib/pipeline.js`
+  op→mode maps all fall back to WRITE (safe direction); `lib/rules.js evaluate`
+  is total.
+
+### Testing laws learned this round
+- Pins: `test/rls-op-classification.test.js` — 16 pins, BOTH directions.
+  Stashing the source fixes flips 9 finding-shaped pins; the read-canon and
+  explicit-write controls hold both ways by design (a fix that over-tightens a
+  real read would fail the controls).
+- The bug class is "truthiness on a verdict object / fallback to the looser
+  class" — grep for `? 'write' : 'read'`, `allowed ?`, and `isOperationAllowed`
+  returns when walking a new surface.
+- Probe: `vant <surface> allow <verb>` across the write-verb vocabulary
+  (read/write/set/delete/grant/revoke/mint/issue/record/assign/spawn/update/
+  commit) and a typo; a verb that answers ALLOWED while `delete` answers DENIED
+  is the tell.
+- PR #330 (branch `audit-pass-365-r9-verdict-failopen`), based on `axolotl`.
+  A dedicated crashtest pack for this family is a follow-up pass (the round-8
+  `vant-authority` precedent).
+
