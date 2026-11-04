@@ -143,6 +143,9 @@ When uncertain, call `think` tool. List approaches, assess likelihood, start wit
 ### VERIFY STATE
 Always check: `git status`, current branch, existing tests, dependencies before making changes.
 
+### PROSE FLOW
+Living prose never hard-wraps at commit time: paragraphs flow (one line per paragraph, no mid-sentence breaks), and dated history keeps its era wording. `node scripts/unwrap-prose.cjs <file.md> ...` joins hard-wrapped prose before you commit (family canon, from eyestruct@bfb53b1; it never touches frontmatter, fenced or indented code, tables, headings, thematic breaks, or HTML blocks).
+
 ---
 
 ## Brain Files
@@ -175,24 +178,14 @@ cat models/private/vant/identity.md  # Who you are
 
 ## Branch Workflow
 
-The main <> staging flow (the staging rule — poststruct#32's canon, adopted
-fleet-wide; eyestruct#21 was the reuse at this repo, wave 16 of the axolotl
-campaign made the call deliberate per vant#272):
+The main <> staging flow (the staging rule — poststruct#32's canon, adopted fleet-wide; eyestruct#21 was the reuse at this repo, wave 16 of the axolotl campaign made the call deliberate per vant#272):
 
-- **`staging` is the permanent integration branch.** Never deleted. It is the
-  only lane into `main`: work branches off it, PRs target it, and promotion
-  (staging → main) is the only path out the other side.
-- **`main` stays the production truth.** Every deploy job (docs Pages,
-  docker) gates itself to main explicitly — `if: github.ref ==
-  'refs/heads/main'` — because being visible in a trigger list never keeps
-  content out of production.
-- **`axolotl` is the free-bird dev branch.** Batch passes land there before
-  any PR exists, so CI covers its pushes; nothing ships from it directly.
+- **`staging` is the permanent integration branch.** Never deleted. It is the only lane into `main`: work branches off it, PRs target it, and promotion (staging → main) is the only path out the other side.
+- **`main` stays the production truth.** Every deploy job (docs Pages, docker) gates itself to main explicitly — `if: github.ref == 'refs/heads/main'` — because being visible in a trigger list never keeps content out of production.
+- **`axolotl` is the free-bird dev branch.** Batch passes land there before any PR exists, so CI covers its pushes; nothing ships from it directly.
 - **`agent-*`** are per-agent working branches for memory work (below).
 
-**After every promotion, the sync is a required step, not a repair.** A
-merge-commit promotion puts a commit on `main` that `staging` lacks, so the
-two drift by one on every promotion even when the flow is followed exactly:
+**After every promotion, the sync is a required step, not a repair.** A merge-commit promotion puts a commit on `main` that `staging` lacks, so the two drift by one on every promotion even when the flow is followed exactly:
 
 ```bash
 git push origin origin/main:staging   # fast-forward, non-destructive
@@ -203,8 +196,7 @@ git push origin origin/main:staging   # fast-forward, non-destructive
 1. Create your branch: `git checkout -b agent-yourname`
 2. Do work — Edit files in `models/private/`
 3. Commit with prefix: `agent-yourname: Did thing X`
-4. Open a PR into `staging` (or push straight to `axolotl` for batch work —
-   CI covers both lanes)
+4. Open a PR into `staging` (or push straight to `axolotl` for batch work — CI covers both lanes)
 
 ---
 

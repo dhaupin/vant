@@ -1,11 +1,9 @@
 ---
-
 version: 0.8.6
 permalink: /advanced/rerank
 layout: default
 title: Rerank (RAG)
 description: Rerank - second-stage scoring for better retrieval answers.
-
 nav_order: 92
 ---
 

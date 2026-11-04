@@ -34,12 +34,9 @@ where `BASE64 = base64('BRN:ENC:' + Encrypt.encrypt(message, password))`.
 | Ciphertext | lowercase hex |
 | Wire order | `salt:iv:authTag:ciphertext`, literal colons |
 
-Decode (`decodeSvg`): regex `<brn:secret>([A-Za-z0-9+/=]+)</brn:secret>`
-— **requires a bare opening tag** (no attributes), strips `BRN:ENC:`,
-decrypts, refuses plaintext (`Invalid format: encrypted data required`).
+Decode (`decodeSvg`): regex `<brn:secret>([A-Za-z0-9+/=]+)</brn:secret>` — **requires a bare opening tag** (no attributes), strips `BRN:ENC:`, decrypts, refuses plaintext (`Invalid format: encrypted data required`).
 
-Password discovery: argument → `<path>-p_([^.]+).svg` filename convention
-(`p_PASSWORD-b_BOOTSTRAPFLAGS_EXTRA.svg`, flags `[endcv]`).
+Password discovery: argument → `<path>-p_([^.]+).svg` filename convention (`p_PASSWORD-b_BOOTSTRAPFLAGS_EXTRA.svg`, flags `[endcv]`).
 
 ## 2. What Stegoframe (current main) writes
 
@@ -63,9 +60,7 @@ Same packet core, different wrap:
 | Whole-file data URL | n/a | `data:image/svg+xml;base64,…` |
 | LSB PNG mode | separate raw-offset impl | red-channel LSB, MSB-first (and its own lsbr is internally suspect — README's SGF/8-byte-header framing does not match its lsbr) |
 
-**Both split Web/GCM tag handling the same way: tag before ciphertext,
-concatenated `ciphertext+tag` for Node's decipher.** Same KDF, same
-iterations, same field order. The ONLY crypto divergence is IV length.
+**Both split Web/GCM tag handling the same way: tag before ciphertext, concatenated `ciphertext+tag` for Node's decipher.** Same KDF, same iterations, same field order. The ONLY crypto divergence is IV length.
 
 ## 3. Impact audit — what in Vant consumes this surface?
 
@@ -79,35 +74,23 @@ iterations, same field order. The ONLY crypto divergence is IV length.
 | `lib/boot.js` `_discoverBootHorcruxes` + horcrux-safe | boot dir `<agent>-p_*.svg` discovery (`.tmp.svg` skip) | NONE for wire change (file naming, not payload) |
 | Existing user stones on disk | all past `.svg` horcruxes + galleries | **HIGH — must stay decodable** (restores happen months later) |
 
-Tests pinning behavior: horcrux round-trips, snapshot/restore, `vant
-horcrux verify|anchor` exit codes, transform suite (~15 suites).
+Tests pinning behavior: horcrux round-trips, snapshot/restore, `vant horcrux verify|anchor` exit codes, transform suite (~15 suites).
 
 ## 4. The interoperable design (proposed, smallest possible)
 
 Two rules, no format fork:
 
-1. **Vant becomes lenient, Stegoframe-compatible on read.**
-   `decodeSvg` regex widens to accept the opening tag with OR without an
-   `xmlns:brn` attribute, and also looks inside `<metadata>` vs bare
-   element (one regex covers both). Nothing else in the read path moves.
-   → **Vant reads Stegoframe SVGs today, with zero writes changed.**
-2. **Vant writes standard-GCM (12-byte IV), tagged clearly.** Bump
-   `Encrypt.encrypt` IV to the GCM-standard 96 bits and have `decrypt`
-   sniff IV length from hex width (24→12B, 32→16B legacy). Then encrypt:
-   - with `options.brnStd = true` (default) writes the shared packet
-     shape; legacy-16 decode remains. → **Stegoframe reads Vant**.
-   - A `fam`/marker is optional; IV-width sniffing already disambiguates,
-     so no extra magic needed (KISS).
+1. **Vant becomes lenient, Stegoframe-compatible on read.** `decodeSvg` regex widens to accept the opening tag with OR without an `xmlns:brn` attribute, and also looks inside `<metadata>` vs bare element (one regex covers both). Nothing else in the read path moves. → **Vant reads Stegoframe SVGs today, with zero writes changed.**
+2. **Vant writes standard-GCM (12-byte IV), tagged clearly.** Bump `Encrypt.encrypt` IV to the GCM-standard 96 bits and have `decrypt` sniff IV length from hex width (24→12B, 32→16B legacy). Then encrypt:
+   - with `options.brnStd = true` (default) writes the shared packet shape; legacy-16 decode remains. → **Stegoframe reads Vant**.
+   - A `fam`/marker is optional; IV-width sniffing already disambiguates, so no extra magic needed (KISS).
 
 Mitigations required (from §3):
 
-- Keep the `<agent>-p_<pw>.svg` filename convention EXACTLY (boot
-  discovery + horcrux password chain pin on it).
+- Keep the `<agent>-p_<pw>.svg` filename convention EXACTLY (boot discovery + horcrux password chain pin on it).
 - `hasBrnSecret` sniff already tolerant (`includes`) — keep.
-- Existing stones: legacy 16-byte-IV records remain decodable via the
-  sniff — no migration script needed.
-- `desc data-f="1.0"` marker: write it on new stones (cheap, gives future
-  tools a format tag), never require it on read.
+- Existing stones: legacy 16-byte-IV records remain decodable via the sniff — no migration script needed.
+- `desc data-f="1.0"` marker: write it on new stones (cheap, gives future tools a format tag), never require it on read.
 
 ## 5. Test plan before merging (acceptance)
 
@@ -120,11 +103,8 @@ Mitigations required (from §3):
 
 ## 6. Residual risks / notes
 
-- Stegoframe README describes an SGF binary frame its own code doesn't
-  implement — interop target is the CODE, not the README.
-- Stegoframe's LSB mode is internally inconsistent (writer vs reader
-  framing); SVG is the only solid interop surface for now.
-- Vant PNG `stego.encode` (raw-offset LSB) is a THIRD pipeline; not part
-  of this interop unless asked.
+- Stegoframe README describes an SGF binary frame its own code doesn't implement — interop target is the CODE, not the README.
+- Stegoframe's LSB mode is internally inconsistent (writer vs reader framing); SVG is the only solid interop surface for now.
+- Vant PNG `stego.encode` (raw-offset LSB) is a THIRD pipeline; not part of this interop unless asked.
 
 *Audit only — no wire changes made this pass.*

@@ -1,9 +1,6 @@
 # Docs Archive
 
-Retired docs pages, preserved for history. Nothing here is linked from the
-docs site nav, and nothing here should be trusted as current - each page was
-archived because it documented something that never existed, something that
-was removed, or a duplicate of a better-maintained page.
+Retired docs pages, preserved for history. Nothing here is linked from the docs site nav, and nothing here should be trusted as current - each page was archived because it documented something that never existed, something that was removed, or a duplicate of a better-maintained page.
 
 | Page | Why it was retired |
 |------|--------------------|
@@ -24,10 +21,4 @@ was removed, or a duplicate of a better-maintained page.
 | essential/plugins.md | Advertised a plugin system that does not exist: `vant.use(plugin)`, a `plugins/` directory loader, and an npm plugin ecosystem (`npm install vant-my-plugin`, packages "vant-github" and "vant-linear"). Nothing in lib references plugins at all, and `vant.use` is not an export. The real extension surface is islands: docs/essential/extensibility.md and docs/essential/custom-island.md. |
 | operations-notifications.md | Full fiction: documented `require('./lib/notifications')` with slack/discord/email/pushover/telegram channels, `broadcast()`, and `status()`. lib/notifications.js does not exist and no lib file mentions notifications; none of SLACK/DISCORD/PUSHOVER/SMTP env vars are read anywhere in lib/ or bin/. Vant's real outbound surfaces are the Telegram bot (bin/bot.js, TELEGRAM_BOT_TOKEN), in-process events (lib/event.js), and the webhooks system (bin/webhooks.js). Archived pass 142; operations/index + nav rows dropped, operations.md Notifications section rewritten to the real surfaces. |
 
-Archived: 2026-10-06 (pass 130 docs power run; pass 133 added
-memory/horcrux-bootstrap.md and advanced/architecture.md; pass 136 added
-the 0.8.6-era trio MIGRATING-0.8.6.md, reference/CHANGELOG.md,
-reference/deprecations.md; pass 140 added essential-plugins.md; pass 142
-added operations-notifications.md).
-Restoring one? `git mv` it back under `docs/`, fix its claims against the
-current code, re-add frontmatter, and re-run the docs linters.
+Archived: 2026-10-06 (pass 130 docs power run; pass 133 added memory/horcrux-bootstrap.md and advanced/architecture.md; pass 136 added the 0.8.6-era trio MIGRATING-0.8.6.md, reference/CHANGELOG.md, reference/deprecations.md; pass 140 added essential-plugins.md; pass 142 added operations-notifications.md). Restoring one? `git mv` it back under `docs/`, fix its claims against the current code, re-add frontmatter, and re-run the docs linters.

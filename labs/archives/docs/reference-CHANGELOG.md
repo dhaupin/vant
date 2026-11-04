@@ -16,17 +16,13 @@ nav_order: 118
 
 ### Refactor: Multi-Brain (T1–T4)
 
-- `pipeline.run` now caches module resolution and supports `async`
-  execution with an options bag.
-- "Secured" variants of the brain surface are exported for callers
-  that need the locked-down VAF → QoS → Escrow chain.
-- A second private brain ("axolotl") is loaded alongside the public
-  template so multibrain callers can switch contexts.
+- `pipeline.run` now caches module resolution and supports `async` execution with an options bag.
+- "Secured" variants of the brain surface are exported for callers that need the locked-down VAF → QoS → Escrow chain.
+- A second private brain ("axolotl") is loaded alongside the public template so multibrain callers can switch contexts.
 
 ### Refactor: Dead-Code Bloat Removal (T10b–T14b-r1)
 
-30+ aliases, singletons, and legacy exports removed. Each is a
-hard break; see `MIGRATING-0.8.6.md`.
+30+ aliases, singletons, and legacy exports removed. Each is a hard break; see `MIGRATING-0.8.6.md`.
 
 | Removed | Use instead |
 |---------|-------------|
@@ -42,8 +38,7 @@ hard break; see `MIGRATING-0.8.6.md`.
 
 ### Test: T15 - Stale Test Fixes
 
-Swept all 110 test files. Fixed 24 of 35 pre-existing failures.
-Remaining 11 (embed: 9, test-escrow: 4) deferred.
+Swept all 110 test files. Fixed 24 of 35 pre-existing failures. Remaining 11 (embed: 9, test-escrow: 4) deferred.
 
 ## v0.8.6 (Unreleased)
 
@@ -119,7 +114,6 @@ Remaining 11 (embed: 9, test-escrow: 4) deferred.
   await brain.write('file.md', content);
   const data = await brain.read('file.md');
   ```
-
 
 ## v0.8.6
 

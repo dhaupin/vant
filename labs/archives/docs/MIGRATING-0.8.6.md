@@ -41,14 +41,9 @@ await cache.set('key', 'value');
 const v = await cache.get('key');
 ```
 
-The singleton is gone. Every consumer now owns its `Cache` instance.
-This makes multi-tenant use cases sane (each tenant can have its own
-cache without sharing state).
+The singleton is gone. Every consumer now owns its `Cache` instance. This makes multi-tenant use cases sane (each tenant can have its own cache without sharing state).
 
-**Why it changed**: the singleton leaked state between tests and
-between consumers. It also made the dependency graph invisible —
-you couldn't tell from the API surface which code owned a given
-cache entry.
+**Why it changed**: the singleton leaked state between tests and between consumers. It also made the dependency graph invisible — you couldn't tell from the API surface which code owned a given cache entry.
 
 ---
 
@@ -70,13 +65,9 @@ const item = await brain.read('identity');          // unified read
 const corpus = brain.loadCorpus();                  // sync, all brains
 ```
 
-`brain.read(name)` is the new unified reader — it returns
-`{ format, source, content, data }` regardless of file extension
-(.md, .json, .yaml, .yml, .txt, .ini).
+`brain.read(name)` is the new unified reader — it returns `{ format, source, content, data }` regardless of file extension (.md, .json, .yaml, .yml, .txt, .ini).
 
-**Why it changed**: `loadBrain` and `brainList` were two different
-APIs for related operations. `read()` + `loadCorpus()` are one
-mental model.
+**Why it changed**: `loadBrain` and `brainList` were two different APIs for related operations. `read()` + `loadCorpus()` are one mental model.
 
 ---
 
@@ -96,8 +87,7 @@ const storage = require('vant/lib/storage');
 if (await storage.has('foo.md')) { ... }
 ```
 
-`exists` was an alias. `has` is the canonical name (matches
-`Map.prototype.has`).
+`exists` was an alias. `has` is the canonical name (matches `Map.prototype.has`).
 
 ---
 
@@ -117,9 +107,7 @@ const compute = require('vant/lib/compute');
 const r = await compute.evaluate(code, { lang: 'python' });
 ```
 
-`eval` is a reserved-ish word in some contexts. `evaluate` is the
-canonical name. The 4 internal callsites in `lib/framework.js`,
-`lib/mcp.js`, and `lib/geometry/engine.js` have all been migrated.
+`eval` is a reserved-ish word in some contexts. `evaluate` is the canonical name. The 4 internal callsites in `lib/framework.js`, `lib/mcp.js`, and `lib/geometry/engine.js` have all been migrated.
 
 ---
 
@@ -139,8 +127,7 @@ const { EventEmitter } = require('vant/lib/event');
 const bus = new EventEmitter();
 ```
 
-`EventBus` and `SimpleEventEmitter` were aliases. The canonical
-export is `EventEmitter`.
+`EventBus` and `SimpleEventEmitter` were aliases. The canonical export is `EventEmitter`.
 
 ---
 
@@ -160,8 +147,7 @@ const { set } = require('vant/lib/config');
 set('foo', true);
 ```
 
-`setFlag` was a noun-phrase alias for `set`. The canonical name
-matches `Map.set` semantics.
+`setFlag` was a noun-phrase alias for `set`. The canonical name matches `Map.set` semantics.
 
 ---
 
@@ -185,9 +171,7 @@ const vant = require('vant');
 vant.brain.read('identity');
 ```
 
-`vant.Runtime` was a legacy class that wrapped top-level accessors.
-The top-level lazy getters (which `vant.Runtime` was just a thin
-wrapper around) are the canonical way to access subsystems.
+`vant.Runtime` was a legacy class that wrapped top-level accessors. The top-level lazy getters (which `vant.Runtime` was just a thin wrapper around) are the canonical way to access subsystems.
 
 ---
 
@@ -207,16 +191,13 @@ const vant = require('vant');
 console.log(vant.api.mode);   // read-only property, same syntax
 ```
 
-The syntax is the same. The implementation changed (no getter, just
-a property), so if you used `Object.getOwnPropertyDescriptor` or
-re-defined `mode` on the object, that no longer works.
+The syntax is the same. The implementation changed (no getter, just a property), so if you used `Object.getOwnPropertyDescriptor` or re-defined `mode` on the object, that no longer works.
 
 ---
 
 ## What was NOT changed
 
-- The `Cache` class API itself (all 25 methods: configure, set, get,
-  remove, clear, has, size, compress, decompress, createPool, etc.)
+- The `Cache` class API itself (all 25 methods: configure, set, get, remove, clear, has, size, compress, decompress, createPool, etc.)
 - Brain file format / schema
 - Storage backend connectors
 - MCP tool names and signatures
@@ -243,8 +224,7 @@ const enc = Encrypt.encrypt(message, password, { algorithm: 'aes-256-gcm' });
 const dec = Encrypt.decrypt(enc, password, { algorithm: 'aes-256-gcm' });
 ```
 
-The deprecated `encode`/`decode` aliases for `encrypt`/`decrypt`
-with ALGORITHM='aes-256-gcm' are gone.
+The deprecated `encode`/`decode` aliases for `encrypt`/`decrypt` with ALGORITHM='aes-256-gcm' are gone.
 
 ### 10. `Encrypt.pbkdf2Sync()` → `crypto.pbkdf2Sync()` (Node built-in)
 
@@ -262,8 +242,7 @@ const crypto = require('crypto');
 const key = crypto.pbkdf2Sync(password, salt, 100000, 32, 'sha256');
 ```
 
-`Encrypt.pbkdf2Sync` was a 1-line passthrough to `crypto.pbkdf2Sync`
-with zero callers. Use the Node built-in directly.
+`Encrypt.pbkdf2Sync` was a 1-line passthrough to `crypto.pbkdf2Sync` with zero callers. Use the Node built-in directly.
 
 ### 11. `secret.getPassword()` / `hasPassword()` / `clearPassword()` → `get` / `has` / `clear` with `'brain'` type
 
@@ -285,14 +264,10 @@ const exists = await secret.has('brain');
 await secret.clear('brain');
 ```
 
-The legacy "password" aliases were hardcoded to the `'brain'`
-secret type. Use the generic `get(type, options)` API with
-the explicit type.
+The legacy "password" aliases were hardcoded to the `'brain'` secret type. Use the generic `get(type, options)` API with the explicit type.
 
 ## What if I'm stuck?
 
-Run the test suite — the failures are informative. The branch is
-**100% green** as of T16: 1489/1489 passing, 0 failures.
+Run the test suite — the failures are informative. The branch is **100% green** as of T16: 1489/1489 passing, 0 failures.
 
-If a removal broke your code and you need help migrating, the
-diff is in commits `4ae316b` → `3df35d4` on the `axolotl` branch.
+If a removal broke your code and you need help migrating, the diff is in commits `4ae316b` → `3df35d4` on the `axolotl` branch.

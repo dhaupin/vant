@@ -69,8 +69,7 @@ git push origin your-branch
 
 ## Notifications
 
-There is no built-in Slack/Discord/email notifier (lib/notifications.js
-does not exist). Vant's real outbound surfaces today:
+There is no built-in Slack/Discord/email notifier (lib/notifications.js does not exist). Vant's real outbound surfaces today:
 
 - **Telegram bot** (below) - status, brain, health, sync via chat
 - **Events** - subscribe in-process: `require('./lib/event')`
@@ -84,8 +83,7 @@ Control via Telegram bot.
 
 ### Setup
 
-Set your bot token from [@BotFather](https://t.me/BotFather), then run
-the bot:
+Set your bot token from [@BotFather](https://t.me/BotFather), then run the bot:
 
 ```bash
 TELEGRAM_BOT_TOKEN=xxx vant bot

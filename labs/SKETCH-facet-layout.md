@@ -13,17 +13,9 @@
 <basePath>/<key[0:2]>/<key>.json     (key = FACILITY SEQUENCE CHECK)
 ```
 
-Inventory assertion (from the sketch survey): every stored record can
-derive `getStorageKey(barcode) = FACILITY_SEQUENCE_CHECK` deterministically —
-the re-derivation is the addressing (that part never changes).
+Inventory assertion (from the sketch survey): every stored record can derive `getStorageKey(barcode) = FACILITY_SEQUENCE_CHECK` deterministically — the re-derivation is the addressing (that part never changes).
 
-`geometry/fold.js` gives the repo a law for a BOUNDED facet layout:
-20 faces × 4^11 cells, packed `face * capacity + localCell`, overflow
-refused (never wrapped). **What a facet layout would give quasicrystal
-storage:** a stated-per-facet capacity + a refusal contract for any
-consumer that wants bounded region allocation (a brain's geometry space
-gets a hard cap per shard, disk fill becomes a loud refusal rather than
-a silent crawl).
+`geometry/fold.js` gives the repo a law for a BOUNDED facet layout: 20 faces × 4^11 cells, packed `face * capacity + localCell`, overflow refused (never wrapped). **What a facet layout would give quasicrystal storage:** a stated-per-facet capacity + a refusal contract for any consumer that wants bounded region allocation (a brain's geometry space gets a hard cap per shard, disk fill becomes a loud refusal rather than a silent crawl).
 
 ## Wiring shape (when it happens)
 
@@ -36,25 +28,15 @@ a silent crawl).
 
 ## Consumer that actually needs it
 
-The readiness test: does anything WANT bounded facet allocation today?
-Measured survey says **not yet hard**: memory store + canvas + horcrux
-all address byte-addressably through the same `getStorageKey` contract
-with no capacity pressure. The honest wiring trigger would be:
-- a brain's geometry space actually filling up under a backup/
-  replication policy that shards per region, **or**
-- the `/world/` space getting a live consumer (mesh PRD's world frame,
-  still orphan).
+The readiness test: does anything WANT bounded facet allocation today? Measured survey says **not yet hard**: memory store + canvas + horcrux all address byte-addressably through the same `getStorageKey` contract with no capacity pressure. The honest wiring trigger would be:
+- a brain's geometry space actually filling up under a backup/ replication policy that shards per region, **or**
+- the `/world/` space getting a live consumer (mesh PRD's world frame, still orphan).
 
-Until one of those exists, fold's law is TESTED MATH WAITING (the
-engine-parity series's own posture — primitives before consumers).
+Until one of those exists, fold's law is TESTED MATH WAITING (the engine-parity series's own posture — primitives before consumers).
 
 ## Compatibility goals (when implementing)
 
-1. `getFilePath(barcode)` per-adapter NOT changed: the flat path stays
-   the primary for existing records.
-2. New facet paths coexist via a resolver: lookup tries facet, falls
-   back to flat (never the reverse — no silent split-brain).
-3. Over-capacity refuses a WRITE without ever mutating an existing
-   region's records (eviction/copy semantics stay out of scope).
-4. The cellStore rebate (#150) applies verbatim: identical records
-   across facets pay bytes once.
+1. `getFilePath(barcode)` per-adapter NOT changed: the flat path stays the primary for existing records.
+2. New facet paths coexist via a resolver: lookup tries facet, falls back to flat (never the reverse — no silent split-brain).
+3. Over-capacity refuses a WRITE without ever mutating an existing region's records (eviction/copy semantics stay out of scope).
+4. The cellStore rebate (#150) applies verbatim: identical records across facets pay bytes once.

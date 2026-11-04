@@ -1,14 +1,8 @@
 # Cohesion Audit — axolotl (2026-09-20)
 
-Goal: one consolidated stack — everything wired through the runtime/os surface
-(storage, pipeline, error, event, version, brain facade), no old conventions
-lingering. This is a findings doc, not a fix log.
+Goal: one consolidated stack — everything wired through the runtime/os surface (storage, pipeline, error, event, version, brain facade), no old conventions lingering. This is a findings doc, not a fix log.
 
-**Update (same day):** A-1 and its restore-side sibling were verified and FIXED
-(wrong-path requires, restore-block mis-nesting, and the missing payload unwrap
-in `restore()` — a real horcrux round-trip now restores all sections). The
-`pushBrain` test was also made order-independent (stack persists in
-`models/state.json`). All suites re-verified green: 1,144 module tests + CI 406/406.
+**Update (same day):** A-1 and its restore-side sibling were verified and FIXED (wrong-path requires, restore-block mis-nesting, and the missing payload unwrap in `restore()` — a real horcrux round-trip now restores all sections). The `pushBrain` test was also made order-independent (stack persists in `models/state.json`). All suites re-verified green: 1,144 module tests + CI 406/406.
 
 ---
 
