@@ -88,10 +88,10 @@
     "eslint": "^8.57.1",
     "eslint-plugin-react-hooks": "4.6.2",
     "eyestruct": "^1.0.0",
-    "govstruct": "^0.9.0",
+    "govstruct": "^1.0.0",
     "monoforge": "^0.9.0",
     "packstruct": "^1.0.0",
-    "poststruct": "^0.9.0",
+    "poststruct": "^1.0.0",
     "typescript": "5.8.3"
   },
   "main": "index.js",

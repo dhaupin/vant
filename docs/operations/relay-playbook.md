@@ -103,15 +103,16 @@ Honest-by-construction: while the chain editor and the pairing-time e2e key bind
 
 ## Verify the whole pipe (the pins already prove it)
 
+Pin counts grow as the walls grow - the suite output is the truth; this page names WHAT each suite covers, not a number that can quietly rot:
+
 ```bash
-node test/relay.test.js             # 26 pins: the r/2 face, REAL-socket
-                                    # loops (hop + ride), gate ladder,
-                                    # replays, typed refusals, no-body-leak
-node test/relay-parity.test.js      # 16 pins: face <-> kit <-> vendored
-                                    # parity, shape agreement, retired-wire
-                                    # lies caught
+node test/relay.test.js             # the r/2 face, REAL-socket loops
+                                    # (hop + ride), gate ladder, replays,
+                                    # typed refusals, no-body-leak
+node test/relay-parity.test.js      # face <-> kit <-> vendored parity,
+                                    # shape agreement, retired-wire lies
 node test/no-legacy-bloat.test.js   # 13 pins: lib/relay.js STAYS deleted
-node test/mcp.test.js               # 17 pins: the door incl. relay_status
+node test/mcp.test.js               # the door incl. relay_status
 node scripts/vendor-relay-kit.js --check   # the checksummed contract
 ```
 

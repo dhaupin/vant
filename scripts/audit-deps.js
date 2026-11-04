@@ -133,8 +133,8 @@ const FAMILY_PINS = {
     'crashtest': '1.1.0',
     'eyestruct': '1.0.0',
     'packstruct': '1.0.0',
-    'poststruct': '0.9.0',
-    'govstruct': '0.9.0',
+    'poststruct': '1.0.0',
+    'govstruct': '1.0.0',
     'monoforge': '0.9.0',
 };
 
