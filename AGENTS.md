@@ -623,3 +623,63 @@ discriminating by stashing the src fixes (11/11 fail pre-fix). Full wall green:
   ages out of the bounded `REPLAY_SEEN_MAX` pool — inherent to HMAC over bytes
   with no timestamp. Worth a follow-up if such a source is wired.
 
+## Discovery: 2026-11-02 - Audit Round 5 (relay/seal + envelope + token frontiers)
+
+Frontiers walked: the webhook reply/seal SEND path (`lib/api.js` `relaySend` +
+the pod seal lane), `lib/messaging.js` envelope seal verification end-to-end,
+and the `lib/habitat.js` token flows. Four findings, all fixed and pinned in
+`test/audit-round5.test.js` (R5-1..R5-4) — each pin verified to fail pre-fix by
+stashing the matching lib file.
+
+### R5-1 (medium): the HMAC canon crashed raw on a non-string key or body
+`Encrypt.hmacSign` passed `key` straight to `crypto.createHmac`, so a missing/
+non-string key threw a raw `ERR_INVALID_ARG_TYPE` out of EVERY caller
+(crew-bus `send`, messaging `signEnvelope`, the relay seal lane). `hmacVerify`
+guarded `key`/`signature` (R4-10) but still threw on a non-string `data`
+(`update()` rejects an object/Buffer/number). Fixed: `hmacSign` refuses typed
+(`ENCRYPT_KEY_REQUIRED`); `hmacVerify` is total — an unverifiable body answers
+`false`, never throws.
+
+### R5-2 (medium): `habitat.context()` verified tokens with NO secret — a dead path
+`lib/habitat.js` `context()` called `encrypt.verifyToken(token)` with no
+`secret` argument. `verifyToken` fails closed on a missing secret, so EVERY
+token — including a legitimately signed one — silently resolved to anonymous.
+The token->identity path was dead code that looked live: the only test that
+touched it (`habitat-rls-qc.test.js`) seeded `h.contexts` directly, never the
+verify. Fixed: resolve `VANT_TOKEN_SECRET` (the SAME key `lib/auth.js` signs
+with) and pass it; with no secret configured, fail closed to anonymous.
+
+### R5-3 (low): `messaging.verifyEnvelope` threw on a non-serializable envelope
+`signEnvelope`/`verifyEnvelope` both `JSON.stringify` the envelope, so a body
+that cannot serialize (BigInt, a circular ref) threw a raw `TypeError` out of
+the ceremony. The verifier is the security-critical half and must be total.
+Fixed: an unverifiable envelope -> `false`; `signEnvelope` names its refusal
+typed (`E_INPUT`).
+
+### R5-4 (low): `rls.middleware` Bearer parse accepted non-Bearer credentials
+The middleware parsed `Authorization` with `.replace('Bearer ', '')`, which
+strips the scheme ANYWHERE in the string (`Basic <tok>` -> `<tok>`) and, on a
+scheme-less value, passes it through whole — so a raw token or a Basic
+credential could be handed to `context()` as if it were a Bearer token. Fixed:
+accept only the exact `Bearer <token>` form (case-insensitive scheme).
+
+### Design notes (walked, NOT defects)
+- The relay seal's `ts` is unbound from the sealed bytes, but the pod's dedupe
+  key is the signature (HMAC over `ct`), so a `ts`-bumped replay of the same
+  `ct` hits the SAME key -> 409. The stateless edge (which has no cross-request
+  cache) is backstopped by the pod. Sound.
+- Outbound `webhooks.send`/`sendWebhook` pass an attacker-influenceable `url`
+  to `network.fetch`, whose SSRF wall (loopback/link-local/metadata + DNS-
+  rebinding re-check) refuses internal targets. Walled.
+
+### Testing laws learned this round
+- Pins: `test/audit-round5.test.js` R5-1..R5-4 (11 pins) — each finding has at
+  least one pin that fails pre-fix, verified by stashing the matching
+  lib/{encrypt,messaging,habitat,rls}.js. R5-4a/4b discriminate against an
+  rls-only revert; R5-4c and R5-2 discriminate against a habitat-only revert
+  (the middleware's `context()` returns anonymous until `rls.getHabitat()`
+  claims the singleton — the test claims it first so the header path is
+  actually exercised).
+- Probe scripts: /tmp/probe18/p1..p5 (habitat token path, envelope + hmac
+  edges, encrypt core).
+
