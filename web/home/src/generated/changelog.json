@@ -1,8 +1,24 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 101,
+  "_headingCount": 102,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 372 (the publication primitive - channels carry typed engine rows, plates render them read-only, vant#339)",
+      "sections": [
+        {
+          "name": "Added: `lib/plates.js` — one typed publication primitive for player-run surfaces",
+          "items": []
+        },
+        {
+          "name": "Tests: `tests/board-plates.test.js` — 10 pins, discriminating",
+          "items": []
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,
