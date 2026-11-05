@@ -55,7 +55,7 @@ build/
 # Temp
 *.tmp
 
-# Migration test fixture scratch (test/migrations.test.js)
+# Migration test fixture scratch (tests/migrations.test.js)
 .migration-fixture/
 .migration-fixture-legacy-main/
 
@@ -71,9 +71,9 @@ models/tmp-space/
 # QC drill scratch (real-tree migration drills)
 .drill-*/
 
-# test/tmp: external-tool QC targets (e.g. a throwaway vant install for
+# tests/tmp: external-tool QC targets (e.g. a throwaway vant install for
 # crashtest.creadev.org to attack) - scratch, never tracked.
-test/tmp/
+tests/tmp/
 
 # Agent capability-probe scratch (sandbox gate tests, never tracked)
 /private/

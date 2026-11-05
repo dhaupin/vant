@@ -114,16 +114,16 @@ There are no test:watch/test:coverage npm scripts. The real surface:
 npm test
 
 # Full runner (all suites)
-node test/runner.js
+node tests/runner.js
 
 # Coverage summary
-node test/coverage.js
+node tests/coverage.js
 
 # The CI battery end to end
-node test/ci.js
+node tests/ci.js
 
 # One suite
-node test/brain.test.js
+node tests/brain.test.js
 ```
 
 ---

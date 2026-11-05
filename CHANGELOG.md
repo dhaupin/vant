@@ -5,6 +5,100 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 366 (audit round 9 follow-up: the verdict surfaces get
+their own crashtest pack — the class is now attacked from the outside, in the
+engine's own verdict language)
+
+### Added: `packs/public/vant-verdict-surfaces` — the allow/deny verdict surfaces (10 oracles)
+
+The round-9 fix (pass 365) pinned the class in `tests/rls-op-classification.test.js`.
+This pack is the class's crashtest HOME, so the packstruct census counts it and
+the engine attacks it from the outside: the packstruct census moves 23 packs /
+322 ids → 24 packs / 333 ids, and the crashtest ledger 299 rows / 116 REFUSED →
+309 rows / 126 REFUSED (0 EXPLOITED either way).
+
+- Eight rows drive the **REAL operator door** — `bin/vant.js rls allow`,
+  `bin/vant.js system allow`, `bin/vant.js habitat can` — as an in-process
+  child spawn (the `vant-carriers` `bin/traveler` precedent), so the verdict
+  AND the exit code are measured, which is what a script actually reads. The
+  pack derives `ROOT` from its own file location, so the bin is the repo's
+  while cwd stays the harness sandbox (the RLS decision reads the throwaway
+  `models/` tree, never the workspace's).
+- Two rows drive the **layer helpers** directly — `lib/rls.js
+  isOperationAllowed` (every unlisted word resolves WRITE, the read canon
+  READ) and `lib/system.js isOperationAllowed` (the verdict OBJECT carries
+  `allowed:false` for an unknown word).
+- Direction matters: an unclassified write verb (`grant`), a typo (`raed`),
+  an unknown word (`totally-bogus-op`), and a write verb passed as a mode
+  (`habitat can delete`) must all REFUSE; three read/write-holds controls pin
+  that the fix did not over-reach. Reverting the round-9 fixes flips the seven
+  finding-shaped rows to EXPLOITED (verified against the pre-fix tree); the
+  controls hold both ways by design. Zero sockets.
+- Verification: the contract suite's `vant-verdict-surfaces` table (10 rows)
+  and the real-harness run root both green; `npm run packs:lint` censuses the
+  new pack (0 violations); `npm run packs:audit` holds 7 honored / 1 pinned;
+  `npm run struct:check` green.
+
+## [Unreleased] - pass 365 (audit round 9: the verdict surfaces stop failing open — an
+unclassified operation word is a refusal, not a pass)
+
+### Changed: the pod `test/` directory is now `tests/` - the convention flips (vant#277)
+
+The pod consolidates the web apps' own suites into the repo-root test lane, and
+that lane was spelled `test/` - the last tree-wide name that hid the integration
+lanes from spelling the same thing their siblings (crashtest, freestruct) do.
+This wave names the reversal of the deliberate consolidation in `4788a1a4`
+(the /tests stragglers fold into /test): the pod now spells it `tests/`, one
+convention for every member of the family. Everything load-bearing moved in
+the same commit: the CI workflow (`.github/workflows/test.yml`), the root
+`package.json` scripts, the ignore-rule scratch paths (`tests/tmp/`), the
+vendored `govstruct/compliance/vant.json` lane names, the
+`lib/audit-report.js` deep link, the harness self-headers, and a fresh
+`scripts/struct-feed-stamp.js` ring restamp (`--check` green on both web
+flavors). The web apps' own `test/` directories are their own trees and are
+untouched (the one-way domain law).
+
+### Fixed: audit round 9 across the access-control/enforcement seam (3 findings, 16 discriminating pins)
+
+The class: a surface classifies an operation WORD against a small hardcoded
+list and falls back to the LOOSER class. Every one of them is a gate whose
+verdict reads ALLOWED for a word it never heard of — the opposite of the
+house's own "unknown = write" law (`lib/guests.js classifyTool`). An
+unclassified word is now a refusal.
+
+- **`lib/rls.js isOperationAllowed` (R9-1)** mapped `op` with
+  `['write','create','update','delete','commit'].includes(op) ? 'write' : 'read'`,
+  so EVERY unlisted word resolved to the LOOSER `read` policy:
+  `vant rls allow grant <resource>` printed ALLOWED while the identical
+  write verb `delete` printed DENIED, and a typo (`raed`) read as a pass.
+  The READ canon is now explicit (`read`/`get`/`list`/`status`/…) and
+  everything else is WRITE — fail-closed on the verb the way the guest
+  door already is.
+- **`lib/system.js isOperationAllowed` + `bin/system.js` (R9-2)** — the
+  stub returned `{ allowed: true }` for ANY string, and the CLI
+  truthy-tested that OBJECT (`allowed ? 'ALLOWED' : 'DENIED'`), so
+  `vant system allow totally-bogus-op` printed ALLOWED and exited 0. The
+  stub now refuses an unknown/empty word, and the CLI reads the `.allowed`
+  field and sets the exit code (the shape `bin/rls.js` already used).
+- **`bin/habitat.js` `can` (R9-3)** — the mode guard checked presence then
+  coerced `mode === 'write' ? 'write' : 'read'`, so
+  `vant habitat can delete <res> <user>` (a write verb) and
+  `vant habitat can garbage …` both answered against the LOOSER read
+  policy and printed ALLOWED. The mode is `read|write` or it is a usage
+  error; the silent downgrade is gone.
+- Verification: `test/rls-op-classification.test.js` — 16 pins, both
+  directions. Stashing the fixes flips 9 finding-shaped pins (grant/set/
+  mint/record/assign/spawn/revoke/issue + typo + bogus/empty + the two
+  `habitat can` coercions); the read-canon and explicit-write controls
+  hold BOTH ways by design. Adjacent suites green: system 12/0,
+  habitat-rls 23/0, habitat-rls-qc 13/0, rls-hookups 19/0,
+  security-hardening 22/0; seed `test/ci.js` 521 passed / 0 failed.
+- Swept the rest of the class: `lib/mcp.js` (level→scope, comment-correct),
+  `lib/tmp.js`, `lib/server.js`, `lib/pipeline.js` all fall back to WRITE
+  (safe direction); `lib/rules.js evaluate` is total; `lib/guests.js
+  classifyTool` is the law the above now match. A crashtest pack for this
+  family is a follow-up pass (the round-8 `vant-authority` precedent).
+
 ## [Unreleased] - pass 364 (round-8 ledger entry: the dedicated vant-authority crashtest pack)
 
 ### Round-8 audit landed: cherry-pick `506fa600` (PR #326, Openhands) — entry the round itself never wrote

@@ -62,7 +62,7 @@ Every verb accepts `--json` for machine-readable output. Exit codes: `0` ok, `1`
 | Closeout | `lib/consensus.js` quorum ballot | `E_SCENARIO_NO_QUORUM`; hold released |
 | Decision | `lib/resolution.js` `logDelta` | Failure is surfaced in `refusals`, closeout stands |
 
-Hard rules pinned by `test/scenario-crew.test.js`:
+Hard rules pinned by `tests/scenario-crew.test.js`:
 
 - A crew where every member is quarantined cannot delegate at all (`E_SCENARIO_QUARANTINED`) - and the escrow draw is never touched.
 - A single remaining live voter can never pass closeout: the ballot's `minQuorum` is `max(2, live-voters)`, so no single-agent bless exists.
@@ -87,7 +87,7 @@ The materialization bills **1 escrow credit per restored cell** against the acto
 | U3.2 quarantine drill | refusal recorded who/why; drawn **before** the budget gate | drill pins (one-q + all-q) |
 | U3.3 voted closeout | quorum ballot + `resolution.logDelta` | no-single-bless pin |
 | U3.4 this page | playbook doc | coverage gates |
-| U3.5 pin suite | `test/scenario-crew.test.js` (13 pins, measured) | CI sweep |
+| U3.5 pin suite | `tests/scenario-crew.test.js` (13 pins, measured) | CI sweep |
 
 ## Crew budgets and hygiene
 
@@ -100,6 +100,6 @@ The materialization bills **1 escrow credit per restored cell** against the acto
 ## Related
 
 - Universe engine and manifests: [`lib/state/genesis-snapshot.js`](https://github.com/dhaupin/vant/blob/main/lib/state/genesis-snapshot.js) (`labs/prd-universe.md` U1-U3)
-- Escrow budgets and workspace pools: [Escrow](/security/escrow)
-- Consensus voting: [Consensus](/reference/consensus)
-- Trust quarantine: [Succession](/multi-agent/succession)
+- Escrow budgets and workspace pools: [Escrow](/vant/security/escrow)
+- Consensus voting: [Consensus](/vant/reference/consensus)
+- Trust quarantine: [Succession](/vant/multi-agent/succession)

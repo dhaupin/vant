@@ -21,7 +21,7 @@
  * organized IN SECTIONS like the dashboard's own nav (web/dashboard
  * SideNav: a registry with a section per item, tiny uppercase heads, items
  * under them, plus a drawer head and a close button; scrim click/Escape/
- * link tap close it). Bolete sections its 19 modules as observe/work/ops;
+ * link tap close it). Bolete sections its 21 modules as observe/work/ops;
  * vant.creadev.org sections its destinations as
  * "Get going / The install / The family / More". Sections are
  * PRESENTATIONAL grouping only; the walk order stays WALK's order.

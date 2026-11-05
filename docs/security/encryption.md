@@ -27,6 +27,11 @@ Vant uses AES-256-GCM for message encryption. Every method returns an authTag, s
 | `Encrypt.signToken` | HMAC-SHA256 |
 | `Encrypt.verifyToken` | HMAC-SHA256 |
 
+Fail-closed laws (audit rounds 4/5): a non-string or EMPTY secret is refused —
+`signToken` throws typed `ENCRYPT_KEY_REQUIRED`, and a token minted under the
+empty key no longer verifies; `hmacSign`/`hmacVerify` are total (an
+unverifiable body/key answers a typed refusal or `false`, never a raw throw).
+
 ## RSA
 
 | Method | Algorithm | Min Key Size |

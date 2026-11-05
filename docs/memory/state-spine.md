@@ -166,7 +166,7 @@ spine.writeSharedFact(cellStore, fact, ['/world/w1', '/raid/doc']);
 
 ## Status and pointers
 
-The tier-tracking ledger is `labs/WIRING.md` ("is it wired" is a status column, not a checklist); the engine-parity harness that pins these modules is `test/engine-parity-spine.test.js` (state core, world/clock, mesh, RAID + storage tier suites). Layered on top you will find: [hcom/federation](/vant/multi-agent/federation) uses the tree for cross-node presence/authority; [horcrux](/vant/memory/horcrux) rides brain-verify for its export/verify contract.
+The tier-tracking ledger is `labs/WIRING.md` ("is it wired" is a status column, not a checklist); the engine-parity harness that pins these modules is `tests/engine-parity-spine.test.js` (state core, world/clock, mesh, RAID + storage tier suites). Layered on top you will find: [hcom/federation](/vant/multi-agent/federation) uses the tree for cross-node presence/authority; [horcrux](/vant/memory/horcrux) rides brain-verify for its export/verify contract.
 
 ## Related
 

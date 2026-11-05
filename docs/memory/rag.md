@@ -143,7 +143,7 @@ See [Brain Search](/vant/memory/search) for details.
 - **Per-doc embed cap (20000 chars)**: an oversized brain file fed verbatim through the input pipeline permanently blocked the whole surface (the scorer is the data feeder; it caps at the seam instead of pushing unbounded corpus text through generate). User QUERY input keeps every scan - owner-owned doc content rides the internal `blobContent` length gate only (vaf.js; the MCP schemas expose no such field to callers).
 - **withProjection (opt-in)**: returns a deterministic seeded JL projection of the SAME vectors the scoring used - `projection.points` where point 0 is the query anchor and `points[i + 1]` pairs BY INDEX with `results[i]` (dims 2, seed 9). The dashboard's Brains map consumes this contract fail-closed; a hostile projection is not a plot.
 
-Pinned live (door included): `test/embed-projection.test.js`.
+Pinned live (door included): `tests/embed-projection.test.js`.
 
 ## Cache Results
 

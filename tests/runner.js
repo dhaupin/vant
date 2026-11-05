@@ -1,0 +1,340 @@
+#!/usr/bin/env node
+/**
+ * Vant Test Runner
+ * Comprehensive component testing framework
+ * 
+ * Usage: node tests/runner.js
+ *        node tests/runner.js --lib vaf
+ *        node tests/runner.js --bin vant
+ */
+
+const _fs = require('fs');
+const path = require('path');
+
+// Get vant root directory
+const ROOT = path.resolve(__dirname, '..');
+
+// Test results storage
+const results = {
+  passed: 0,
+  failed: 0,
+  errors: []
+};
+
+function pass(name, _details = '') {
+  results.passed++;
+  console.log(`✓ ${name}`);
+}
+
+function fail(name, error) {
+  results.failed++;
+  results.errors.push({ name, error });
+  console.log(`✗ ${name}: ${error}`);
+}
+
+// ============================================
+// LIBRARY TESTS
+// ============================================
+
+function testLib(name, modPath, tests = {}) {
+  console.log(`\n📦 Testing: ${name}`);
+  
+  try {
+    const mod = require(path.join(ROOT, modPath));
+    
+    // Load test
+    if (tests.load !== false) {
+      if (mod) {
+        pass(`${name} loads`);
+      } else {
+        fail(`${name} loads`, 'module is null');
+      }
+    }
+    
+    // Function tests
+    if (tests.functions) {
+      for (const [fn, _expected] of Object.entries(tests.functions)) {
+        if (typeof mod[fn] === 'function') {
+          pass(`${name}.${fn} is function`);
+        } else {
+          fail(`${name}.${fn}`, `not a function: ${typeof mod[fn]}`);
+        }
+      }
+    }
+    
+  } catch (e) {
+    fail(`${name} load`, e.message);
+  }
+}
+
+// ============================================
+// BINARY TESTS
+// ============================================
+
+// Known long-running servers: a watchdog kill is their PASS condition, not
+// a hang (they serve until terminated).
+const BIN_SERVERS = new Set(['mcp']);
+
+function testBin(name, binPath, args = [], timeout = 3000, expectedCode = 0) {
+  return new Promise((resolve) => {
+    console.log(`\n🔧 Testing: ${name}`);
+    
+    const proc = require('child_process').spawn('node', [binPath, ...args], {
+      cwd: process.cwd(),
+      stdio: 'pipe'
+    });
+    
+    let output = '';
+    let error = '';
+    
+    proc.stdout.on('data', (d) => { output += d; });
+    proc.stderr.on('data', (d) => { error += d; });
+    
+    // (pass 21) Judged on EXIT SEMANTICS, never on stdout. The old rule
+    // killed the process at the timeout and passed on ANY output — so a
+    // binary that crashed loudly after printing its banner passed, while the
+    // same binary flipped pass/fail across machines on environment-dependent
+    // INFO lines. Now: wait for close; Syntax/ReferenceError still fails;
+    // exit 0 passes; self-exited nonzero fails with the captured stderr;
+    // a watchdog kill passes ONLY for known servers.
+    let done = false;
+    const finish = (verdict, detail) => {
+      if (done) return;
+      done = true;
+      if (verdict === 'syntax') {
+        fail(`${name} syntax`, (error || '').toString().substring(0, 100));
+      } else if (verdict === 'ok') {
+        pass(detail || `${name} exits 0`);
+      } else if (verdict === 'expected-refusal') {
+        pass(`${name} exits nonzero on refusal (pinned)`);
+      } else if (verdict === 'server') {
+        pass(`${name} serves (killed at watchdog, expected for servers)`);
+      } else if (verdict === 'hung') {
+        fail(`${name} hung`, `no exit within ${timeout}ms watchdog`);
+      } else {
+        fail(`${name} exit ${detail || '?'}`, (error || output).toString().trim().slice(0, 100) || 'nonzero exit');
+      }
+      resolve();
+    };
+    
+    proc.on('close', (code, signal) => {
+      if ((error || '').toString().includes('SyntaxError') || (error || '').toString().includes('ReferenceError')) {
+        finish('syntax');
+        return;
+      }
+      if (signal || code === null || code === undefined) {
+        // Killed (our watchdog) — servers legitimately never exit.
+        finish(BIN_SERVERS.has(name) ? 'server' : 'hung');
+        return;
+      }
+      if (code === expectedCode) {
+        finish(expectedCode === 0 ? 'ok' : 'expected-refusal');
+      } else {
+        finish('exit', code);
+      }
+    });
+    
+    proc.on('error', (e) => {
+      done = true;
+      fail(`${name} spawn`, e.message);
+      resolve();
+    });
+    
+    // Watchdog: a CLI that hasn't exited in `timeout` ms is hung.
+    const killer = setTimeout(() => {
+      try { proc.kill(); } catch (e) {}
+    }, timeout);
+    killer.unref();
+  });
+}
+
+// ============================================
+// SECURITY TESTS
+// ============================================
+
+function testSecurity(name, testFn) {
+  console.log(`\n🔒 Testing: ${name}`);
+  try {
+    const result = testFn();
+    if (result.blocked) {
+      pass(`${name} blocked`, result.pattern || 'attack pattern');
+    } else {
+      fail(`${name} security`, 'should have blocked');
+    }
+  } catch (e) {
+    fail(`${name} security`, e.message);
+  }
+}
+
+// ============================================
+// MAIN
+// ============================================
+
+async function main() {
+  const args = process.argv.slice(2);
+  const filter = args.includes('--lib') ? args[args.indexOf('--lib') + 1] : null;
+  const binFilter = args.includes('--bin') ? args[args.indexOf('--bin') + 1] : null;
+  
+  console.log('='.repeat(50));
+  console.log('VANT TEST RUNNER');
+  console.log('='.repeat(50));
+  
+  // ============================================
+  // CORE LIBRARIES
+  // ============================================
+  
+  if (!filter || filter === 'vaf') {
+    testLib('vaf', './lib/vaf', {
+      functions: { check: 1, checkPathTraversal: 1, checkContent: 1 }
+    });
+    
+    testSecurity('VAF path traversal', () => {
+      const vaf = require(path.join(ROOT, 'lib/vaf'));
+      return vaf.checkPathTraversal('../etc/passwd');
+    });
+    
+    testSecurity('VAF script injection', () => {
+      const vaf = require(path.join(ROOT, 'lib/vaf'));
+      return vaf.checkContent('<script>');
+    });
+  }
+  
+  if (!filter || filter === 'config') {
+    testLib('config', './lib/config', {
+      functions: { get: 1, getAll: 1, getGithub: 1 }
+    });
+  }
+  
+  if (!filter || filter === 'brain-lock') {
+    testLib('brain-lock', './lib/brain-lock', {
+      functions: { acquireBrainLock: 1, releaseBrainLock: 1, brainLockStatus: 1 }
+    });
+  }
+  
+  if (!filter || filter === 'branch') {
+    testLib('branch', './lib/branch', {
+      functions: { checkout: 1, commit: 1, status: 1 }
+    });
+  }
+  
+  if (!filter || filter === 'storage') {
+    testLib('storage', './lib/storage', {
+      functions: { get: 1 }
+    });
+  }
+  
+  if (!filter || filter === 'logger') {
+    testLib('logger', './lib/audit', {
+      functions: { info: 1, warn: 1, error: 1, debug: 1 }
+    });
+  }
+  
+  if (!filter || filter === 'errors') {
+    // (pass 40) Error alias was removed in pass 26 (no-legacy-bloat pins its
+    // absence); the class export is VantError. Pin moved off the dead name.
+    testLib('errors', './lib/error', {
+      functions: { VantError: 1, handle: 1 }
+    });
+  }
+  
+//   if (!filter || filter === 'entropy') {
+//     testLib('entropy', './lib/entropy', {
+//       functions: { generatePatches: 1, hydratePatches: 1 }
+//     });
+//     
+//     testSecurity('Entropy buffer limit', () => {
+//       const vaf = require(path.join(ROOT, 'lib/vaf'));
+//       try {
+//         vaf.check('x'.repeat(20 * 1024 * 1024), { type: 'string', maxLength: 10 * 1024 * 1024 });
+//         return { blocked: false };
+//       } catch(e) {
+//         // Should throw - this is correct behavior
+//         return { blocked: true, pattern: e.message };
+//       }
+//     });
+//   }
+  
+  if (!filter || filter === 'stego') {
+    testLib('stego', './lib/stego', {
+      functions: { encode: 1, decode: 1 }
+    });
+  }
+  
+  if (!filter || filter === 'rate-limit') {
+    // v0.8.6: rate-limit replaced by QoS - skip test but mark as resolved
+    console.log('⚠ rate-limit skipped (replaced by QoS in v0.8.6)');
+  }
+  
+  // ============================================
+  // BINARIES
+  // ============================================
+  
+  if (!binFilter || binFilter === 'vant') {
+    await testBin('vant', './bin/vant.js');
+  }
+  
+  if (!binFilter || binFilter === 'health') {
+    await testBin('health', './bin/health.js');
+  }
+  
+  if (!binFilter || binFilter === 'load') {
+    await testBin('load', './bin/load.js');
+  }
+  
+  if (!binFilter || binFilter === 'sync') {
+    // (pass 131) `vant sync` status works configless (exit 0). The bare
+    // default pull in a configless tree is a REFUSAL and must exit 1 - it
+    // used to exit 0, so scripts wrapping sync saw success on a refused
+    // pull. Pin both sides of the contract.
+    await testBin('sync', './bin/sync.js', ['status']);
+    await testBin('sync', './bin/sync.js', [], 3000, 1);
+  }
+  
+  if (!binFilter || binFilter === 'mcp') {
+    await testBin('mcp', './bin/mcp.js', [], 2000);
+  }
+  
+  if (!binFilter || binFilter === 'help') {
+    await testBin('help', './bin/help.js');
+  }
+  
+  // ============================================
+  // DOOR PINS (issue #181: contract pin per CLI door)
+  // ============================================
+  
+  // The output-shape half `testBin` lacked: each door's DOCUMENTED argv
+  // contract (exit code + stdout), sourced from the door's own help. A
+  // pin failing is a bug, never a pin-weakening (see tests/door-pin.js).
+  if (!binFilter || binFilter === 'doors') {
+    try {
+      const { runDoorPins } = require('./door-pin');
+      const { PINS } = require('./door-pins');
+      const r = runDoorPins(PINS);
+      if (r.failed > 0) throw new Error(r.failed + ' door pin(s) failed');
+      pass('door pins batch (' + (r.passed + r.failed) + ' doors, ' + r.passed + ' held)');
+    } catch (e) {
+      fail('door pins batch', e.message);
+    }
+  }
+  
+  // ============================================
+  // SUMMARY
+  // ============================================
+  
+  console.log('\n' + '='.repeat(50));
+  console.log(`RESULTS: ${results.passed} passed, ${results.failed} failed`);
+  console.log('='.repeat(50));
+  
+  if (results.failed > 0) {
+    console.log('\nFailed tests:');
+    results.errors.forEach((e, i) => {
+      console.log(`  ${i + 1}. ${e.name}`);
+      console.log(`     ${e.error}`);
+    });
+    process.exit(1);
+  }
+  
+  process.exit(0);
+}
+
+main().catch(console.error);

@@ -23,7 +23,7 @@ The relay is a connection layer of vant, not an app ([prd-relay.md](https://gith
 | the api face | `lib/api.js` relay - mount/status handlers, `relaySend` client seam |
 | boot wiring | `vant.startFull`/`startHeadless` mount the face when the posture is ON |
 
-The guard is mechanical: `test/no-legacy-bloat.test.js` FAILS the moment `lib/relay.js` reappears.
+The guard is mechanical: `tests/no-legacy-bloat.test.js` FAILS the moment `lib/relay.js` reappears.
 
 ## The wire (r/2)
 
@@ -62,7 +62,7 @@ Transport refusals ride HTTP statuses (the webhook transport's own): 401 unsigne
 
 ## The kit: one contract, checksummed copies
 
-The contract lives ONCE, in `web/kit/contracts/relay-contract.js` (+ `.d.ts` twin) at version **r/2**: the wire, the signature header, typed reply codes, the envelope rule, flavors, and the honest caps shape. Renderers hold their own checksummed copies - vendored by `scripts/vendor-relay-kit.js`, pinned by `.sha256` sidecars, and the parity pins (`test/relay-parity.test.js`) FAIL on any drift from kit head:
+The contract lives ONCE, in `web/kit/contracts/relay-contract.js` (+ `.d.ts` twin) at version **r/2**: the wire, the signature header, typed reply codes, the envelope rule, flavors, and the honest caps shape. Renderers hold their own checksummed copies - vendored by `scripts/vendor-relay-kit.js`, pinned by `.sha256` sidecars, and the parity pins (`tests/relay-parity.test.js`) FAIL on any drift from kit head:
 
 | Renderer | Their copy | Verified by |
 |----------|------------|-------------|
@@ -115,7 +115,7 @@ const r = await relay.send(
 
 ## Pins, rebuilt fresh
 
-`test/relay.test.js` walks the FULL loops over real sockets: signed gate (401/200/409 ladder), the hop round trip (forward + verbatim answer + no-body-leak + secret-never-rides), the ride loop (envelope -> open -> nonce -> door -> re-envelope, bearer inside), typed ride refusals through the pipe, the OFF posture, the body cap, the counters, and the sender seam. `test/relay-parity.test.js` pins face-to-kit constants, vendored byte-identity, shape agreement, and the retired-wire lies.
+`tests/relay.test.js` walks the FULL loops over real sockets: signed gate (401/200/409 ladder), the hop round trip (forward + verbatim answer + no-body-leak + secret-never-rides), the ride loop (envelope -> open -> nonce -> door -> re-envelope, bearer inside), typed ride refusals through the pipe, the OFF posture, the body cap, the counters, and the sender seam. `tests/relay-parity.test.js` pins face-to-kit constants, vendored byte-identity, shape agreement, and the retired-wire lies.
 
 ---
 

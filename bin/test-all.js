@@ -16,7 +16,7 @@ const results = { passed: [], failed: [] };
 const LIB = path.join(ROOT, 'lib');
 
 // (pass 20) allowNonZero: some checks assert on a graceful FAILURE path
-// (e.g. `vant test` in installs without test/ exits 1 with guidance). For
+// (e.g. `vant test` in installs without tests/ exits 1 with guidance). For
 // those, the check function decides from captured output; for everything
 // else a nonzero exit is still a hard fail.
 function test(name, cmd, check, allowNonZero) {
@@ -73,7 +73,7 @@ Runs from any directory; exits 1 on any failure.
     test('islands', 'islands --status', o => o.includes('Islands'));
     test('changelog', 'changelog', o => o.includes('Changelog'));
     test('test', 'test', o => o.includes('Build') || o.includes('Test') ||
-        // (pass 20) Installs without test/ now exit 1 with graceful guidance
+        // (pass 20) Installs without tests/ now exit 1 with graceful guidance
         // ("No test files found") instead of a raw ENOENT stack — that IS the
         // correct outcome there, so count it as a pass of the graceful path.
         o.includes('No test files found'), true);

@@ -25,7 +25,7 @@
  *
  * Escape hatch: `// STATUS-FIELD-OK: <reason>` on the line opts out of (a).
  *
- * Negative controls live in test/run-all.js-adjacent history: before
+ * Negative controls live in tests/run-all.js-adjacent history: before
  * trusting a PASS, temporarily drop a violating file into bin/ and confirm
  * the gate FAILS (pass 79 lesson — a gate without a negative control is a
  * rubber stamp; the first helpers gate missed member-expression `new ns.X()`

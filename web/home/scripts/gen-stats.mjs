@@ -13,7 +13,7 @@
  *   mcp            -> scripts/check-mcp-coverage.js output ("N documented")
  *   libModules     -> every .js file under lib/ in the repo checkout
  *   docPages       -> every .md file under docs/ (the census check-home reports)
- *   testSuites     -> every .test.js under test/ (the test/tmp QC copies excluded)
+ *   testSuites     -> every .test.js under tests/ (the tests/tmp QC copies excluded)
  *   version        -> package.json version (never a hardcoded copy)
  *
  * If a coverage gate refuses to run or its number cannot be parsed, the
@@ -75,7 +75,7 @@ try {
 
 const libModules = walk(path.join(ROOT, 'lib'), ['node_modules']).filter((f) => f.endsWith('.js')).length
 const docPages = walk(path.join(ROOT, 'docs'), ['node_modules']).filter((f) => f.endsWith('.md')).length
-const testSuites = walk(path.join(ROOT, 'test'), ['tmp']).filter((f) => f.endsWith('.test.js')).length
+const testSuites = walk(path.join(ROOT, 'tests'), ['tmp']).filter((f) => f.endsWith('.test.js')).length
 
 const stats = {
     _generatedBy: 'web/home/scripts/gen-stats.mjs',

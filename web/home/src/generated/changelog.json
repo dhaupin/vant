@@ -1,8 +1,47 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 94,
+  "_headingCount": 96,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 366 (audit round 9 follow-up: the verdict surfaces get",
+      "sections": [
+        {
+          "name": "Added: `packs/public/vant-verdict-surfaces` — the allow/deny verdict surfaces (10 oracles)",
+          "items": [
+            "Eight rows drive the **REAL operator door** — `bin/vant.js rls allow`,",
+            "Two rows drive the **layer helpers** directly — `lib/rls.js",
+            "Direction matters: an unclassified write verb (`grant`), a typo (`raed`),",
+            "Verification: the contract suite's `vant-verdict-surfaces` table (10 rows)"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 365 (audit round 9: the verdict surfaces stop failing open — an",
+      "sections": [
+        {
+          "name": "Changed: the pod `test/` directory is now `tests/` - the convention flips (vant#277)",
+          "items": []
+        },
+        {
+          "name": "Fixed: audit round 9 across the access-control/enforcement seam (3 findings, 16 discriminating pins)",
+          "items": [
+            "**`lib/rls.js isOperationAllowed` (R9-1)** mapped `op` with",
+            "**`lib/system.js isOperationAllowed` + `bin/system.js` (R9-2)** — the",
+            "**`bin/habitat.js` `can` (R9-3)** — the mode guard checked presence then",
+            "Verification: `test/rls-op-classification.test.js` — 16 pins, both",
+            "Swept the rest of the class: `lib/mcp.js` (level→scope, comment-correct),"
+          ]
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

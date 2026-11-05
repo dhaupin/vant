@@ -152,6 +152,25 @@ Filed with the round-7 audit (2026-11-04, vant PR #325) that found the defects i
 | `authority-classification-totality` | the forward-looking invariant: EVERY verb whose handler calls `_assertNotGuestAuthority` is ALSO admin-class at the door — a new authority verb cannot ship guarded-in-the-handler but door-reachable. The scan is proven live by asserting it detects the known family (scan-rot guard) | validated — REFUSED |
 | `authority-guard-does-not-overreach` | the authority block is NARROW: ordinary read verbs stay read-class and ordinary write verbs stay write-class | validated — REFUSED |
 
+### `public/vant-verdict-surfaces` — the allow/deny VERDICT surfaces (10 oracles; all validated 2026-11-04)
+
+**What it does.** Grades the operator-facing access-control doors themselves — the surfaces that answer `ALLOWED`/`DENIED` to a person or a script: `vant rls allow`, `vant system allow`, and `vant habitat can`. Each classifies an operation **word** and answers a verdict, and each once failed OPEN by mapping an UNCLASSIFIED word to the LOOSER class (a gate that answers ALLOWED for a word it never heard of — the opposite of the house's "unknown = write" law in `lib/guests.js classifyTool`). Eight rows drive the REAL CLI (`bin/vant.js <surface>`) as an in-process child spawn (the `vant-carriers` `bin/traveler` precedent) so the verdict AND the exit code are measured — the surface a script actually reads; two rows drive the layer helpers (`lib/rls.js`, `lib/system.js` `isOperationAllowed`) directly. ROOT is derived from the pack file's own location, so the bin is the repo's while cwd stays the harness sandbox. **Zero sockets.**
+
+Filed with the round-9 audit (2026-11-04, vant PR #330) that found the defects it now pins. Reverting the fix flips the seven finding-shaped rows to EXPLOITED; the three read/write-holds controls hold both ways by design.
+
+| Attack | What it shakes | Status |
+|---|---|---|
+| `rls-unclassified-write-verb-refuses` | `vant rls allow grant <res>`: the old map `['write','create','update','delete','commit'].includes(op) ? 'write' : 'read'` sent every UNLISTED write verb to the LOOSER read policy — `grant` printed ALLOWED while the identical `delete` printed DENIED. Must refuse with a non-zero exit (R9-1) | validated — REFUSED |
+| `rls-typo-refuses` | a typo (`raed`) resolved to read and printed ALLOWED. An unknown op word must refuse (fail-closed) | validated — REFUSED |
+| `rls-read-canon-holds` | the read canon is NOT over-tightened: a genuine read word still answers ALLOWED | validated — REFUSED |
+| `system-unknown-word-refuses` | `vant system allow totally-bogus-op`: the stub returned `{allowed:true}` for ANY string and the CLI truthy-tested the OBJECT, so a bogus word printed ALLOWED, exit 0. Must answer DENIED with a non-zero exit (R9-2) | validated — REFUSED |
+| `system-write-verb-holds` | a known write verb still answers ALLOWED, exit 0 | validated — REFUSED |
+| `habitat-write-verb-as-mode-refuses` | `vant habitat can delete <res> <user>`: the guard coerced `mode === "write" ? "write" : "read"`, so a WRITE verb as the mode answered against read and printed ALLOWED. A non-`read\|write` mode is a usage error (R9-3) | validated — REFUSED |
+| `habitat-unknown-mode-refuses` | an unknown mode word (`garbage`) coerced to read and printed ALLOWED. Must be a usage error | validated — REFUSED |
+| `habitat-read-mode-holds` | a valid mode (`read`) is still accepted and answers a real verdict | validated — REFUSED |
+| `layer-rls-op-never-looser-class` | `lib/rls.js isOperationAllowed`: every unlisted word (write verbs + a typo + empty) resolves WRITE, and the read canon resolves READ — measured in-process | validated — REFUSED |
+| `layer-system-op-refuses-unknown` | `lib/system.js isOperationAllowed`: the verdict object carries `allowed:false` for an unknown word (was `{allowed:true}` for any string) and `allowed:true` for the known vocabulary | validated — REFUSED |
+
 ### `public/vant-network-wall` — the outbound-network SSRF wall (5 oracles; all validated)
 
 **What it does.** Attacks the wall UNDER the network doors — `lib/network.js`'s `isInternalIP` / `isPrivateLanIP` / `isDomainAllowed` / `fetch` are plain in-process code, and the MCP `vant_network_fetch` tool (driven through `lib/mcp.execute`, the exact `/mcp/exec` dispatcher) is the guest-reachable network door. Four rows are self-contained (they drive lib/network.js directly, no route — the vant-brain batch-2 precedent), so they earn strict verdicts in every run root; the door row rides the shared `mcp-exec` arm. **Zero external sockets**: the door row dials a test-owned loopback listener and asserts it is never reached (the vant-relay real-upstream precedent, inverted), and the DNS row stubs `dns.resolve4`/`resolve6` in-process.

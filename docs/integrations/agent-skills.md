@@ -45,11 +45,9 @@ metadata:
 ## Installation
 
 ```bash
-# Export Vant as a skill
-vant skills:export
-
-# Or manually copy
-cp -r models/public/vant ~/.claude/skills/
+# No CLI export command exists - point the tool at the tree directly:
+cp -r models/public/vant ~/.claude/skills/vant
+# each skills/vant-skill-*/SKILL.md is already agentskills-shaped
 ```
 
 ## When to Use
@@ -108,14 +106,14 @@ CRITICAL_CONTEXT:
 ### Branch-per-Agent Workflow
 
 ```bash
-# Agent A starts work
-vant branch create agent-a
-vant sync push
+# Agent A starts work (agents branch off staging, then push)
+git checkout -b agent-a
+vant sync --push "agent-a session start"
 
 # Agent B takes over
-vant branch switch agent-a
-vant sync pull
-vant branch create agent-b
+git checkout agent-a
+vant sync --pull
+vant branch commit   # or: vant branch auto / status / push / pr
 ```
 
 ### Trust Levels
