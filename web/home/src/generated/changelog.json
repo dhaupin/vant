@@ -1,8 +1,28 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 99,
+  "_headingCount": 100,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 370 (the publish-only exports - the forum decision trail becomes a read-only artifact and consensus learns the reconcile report, vant#335)",
+      "sections": [
+        {
+          "name": "Added: `forum exportTrail(thread, opts)` — one derivation, many readers",
+          "items": []
+        },
+        {
+          "name": "Added: `consensus reconcile(topic)` — a health report, roots not ballots",
+          "items": []
+        },
+        {
+          "name": "Verification",
+          "items": []
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

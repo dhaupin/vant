@@ -5,6 +5,20 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 370 (the publish-only exports - the forum decision trail becomes a read-only artifact and consensus learns the reconcile report, vant#335)
+
+### Added: `forum exportTrail(thread, opts)` — one derivation, many readers
+
+The durable decision log behind threadDecisionTrail exports as a read-only artifact: json rows only (the format gate names 'json' as the whole supported surface — the machine-readable contract IS the export; clarifying renderings belong outside the engine), an optional `since` filter on vote timestamps, and an optional voters-digest withhold (`withholdVotes: true`) for audiences that need the outcome without the voter names. A publication-backed thread rides the EXACT same tenancy gate the vote-carrying read path uses (`_publicationVisible`, pass 87 rules) — fail-closed to an anonymous reader (E_FORUM_VISIBILITY), so a publish-only channel cannot leak a gated row either. No write path and no vote surface is exposed by the mode.
+
+### Added: `consensus reconcile(topic)` — a health report, roots not ballots
+
+The cross-process merge unions votes and carries reap tombstones, but the surface never answered "do our ledgers agree". reconcile(topic) reports, per reachable tier (hot in-memory + the disk snapshot row each hydrate would load), the topic's deterministic row hash, vote-row count, and reap state, plus the first divergent row id on divergence — and DELIBERATELY no voting and no automatic repair: the caller (tenant) decides what reconciliation means. Tombstone discipline is kept in the report itself: a converged reap reads as agreement (both tiers dropped the row) while still naming the tombstone, and a tombstoned topic can never read as resurrected.
+
+### Verification
+
+tests/forum-consensus-exports.test.js carries 8 pins; ALL flip by stashing the lib/forum.js + lib/consensus.js fixes (verified pre-fix), and the adjacent suites hold green post-fix (forum-decisions-persistence 12/0, ledger-persistence 5/0). Wave D of the Synmergia port-review adoption (#335); the economy seam (#337: credit-side ledger, market tape, typed economy events, world-base connector) is the next pass.
+
 ## [Unreleased] - pass 369 (the market settles by the record - vend-able settle contracts, the settle-verifier seam, and the trust layer as a per-tenant opt-out, vant#333/#334)
 
 ### Added: vend-able settle contracts (deterministic settle without buyer discretion)
