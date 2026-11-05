@@ -5,7 +5,7 @@
  * A real crashtest run root, zero install steps:
  *
  *   - packs load through crashtest v1.1.0's REAL pack loader + Harness
- *     (not the micro-harness in test/crashtest-packs.test.js);
+ *     (not the micro-harness in tests/crashtest-packs.test.js);
  *   - the target is vant's own lib graph, exercised in a throwaway sandbox
  *     (same fixture shape as the contract suite - the workspace never
  *     touches its own models/ tree);
@@ -45,7 +45,7 @@ const KNOWN_FINDINGS = new Set([
     // Whitelist is EMPTY as of the 2026-10-22 read-side trust gate: every
     // oracle measures REFUSED (or an honest bounded skip). If a new genuine
     // finding gets measured and pinned, its line belongs here and in
-    // test/ci-crashtest-gate.js ALLOWED_FINDINGS — both in the same commit,
+    // tests/ci-crashtest-gate.js ALLOWED_FINDINGS — both in the same commit,
     // and deleted together when its fix lands.
 ]);
 
@@ -1853,7 +1853,7 @@ function resetEdgeChains(sb) {
     const Server = require(path.join(sb, 'lib', 'server.js')).Server;
     EDGE_CHAINS.open = new Server({ port: 0, authRequired: false });
     EDGE_CHAINS.priv = new Server({ port: 0, authRequired: true });
-    // (2026-10-27 REST door-parity arm, same as test/crashtest-packs) the
+    // (2026-10-27 REST door-parity arm, same as tests/crashtest-packs) the
     // REST surface's tool-carrier doors register on the chains so the
     // packs drive the REAL startREST handler code without a listener.
     let restRoutes;
@@ -2367,7 +2367,7 @@ function buildRoutes(sb, Harness) {
 
     const LIB_FIRST_DOORS_CHILD = `${CHILD_STDOUT_GUARD}
 // (lib-first-doors census 2026-10-28) the legacy-runner graveyard pass: 31
-// sweep-invisible test/test-*.js legacy suites cover ALIVE lib modules and
+// sweep-invisible tests/test-*.js legacy suites cover ALIVE lib modules and
 // run in NO suite wall - four of their modules (citations, telegram,
 // webhooks, theme) have ZERO pack coverage anywhere. This child is their
 // first doors: the real doors, not the "has X function" shape-smokes the
@@ -2454,7 +2454,7 @@ function buildRoutes(sb, Harness) {
 
     // (legacy-orphan-laws census 2026-10-28, wave 6 slice 2) the
     // legacy-runner graveyard's REAL-behavior leftovers: of the 31
-    // sweep-invisible test/test-*.js files, most duplicate laws that MODERN
+    // sweep-invisible tests/test-*.js files, most duplicate laws that MODERN
     // suites now cover (escrow.test.js, habitat-rls*, security-hardening
     // P0-9/P1-15, islands.test.js, vaf's audit-C1 regression). What stayed
     // ORPHANED - graded by NO modern suite and NO pack row - are these: the
@@ -2601,7 +2601,7 @@ function buildRoutes(sb, Harness) {
     });
 
     // (qos-window-laws census 2026-10-28) the QoS window family converts:
-    // the modern twin (test/qos.test.js) grades only shapes, and the packs
+    // the modern twin (tests/qos.test.js) grades only shapes, and the packs
     // ride one rate-lane (the carriers' E_TRAVELER_RATE), so the machinery's
     // window BEHAVIORS were never graded: RateLimiter's sliding window
     // (under-limit ads, per-client refusal at the cap, the window sliding
@@ -4423,7 +4423,7 @@ const LIFECYCLE_CHILD = `${CHILD_STDOUT_GUARD}
     // -> the REAL Node wire, lib/server.js _handleRequest, driven with the
     // same fake req/res pairs the native door-pin suite uses (no sockets,
     // no wall clock). (Phase A bucket 0, #249) The native suite
-    // test/crashtest-server.js converts into pack rows graded against THIS
+    // tests/crashtest-server.js converts into pack rows graded against THIS
     // route; the suite itself stays green alongside until the run is one
     // full cycle green on both (the reverse-verification law).
     // `pin` is the row's arming need: 'escrow-dry' pins the budget spent
@@ -4928,7 +4928,7 @@ const LIFECYCLE_CHILD = `${CHILD_STDOUT_GUARD}
                     }
                     if (o.op === 'seed') {
                         // (2026-10-28 wave-2 conversion) the SEEDS family off
-                        // the retiring test/state-wiring.test.js: seedScope
+                        // the retiring tests/state-wiring.test.js: seedScope
                         // over a throwaway in-memory MeshTree (no dir, no
                         // side effects) — scopePath + 64-hex seed; invalid
                         // regions answer the boundary's real typed refusal.
@@ -5044,7 +5044,7 @@ const LIFECYCLE_CHILD = `${CHILD_STDOUT_GUARD}
     });
     // wiring-store: POST { ops: [{ op, ... }] } — the BARE-STORE arm
     // (2026-10-28 wave-2 conversion, #249): the tree-tier + StateAnchor
-    // ledger laws off test/state-wiring.test.js's state-store families,
+    // ledger laws off tests/state-wiring.test.js's state-store families,
     // driven on the REAL lib/state-store seams in-process (deterministic
     // roots, treeFor typed presence, the hydrate law, and the append-only
     // anchor chain ride the actual store instance — no fixtures, no

@@ -1,0 +1,531 @@
+#!/usr/bin/env node
+/**
+ * Vant CI Test Runner
+ * 
+ * DESIGN PRINCIPLES:
+ * - Simple: No heavy frameworks, easy to understand
+ * - Extensible: Easy to add new tests
+ * - Fork-friendly: Works in forks with minimal changes
+ * - CI-compatible: Exit codes 0/1/2, JSON output
+ * 
+ * USAGE:
+ *   node tests/ci.js                    # Run all tests
+ *   node tests/ci.js --lib=vaf          # Test specific library
+ *   node tests/ci.js --lib=vaf --lib=config  # Multiple libs
+ *   node tests/ci.js --bin=vant         # Test specific binary
+ *   node tests/ci.js --json            # JSON output
+ *   node tests/ci.js --category=security  # Security tests only
+ * 
+ * EXIT CODES:
+ *   0 = success (all tests pass)
+ *   1 = failure (tests fail)
+ *   2 = warning (non-critical issues)
+ * 
+ * FORK MODIFICATIONS:
+ *   - Modify CATEGORIES to add test groups
+ *   - Modify TEST_FUNCTIONS at bottom to add tests
+ *   - Add fixtures as needed
+ * 
+ * NODE SUPPORT:
+ *   - Node.js 18+ (required for fetch/globalThis)
+ *   - See .nvmrc for exact version
+ */
+
+const fs = require('fs');
+const path = require('path');
+const { spawn } = require('child_process');
+
+const ROOT = path.resolve(__dirname, '..');
+const args = process.argv.slice(2);
+
+// ============================================
+// CONFIGURATION
+// ============================================
+
+const CONFIG = {
+  /** @type {string[]} - Supported Node.js versions */
+  supportedNode: ['18', '20', '22'],
+  
+  /** @type {number} - Test timeout in ms */
+  testTimeout: 5000,
+  
+  /** @type {string[]} - Required files */
+  requiredFiles: [
+    'bin/vant.js',
+    'lib/vaf.js', 
+    'lib/config.js',
+    'lib/brain-lock.js',
+    'lib/branch.js'
+  ]
+};
+
+/** @readonly @enum {string} */
+const CATEGORIES = {
+  UNIT: 'unit',
+  INTEGRATION: 'integration', 
+  SECURITY: 'security',
+  SMOKE: 'smoke'
+};
+
+// ============================================
+// STATE
+// ============================================
+
+const state = {
+  tests: [],
+  passed: 0,
+  failed: 0,
+  warnings: 0,
+  skipped: 0,
+  startTime: Date.now()
+};
+
+// Parse args
+const options = {
+  json: args.includes('--json'),
+  libs: args.filter(a => a.startsWith('--lib=')).map(a => a.split('=')[1]),
+  bins: args.filter(a => a.startsWith('--bin=')).map(a => a.split('=')[1]),
+  category: args.find(a => a.startsWith('--category='))?.split('=')[1]
+};
+
+// ============================================
+// TEST FUNCTIONS
+// ============================================
+
+/**
+ * Log message (silent in JSON mode)
+ * @param {string} msg 
+ */
+function log(msg) {
+  if (!options.json) console.log(msg);
+}
+
+/**
+ * Add a passing test
+ * @param {string} name 
+ */
+function pass(name) {
+  state.passed++;
+  state.tests.push({ name, status: 'pass' });
+  log(`✓ ${name}`);
+}
+
+/**
+ * Add a failing test
+ * @param {string} name 
+ * @param {string} error 
+ */
+function fail(name, error) {
+  state.failed++;
+  state.tests.push({ name, status: 'fail', error });
+  log(`✗ ${name}: ${error}`);
+}
+
+/**
+ * Add a warning
+ * @param {string} name 
+ * @param {string} message 
+ */
+function warn(name, message) {
+  state.warnings++;
+  state.tests.push({ name, status: 'warn', message });
+  log(`⚠ ${name}: ${message}`);
+}
+
+/**
+ * Record a skipped test (environment can't exercise it — NOT a failure).
+ * Skips never affect the exit code, so CI is deterministic across machines
+ * (e.g. sandboxes that deny network binds vs dev boxes that allow them).
+ * @param {string} name
+ * @param {string} message
+ */
+function skip(name, message) {
+  state.skipped++;
+  state.tests.push({ name, status: 'skip', message });
+  log(`○ ${name}: ${message}`);
+}
+
+/**
+ * Test a library loads
+ * @param {string} name - Library name (without .js)
+ * @param {object} [options] - Test options
+ * @param {string} [options.category] - Test category
+ * @param {string[]} [options.exports] - Required exports
+ */
+async function testLib(name, options = {}) {
+  const { category = CATEGORIES.UNIT, exports: requiredExports } = options;
+  
+  // Filter by category
+  if (options.category && options.category !== category) return;
+  
+  const fullName = `${category}:${name}`;
+  
+  try {
+    const lib = require(path.join(ROOT, 'lib', name + '.js'));
+    pass(fullName);
+    
+    // Check exports if specified
+    if (requiredExports) {
+      const actual = Object.keys(lib);
+      const missing = requiredExports.filter(e => !actual.includes(e));
+      if (missing.length > 0) {
+        warn(`${fullName}:exports`, `Missing: ${missing.join(', ')}`);
+      }
+    }
+  } catch(e) {
+    fail(fullName, e.message);
+  }
+}
+
+// Binaries that are long-running servers by design: alive at the watchdog
+// deadline IS their pass condition. Anything else that must be SIGKILLed
+// "hung" and fails.
+const SERVER_BINS = new Set(['mcp', 'watch', 'server']);
+
+// (pass 21) Per-binary budgets. Bins that legitimately need longer than the
+// smoke timeout get their own allowance so the watchdog doesn't kill a
+// healthy-but-slow check. test-all runs 17 sub-checks (10s timeout each via
+// execSync) and needs ~25s on slow machines; everything else keeps the 5s
+// smoke budget.
+const BIN_BUDGETS = { 'test-all': 30000 };
+const binBudget = name => BIN_BUDGETS[name] || CONFIG.testTimeout;
+
+// Error signatures that mean "this environment refuses to run the binary",
+// not "the binary is broken". Matched case-insensitively against combined
+// output when a binary exits nonzero on its own.
+const ENV_DENIALS = [
+  'network permission required', // sandbox bind denial (bin/server.js)
+  'eperm: operation not permitted',
+  'eacces: permission denied'
+];
+
+// Sandbox-gate refusals: the binary ran, loaded its security chain, and
+// correctly refused an operation it was not granted capability for. Under
+// deny-by-default that is the B-2 security chain doing its job — recorded
+// as a skip (the refusal itself is verified behavior; the suites that pin
+// gate semantics live in security tests).
+const SECURITY_REFUSALS = [
+  'capability required',
+  'capability refused', // snapshot.js prints refusals to stdout by design
+  'sudo required',
+  'authentication required'
+];
+
+/**
+ * Pick the most readable line for a skip message: the first line that
+ * actually matches a refusal/denial pattern (stderr noise like Node's
+ * circular-dependency warnings often comes after it).
+ * @param {string} combined - Lowercased combined stdout+stderr
+ * @param {string[]} patterns - Matched patterns
+ * @returns {string} Original-case detail line (or '')
+ */
+function detailLine(combined, patterns) {
+  for (const p of patterns) {
+    const idx = combined.indexOf(p);
+    if (idx >= 0) {
+      const lineStart = combined.lastIndexOf('\n', idx) + 1;
+      const lineEnd = combined.indexOf('\n', idx);
+      return combined.slice(lineStart, lineEnd === -1 ? undefined : lineEnd).trim();
+    }
+  }
+  return '';
+}
+
+/**
+ * Test a binary runs
+ *
+ * Judged on EXIT SEMANTICS, never on stdout. The old "any stdout = pass"
+ * rule was environment-fragile: a leftover .circuit-auth.json INFO line made
+ * the same binary flip between pass/fail across machines, and a
+ * loudly-failing server passed as long as it printed before dying.
+ *
+ * @param {string} name - Binary name
+ * @param {object} [options] - Test options
+ */
+async function testBin(name, options = {}) {
+  const { category = CATEGORIES.SMOKE } = options;
+
+  const fullName = `${category}:${name}`;
+  const binPath = path.join(ROOT, 'bin', name + '.js');
+
+  // Check file exists
+  if (!fs.existsSync(binPath)) {
+    fail(fullName, 'File not found');
+    return;
+  }
+
+  const result = await new Promise(resolve => {
+    const budget = binBudget(name);
+    // stdin: 'ignore' -> reads from the child see immediate EOF. Interactive
+    // CLIs (setup.js) block on readline waiting for input, and a piped stdin
+    // never delivers EOF, so they'd hang the watchdog. 'ignore' is /dev/null
+    // without an extra fd to clean up.
+    const proc = spawn('node', [binPath], {
+      timeout: budget,
+      killSignal: 'SIGKILL',
+      stdio: ['ignore', 'pipe', 'pipe']
+    });
+    let out = '', err = '', watchdog = false;
+    proc.stdout.on('data', d => out += d);
+    proc.stderr.on('data', d => err += d);
+
+    // Watchdog: spawn's timeout only sends SIGTERM; servers that ignore it
+    // (mcp.js, watch.js) would hang the runner forever. SIGKILL guarantees close.
+    const killer = setTimeout(() => {
+      watchdog = true;
+      try { proc.kill('SIGKILL'); } catch (e) {}
+    }, budget + 1000);
+    killer.unref();
+
+    proc.on('close', (code, signal) => {
+      clearTimeout(killer);
+      resolve({ code, signal, out, err, watchdog });
+    });
+
+    proc.on('error', e => {
+      clearTimeout(killer);
+      resolve({ code: -1, signal: null, out, err, watchdog, error: e.message });
+    });
+  });
+
+  // Spawn failure: binary genuinely cannot run
+  if (result.error) {
+    fail(fullName, result.error);
+    return;
+  }
+
+  // Alive at the deadline: pass for known servers (that is what they DO),
+  // fail for anything else (a CLI that hangs is broken).
+  if (result.watchdog || result.signal === 'SIGKILL') {
+    if (SERVER_BINS.has(name)) {
+      pass(fullName);
+    } else {
+      fail(fullName, `hung past ${binBudget(name)}ms watchdog (not a known server)`);
+    }
+    return;
+  }
+
+  // Clean exit: pass
+  if (result.code === 0) {
+    pass(fullName);
+    return;
+  }
+
+  // Self-exited nonzero: broken, UNLESS (a) the environment itself refused
+  // — denials become skips so a capability-poor sandbox does not red-flag
+  // CI — or (b) the binary is presenting its USAGE screen (standard CLI
+  // convention: no args -> print usage to STDOUT, exit 1). Both checked on
+  // the same evidence, denial first so a denied bind is never mistaken for
+  // a usage screen.
+  const combined = (result.out + '\n' + result.err).toLowerCase();
+  if (ENV_DENIALS.some(d => combined.includes(d))) {
+    const detail = detailLine(combined, ENV_DENIALS);
+    skip(fullName, `environment cannot run binary (exit ${result.code}): ${detail.slice(0, 160)}`);
+    return;
+  }
+
+  if (SECURITY_REFUSALS.some(d => combined.includes(d))) {
+    const detail = detailLine(combined, SECURITY_REFUSALS);
+    skip(fullName, `sandbox gate refused (deny-by-default working; exit ${result.code}): ${detail.slice(0, 160)}`);
+    return;
+  }
+
+  if (result.out.trim() && !result.err.includes('Error') && !result.err.includes('failed')) {
+    pass(fullName);
+    return;
+  }
+
+  fail(fullName, (result.err || result.out || '').trim().slice(0, 300) || `exit ${result.code}`);
+}
+
+/**
+ * Test a security pattern is blocked
+ * @param {string} name 
+ * @param {string} input - Malicious input
+ * @param {Function} testFn - Test function
+ * @param {boolean} shouldBlock - Expected result
+ */
+async function testSecurity(name, input, testFn, shouldBlock = true) {
+  const fullName = `security:${name}`;
+  
+  try {
+    const result = testFn(input);
+    if (result.blocked === shouldBlock) {
+      pass(fullName);
+    } else {
+      fail(fullName, `Expected ${shouldBlock ? 'blocked' : 'allowed'}, got ${result.blocked}`);
+    }
+  } catch(e) {
+    fail(fullName, e.message);
+  }
+}
+
+/**
+ * Run security tests using VAF
+ */
+async function _testSecurityTests() {
+  try {
+    const vafPath = path.join(ROOT, 'lib/vaf.js');
+    const vaf = require(vafPath);
+    
+    // Test script injection blocked
+    await testSecurity('script', '<script>', vaf.checkContent, true);
+    await testSecurity('img-onerror', '<img onerror=alert(1)>', vaf.checkContent, true);
+    await testSecurity('svg', '<svg onload=alert(1)>', vaf.checkContent, true);
+    await testSecurity('javascript:', 'javascript:alert(1)', vaf.checkContent, true);
+    
+    // Test command injection blocked
+    await testSecurity('shell', 'rm -rf /', vaf.checkContent, true);
+    await testSecurity('pipe', '| bash', vaf.checkContent, true);
+    await testSecurity('subshell', '$(whoami)', vaf.checkContent, true);
+    await testSecurity('backtick', '\`id\`', vaf.checkContent, true);
+    
+    // Test path traversal blocked
+    await testSecurity('path-traversal', '../etc/passwd', vaf.checkPathTraversal, true);
+    await testSecurity('absolute-path', '/etc/passwd', vaf.checkPathTraversal, true);
+    await testSecurity('double-dot', '..', vaf.checkPathTraversal, true);
+    
+    // Test allowed paths (should NOT block)
+    await testSecurity('allowed-file', 'models/public/goals.md', vaf.checkPathTraversal, false);
+    await testSecurity('allowed-dir', 'models/public', vaf.checkPathTraversal, false);
+    
+  } catch(e) {
+    warn('security:vaf', e.message);
+  }
+}
+
+/**
+ * Check Node.js version is supported
+ */
+function checkNodeVersion() {
+  const version = process.version.slice(1).split('.')[0];
+  const supported = CONFIG.supportedNode.includes(version);
+  
+  if (supported) {
+    pass(`node:${version}`);
+  } else {
+    warn(`node:${version}`, `Not in supported list: ${CONFIG.supportedNode.join(', ')}`);
+  }
+}
+
+/**
+ * Check required files exist
+ */
+function checkRequiredFiles() {
+  CONFIG.requiredFiles.forEach(file => {
+    const fullPath = path.join(ROOT, file);
+    if (fs.existsSync(fullPath)) {
+      pass(`file:${file}`);
+    } else {
+      fail(`file:${file}`, 'Required file missing');
+    }
+  });
+}
+
+/**
+ * Check syntax of all JS files
+ */
+function checkSyntax() {
+  const vm = require('vm');
+  const dirs = ['lib', 'bin'];
+  
+  dirs.forEach(dir => {
+    const dirPath = path.join(ROOT, dir);
+    if (!fs.existsSync(dirPath)) return;
+    
+    fs.readdirSync(dirPath)
+      .filter(f => f.endsWith('.js'))
+      .forEach(file => {
+        const fullPath = path.join(dirPath, file);
+        try {
+          // COMPILE only - do NOT require. Requiring CLI binaries executes
+          // them (side effects, process.exit kills this runner).
+          // Wrap like Node's CJS loader (strip shebang, wrap module scope) so
+          // legal top-level `return` and `#!` lines compile.
+          let src = fs.readFileSync(fullPath, 'utf8');
+          if (src.startsWith('#!')) src = '//' + src.slice(2);
+          new vm.Script('(function (exports, require, module, __filename, __dirname) {' +
+            src + '\n});', { filename: fullPath });
+          pass(`syntax:${dir}/${file}`);
+        } catch(e) {
+          fail(`syntax:${dir}/${file}`, e.message);
+        }
+      });
+  });
+}
+
+// ============================================
+// MAIN
+// ============================================
+
+async function main() {
+  log('VANT CI TEST RUNNER');
+  log('='.repeat(40));
+  log(`Node.js: ${process.version}`);
+  log('');
+  
+  // Pre-flight checks
+  checkNodeVersion();
+  checkRequiredFiles();
+  checkSyntax();
+  
+  log('--- Libraries ---');
+  
+  // Library tests
+  if (options.libs.length === 0 || options.libs.length > 0) {
+    
+    const libs = fs.readdirSync(path.join(ROOT, 'lib'))
+      .filter(f => f.endsWith('.js'))
+      .map(f => f.replace('.js', ''));
+    
+    for (const lib of libs) {
+      if (options.libs.length === 0 || options.libs.includes(lib)) {
+        await testLib(lib);
+      }
+    }
+  }
+  
+  // Binary tests (--bin=X filters; an empty list means run all)
+  {
+    log('--- Binaries ---');
+
+    const bins = fs.readdirSync(path.join(ROOT, 'bin'))
+      .filter(f => f.endsWith('.js'))
+      .map(f => f.replace('.js', ''));
+
+    for (const bin of bins) {
+      if (options.bins.length === 0 || options.bins.includes(bin)) {
+        await testBin(bin);
+      }
+    }
+  }
+  
+  // Exit
+  log('');
+  log('='.repeat(40));
+  const elapsed = ((Date.now() - state.startTime) / 1000).toFixed(1);
+  
+  if (options.json) {
+    console.log(JSON.stringify({
+      node: process.version,
+      passed: state.passed,
+      failed: state.failed,
+      warnings: state.warnings,
+      skipped: state.skipped,
+      elapsed: `${elapsed}s`,
+      tests: state.tests
+    }, null, 2));
+  } else {
+    log(`RESULTS: ${state.passed} passed, ${state.failed} failed, ${state.warnings} warnings, ${state.skipped} skipped (${elapsed}s)`);
+  }
+  
+  // Exit codes
+  if (state.failed > 0) process.exit(1);
+  if (state.warnings > 0) process.exit(2);
+  process.exit(0);
+}
+
+main().catch(e => {
+  console.error(e);
+  process.exit(1);
+});

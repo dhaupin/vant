@@ -70,7 +70,7 @@ Every verb: exit 0 ok · 1 typed lib error (code on stderr) · 2 usage · 3 gate
 
 ## 3. The settlement economics (ESCROW is real)
 
-,U6.5 closed the prototype's honest gap. The invariant, verified against the real escrow store and pinned in `test/market-skills.test.js`:
+,U6.5 closed the prototype's honest gap. The invariant, verified against the real escrow store and pinned in `tests/market-skills.test.js`:
 
 | Stage | Escrow | Money |
 |-------|--------|-------|
@@ -172,7 +172,7 @@ The TTL clamp is also dual-path now: `market.skillsTradeTtlMs` is clamped to 60s
 
 | Pin | Where |
 |---|---|
-| gate-inert typed | `test/market-skills.test.js` (U6.2) |
+| gate-inert typed | `tests/market-skills.test.js` (U6.2) |
 | listing boundaries (launch/price/title) | same (U6.4) |
 | happy-path loop, hash, debit-on-confirm-only | same (U6.4) |
 | seller-keyed reputation up AND down | same (U6.3/U6.4) |
@@ -191,8 +191,8 @@ The TTL clamp is also dual-path now: `market.skillsTradeTtlMs` is clamped to 60s
 | **QC unlimited default** (no explicit supply = labor service) | same (QC pass-204) |
 | **QC self-buy refused** at buy time | same (QC pass-204) |
 | **QC settle identity** (third-party/anonymous refused; debit lands on the real buyer exactly once) | same (QC pass-204) |
-| **QC expired-hold prune** (starvation regress) | `test/escrow.test.js` (QC pass-204) |
-| grand tour door count 311 to 317 | `test/e2e-grand-tour.test.js` gate B |
+| **QC expired-hold prune** (starvation regress) | `tests/escrow.test.js` (QC pass-204) |
+| grand tour door count 311 to 317 | `tests/e2e-grand-tour.test.js` gate B |
 
 ---
 

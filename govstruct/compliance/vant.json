@@ -5,12 +5,12 @@
     "gates": [
         {
             "banner": "the pod battery",
-            "runs": ["npm test", "node test/run-all.js"],
+            "runs": ["npm test", "node tests/run-all.js"],
             "where": "test.yml ci job - Run tests + Run standalone suites"
         },
         {
             "banner": "the crashtest packs floor (contract table + real-harness run root)",
-            "runs": ["node test/ci-crashtest-gate.js", "npx crashtest lint-determinism"],
+            "runs": ["node tests/ci-crashtest-gate.js", "npx crashtest lint-determinism"],
             "where": "test.yml crashtest job",
             "pin": "crashtest@1.1.0"
         },

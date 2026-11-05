@@ -670,7 +670,7 @@ Some dev tools are invoked with node directly rather than through the `vant` dis
 
 ```bash
 bash bin/sweep.sh        # Test health gate (or: bash bin/sweep.sh --quick)
-node test/runner.js      # Raw test runner
+node tests/runner.js      # Raw test runner
 ```
 
 ## See also

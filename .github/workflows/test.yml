@@ -8,8 +8,8 @@ name: VANT CI
 #   ci    — the gates: security, smoke doors, packs/poststruct/govstruct/
 #           dep-ledger/changelog/claims/language/docs/ledger checks.
 #   sweep — the suite wall as a 4-way round-robin shard matrix
-#           (test/run-all.js --shard=N/4). Each shard is its own runner with
-#           its own checkout, so the order-independence seam (test/slate.js)
+#           (tests/run-all.js --shard=N/4). Each shard is its own runner with
+#           its own checkout, so the order-independence seam (tests/slate.js)
 #           never has two suites racing one workspace; the per-suite count of
 #           each shard's own receipts proves the split covers every suite.
 # Concurrency cancels in-flight runs when a newer push lands on the same
@@ -70,8 +70,8 @@ jobs:
       - name: Smoke doors (runner + 39-pin smoke batch)
         run: |
           node -e "console.log('vant', require('./package.json').version)"
-          node test/ci.js
-          node test/runner.js
+          node tests/ci.js
+          node tests/runner.js
 
       - name: Eyes gate (eyestruct@1.0 visual ledger, browserless)
         # The crashtest lane aimed at appearance instead of attackability.
@@ -157,6 +157,9 @@ jobs:
       - name: changelog parity gate (site json vs CHANGELOG.md byte-compare, version truth)
         run: npm run lint:changelog
 
+      - name: prestruct pins gate (family floor ^1.2.0 + vendored islands.js freshness, vant#328)
+        run: npm run lint:prestruct
+
       - name: Fiction signatures (repo-wide, wrong-claims regression gate)
         run: npm run lint:claims
 
@@ -181,12 +184,12 @@ jobs:
   # results depended on ordering (live-fire repro: guests tripped
   # agents.maxAgents on a roster the prior suite left; teams-refresh
   # ENOENTed on a mutated state.json). run-all gives every suite the same
-  # baseline (per-suite slate restore, see test/slate.js) and exits 1 on
+  # baseline (per-suite slate restore, see tests/slate.js) and exits 1 on
   # failures / 2 on timeouts.
   # (pass 363) THE WALL ITSELF FANS OUT: a 4-way shard matrix cuts the
   # measured 450s serial wall to its longest shard (top-20 slowest suites =
   # 73% of the wall, so shards round-robin the sorted list to spread the
-  # slow clusters — test/run-all.js --shard). fail-fast is off on purpose:
+  # slow clusters — tests/run-all.js --shard). fail-fast is off on purpose:
   # a red shard must not cancel the others' receipts.
   sweep:
     runs-on: ubuntu-latest
@@ -209,7 +212,7 @@ jobs:
 
       - name: Baseline seed (the wall's precondition)
         # The sweep's health. In the pre-shard lane this seeding happened
-        # IMPLICITLY because `node test/ci.js` always ran first inside the
+        # IMPLICITLY because `node tests/ci.js` always ran first inside the
         # one big job, so `run-all` never saw a bare checkout
         # (fresh-install-resolution.test.js documents the dependency).
         # Shards start from a bare checkout, so the seed is now an explicit
@@ -217,10 +220,10 @@ jobs:
         # artifacts (measured on the 5b88257c run: init-wizard rerun-grant
         # and state-persistence #224 in shard 1, kernel-wiring census
         # ENOENT in shard 2, all green once seeded).
-        run: node test/ci.js
+        run: node tests/ci.js
 
       - name: Suite wall shard ${{ matrix.shard }}/4
-        run: node test/run-all.js --shard=${{ matrix.shard }}/4
+        run: node tests/run-all.js --shard=${{ matrix.shard }}/4
 
   # The crashtest pack matrix as its OWN gate (separate runner budget from
   # the main suite wall): the strict contract table + the REAL harness run
@@ -254,4 +257,4 @@ jobs:
         run: npx crashtest lint-determinism
 
       - name: Crashtest gate (contract table + real-harness run root)
-        run: node test/ci-crashtest-gate.js
+        run: node tests/ci-crashtest-gate.js

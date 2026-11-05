@@ -102,7 +102,7 @@ Org/mesh scoping (scope-aware eras), agora sign-off on close, horcrux AUTO-refre
 
 ## Pinned
 
-`test/era.test.js` (7 pins): typed refusals, subscriber no-op without an era, cross-process persistence across THREE real child processes (open, fold, die; resume+close, verify archive integrity), double-open refusal, tamper detection on a mutated rollup, and the MCP door loop. `test/e2e-grand-tour` gates the registry count.
+`tests/era.test.js` (7 pins): typed refusals, subscriber no-op without an era, cross-process persistence across THREE real child processes (open, fold, die; resume+close, verify archive integrity), double-open refusal, tamper detection on a mutated rollup, and the MCP door loop. `tests/e2e-grand-tour` gates the registry count.
 
 ---
 

@@ -33,11 +33,15 @@ const dispositions = {
     'vant': 'the dispatcher itself',
     // Internal test helper invoked via package scripts/docs, not a user verb.
     'test-core': 'internal CI test driver',
-    // Internal CI smoke helper (test/ci.js consumes it, not humans).
+    // Internal CI smoke helper (tests/ci.js consumes it, not humans).
     'summary': 'internal CI summary helper',
     // bot.js is documented as `vant telegram` (the routed command);
     // the row notes the module is the Telegram bot.
     'bot': 'documented as `vant telegram` (routed name)',
+    // mesh-status.js is the module behind the `vant mesh` command; cli.md
+    // documents the routed forms (`vant mesh`, `vant mesh status`), so this
+    // bin needs no separate row (same pattern as bot.js).
+    'mesh-status': 'documented as `vant mesh status` (routed name)',
     // agent-spawner.js / test-all.js are now doc-row'd by routed+file name
     // (pass 192), so no disposition needed - left here as an example.
 };

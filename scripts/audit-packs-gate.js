@@ -3,7 +3,7 @@
  * audit-packs-gate.js - run packstruct `audit-conformance` (SPEC section 7)
  * as a CI-grade gate over the repo, with the KNOWN-FINDING allowlist from
  * the same house pattern as scripts/crashtest-run.js KNOWN_FINDINGS and
- * test/ci-crashtest-gate.js ALLOWED_FINDINGS.
+ * tests/ci-crashtest-gate.js ALLOWED_FINDINGS.
  *
  * The run is honest in both directions:
  *   - a violation OUTSIDE the allowlist fails the job (exit 1) - a regressing

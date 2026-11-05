@@ -146,7 +146,7 @@ await orgSync.replicate(crewBus, 'acme-node');
 await orgSync.replicate(crewBus, 'beta-node');
 ```
 
-Rules the members enforce (all pinned in `test/org-sync.test.js`):
+Rules the members enforce (all pinned in `tests/org-sync.test.js`):
 
 - The replica is wholesale-replaced only when the incoming generation is newer. Older or equal generations are ignored, so replays and restarts converge without regression.
 - The replica is separate from the member's own org model. A member's agent can hold a local assignment and a group assignment; neither shadows the other, because resolution is local first, replica on miss.
