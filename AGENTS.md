@@ -776,5 +776,17 @@ counts it (the round-8 `vant-authority` precedent).
   `unset VANT_BRAIN` before any gate run; the CI env never sets it.
 - The contract suite's verdicts are environment-honest: a clean shell is
   required for a truthful run (429/0 clean vs 426/3 with `VANT_BRAIN` set).
-- PR: branch `audit-pass-366-r9-crashtest-pack`, based on `axolotl` (39ab3a54).
+- PR: branch `audit-pass-366-r9-crashtest-pack`, based on `axolotl`
+  (rebased onto `cff2a8c5`, wave 20). All 6 CI jobs green on head `6bf6633a`.
+
+### Wave-20 structural fact (rebased onto it; walk this next time)
+- `cff2a8c5` renamed the repo-root pod `test/` → `tests/` (vant#277). All
+  root test files, `package.json` scripts, `.github/workflows/test.yml`,
+  `.gitignore`/`.eslintignore`, and the `struct-feed-stamp.js` SUITE constant
+  moved with it. The **web apps' own `web/*/test/` dirs are untouched**
+  (one-way domain law). Any stale `test/…` path in docs/prose is pre-existing
+  wave-20 drift, not yours to fix unless you touched that line.
+- Wave 20 also trued the `mesh-status` CLI-doc coverage gap in the same
+  commit — so `build:home` / `lint:home` are green on `cff2a8c5`+, and an
+  older base (`39ab3a54`) shows a red `ci` job on that pre-existing gap.
 
