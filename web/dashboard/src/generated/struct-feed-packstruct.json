@@ -2,10 +2,10 @@
   "source": "packstruct",
   "ok": true,
   "version": "packstruct-lint/1",
-  "generatedAt": "2026-11-04",
+  "generatedAt": "2026-11-05",
   "counts": {
-    "packs": 23,
-    "ids": 322,
+    "packs": 24,
+    "ids": 333,
     "honored": 7,
     "pinned": 1,
     "violations": 0

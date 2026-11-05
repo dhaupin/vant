@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "name": "vant-verdict-surfaces",
+  "description": "The allow/deny VERDICT surfaces in their own home: the operator-facing access-control doors (vant rls allow, vant system allow, vant habitat can) plus the layer isOperationAllowed helpers they ride. Each door classifies an operation WORD and answers ALLOWED/DENIED — and each once failed OPEN, mapping an UNCLASSIFIED word to the LOOSER class (a gate that answers ALLOWED for a word it never heard of). The rows drive the REAL CLI entry (bin/vant.js <surface>) in a throwaway sandbox and pin the direction that matters: an unclassified write verb, an unknown word, and a typo all REFUSE while the read canon and the explicit write verbs keep their verdict. Also pins the LAYER-LEVEL truthiness law directly (lib/rls.js isOperationAllowed never resolves the LOOSER class for an unlisted verb; lib/system.js isOperationAllowed refuses an unknown word). In-process CLI spawn, no sockets.",
+  "version": "0.1.0",
+  "entry": "index.mjs"
+}

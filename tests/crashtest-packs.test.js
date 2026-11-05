@@ -1484,6 +1484,28 @@ const EXPECTED = {
         'authority-classification-totality': 'REFUSED',
         'authority-guard-does-not-overreach': 'REFUSED',
     },
+    // (round-9 audit, 2026-11-04) the allow/deny VERDICT surfaces themselves.
+    // Every row is self-contained (drives the REAL CLI bin/vant.js <surface>
+    // in-process, or the lib helpers directly) so each earns a strict verdict
+    // in every run root. The three doors each once failed OPEN: an operation
+    // WORD was classified against a small hardcoded list with a fallback to
+    // the LOOSER class, so an unclassified write verb (grant), an unknown
+    // word (raed / totally-bogus-op / garbage) or a write verb passed as a
+    // mode (delete) printed ALLOWED. Fixed in vant PR #330; reverting the fix
+    // flips the seven finding-shaped rows below to EXPLOITED (the three
+    // read/write-holds controls hold both ways by design).
+    'vant-verdict-surfaces': {
+        'rls-unclassified-write-verb-refuses': 'REFUSED',
+        'rls-typo-refuses': 'REFUSED',
+        'rls-read-canon-holds': 'REFUSED',
+        'system-unknown-word-refuses': 'REFUSED',
+        'system-write-verb-holds': 'REFUSED',
+        'habitat-write-verb-as-mode-refuses': 'REFUSED',
+        'habitat-unknown-mode-refuses': 'REFUSED',
+        'habitat-read-mode-holds': 'REFUSED',
+        'layer-rls-op-never-looser-class': 'REFUSED',
+        'layer-system-op-refuses-unknown': 'REFUSED',
+    },
     // (round-2 audit, 2026-11-03) the outbound-network SSRF wall itself.
     // The four lib-level rows are self-contained (drive lib/network.js
     // directly, no route) and earn strict REFUSED in every run root; the
