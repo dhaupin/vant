@@ -31,7 +31,7 @@ Vant uses GitHub Actions for CI.
 | Workflow | Trigger | Jobs | Status |
 |----------|---------|------|--------|
 | test.yml | push (main, staging, agent-* and axolotl), pull_request (main, staging), weekly schedule, manual | `ci` (tests, security checks, validation) + `crashtest` (the contract battery) | Required |
-| docs.yml | push to main | Build and deploy docs to GitHub Pages | Auto |
+| docs.yml | push to main, staging, axolotl; manual | Thin caller of the family docs lane (`dhaupin/freestruct` docs-lane.yml @ SHA): builds the Jekyll docs, runs the pinned freestruct + pagefind layers, and deploys to GitHub Pages (main only; the lane gates the deploy) | Auto |
 | docker.yml | push to main, tags | Build and push container image | Auto |
 
 CI keeps Actions minutes low: the `ci` job runs tests, security checks, and validation in one job, and the separate `crashtest` job runs the contract battery (`packs:audit` gate) so the two verdicts stay independent. Concurrency is set to `cancel-in-progress`, so a new push cancels the stale run on the same branch or PR instead of queueing behind it. The trigger list follows the branch slate: the staging-rule canon made `staging` the permanent integration branch and retired `develop`, and pushes to `axolotl` are covered because batch passes land there before any PR exists.
