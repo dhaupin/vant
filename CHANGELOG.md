@@ -5,6 +5,24 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 369 (the market settles by the record - vend-able settle contracts, the settle-verifier seam, and the trust layer as a per-tenant opt-out, vant#333/#334)
+
+### Added: vend-able settle contracts (deterministic settle without buyer discretion)
+
+bin/market settlements used to put the go/no-go squarely on the buyer's hand. Now a skill listing can carry a settle contract - a template object whose typed clauses (payloadIncludes tokens, payloadLength bounds; nothing else is accepted) the DELIVERY PROOF must match - and the buyer's confirm key only triggers the deterministic re-verification: the record decides. An unmet clause refuses typed (E_SKILL_CONTRACT carrying the unmet list) with the escrow semantics untouched - the hold releases, no debit, no penalty - and refute never consults the record (the release path stays the buyer's own hand). The contract is buyer-visible on skillStatus; contractCheck(tradeId) reads the deterministic evidence before the key is spent. A generic listing carrying a contract is refused fail-closed.
+
+### Added: the settle-verifier seam (registered per trade)
+
+registerSettleVerifier(tradeId, verifier) attaches a deterministic judge whose verdict (confirm | release) IS the settle decision when the buyer's confirm fires. A throwing or non-deterministic verifier withholds settlement typed (E_SKILL_VERIFIER) - the hold stays, no debit ever moves - and a seam-ruled release never bites the seller's trust feed (the seam's release is not a buyer complaint).
+
+### Added: the trust layer as a per-tenant opt-out
+
+The market.trustMode config key (off | record (default) | full) is consulted at every trust write/read site inside the market: 'off' writes no feed, reads no reputation (skillStatus surfaces sellerReputation: null and the trade path skips the score checks), while holds, scarcity counts and sweeps behave identically. A stray config value reads as 'record', so a typo can never silently disable the watchdog writes - and trustWritten tells the truth about an attempt (false under 'off', not accidentally true).
+
+### Verification
+
+tests/market-settle-contracts.test.js carries 9 pins on the skill surface; 8 are finding-shaped (flipped by stashing the lib/market.js wave-C fixes, verified by stash) and the refute-never-consults control holds both ways by design. The existing tests/market-skills.test.js suite holds 23/23 green. Wave C of the Synmergia port-review adoption (#333 + #334); #335's forum/consensus exports are the next pass.
+
 ## [Unreleased] - pass 368 (the srv wire contract becomes a supported interface — contract:1 negotiation marker on /health plus the contract doc, vant#338)
 
 ### Added: `lib/connectors/SRV-CONTRACT.md` - the supported wire interface of the language sidecars

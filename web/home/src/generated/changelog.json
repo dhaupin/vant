@@ -1,8 +1,32 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 98,
+  "_headingCount": 99,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 369 (the market settles by the record - vend-able settle contracts, the settle-verifier seam, and the trust layer as a per-tenant opt-out, vant#333/#334)",
+      "sections": [
+        {
+          "name": "Added: vend-able settle contracts (deterministic settle without buyer discretion)",
+          "items": []
+        },
+        {
+          "name": "Added: the settle-verifier seam (registered per trade)",
+          "items": []
+        },
+        {
+          "name": "Added: the trust layer as a per-tenant opt-out",
+          "items": []
+        },
+        {
+          "name": "Verification",
+          "items": []
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,
