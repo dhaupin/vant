@@ -171,37 +171,35 @@ asyncTest('R10-6: configured canNetwork:false REFUSES webhooks.send before any f
 
 // ==== R10-7: no source still carries the dead gate shape ===================
 
-asyncTest('R10-7: no lib module keeps a refusal-throw inside an empty catch (class closure)', async () => {
+asyncTest('R10-7: no lib module swallows a capability refusal in a non-rethrowing catch', async () => {
     const fs = require('fs');
 
-    // Brace-matching scan: a regex cannot cross the nested `if (...) {` that
-    // wraps the throw in every real instance, so walk the source manually.
-    // Returns [lineNo] of every `try { ...throw... } catch (e) {}`.
-    function _deadGateLines(src) {
+    // Brace-matching scan (a regex cannot cross the nested `if (...) {` that
+    // wraps the throw). Flags `try { ...capability refusal throw... } catch (e)
+    // { ...no rethrow... }` — including catches whose body is only a COMMENT,
+    // the exact blind spot that let onboard.js/config.js survive round 10.
+    function _swallowedGates(src) {
+        const strip = (s) => s.replace(/\/\/[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '');
+        const PERM = /CAPABILITY_NOT_ALLOWED|STORAGE_READ_DENIED|STORAGE_WRITE_DENIED|PERMISSION_REQUIRED|canRead|canWrite|canNetwork|canExec|canSpawn/;
         const hits = [];
+        const _close = (s, open) => { let d = 0; for (let j = open; j < s.length; j++) { if (s[j] === '{') d++; else if (s[j] === '}') { d--; if (d === 0) return j; } } return -1; };
         const re = /\btry\s*\{/g;
         let m;
         while ((m = re.exec(src))) {
             const open = src.indexOf('{', m.index);
-            let depth = 0, j = open;
-            for (; j < src.length; j++) {
-                if (src[j] === '{') depth++;
-                else if (src[j] === '}') { depth--; if (depth === 0) break; }
-            }
-            const body = src.slice(open + 1, j);
-            const rest = src.slice(j + 1);
+            const close = _close(src, open);
+            if (close < 0) continue;
+            const body = strip(src.slice(open + 1, close));
+            const rest = src.slice(close + 1);
             const cm = rest.match(/^\s*catch\s*(\([^)]*\))?\s*\{/);
             if (!cm) continue;
             const cOpen = rest.indexOf('{', cm.index);
-            let d2 = 0, k = cOpen;
-            for (; k < rest.length; k++) {
-                if (rest[k] === '{') d2++;
-                else if (rest[k] === '}') { d2--; if (d2 === 0) break; }
-            }
-            const cbody = rest.slice(cOpen + 1, k).trim();
-            if (cbody === '' && /\bthrow\b/.test(body)) {
-                hits.push({ line: src.slice(0, m.index).split('\n').length, body });
-            }
+            const cClose = _close(rest, cOpen);
+            const cbody = strip(rest.slice(cOpen + 1, cClose));
+            if (!/\bthrow\b/.test(body)) continue;       // try must throw
+            if (!PERM.test(body)) continue;              // only capability refusals
+            if (/\bthrow\b/.test(cbody)) continue;       // catch rethrows -> fine
+            hits.push({ line: src.slice(0, m.index).split('\n').length, body });
         }
         return hits;
     }
@@ -213,7 +211,7 @@ asyncTest('R10-7: no lib module keeps a refusal-throw inside an empty catch (cla
             if (ent.isDirectory()) { scan(p); continue; }
             if (!ent.name.endsWith('.js')) continue;
             const rel = path.relative(ROOT, p);
-            for (const h of _deadGateLines(fs.readFileSync(p, 'utf8'))) {
+            for (const h of _swallowedGates(fs.readFileSync(p, 'utf8'))) {
                 // The documented deliberate fail-open in sync.js _checkNetwork is
                 // the ONE allowed survivor; anything else is the r10 bug.
                 if (rel === path.join('lib', 'sync.js') && /canNetwork/.test(h.body)) continue;
@@ -222,7 +220,44 @@ asyncTest('R10-7: no lib module keeps a refusal-throw inside an empty catch (cla
         }
     };
     scan(path.join(ROOT, 'lib'));
-    if (offenders.length) return { success: false, error: 'dead gate shape survives in: ' + offenders.join(', ') };
+    if (offenders.length) return { success: false, error: 'swallowed capability refusal survives in: ' + offenders.join(', ') };
+    return true;
+});
+
+// ==== R10-12: the config read gate enforces a configured deny (no secret leak)
+
+asyncTest('R10-12: configured canRead:false REFUSES config.getAll and leaks no token', async () => {
+    const out = _child(`
+        const sb = require(${SB});
+        sb.defaultSandbox.setCapabilities({ canRead: false });
+        const config = require(${JSON.stringify(path.join(ROOT, 'lib', 'config.js'))});
+        let code = null, threw = false, leaked = null;
+        try { const all = config.getAll(); leaked = all && all.github ? Object.keys(all.github) : []; }
+        catch (e) { threw = true; code = e.code || e.message; }
+        console.log(JSON.stringify({ threw, code, leaked }));`);
+    if (!out.threw) return { success: false, error: 'config.getAll did not refuse under canRead:false (secret-leak swallow); leaked=' + JSON.stringify(out.leaked) };
+    if (out.code !== 'CAPABILITY_NOT_ALLOWED') return { success: false, error: 'wrong code: ' + out.code };
+    return true;
+});
+
+// ==== R10-13: the onboard read gate enforces a configured deny =============
+// (corroborating, not discriminating: the pipeline's own capability layer
+//  already refuses this read, so it passes pre-fix too. It guards the inner
+//  module gate — now routed through gate.js — against a future refactor that
+//  drops the pipeline layer.)
+
+asyncTest('R10-13: configured canRead:false REFUSES onboard.getBrainFiles (was swallowed)', async () => {
+    const out = _child(`
+        const sb = require(${SB});
+        sb.defaultSandbox.setCapabilities({ canRead: false });
+        const onboard = require(${JSON.stringify(path.join(ROOT, 'lib', 'onboard.js'))});
+        (async () => {
+            let code = null, threw = false;
+            try { await onboard.getBrainFiles(); } catch (e) { threw = true; code = e.code || e.message; }
+            console.log(JSON.stringify({ threw, code }));
+        })();`);
+    if (!out.threw) return { success: false, error: 'onboard.getBrainFiles did not refuse under canRead:false (pre-fix swallow)' };
+    if (out.code !== 'CAPABILITY_NOT_ALLOWED') return { success: false, error: 'wrong code: ' + out.code };
     return true;
 });
 

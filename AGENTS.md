@@ -852,3 +852,48 @@ file reports `OK (no summary; exit 0)`.
 - `tests/audit-round10.test.js` 11/11 post-fix; 9/11 fail against the pre-fix lib
   (R10-10/11 fail against the pre-fix sweep). Full sweep `TOTAL: P=3393 F=0`
   (exit 0), up from P=3391 — the round-10 pins added, the two false BROKENs gone.
+
+## Discovery: 2026-11-02 - Audit Round 10b (the gate class was wider than round 10)
+
+A second pass on the R10-A class — hunting for the *same* swallowed-throw shape
+in files round 10 never touched — found two more, both invisible to round 10's
+scanner.
+
+### Why round 10 missed them
+R10-7's class scan matched a literally-empty `catch {}`. These two have a
+*comment-only* catch body, so a naive "empty braces" match skipped them:
+
+```js
+// lib/onboard.js (pre-fix) — catch body was only a comment
+try { if (!sandbox.canRead()) { throw new errors.VantError('…'); } }
+catch (e) { /* Allow by default if check fails */ }
+```
+
+The strengthened R10-7 scan now strips comments and flags any `try { …capability
+refusal throw… } catch (e) { …no rethrow… }`, so a comment can no longer hide
+the swallow. It runs against the tree, so the class cannot silently reopen.
+
+### R10-14 (HIGH): config.js `_checkRead` leaked secrets under a read-deny
+`lib/config.js`'s probe swallowed its refusal into a catch that only logged, so
+a configured `canRead:false` never blocked `load()` — which hands out
+`github.token`, `linear.apiKey`, `anthropic.apiKey`, `stegoframe`, etc. via the
+exported `getAll()`/`getGithub()`/`getStegoframe()` (reached by `vant config
+get`, `bin/config.js`, `bin/nature.js`). Confirmed: `config.getAll()` returned
+`{github:{token,repo}}` under `canRead:false`. Fixed by routing through
+`gate.checkCapability('canRead')`; R10-12 pins both the refusal and that no
+token key is present.
+
+### R10-15 (low): onboard.js `_checkRead` swallowed its refusal
+`lib/onboard.js` had the comment-body swallow too. Its inner gate is
+**shadowed** by the pipeline's own correct capability layer (every onboard read
+wraps `pipeline.run({operation:'read'})`), so the pre-fix impact was latent, not
+live — but the inner gate is now correct too (R10-13, corroborating).
+
+### Testing laws learned this round
+- An "empty catch" scan is not enough; strip comments first, then check for a
+  rethrow. A comment is a swallow.
+- When a fix routes N call sites through a helper, the class scan must assert
+  *the shape*, not the count — the class reopened in files round 10 skipped.
+- "Already shadowed by a correct outer gate" is a reason to downgrade severity,
+  never a reason to leave the inner gate broken: the outer layer is one refactor
+  away from gone.
