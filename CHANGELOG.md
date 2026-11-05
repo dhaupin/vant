@@ -5,6 +5,16 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 368 (the srv wire contract becomes a supported interface — contract:1 negotiation marker on /health plus the contract doc, vant#338)
+
+### Added: `lib/connectors/SRV-CONTRACT.md` - the supported wire interface of the language sidecars
+
+The smallest port-review asks (#338) was mostly a documentation ask, and it landed exactly as proposed: the rust-srv / julia-srv wire shape (GET /health, POST /eval {token, code}, POST /stop {token}, their bodies, their error shapes, and the loopback single-token threat model) is now a declared supported interface in one contract doc, so a downstream integrator can mirror it for another language instead of reverse-engineering a sidecar. No behavior changed.
+
+### Added: the `contract: 1` negotiation marker on `/health`
+
+Both sidecars now answer `{"ok":true,"lang":"<lang>","contract":1}` — integrators negotiate on the marker instead of guessing, additive fields stay inside the same version, and a breaking wire change is a bump. The shared runtime (`lib/sidecar.js` `healthy()`) still probes `ok === true && lang === spec.lang` and never the whole body, so the marker rides under it harmlessly; its header doc now names the contract. Headers of both sidecars declare the supported interface.
+
 ## [Unreleased] - pass 367 (memory standing, wave A of the Synmergia port-review series: the durable state class, tombstone receipts, and the multi-writer declaration land, vant#336)
 
 ### Added: `memory.state(key, value, { durable: true })` - the standing class

@@ -1,8 +1,24 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 97,
+  "_headingCount": 98,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 368 (the srv wire contract becomes a supported interface — contract:1 negotiation marker on /health plus the contract doc, vant#338)",
+      "sections": [
+        {
+          "name": "Added: `lib/connectors/SRV-CONTRACT.md` - the supported wire interface of the language sidecars",
+          "items": []
+        },
+        {
+          "name": "Added: the `contract: 1` negotiation marker on `/health`",
+          "items": []
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

@@ -6,8 +6,9 @@ ARGV[1], reads "SIDECAR_PORT=<n>" from stdout, then POSTs evals. One
 process, one JIT cost, many calls — geometry/engine.js-style
 per-operation math stops paying 2-30s of JIT per multiply.
 
-Wire (all JSON, token-checked):
-  GET  /health  -> {"ok":true,"lang":"julia"}
+Wire (all JSON, token-checked) — a SUPPORTED INTERFACE
+(SRV-CONTRACT.md, contract: 1):
+  GET  /health  -> {"ok":true,"lang":"julia","contract":1}
   POST /eval    {"token","code"} -> {"ok":true,"stdout","stderr"}
   POST /stop    {"token"}        -> process exits 0
 
@@ -96,7 +97,8 @@ function handle(sock)
     end
 
     if method == "GET" && startswith(path, "/health")
-        respond(sock, 200, "{\"ok\":true,\"lang\":\"julia\"}")
+        # (SRV-CONTRACT.md, vant#338) contract: 1 marker — bump on a wire change.
+        respond(sock, 200, "{\"ok\":true,\"lang\":\"julia\",\"contract\":1}")
         return
     end
 
