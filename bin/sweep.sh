@@ -2,7 +2,7 @@
 # Vant test sweep — full-suite health gate for the axolotl branch.
 #
 # Usage:
-#   bash bin/sweep.sh           # full sweep (all test/*.test.js + test/test-*.js)
+#   bash bin/sweep.sh           # full sweep (all tests/*.test.js + tests/test-*.js)
 #   bash bin/sweep.sh --quick   # quick subset (lib/ modules with the most
 #                               #   impact during refactor: embed, escrow,
 #                               #   cache, storage, transform, islands,
@@ -44,13 +44,13 @@ if [ "${1:-}" = "--quick" ]; then
   echo "=== QUICK SWEEP (${#QUICK_SET[@]} files) ==="
   files=()
   for name in "${QUICK_SET[@]}"; do
-    f="test/${name}.test.js"
+    f="tests/${name}.test.js"
     [ -f "$f" ] || continue
     files+=("$f")
   done
 else
   echo "=== FULL SWEEP ==="
-  files=($(ls test/*.test.js test/test-*.js 2>/dev/null | sort -u))
+  files=($(ls tests/*.test.js tests/test-*.js 2>/dev/null | sort -u))
 fi
 
 for f in "${files[@]}"; do

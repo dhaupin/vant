@@ -16,7 +16,7 @@
 //              shim reports raw results verbatim - the ATTACK decides.
 //
 // VALIDATION STATUS: all three oracles are validated against a vant sandbox
-// (test/crashtest-packs.test.js) - drive them anywhere the one law holds.
+// (tests/crashtest-packs.test.js) - drive them anywhere the one law holds.
 
 const ROUTE_ABSENT = /no route registered as/i;
 

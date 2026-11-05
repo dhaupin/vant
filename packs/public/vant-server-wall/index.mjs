@@ -1,6 +1,6 @@
 /**
  * vant-server-wall pack — Phase A bucket 0 (issue #249, S0→S1 conversion
- * campaign). Converted from the native wire suite `test/crashtest-server.js`
+ * campaign). Converted from the native wire suite `tests/crashtest-server.js`
  * under the reverse-verification law: the suite stays green alongside these
  * rows until the crashtest run is one full cycle green on both, and only
  * then does the S-counter advance for this bucket.

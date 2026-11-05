@@ -10,7 +10,7 @@
 // gates, monkeypatched module fns and event listeners are all restored
 // in finallys so every pack run is deterministic.
 //
-// NO SOCKETS (the one law). The native test/leisure.test.js RETIRED WHOLE
+// NO SOCKETS (the one law). The native tests/leisure.test.js RETIRED WHOLE
 // to these rows (2026-10-27, the carriers precedent: every family the
 // suite pins — lifecycle, rotation/receipts, pursue/tempo, breath/dream,
 // containment, the gate ladder — is converted; the coverage lives in

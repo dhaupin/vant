@@ -27,7 +27,7 @@
 - Live-verified against the real JV state from the test runs: 6 peers
   (stale ones flagged), the passed 4-ballot topic, the decision feed
   showing "ratify", the 8-credit JV payment in the budget aggregates.
-- Pins: test/mesh-status.test.js 7/7. Full mesh regression green.
+- Pins: tests/mesh-status.test.js 7/7. Full mesh regression green.
 
 ## Pass 61 — 2026-09-26 — Wave E: the stamps on the Post
 
@@ -49,7 +49,7 @@
   guarded seam (`_setReceiverVersion`) and the exported `ENVELOPE_V`
   getters read the LIVE receiver version. What we sign and what we
   accept cannot desync.
-- Pins: test/crew-bus.test.js 20/20 (full cross-version matrix, both
+- Pins: tests/crew-bus.test.js 20/20 (full cross-version matrix, both
   directions, v0 malformed, six malformed-stamp shapes, scope-gate
   precedence, live getters). Regression: every envelope-riding suite
   green, JV exercise 8/8.
@@ -80,7 +80,7 @@
 - **Also shipped:** labs/frame.md v0.1 — the Commons frame naming the
   environment above the agora (seven commons + stewardship, the
   sovereignty line, the gap list the mesh experiments feed).
-- Pins: test/msg-sync.test.js 9/9, including the two-process standup
+- Pins: tests/msg-sync.test.js 9/9, including the two-process standup
   (host posts under JV scope → joiner pulls through the vetted
   principal → joiner posts locally → the host's return pull converges
   BOTH orgs). Full mesh regression green in one sweep.
@@ -113,7 +113,7 @@
   shared by standalone rounds (a direct-gossipRound caller cannot
   bypass the miss-flood guard), and reply legs stay sender-bound
   (pass-51 rule).
-- Pins: test/agora-hygiene.test.js 6/6. Full regression: agora-sync 7,
+- Pins: tests/agora-hygiene.test.js 6/6. Full regression: agora-sync 7,
   agora-distributed 6, mcp-agora-sync 8, genesis 5, JV exercise 8/8 —
   all green in one sweep.
 
@@ -140,7 +140,7 @@
   fails the genesis loudly, never acks), dispatcher gets the resolved
   record (generated ids + scope), and E_DUPLICATE on re-genesis is
   rotation-reuse, not an error.
-- Pins: test/genesis-ceremony.test.js 5/5 — two REAL processes (secret
+- Pins: tests/genesis-ceremony.test.js 5/5 — two REAL processes (secret
   printed once → out-of-band handoff → acked with resolved JV ids →
   agora vote through the pair → joint tally PASSED), secret hygiene,
   host-side vetting, wrong-secret fail-closed, status surface (scope
@@ -175,7 +175,7 @@ preserved); teams+escrow brain resolution through state-store (a
 VANT_BRAIN-scoped process no longer split-brains org model/budgets away
 from protocol state).
 
-**Pins:** test/teams-refresh.test.js 6/6. JV exercise re-run: 8/8
+**Pins:** tests/teams-refresh.test.js 6/6. JV exercise re-run: 8/8
 phases, 0 gaps — scoped decision delivery correct by design, not by
 hydration-timing luck.
 
@@ -244,5 +244,5 @@ both tally PASSED.
 budget; credit was reserved, never spent. **Fixed:** the settle point
 debits the buyer (escrow.recordSpend; numeric prices debit, missing/
 zero costs the default 1, barter strings stay free); debit refusal
-unwinds reservation + hold BEFORE settlement. Pinned test/
+unwinds reservation + hold BEFORE settlement. Pinned tests/
 market-debit.test.js 4/4.

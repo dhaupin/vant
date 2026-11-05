@@ -43,17 +43,17 @@ Four installs, four brains, four repos. The mesh PRD ([labs/prd-mesh.md](../prd-
 
 Every item below is pinned in-repo as of this writing:
 
-- **Restart-durable state** — kill any node mid-protocol; consensus, market, trust, registry, msg survive (test/state-persistence.test.js).
-- **Signed transport** — HMAC envelopes, inbound webhook gate, sandbox-gated outbound; strangers get silence, not oracles (test/crew-bus.test.js).
-- **Cross-machine sync that cannot lie** — pull/push seam; adopt-only- unknown ballots; all derived fields re-derived locally; the wire can never declare a topic passed (test/agora-sync.test.js).
-- **Remote voting under the owner's gates** — scope, registry vetting, quarantine, one vote: enforced where the team model lives, not on the wire (test/agora-distributed.test.js).
+- **Restart-durable state** — kill any node mid-protocol; consensus, market, trust, registry, msg survive (tests/state-persistence.test.js).
+- **Signed transport** — HMAC envelopes, inbound webhook gate, sandbox-gated outbound; strangers get silence, not oracles (tests/crew-bus.test.js).
+- **Cross-machine sync that cannot lie** — pull/push seam; adopt-only- unknown ballots; all derived fields re-derived locally; the wire can never declare a topic passed (tests/agora-sync.test.js).
+- **Remote voting under the owner's gates** — scope, registry vetting, quarantine, one vote: enforced where the team model lives, not on the wire (tests/agora-distributed.test.js).
 - **The joint venture, live** — two REAL processes, two orgs, genesis handshake, JV org model with both orgs assigned, 4-ballot joint ledger, decisions crossing the boundary, escrow settlement, cold- process persistence (labs/node-crew/exercise-two-orgs.js).
-- **Cross-node conversations** — the JV standup over the wire: bounded snapshots, merge-only adoption, owner-side gates on request and push, sender-bound replies; a vetted identity always beats the crew transport self-registration (test/msg-sync.test.js).
-- **Observability from one node** — `vant mesh status` answers the coordinator's question read-only: peers, topics, decisions, budgets, channels, pending syncs; JSON mode for CI; degraded sections print their error instead of dying (test/mesh-status.test.js).
-- **Interoperable wire** — envelope version stamps with a loud-refusal matrix: major mismatch (either direction) refused with an event, minor tolerated, unstamped = v1.0; a version claim never widens what a receiver accepts (test/crew-bus.test.js).
+- **Cross-node conversations** — the JV standup over the wire: bounded snapshots, merge-only adoption, owner-side gates on request and push, sender-bound replies; a vetted identity always beats the crew transport self-registration (tests/msg-sync.test.js).
+- **Observability from one node** — `vant mesh status` answers the coordinator's question read-only: peers, topics, decisions, budgets, channels, pending syncs; JSON mode for CI; degraded sections print their error instead of dying (tests/mesh-status.test.js).
+- **Interoperable wire** — envelope version stamps with a loud-refusal matrix: major mismatch (either direction) refused with an event, minor tolerated, unstamped = v1.0; a version claim never widens what a receiver accepts (tests/crew-bus.test.js).
 - **Adversarial hardening** — merge scope-filter (synced snapshots cannot stuff non-member ballots) and sender-bound reply legs (an observed reqId cannot forge verdicts); found by live-fire, pinned.
-- **Scope consistency by design** — a long-lived node's stale org view is rescued on scope-miss (merge-only refresh, throttled, fail-closed preserved) (test/teams-refresh.test.js).
-- **Real economics** — trades debit the buyer's budget at settle; debit refusal unwinds the trade (test/market-debit.test.js).
+- **Scope consistency by design** — a long-lived node's stale org view is rescued on scope-miss (merge-only refresh, throttled, fail-closed preserved) (tests/teams-refresh.test.js).
+- **Real economics** — trades debit the buyer's budget at settle; debit refusal unwinds the trade (tests/market-debit.test.js).
 
 ## 5. The roadmap from here
 

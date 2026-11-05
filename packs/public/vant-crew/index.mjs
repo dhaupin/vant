@@ -18,7 +18,7 @@
 //              when the window fired), `rosterNames` = everything ACCEPTED.
 //
 // VALIDATION STATUS (honest, per the candidates survey):
-//   validated against a vant sandbox (test/crashtest-packs.test.js):
+//   validated against a vant sandbox (tests/crashtest-packs.test.js):
 //     roster-quota-ceiling, spawn-rate-limit, quota-error-is-typed
 //   No pending rows in this pack: every oracle is registry-level and
 //   armable anywhere the one law holds.

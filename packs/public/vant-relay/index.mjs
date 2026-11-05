@@ -20,8 +20,8 @@
  *   6. encrypted pipes only — plaintext never hops (typed NEEDS_ENVELOPE)
  *   7. body cap      — the doors' shared 1 MiB cap answers 413
  *
- * Reverse-verification law: the native relay lanes (test/relay.test.js,
- * test/relay-parity.test.js) stay green alongside these rows until one
+ * Reverse-verification law: the native relay lanes (tests/relay.test.js,
+ * tests/relay-parity.test.js) stay green alongside these rows until one
  * full run cycle is green on both; the S-counter only moves on that.
  */
 
@@ -383,7 +383,7 @@ export default {
     // grade the deploy; these grade the core underneath both faces.
     // Honesty note: the wire/socket families now drive in-process too
     // (slice 2, below — the real route mounted on loopback port 0), so
-    // nothing here stays honest-absent; native test/relay.test.js stays
+    // nothing here stays honest-absent; native tests/relay.test.js stays
     // green alongside under the reverse-verification law.
 
     {

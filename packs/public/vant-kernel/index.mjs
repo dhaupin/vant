@@ -4,7 +4,7 @@
 // form is a conformance pack, not a spec doc. An adopter (or this repo's
 // own suite) proves the kernel by running these shapes against THEIR
 // kernel instance - typed refusals required, never raw crashes - reading
-// nothing of ours first. Lands in the same pass as K2 (test/kernel.test.js)
+// nothing of ours first. Lands in the same pass as K2 (tests/kernel.test.js)
 // per the same-pass law in vant#250. K3 LANDED (2026-10-25): escrow registered
 // as the reference consumer (census of budgets + attest of spend pairs, one
 // row, smallest lift), so the pack now carries BOTH halves - the seed

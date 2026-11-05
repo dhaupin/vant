@@ -97,7 +97,7 @@ Mirror of the lander hierarchy in GitHub-native form: positioning one paragraph,
 
 ## 7. Verification
 
-- `node test/docs.test.js` green (frontmatter, permalinks, link targets).
+- `node tests/docs.test.js` green (frontmatter, permalinks, link targets).
 - Grep gates: zero banned phrases, zero em dashes, zero emoji in docs/ and dist/index.html (labs/ exempt). Zero backronym instances on public surfaces.
 - Every permalink resolves; every internal link target exists.
 - All fences tagged; spot-check that no code block lacks an explainer.

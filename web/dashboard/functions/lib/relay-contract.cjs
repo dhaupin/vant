@@ -15,7 +15,7 @@
  *
  * Who holds a copy:
  *   - lib/api.js relay face holds its OWN plain-copy constants and the
- *     fresh suite pins them to THIS source (test/relay-parity.test.js).
+ *     fresh suite pins them to THIS source (tests/relay-parity.test.js).
  *     The pod never requires web/ (the one-way boundary, prd-web.md);
  *     parity is CHECKED, not imported.
  *   - web/dashboard + web/relay vendor copies by the same script — the

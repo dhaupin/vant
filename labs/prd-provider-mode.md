@@ -208,8 +208,8 @@ Closed by rulings 11–14 this pass: transport sequencing = purelymail FIRST (so
 ## 11. Verify it (after build waves, from anywhere)
 
 ```bash
-node test/relay.test.js                # the ride face this mode rides (38 pins, untouched)
-node test/relay-parity.test.js         # r/2 contract + pins (40); provider adds NOTHING to the wire
+node tests/relay.test.js                # the ride face this mode rides (38 pins, untouched)
+node tests/relay-parity.test.js         # r/2 contract + pins (40); provider adds NOTHING to the wire
 (web/dashboard) node_modules/.bin/vitest run test/provider-gate.test.ts   # PM1 pins: OFF omits the key entirely (no null-server lie), ON adds the provider line additive-only, the gate-ON/KV-absent middle reads offering + storeReady:false, malformed numerals fall back to defaults
 ```
 

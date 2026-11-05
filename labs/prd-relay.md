@@ -72,7 +72,7 @@ A hosted relay MAY ship a first-run default profile as an ONBOARDING convenience
 > + `x-relay-gate`). It is RETIRED below by the pass-236 ruling; the
 > r/2 truth follows, then the pass-237 interface-handler doctrine.
 
-Every renderer below (§4) serves these EXACT surfaces. The single uplift source is `web/kit/contracts/relay-contract.js` (+ `.d.ts` twin); the vendoring script is `scripts/vendor-relay-kit.js` with `.sha256` pin sidecars; parity is CHECKED, never imported (`test/relay-parity.test.js` — the pod never requires `web/`).
+Every renderer below (§4) serves these EXACT surfaces. The single uplift source is `web/kit/contracts/relay-contract.js` (+ `.d.ts` twin); the vendoring script is `scripts/vendor-relay-kit.js` with `.sha256` pin sidecars; parity is CHECKED, never imported (`tests/relay-parity.test.js` — the pod never requires `web/`).
 
 **Roots:** `POST /relay` on the pod's webhook transport (3467-class) · `POST /api/r/relay` on the edge flavors · gate = the route HMAC secret (`relay.gateKey` / `VANT_RELAY_GATE_KEY`) signed as `X-Signature-256` over the RAW body bytes · crew-bus envelope shape · body cap 1 MiB.
 
@@ -108,7 +108,7 @@ Implemented per flavor BY CAPABILITY: the POD face implements the full family (i
 
 The one-way credential law stands: adding bridge families does NOT put pod credentials INTO relay-coded files that pass-234 pinned — the edge bridge routes through the edge's existing bridge lib (the pod token was already authorized there), the solo deploys gain nothing new to hold.
 
-Every renderer below (§4) serves these EXACT surfaces. The single uplift source is `web/kit/contracts/relay-contract.js` (+ `.d.ts` twin); the vendoring script is `scripts/vendor-relay-kit.js` with `.sha256` pin sidecars; parity is CHECKED, never imported (`test/relay-parity.test.js` — the pod never requires `web/`).
+Every renderer below (§4) serves these EXACT surfaces. The single uplift source is `web/kit/contracts/relay-contract.js` (+ `.d.ts` twin); the vendoring script is `scripts/vendor-relay-kit.js` with `.sha256` pin sidecars; parity is CHECKED, never imported (`tests/relay-parity.test.js` — the pod never requires `web/`).
 
 **Roots:** `GET /api/r/capabilities` · `POST /api/r/exec` · gate header `x-relay-gate` · body cap 512 KiB per side · hop timeout 15000 ms.
 
@@ -277,8 +277,8 @@ Node compute across the relay mesh (job posting into a chain, escrow budgets rel
 
 | Element | Truth-state | Where |
 |---------|-------------|-------|
-| The contract (**r/2**, pass 236): the webhook-native wire (HMAC-signed crew envelope, POST /relay, ack-with-reply, typed reply codes), envelope law, caps shape, config seams | **BUILT + PINNED** | `web/kit/contracts/relay-contract.js` (+`.d.ts`), vendored copies in both flavors, pins in `test/relay-parity.test.js` (16). **r/1's REST hop face (/api/r/exec + x-relay-gate) is RETIRED.** |
-| Pod face (r/2): NO lib/relay module (the owner ruling - banned by the no-legacy guard); intake = the webhook transport (HMAC gate + replay + 1 MiB cap); outbound = lib/network.fetch's own SSRF/DNS walls; envelope = lib/encrypt.js; ride dispatch = the pod's OWN MCP door; boot wiring in startFull/startHeadless; bin/relay.js = the CLI over the face; MCP `relay_status` | **BUILT + PINNED** | `lib/api.js` relay, `lib/webhooks.js` reply/dispatch-hook extension, `bin/relay.js`; `test/relay.test.js` (26, real-socket loops) + `test/no-legacy-bloat.test.js` |
+| The contract (**r/2**, pass 236): the webhook-native wire (HMAC-signed crew envelope, POST /relay, ack-with-reply, typed reply codes), envelope law, caps shape, config seams | **BUILT + PINNED** | `web/kit/contracts/relay-contract.js` (+`.d.ts`), vendored copies in both flavors, pins in `tests/relay-parity.test.js` (16). **r/1's REST hop face (/api/r/exec + x-relay-gate) is RETIRED.** |
+| Pod face (r/2): NO lib/relay module (the owner ruling - banned by the no-legacy guard); intake = the webhook transport (HMAC gate + replay + 1 MiB cap); outbound = lib/network.fetch's own SSRF/DNS walls; envelope = lib/encrypt.js; ride dispatch = the pod's OWN MCP door; boot wiring in startFull/startHeadless; bin/relay.js = the CLI over the face; MCP `relay_status` | **BUILT + PINNED** | `lib/api.js` relay, `lib/webhooks.js` reply/dispatch-hook extension, `bin/relay.js`; `tests/relay.test.js` (26, real-socket loops) + `tests/no-legacy-bloat.test.js` |
 | Dashboard-relay flavor (piggyback, env posture, HMAC edge intake POST /api/r/relay) | **BUILT** (live behavior pinned by parity; edge runtime E2E lands with the LIVE deploy walk) | `web/dashboard/functions/api/r/relay.ts` + `capabilities.ts` |
 | UI: operator posture card (re-read) + user reach toggle (honest intent) | **BUILT** | `web/dashboard/src/modules/settings/index.tsx`, `src/state.ts` |
 | Kit vendoring + pin gate | **BUILT** | `scripts/vendor-relay-kit.js` (+`--check`) |
@@ -286,7 +286,7 @@ Node compute across the relay mesh (job posting into a chain, escrow budgets rel
 | `GET /api/r/events` SSE stream-through (solo flavor) | **BUILT — pass 233** (edge shape pinned vs sources 11a-11d; live-stream E2E with the deploy walk) | `web/relay/functions/api/r/events.ts` |
 | Dashboard RUNS WITH a relay (the corrected-arc setting: endpoint pref + live caps verify card) | **BUILT — pass 233** (honest today-truth stated: verification live, execution-through-routes with the e2e rung) | `web/dashboard/src/modules/settings/index.tsx`, `src/state.ts` |
 | The chain (ordered hops, probe loop, failover naming, chain card #20) | **DEFINED — build rung R2** (the usage toggle governs its chain; live routing waits for this + rung 3) | this spec §3.3/§6.1 |
-| Pairing-time e2e rungs (key binding, context-nonce, door decode) | **DOOR ACCEPTOR BUILT + PINNED (pass 235)** — rung 3 + rung 2-lite (nonce replay binding) live in the pod's `handleRide`, walked over real sockets through the mounted relay core with the E_RIDE_* 200-framing law; key binding at pairing stays client-side (R2) | this spec §5; `lib/relay.js` `handleRide`; `test/relay.test.js` block 16 |
+| Pairing-time e2e rungs (key binding, context-nonce, door decode) | **DOOR ACCEPTOR BUILT + PINNED (pass 235)** — rung 3 + rung 2-lite (nonce replay binding) live in the pod's `handleRide`, walked over real sockets through the mounted relay core with the E_RIDE_* 200-framing law; key binding at pairing stays client-side (R2) | this spec §5; `lib/relay.js` `handleRide`; `tests/relay.test.js` block 16 |
 | Sovereign profile transport (encrypted profile, export/import) | **DEFINED** | this spec §2.2 |
 
 ## 12. Acceptance criteria per rung
@@ -299,10 +299,10 @@ Node compute across the relay mesh (job posting into a chain, escrow budgets rel
 ## 13. Verify it from anywhere
 
 ```bash
-node test/relay.test.js                       # 38 pins, real-socket hops + the ride face
-node test/relay-parity.test.js                # 40 parity/pin pins
+node tests/relay.test.js                       # 38 pins, real-socket hops + the ride face
+node tests/relay-parity.test.js                # 40 parity/pin pins
 node scripts/vendor-relay-kit.js --check      # the checksummed contract
-node test/mcp.test.js && node test/relay.test.js   # adjacent contract suites
+node tests/mcp.test.js && node tests/relay.test.js   # adjacent contract suites
 ```
 
 Operational face: [docs/operations/relay.md](../docs/operations/relay.md)
