@@ -1,8 +1,32 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 103,
+  "_headingCount": 104,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 374 (the carriers pass - countersigned station records, declared-absent payload lanes, party pod holds, vant#341)",
+      "sections": [
+        {
+          "name": "Added: the countersigned station record — every stage datable (vant#341 §1)",
+          "items": []
+        },
+        {
+          "name": "Added: `gdscript` + `binary` on the roster — the declared-absent payload lanes (vant#341 §2)",
+          "items": []
+        },
+        {
+          "name": "Added: party routes — the pod hold rides the pod, the identity stays individual (vant#341 §3)",
+          "items": []
+        },
+        {
+          "name": "Tests: `tests/carriers-pass.test.js` — 14 pins, discriminating",
+          "items": []
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,
