@@ -375,17 +375,17 @@ async function main() {
         assert(replay.status === 409, 'exact replay must 409, got ' + replay.status);
     });
 
-    await test('webhook server binds loopback by default (ss, no wildcard)', async () => {
-        const { execSync } = require('child_process');
-        const ss = execSync('ss -ltn', { encoding: 'utf8' });
-        const lines = ss.split('\n').filter((l) => l.includes(':' + WH_PORT + ' '));
-        // (pass 92) Match OUR loopback line specifically — another process
-        // may legitimately hold the same port number on a different address
-        // (link-local squatters) and ss output order is not stable.
-        const ours = lines.find((l) => l.includes('127.0.0.1:' + WH_PORT + ' ')) || '';
-        assert(ours, 'must bind 127.0.0.1:' + WH_PORT + ', ss lines for port: ' + (lines.join(' | ') || '(none)'));
-        const wildcard = lines.find((l) => /(0\.0\.0\.0|\*):\d+/.test(l)) || '';
-        assert(!wildcard, 'must NOT bind wildcard, got: ' + wildcard.trim());
+    await test('webhook server binds loopback by default (no wildcard)', async () => {
+        // (r10) The pin used to shell out to `ss -ltn` — an external binary
+        // absent from minimal CI images, where it threw instead of asserting.
+        // whServer.address() is the AUTHORITATIVE source: it reports exactly
+        // the address Node bound. A regression to listen(port) (all
+        // interfaces) makes address() return '0.0.0.0' and fails here, with
+        // no dependency on a socket-listing tool.
+        const addr = whServer.address();
+        assert(addr && typeof addr === 'object', 'server must be listening with a bound address, got ' + JSON.stringify(addr));
+        assert(addr.address === '127.0.0.1', 'must bind 127.0.0.1, got ' + addr.address + ':' + addr.port);
+        assert(!(addr.address === '0.0.0.0' || addr.address === '::'), 'must NOT bind a wildcard address, got ' + addr.address);
     });
 
     whServer.close();

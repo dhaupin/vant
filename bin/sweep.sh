@@ -55,6 +55,7 @@ fi
 
 for f in "${files[@]}"; do
   out=$(node "$f" 2>&1)
+  rc=$?
   # Match the last "Passed: N" / "Failed: N" pair explicitly
   p=$(echo "$out" | grep -E "^\s*Passed:\s*[0-9]+" | grep -oE "[0-9]+" | tail -1)
   fl=$(echo "$out" | grep -E "^\s*Failed:\s*[0-9]+" | grep -oE "[0-9]+" | tail -1)
@@ -66,8 +67,15 @@ for f in "${files[@]}"; do
     fl=$(echo "$out" | grep -oE "Results:.*[0-9]+ failed|✗ [0-9]+" | grep -oE "[0-9]+" | tail -1)
   fi
   if [ -z "$p" ] && [ -z "$fl" ]; then
-    if echo "$out" | grep -qE "Cannot find module|SyntaxError|TypeError"; then
-      printf "  %-40s BROKEN\n" "$(basename "$f")"
+    # No parseable summary. The AUTHORITATIVE signal is the exit code — do NOT
+    # grep the body for exception names: passing tests legitimately print
+    # "TypeError"/"SyntaxError" inside their own pin descriptions (e.g.
+    # audit-round2/round3 "never a TypeError"), which made this branch flag
+    # healthy suites as BROKEN and fail the gate.
+    if [ "$rc" = "0" ]; then
+      printf "  %-40s OK (no summary; exit 0)\n" "$(basename "$f")"
+    else
+      printf "  %-40s BROKEN (exit %s)\n" "$(basename "$f")" "$rc"
       failing+=("$f")
     fi
     continue
@@ -77,7 +85,7 @@ for f in "${files[@]}"; do
   total_p=$((total_p + p))
   total_f=$((total_f + fl))
   marker="OK"
-  if [ "$fl" != "0" ]; then
+  if [ "$fl" != "0" ] || [ "$rc" != "0" ]; then
     marker="FAIL"
     failing+=("$f")
   fi

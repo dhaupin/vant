@@ -790,3 +790,65 @@ counts it (the round-8 `vant-authority` precedent).
   commit — so `build:home` / `lint:home` are green on `cff2a8c5`+, and an
   older base (`39ab3a54`) shows a red `ci` job on that pre-existing gap.
 
+
+## Discovery: 2026-11-02 - Audit Round 10 (the swallowed-throw gate class + sweep heuristic)
+
+Two independent gate-quality defects, both pinned by `tests/audit-round10.test.js`
+(11 pins; 9 fail pre-fix, R10-2/8/9 are guards).
+
+### R10-A (HIGH): the swallowed-throw capability-gate class
+`lib/{vaf,security,webhooks,sync,audit,schema,search,stego,succession}.js` and
+`lib/storage/shared.js` each carried an inline clone of the gate:
+
+```js
+if (sandbox && sandbox.canX) {
+    try { if (!sandbox.canX()) { throw new errors.VantError(...); } }
+    catch (e) {}   // <-- swallows the refusal it just raised
+}
+```
+
+The refusal `throw` lived INSIDE the try, so the empty catch ate it: an
+explicitly configured `canX:false` sandbox was never enforced. `gate.js` had
+already replaced this shape for trust/market/memory (and storage's
+`_checkReadSafe`/`_checkWriteSafe`) — these ten sites were missed.
+
+**The second, subtler fault**: the probes called `sandbox.canX()` — the STATIC
+verdict, `false` by default for `canWrite`. A naive "just move the throw out of
+the try" would DENY every write in a stock install. The fix therefore routes
+through `gate.checkCapability()` (which consults `sandbox.can()`, the union of
+static caps + sudo task scope + durable grants), allows the untouched default
+stub with one advisory, and enforces once the sandbox is explicitly configured.
+R10-2 pins the stub-still-allows half so a naive hoist can never land.
+
+- `lib/sync.js` `_checkNetwork` is the ONE deliberate survivor (documented
+  fail-open; `canNetwork()` is false in every posture, no system-task grant path
+  yet) — left as-is, explicitly exempted in R10-7's class scan.
+- `webhooks._checkNetwork` gates `send()` only; `startServer` (a local bind) is
+  intentionally not gated — same distinction as `lib/server.js`.
+- Codes preserved per module (STORAGE_READ_DENIED / STORAGE_WRITE_DENIED /
+  WRITE_PERMISSION_REQUIRED / CAPABILITY_NOT_ALLOWED); storage `_checkRead`'s
+  malformed double-code VantError collapsed to a single clean code.
+
+### R10-B (medium): the sweep gate's BROKEN heuristic false-positives
+`bin/sweep.sh` flagged a file BROKEN when its output had no `Passed:/Failed:`
+summary AND the body matched `Cannot find module|SyntaxError|TypeError`. Passing
+suites legitimately print those words in their own pin names (round2/round3:
+"...never a TypeError"), so a healthy run exited 1. Fix: the AUTHORITATIVE
+signal is the test's exit code; the keyword grep is gone. A non-zero exit is now
+also FAIL even when a summary parses (silent-broken), and a summary-less green
+file reports `OK (no summary; exit 0)`.
+
+### Testing laws learned this round
+- A "no summary + keyword" heuristic is a false-positive magnet; grade process
+  exit codes, never the body of a passing test.
+- The class scan (R10-7) must brace-match; a regex cannot cross the nested
+  `if (...) {` that wraps every real throw. Pin the SCAN itself against a fixture.
+- To exercise a shell gate's logic, copy the real script into a temp tree with
+  fixture tests (R10-10/11) rather than reimplementing it in JS.
+- Gate pins must assert BOTH halves: configured-deny REFUSES and untouched-stub
+  ALLOWS — the second is what stops a naive fail-closed hoist.
+
+### Verification
+- `tests/audit-round10.test.js` 11/11 post-fix; 9/11 fail against the pre-fix lib
+  (R10-10/11 fail against the pre-fix sweep). Full sweep `TOTAL: P=3393 F=0`
+  (exit 0), up from P=3391 — the round-10 pins added, the two false BROKENs gone.
