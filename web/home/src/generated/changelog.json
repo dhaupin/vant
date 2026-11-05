@@ -1,8 +1,32 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 100,
+  "_headingCount": 101,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 371 (the economy seam - the credit-side ledger, the market tape, typed economy events, and the world-base connector contract land, vant#337)",
+      "sections": [
+        {
+          "name": "Added: `lib/ledger.js` — the credit side of the economy's books",
+          "items": []
+        },
+        {
+          "name": "Added: `settlement.tape(listingKey, opts)` — price discovery for programs",
+          "items": []
+        },
+        {
+          "name": "Added: `lib/connectors/world-base.js` — the world-shaped connector contract",
+          "items": []
+        },
+        {
+          "name": "Verification",
+          "items": []
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

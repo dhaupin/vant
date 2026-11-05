@@ -5,6 +5,24 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 371 (the economy seam - the credit-side ledger, the market tape, typed economy events, and the world-base connector contract land, vant#337)
+
+### Added: `lib/ledger.js` — the credit side of the economy's books
+
+lib/settlement.js's own header admitted it: the claims ledger records that a settlement happened but never answers "what have I earned, and what am I holding?" The ledger module closes that half. Its law is settlement's law verbatim - the owner's record is evidence, not income: a credit is a DERIVED row that names the settlement/trade ref it derives from, and refs are unique (a settlement becomes income exactly once - a double-credit is a typed E_LEDGER_DUPLICATE refusal, not a silent second entry). Amounts are cents-clean, capped, and positive-finite or refused; hydrate/persist follow the settlement pattern (merge-only adoption, seen-but-absent tombstoned); balance/history are read-only; every credit emits `economy:ledger.credited` on the bus.
+
+### Added: `settlement.tape(listingKey, opts)` — price discovery for programs
+
+A read-only export over settled owner-claims, per listing key: the realized trade count, the last-N realized prices, and a MEDIAN that publishes only above its guardrail (fewer than 3 realized claims is not evidence - a two-number median is noise dressed as a price, so the report names WHY it withheld). Tenant-gated like the publish-only trail exports: a scoped claim stays invisible to an ungated viewer, the scope machine decides who counts. No settle write path and no new trust rides the tape.
+
+### Added: `lib/connectors/world-base.js` — the world-shaped connector contract
+
+The connector base classes covered language compute and hosted services; a foreign WORLD is neither. The contract is declared upstream so downstream integrators and the transit machinery speak the same three verbs - identities() (the principal map), inventory() (a scoped read/export), txForward() (the tx-root stream a consuming ledger adopts through refs) - while vant itself stays world-agnostic. The base class is contract, not half-implementation: instantiating it and calling a verb refuses typed instead of silently no-opping, and the manifest (contract()) is machine-readable.
+
+### Verification
+
+tests/economy-seam.test.js carries 7 pins (the ledger ref law, the persistence read-through, the bus event, the tape count/median/guardrail/tenancy, the connector contract's no-op refusal). Adjacent suites hold: settlement 10/0, mesh-status 7/0. Wave E of the Synmergia port-review adoption (#337); remaining series items are the channel/board primitive naming + primitive (#339/#341), the boost lane (#340), and the carriers pass (station records, payload lanes, party routes - #341).
+
 ## [Unreleased] - pass 370 (the publish-only exports - the forum decision trail becomes a read-only artifact and consensus learns the reconcile report, vant#335)
 
 ### Added: `forum exportTrail(thread, opts)` — one derivation, many readers
