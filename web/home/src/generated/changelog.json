@@ -1,8 +1,24 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 102,
+  "_headingCount": 103,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 373 (the boost lane - feature-duration windows buy display time, never rank, vant#340)",
+      "sections": [
+        {
+          "name": "Added: `lib/boost.js` — the rank-neutral monetization primitive for surfaces",
+          "items": []
+        },
+        {
+          "name": "Tests: `tests/boost-lane.test.js` — 13 pins, discriminating",
+          "items": []
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,
