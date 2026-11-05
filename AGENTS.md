@@ -738,3 +738,55 @@ Fixed: mode is `read|write` or usage error; the silent downgrade is gone.
   A dedicated crashtest pack for this family is a follow-up pass (the round-8
   `vant-authority` precedent).
 
+## Discovery: 2026-11-05 - Audit Round 9 follow-up (the verdict-surface crashtest pack)
+
+Landed the follow-up named in the round-9 entry: the class now has a crashtest
+HOME, so the engine attacks it from the outside and the packstruct census
+counts it (the round-8 `vant-authority` precedent).
+
+### `packs/public/vant-verdict-surfaces` (10 oracles, all REFUSED)
+- Eight rows drive the REAL operator door — `bin/vant.js rls allow`, `bin/vant.js
+  system allow`, `bin/vant.js habitat can` — as an in-process child spawn (the
+  `vant-carriers` `bin/traveler` precedent), so BOTH the verdict and the exit
+  code are graded (a script reads the exit code). Two rows drive the layer
+  helpers (`lib/rls.js`, `lib/system.js` `isOperationAllowed`) directly.
+- **The reusable trick**: the pack derives `ROOT` from its own file location
+  (`path.dirname(fileURLToPath(import.meta.url))` + `../../..`), so the child
+  runs the REPO's `bin/vant.js` while cwd stays the harness sandbox — the RLS
+  decision resolves the throwaway `models/` tree, never the workspace's. This
+  lets a pack grade any bin CLI (previously only `vant-carriers` did, via a
+  declared route). No new route was needed: the pack spawns the CLI itself.
+- Direction: an unclassified write verb (`grant`), a typo (`raed`), an unknown
+  word (`totally-bogus-op`), and a write verb as a mode (`habitat can delete`)
+  must all REFUSE; three read/write-holds controls pin no over-reach. Verified
+  by running the rows against a pre-fix tree (`git show 506fa600:<file>`):
+  seven finding-shaped rows flip to EXPLOITED, the controls hold both ways.
+- Census moves: crashtest 23 packs / 299 rows / 116 REFUSED → 24 / 309 / 126
+  (0 EXPLOITED); packstruct 23 packs / 322 ids → 24 / 333. Struct-feed
+  crashtest + packstruct rows restamped (both flavors + `.sha256`), matching
+  the round-8 scope (the other feed rows untouched). `struct:check` green.
+
+### Testing laws learned this round
+- To grade a bin CLI in a pack: spawn `process.execPath bin/vant.js …` with
+  `cwd = process.cwd()` (the sandbox) and `VANT_GATE_QUIET=1`; resolve the bin
+  by the pack's own `import.meta.url`. 30s bound, no residue.
+- The **`VANT_BRAIN` env var pollutes every later run in the same shell**: it
+  pins the brain store away from `models/`, so a whole-harness gate then
+  reports ~11 false findings (brain/plates/mcp/migrations/rest/state/teams).
+  `unset VANT_BRAIN` before any gate run; the CI env never sets it.
+- The contract suite's verdicts are environment-honest: a clean shell is
+  required for a truthful run (429/0 clean vs 426/3 with `VANT_BRAIN` set).
+- PR: branch `audit-pass-366-r9-crashtest-pack`, based on `axolotl`
+  (rebased onto `cff2a8c5`, wave 20). All 6 CI jobs green on head `6bf6633a`.
+
+### Wave-20 structural fact (rebased onto it; walk this next time)
+- `cff2a8c5` renamed the repo-root pod `test/` → `tests/` (vant#277). All
+  root test files, `package.json` scripts, `.github/workflows/test.yml`,
+  `.gitignore`/`.eslintignore`, and the `struct-feed-stamp.js` SUITE constant
+  moved with it. The **web apps' own `web/*/test/` dirs are untouched**
+  (one-way domain law). Any stale `test/…` path in docs/prose is pre-existing
+  wave-20 drift, not yours to fix unless you touched that line.
+- Wave 20 also trued the `mesh-status` CLI-doc coverage gap in the same
+  commit — so `build:home` / `lint:home` are green on `cff2a8c5`+, and an
+  older base (`39ab3a54`) shows a red `ci` job on that pre-existing gap.
+

@@ -5,6 +5,40 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 366 (audit round 9 follow-up: the verdict surfaces get
+their own crashtest pack — the class is now attacked from the outside, in the
+engine's own verdict language)
+
+### Added: `packs/public/vant-verdict-surfaces` — the allow/deny verdict surfaces (10 oracles)
+
+The round-9 fix (pass 365) pinned the class in `tests/rls-op-classification.test.js`.
+This pack is the class's crashtest HOME, so the packstruct census counts it and
+the engine attacks it from the outside: the packstruct census moves 23 packs /
+322 ids → 24 packs / 333 ids, and the crashtest ledger 299 rows / 116 REFUSED →
+309 rows / 126 REFUSED (0 EXPLOITED either way).
+
+- Eight rows drive the **REAL operator door** — `bin/vant.js rls allow`,
+  `bin/vant.js system allow`, `bin/vant.js habitat can` — as an in-process
+  child spawn (the `vant-carriers` `bin/traveler` precedent), so the verdict
+  AND the exit code are measured, which is what a script actually reads. The
+  pack derives `ROOT` from its own file location, so the bin is the repo's
+  while cwd stays the harness sandbox (the RLS decision reads the throwaway
+  `models/` tree, never the workspace's).
+- Two rows drive the **layer helpers** directly — `lib/rls.js
+  isOperationAllowed` (every unlisted word resolves WRITE, the read canon
+  READ) and `lib/system.js isOperationAllowed` (the verdict OBJECT carries
+  `allowed:false` for an unknown word).
+- Direction matters: an unclassified write verb (`grant`), a typo (`raed`),
+  an unknown word (`totally-bogus-op`), and a write verb passed as a mode
+  (`habitat can delete`) must all REFUSE; three read/write-holds controls pin
+  that the fix did not over-reach. Reverting the round-9 fixes flips the seven
+  finding-shaped rows to EXPLOITED (verified against the pre-fix tree); the
+  controls hold both ways by design. Zero sockets.
+- Verification: the contract suite's `vant-verdict-surfaces` table (10 rows)
+  and the real-harness run root both green; `npm run packs:lint` censuses the
+  new pack (0 violations); `npm run packs:audit` holds 7 honored / 1 pinned;
+  `npm run struct:check` green.
+
 ## [Unreleased] - pass 365 (audit round 9: the verdict surfaces stop failing open — an
 unclassified operation word is a refusal, not a pass)
 

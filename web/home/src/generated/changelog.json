@@ -1,8 +1,25 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 94,
+  "_headingCount": 95,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 366 (audit round 9 follow-up: the verdict surfaces get",
+      "sections": [
+        {
+          "name": "Added: `packs/public/vant-verdict-surfaces` — the allow/deny verdict surfaces (10 oracles)",
+          "items": [
+            "Eight rows drive the **REAL operator door** — `bin/vant.js rls allow`,",
+            "Two rows drive the **layer helpers** directly — `lib/rls.js",
+            "Direction matters: an unclassified write verb (`grant`), a typo (`raed`),",
+            "Verification: the contract suite's `vant-verdict-surfaces` table (10 rows)"
+          ]
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,
