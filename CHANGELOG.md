@@ -5,6 +5,24 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 367 (memory standing, wave A of the Synmergia port-review series: the durable state class, tombstone receipts, and the multi-writer declaration land, vant#336)
+
+### Added: `memory.state(key, value, { durable: true })` - the standing class
+
+The port review read the unified memory module and asked what it takes to run a small economy on it. The answer for memory is three additive flags, one at a time, with the default behavior untouched. Standing facts (reputation, indebtedness, holds, membership) now have a class of their own: a durable row carries no expiresAt at all, so it survives every read-time sweep and every cold read, and the only release is an explicit forget — standing that decays on a TTL timer is indistinguishable from a bug. The law has teeth: a durable row with a TTL next to it is a confused pin and refuses typed (MEMORY_INPUT_INVALID); a default (TTL) overwrite of a durable row refuses typed too, because a silent downgrade re-arms decay with no receipt — replace standing only with another durable:true write, or release it properly.
+
+### Added: `memory.forget(key, { receipt })` - the tombstone receipt
+
+Erase is loud since the B0 tombstones (#249); now it is datable. The receipt is template-shaped - reason (the why) and an optional stable reference - and it stamps the residue itself with at and by, so a forgotten hold, warrant or membership reads back as data, not silence. For a durable row the receipt is mandatory (MEMORY_FORGET_RECEIPT_REQUIRED when missing), because standing that is erased silently is indistinguishable from theft. Ordinary (non-durable) rows keep releasing exactly as before, receipt optional. The residue of standing keeps the durable marker as residue metadata - this row WAS standing - while reads stay gone.
+
+### Added: `memory.state(..., { multiWriter: true })` - the contested-by-construction declaration
+
+A note namespace can now be declared multi-writer: the flag records on the row, carries forward through the note-envelope merge the way the writers union does, and surfaces on every envelope read. The module still never adjudicates - disjoint writers flag a conflict exactly as before; the declaration only makes the contestedness legible to later readers.
+
+### Verification
+
+tests/memory-durable.test.js carries 7 pins, ALL discriminating - stashing the lib/memory.js + lib/error.js fixes flips every pin pre-fix (verified by stash), and the existing tests/memory.test.js suite holds green post-fix (29/29). Typed refusals ride two new canon codes (MEMORY_INPUT_INVALID, MEMORY_FORGET_RECEIPT_REQUIRED), values mirroring the names. Series context: this is wave A of the downstream design-note adoption (#333-#341); #338's srv-contract pin is the next pass.
+
 ## [Unreleased] - pass 366 (audit round 9 follow-up: the verdict surfaces get
 their own crashtest pack — the class is now attacked from the outside, in the
 engine's own verdict language)

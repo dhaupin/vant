@@ -1,8 +1,32 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 96,
+  "_headingCount": 97,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 367 (memory standing, wave A of the Synmergia port-review series: the durable state class, tombstone receipts, and the multi-writer declaration land, vant#336)",
+      "sections": [
+        {
+          "name": "Added: `memory.state(key, value, { durable: true })` - the standing class",
+          "items": []
+        },
+        {
+          "name": "Added: `memory.forget(key, { receipt })` - the tombstone receipt",
+          "items": []
+        },
+        {
+          "name": "Added: `memory.state(..., { multiWriter: true })` - the contested-by-construction declaration",
+          "items": []
+        },
+        {
+          "name": "Verification",
+          "items": []
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,
