@@ -475,7 +475,7 @@ When a Pages deployment is not answering (or a workstation cannot reach the tunn
 vant config set mcp.serveWeb web/dashboard   # or env VANT_MCP_SERVE_WEB
 ```
 
-Honest mechanics (pins: `test/pod-serve-web.test.js`):
+Honest mechanics (pins: `tests/pod-serve-web.test.js`):
 
 - The value is a frontend DIRECTORY (e.g. `web/dashboard`) whose `dist/` build stays OFF with a loud warning - the door serves nothing it did not build. (Example: `VANT_MCP_SERVE_WEB=web/dashboard` serves the dashboard build. The home frontend ships its static index.html checked in with no build, so the door never serves it - point serveWeb at a built frontend.)
 - The MCP door keeps every owned route: `/mcp/exec`, `/mcp/events`, `/mcp/tools`, `/health`, and tool routes all answer first. Static GETs only; POSTs unknown to the door keep the same 404 JSON as before.

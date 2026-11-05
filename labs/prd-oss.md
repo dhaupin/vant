@@ -53,7 +53,7 @@ Today that codebase has the disease the mesh cured internally: many heads, no co
 
 - Inventory every command/tool/endpoint claim in README, AGENTS.md, docs/reference/cli.md, docs/runtime/*: CLI verbs vs bin/ dispatcher, MCP tools vs mcp.js registration, HTTP endpoints vs servers, config keys vs config.js, env vars vs code.
 - Output: a claims registry (test fixture) mapping claim → file:line → proof (test or implementation). Unresolvable claims get fixed or retired in the same pass.
-- Pins: test/surface.test.js — a claim with no proof fails the suite.
+- Pins: tests/surface.test.js — a claim with no proof fails the suite.
 
 ### Wave OSS-B — single sources of truth (convergence)
 
@@ -85,7 +85,7 @@ Today that codebase has the disease the mesh cured internally: many heads, no co
 
 ## 6. Files
 
-- New: labs/prd-oss.md (this file), scripts/check-surface-consistency.js, test/surface.test.js, .github/SECURITY.md, .github/SUPPORT.md.
+- New: labs/prd-oss.md (this file), scripts/check-surface-consistency.js, tests/surface.test.js, .github/SECURITY.md, .github/SUPPORT.md.
 - Converged: AGENTS.md, CONTRIBUTING.md, docs/getting-started/contributing.md, README.md (links), docs/reference/cli.md (as claims get verified).
 - Optional (owner decision): lib/mcp.js (agent-crew tools), bin/agents.js (CLI parity) under Wave-OSS-A Option A.
 

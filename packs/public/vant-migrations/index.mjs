@@ -13,7 +13,7 @@
  * absence. RETIREMENT (2026-10-27, slice 4): with the last four native
  * trim-survivor pins converted (both-scope import + fresh dual reads,
  * the --brain-name naming law, the clean-layout CLI dry-run),
- * test/migrations.test.js retired WHOLE to these rows - the coverage
+ * tests/migrations.test.js retired WHOLE to these rows - the coverage
  * lives in the pack now.
  */
 
@@ -266,7 +266,7 @@ export default {
     },
 
     // ============ slice 4 (2026-10-27): the trim-survivor conversions ============
-    // The last four native pins of test/migrations.test.js convert onto
+    // The last four native pins of tests/migrations.test.js convert onto
     // the same arm (pure main-style shape for the import family, the
     // clean single-stack layout for the CLI dry-run law) - with the
     // whole suite covered, the file retires to these rows.

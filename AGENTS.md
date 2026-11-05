@@ -790,3 +790,110 @@ counts it (the round-8 `vant-authority` precedent).
   commit — so `build:home` / `lint:home` are green on `cff2a8c5`+, and an
   older base (`39ab3a54`) shows a red `ci` job on that pre-existing gap.
 
+
+## Discovery: 2026-11-02 - Audit Round 10 (the swallowed-throw gate class + sweep heuristic)
+
+Two independent gate-quality defects, both pinned by `tests/audit-round10.test.js`
+(11 pins; 9 fail pre-fix, R10-2/8/9 are guards).
+
+### R10-A (HIGH): the swallowed-throw capability-gate class
+`lib/{vaf,security,webhooks,sync,audit,schema,search,stego,succession}.js` and
+`lib/storage/shared.js` each carried an inline clone of the gate:
+
+```js
+if (sandbox && sandbox.canX) {
+    try { if (!sandbox.canX()) { throw new errors.VantError(...); } }
+    catch (e) {}   // <-- swallows the refusal it just raised
+}
+```
+
+The refusal `throw` lived INSIDE the try, so the empty catch ate it: an
+explicitly configured `canX:false` sandbox was never enforced. `gate.js` had
+already replaced this shape for trust/market/memory (and storage's
+`_checkReadSafe`/`_checkWriteSafe`) — these ten sites were missed.
+
+**The second, subtler fault**: the probes called `sandbox.canX()` — the STATIC
+verdict, `false` by default for `canWrite`. A naive "just move the throw out of
+the try" would DENY every write in a stock install. The fix therefore routes
+through `gate.checkCapability()` (which consults `sandbox.can()`, the union of
+static caps + sudo task scope + durable grants), allows the untouched default
+stub with one advisory, and enforces once the sandbox is explicitly configured.
+R10-2 pins the stub-still-allows half so a naive hoist can never land.
+
+- `lib/sync.js` `_checkNetwork` is the ONE deliberate survivor (documented
+  fail-open; `canNetwork()` is false in every posture, no system-task grant path
+  yet) — left as-is, explicitly exempted in R10-7's class scan.
+- `webhooks._checkNetwork` gates `send()` only; `startServer` (a local bind) is
+  intentionally not gated — same distinction as `lib/server.js`.
+- Codes preserved per module (STORAGE_READ_DENIED / STORAGE_WRITE_DENIED /
+  WRITE_PERMISSION_REQUIRED / CAPABILITY_NOT_ALLOWED); storage `_checkRead`'s
+  malformed double-code VantError collapsed to a single clean code.
+
+### R10-B (medium): the sweep gate's BROKEN heuristic false-positives
+`bin/sweep.sh` flagged a file BROKEN when its output had no `Passed:/Failed:`
+summary AND the body matched `Cannot find module|SyntaxError|TypeError`. Passing
+suites legitimately print those words in their own pin names (round2/round3:
+"...never a TypeError"), so a healthy run exited 1. Fix: the AUTHORITATIVE
+signal is the test's exit code; the keyword grep is gone. A non-zero exit is now
+also FAIL even when a summary parses (silent-broken), and a summary-less green
+file reports `OK (no summary; exit 0)`.
+
+### Testing laws learned this round
+- A "no summary + keyword" heuristic is a false-positive magnet; grade process
+  exit codes, never the body of a passing test.
+- The class scan (R10-7) must brace-match; a regex cannot cross the nested
+  `if (...) {` that wraps every real throw. Pin the SCAN itself against a fixture.
+- To exercise a shell gate's logic, copy the real script into a temp tree with
+  fixture tests (R10-10/11) rather than reimplementing it in JS.
+- Gate pins must assert BOTH halves: configured-deny REFUSES and untouched-stub
+  ALLOWS — the second is what stops a naive fail-closed hoist.
+
+### Verification
+- `tests/audit-round10.test.js` 11/11 post-fix; 9/11 fail against the pre-fix lib
+  (R10-10/11 fail against the pre-fix sweep). Full sweep `TOTAL: P=3393 F=0`
+  (exit 0), up from P=3391 — the round-10 pins added, the two false BROKENs gone.
+
+## Discovery: 2026-11-02 - Audit Round 10b (the gate class was wider than round 10)
+
+A second pass on the R10-A class — hunting for the *same* swallowed-throw shape
+in files round 10 never touched — found two more, both invisible to round 10's
+scanner.
+
+### Why round 10 missed them
+R10-7's class scan matched a literally-empty `catch {}`. These two have a
+*comment-only* catch body, so a naive "empty braces" match skipped them:
+
+```js
+// lib/onboard.js (pre-fix) — catch body was only a comment
+try { if (!sandbox.canRead()) { throw new errors.VantError('…'); } }
+catch (e) { /* Allow by default if check fails */ }
+```
+
+The strengthened R10-7 scan now strips comments and flags any `try { …capability
+refusal throw… } catch (e) { …no rethrow… }`, so a comment can no longer hide
+the swallow. It runs against the tree, so the class cannot silently reopen.
+
+### R10-14 (HIGH): config.js `_checkRead` leaked secrets under a read-deny
+`lib/config.js`'s probe swallowed its refusal into a catch that only logged, so
+a configured `canRead:false` never blocked `load()` — which hands out
+`github.token`, `linear.apiKey`, `anthropic.apiKey`, `stegoframe`, etc. via the
+exported `getAll()`/`getGithub()`/`getStegoframe()` (reached by `vant config
+get`, `bin/config.js`, `bin/nature.js`). Confirmed: `config.getAll()` returned
+`{github:{token,repo}}` under `canRead:false`. Fixed by routing through
+`gate.checkCapability('canRead')`; R10-12 pins both the refusal and that no
+token key is present.
+
+### R10-15 (low): onboard.js `_checkRead` swallowed its refusal
+`lib/onboard.js` had the comment-body swallow too. Its inner gate is
+**shadowed** by the pipeline's own correct capability layer (every onboard read
+wraps `pipeline.run({operation:'read'})`), so the pre-fix impact was latent, not
+live — but the inner gate is now correct too (R10-13, corroborating).
+
+### Testing laws learned this round
+- An "empty catch" scan is not enough; strip comments first, then check for a
+  rethrow. A comment is a swallow.
+- When a fix routes N call sites through a helper, the class scan must assert
+  *the shape*, not the count — the class reopened in files round 10 skipped.
+- "Already shadowed by a correct outer gate" is a reason to downgrade severity,
+  never a reason to leave the inner gate broken: the outer layer is one refactor
+  away from gone.

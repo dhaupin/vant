@@ -9,8 +9,8 @@
  * body.
  *
  * House laws: one decision per attack, `skipped: true` marks honest
- * absence; the native test/carriers.test.js retired WHOLE to these rows
- * (2026-10-26) and test/traveler-lib.test.js trimmed to its real-process
+ * absence; the native tests/carriers.test.js retired WHOLE to these rows
+ * (2026-10-26) and tests/traveler-lib.test.js trimmed to its real-process
  * CLI family (2026-10-27) per the reverse-verification law.
  */
 

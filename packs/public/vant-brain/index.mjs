@@ -45,7 +45,7 @@
 // * brain-graph-walk POST {} -> 200 JSON { error?, threw, depthReached, ms }
 //
 // VALIDATION STATUS (honest, per #231/#233's needs-validation caveat):
-//   validated against a vant sandbox (test/crashtest-packs.test.js):
+//   validated against a vant sandbox (tests/crashtest-packs.test.js):
 //     private-first-fallback, paths-cannot-escape-models,
 //     state-tamper-is-loud, state-json-schema-strictness,
 //     migration-idempotency, guest-capability-gates,
@@ -433,14 +433,14 @@ export default {
     },
 
     // ==================== brain battery batch 2 (2026-10-26): the UNIT
-    // families from test/brain.test.js convert in-process — the 9 rows
+    // families from tests/brain.test.js convert in-process — the 9 rows
     // above grade the SECURITY layer (read seam, state tamper, migration,
     // guests, trust, stones, graph walk); this batch grades the module's
     // own surface + stack laws. NO routes, NO arm: straight lib drives
     // (loadLib house pattern). Stack/mode mutations always restore in
     // finally; the axolotl fixture self-seeds (create-if-missing) the
     // same way the native pins do. RETIREMENT (2026-10-27): the covered
-    // families retired whole to these rows and test/brain.test.js
+    // families retired whole to these rows and tests/brain.test.js
     // trimmed to its UNMEASURED seams (state, registry, metrics, version,
     // module-integrations, pipeline-state, listing/dirs, brainSaveNeurons
     // - 29 native pins, 29/29 green).
@@ -1264,7 +1264,7 @@ export default {
     },
 
     // ============ the surface retirement (2026-10-28): the LAST native
-    // families from test/brain.test.js convert in-process - handler
+    // families from tests/brain.test.js convert in-process - handler
     // registry, metrics + version, module integrations, pipeline state.
     // NO routes, NO arm: the same straight-lib batch-2 drive. Each law is
     // a grade the native shape pins never made; restores ride the

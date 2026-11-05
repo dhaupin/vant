@@ -4,7 +4,7 @@
  * consumer of the state spine's tree tier, labs/WIRING.md step ①) into
  * pack rows riding the run root's `wiring-trust` arm: the REAL lib/trust.js
  * + lib/state-store seams in-process, the way the native suite
- * (test/state-wiring.test.js's trust block) drives them — no fixtures, no
+ * (tests/state-wiring.test.js's trust block) drives them — no fixtures, no
  * answer sheets; a semantics the spine lacks stays UNDECLARED and the
  * rows honest-skip.
  *
@@ -1074,7 +1074,7 @@ export default {
     // ============ (wave-2 conversion, 2026-10-28) the SEEDS + AUTHORITY
     // + tree-tier + ANCHOR + in-memory families ======================
     // The last uncovered pins off the retiring native suite
-    // (test/state-wiring.test.js): the seeds family (universe-scoped,
+    // (tests/state-wiring.test.js): the seeds family (universe-scoped,
     // deterministic, env-sharded, boundary-typed), the canonical
     // authority (one encoder, winner-or-loser), the bare store tier
     // (roundtrip / persist-event / disk tier / typed absence / hydrate),

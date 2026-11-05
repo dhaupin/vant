@@ -77,7 +77,7 @@
 
 | Work | Status | Detail |
 |---|---|---|
-| Bus sink (JSONL) | DONE | `lib/event.js`: `enableSink/Tail/Stats` — off by default, ring-bounded, best-effort writes; pinned in test/event-observability.test.js (+ env sink gating from config) |
+| Bus sink (JSONL) | DONE | `lib/event.js`: `enableSink/Tail/Stats` — off by default, ring-bounded, best-effort writes; pinned in tests/event-observability.test.js (+ env sink gating from config) |
 | Consumers | DONE | security denials (vaf/rls/trust/market blocked, storage:error, stego + secret lifecycle) → hash-chained audit ledger; sync:push/pull:failed → health `sync` check |
 | CLI | DONE | `vant events` (tail/enable/disable/stats) reading the most recent session sink cross-process |
 | MCP | DONE | `event_tail` / `event_sink_enable` / `event_sink_stats` tools |
@@ -93,7 +93,7 @@
 | Agent-registry persistence | DONE (pass 193) | lib/registry.js hydrates from `models/private/<brain>/state/agent-registry.json` via the shared state spine (WAL + tree tier); registration survives restarts; brain-scoped by construction |
 | Registry → trust feed | DONE | register() writes one positive cooperation record into trust's persisted ledger; quarantine gate = deny path (pinned) |
 | `registerBrainAgent` dead store retired | DONE | `_brainRegistries` (pushed to, never read, zero callers) removed; getBrainRegistry/registerBrainAgent delegate to the real persistent singleton; gatherState/restoreState carry the real book (transform.js consumer intact) |
-| Pins | DONE | test/agent-registry.test.js (11) + e2e grand-tour 18 (stale 299-tool pin updated to documented 300 — `vant_resolution_list`, pass 190) |
+| Pins | DONE | tests/agent-registry.test.js (11) + e2e grand-tour 18 (stale 299-tool pin updated to documented 300 — `vant_resolution_list`, pass 190) |
 | Verified | DONE | trust 20, cron 14+legacy, backup 8/3/4, habitat 6+23+15+13+crossprocess 5, nature 7, event 15+legacy, event-observability 40, missing-modules 41, e2e 18/18, CI **453/0**, syntax+coverage gates PASS |
 
 NEXT WIRING CANDIDATES (pass 194+):
@@ -104,7 +104,7 @@ NEXT WIRING CANDIDATES (pass 194+):
 |---|---|---|
 | `lib/hash.js` canonical surface | DONE | `sha256` / `sha256H` (incremental Hasher, legacy update() shape preserved) / `crc32` (core zlib) / `canonicalBytes` (#146 encoder) / `hash` / `hmac` |
 | Consumers migrated | DONE | audit, wal, vaf, encrypt (sha256 + hybridRandom), connectors/s3 (SigV4), habitat (token), storage (_hashToVector), state/tree (roots+scopes+snapshots), state/canonical, state/checkpoint, state/seeds, state/spine, state/brain-verify (fileHash + currentRoot), geometry/raid (shardHash), geometry/lattice-keys — every direct `crypto.createHash('sha256')` in lib/ retired |
-| Digest stability | DONE (pinned) | `test/hash-canon.test.js` 29 pins: byte-identity vs direct crypto, `hash()===canonical.hash()`, goldens, `crc32===zlib.crc32`, fail-closed non-Buffer, grep gate |
+| Digest stability | DONE (pinned) | `tests/hash-canon.test.js` 29 pins: byte-identity vs direct crypto, `hash()===canonical.hash()`, goldens, `crc32===zlib.crc32`, fail-closed non-Buffer, grep gate |
 | Grep gate | LIVE | no lib module calls `crypto.createHash('sha256')` outside lib/hash.js — enforced by test, fails CI on regression |
 | Migrated suites | DONE | audit, wal, state-wiring, engine-parity-spine, backbone, encrypt, vaf, geometry-engine, habitat-token, mesh-status, stego ×2, state-persistence — all green |
 
@@ -123,7 +123,7 @@ NEXT WIRING CANDIDATES (pass 194+):
 |---|---|---|
 | Charter | DONE | prd-canonicalization §6: msg=conversations+channels, stream=work queue, crew-bus=peer transport; overlaps BANNED (no dual-ownership channels, msg OR stream as truth, only crew-bus crosses the wire) |
 | Shared envelope | DONE | lib/messaging.js — crew-bus's v1.0 wire shape + version gate + sign/verify; crew-bus delegates validator/staging to it |
-| Pins | DONE | test/messaging-envelope.test.js 32 pins incl. integration legs (msg snapshot + stream row ride the envelope, zero semantic loss) |
+| Pins | DONE | tests/messaging-envelope.test.js 32 pins incl. integration legs (msg snapshot + stream row ride the envelope, zero semantic loss) |
 | Parity | DONE | staging seam moves the one object both layers read; unstamped v1.0 tolerance preserved |
 | Consumer suites | DONE | crew-bus 20, stream, agents, forum, webhooks, msg, msg-sync 9, forum-msg-escrow, node-crew 9, grand-tour 18 |
 
@@ -134,7 +134,7 @@ NEXT WIRING CANDIDATES (pass 194+):
 | Interface | DONE | `lib/remote-transport.js` — the shared "send state elsewhere" seam built from the git-connector argv-array hardening: `auth()` (the ONE credential door; tokens in closures, never instance fields), `push()`/`pull()`/`verify()`, shared `_run()` ceremony (auth-once, classify, exponential backoff from GitProvider semantics), shared fail-closed validators (`refLike`/`secretLike`/`payloadLike`) and `classifyError` (VantError retryable flag trusted; beyond-ladder attempts = caller bug, non-retryable, never an invented delay) |
 | Base honesty | DONE (pinned) | unimplemented `push/pull/auth` THROW loudly; base `verify()` returns FALSE ("not verified") — never a silent bless; `describe()` leaks no secrets |
 | First adopter | DONE | `lib/connectors/s3.js` `S3Transport` — SigV4 credentials via the `auth()` door (closure-captured), pushes/pulls under the shared ceremony; `createClient` surface unchanged |
-| Pins | DONE | `test/remote-transport.test.js` 23 pins — validators (traversal/absolute/space/dash/empty/non-string/too-long), ceremony (transient retries, auth-once, no backoff burn on hard fails, attempts-override, exhausted-throw), verify honesty, s3 adopter shape + secret-not-on-instance |
+| Pins | DONE | `tests/remote-transport.test.js` 23 pins — validators (traversal/absolute/space/dash/empty/non-string/too-long), ceremony (transient retries, auth-once, no backoff burn on hard fails, attempts-override, exhausted-throw), verify honesty, s3 adopter shape + secret-not-on-instance |
 | Verified | DONE | remote-transport 23, git-injection, s3/connector sync 18, sync-pull 15, org-sync 9, agora-sync 7, remote 10, state-wiring 51, messaging-envelope 32, hash-canon 29 — all green |
 
 ## 16. RemoteTransport adoption wave 3: the GitProvider stack (pass 195 — prd-canonicalization §7 wave G)
@@ -146,7 +146,7 @@ NEXT WIRING CANDIDATES (pass 194+):
 | Timeout getters via config | DONE | `_gitTimeoutMs`/`_requestJson` fallback read `config.gitTimeoutMs()`/`config.httpTimeoutMs()` (env-fallback preserved); sync's `SYNC_OP_TIMEOUT_MS` registered too |
 | Env registry growth | DONE | 43 → 52 entries: transport family (VANT_SYNC_OP_TIMEOUT_MS, VANT_GIT_TIMEOUT_MS, VANT_HTTP_TIMEOUT_MS, GITLAB_TOKEN/URL, GITEA_TOKEN/URL, BITBUCKET_TOKEN, GIT_TOKEN) registered incl. secret flags |
 | Pins | DONE | remote-transport suite re-run (23/23 — adopters inherit the adversarial contract by construction), git-injection 7/7, probe: instanceof RemoteTransport, no `token` field, describe() leaks nothing, base verify() honest false, config-registry registry grew |
-| Pre-existing failure NOTED | — | test/sync-pull.test.js 12/15 (3 fails) is env-dependent (needs a live GITHUB_TOKEN to reach api.github.com — HTTP 403 in CI sandbox); verified identical BEFORE and AFTER the change via git stash diff |
+| Pre-existing failure NOTED | — | tests/sync-pull.test.js 12/15 (3 fails) is env-dependent (needs a live GITHUB_TOKEN to reach api.github.com — HTTP 403 in CI sandbox); verified identical BEFORE and AFTER the change via git stash diff |
 
 ## 13. Wiring candidates landed (pass 184 — the pass-183 queue)
 
@@ -155,7 +155,7 @@ NEXT WIRING CANDIDATES (pass 194+):
 | `hotset` (#153) backed state-store tree reads | **WIRED** (pass 184) | `lib/state-store.js` treeFor is backed by a bounded HotSet (cap 64) keyed by a CORRECTNESS fingerprint (`stateFile:mtime:size` + raw) — repeated reads of an unchanged file reuse the parsed payload (metrics via `stateStore.treeHot.metrics()`); any disk change including external tamper changes the fingerprint → miss → fresh honest read (no stale blessing, pinned). Hydrate/persist paths unchanged |
 | universeSeed first writer (#158) | **WIRED** (pass 184) | genesis's `_writeTopology` (all four ceremony legs: create/join/admit/accept) calls `_persistUniverseSeed()` — derives from the SAME `resolveUniverse()` resolution the spine's SeedChain uses and persists the per-brain config `universeSeed` override; NEVER clobbers an existing pin and NEVER overrides an explicit `VANT_UNIVERSE_SEED` env. The seeds.js read path was live; the writer fills the durability gap |
 | Transport verify (Wave F §7 adoption wave 2) | **WIRED** (pass 184) | `lib/sync.js` gains `verifyProvider(name)` / `verifyAllProviders()` — honest verify at the GitProvider stack: repo reachable + branch probe + corpus snapshot; unreachable/not-found report `verified:false`, never blessed. `lib/agora-sync.js` state-reply now carries the OWNER's locally re-derived `tallyHash`; the asker verifies its OWN post-merge re-tally against it — a mismatch (forged/corrupt stamp) is reported `verify.verified:false`, votes stay adopted on their own merge gates. Backward compatible (no `tallyHash` → `verify:null`) |
-| Pins | DONE | `test/wiring-184.test.js` 10 pins — hot cache hit/miss + identical-root, tamper-detection (no stale blessing), hydrate unaffected, typed absence; writer precedence + never-clobber + read-path round-trip; provider verify honest matrix via the test-DI seam; agora stamp agree/forged-disagree legs |
+| Pins | DONE | `tests/wiring-184.test.js` 10 pins — hot cache hit/miss + identical-root, tamper-detection (no stale blessing), hydrate unaffected, typed absence; writer precedence + never-clobber + read-path round-trip; provider verify honest matrix via the test-DI seam; agora stamp agree/forged-disagree legs |
 | Verified | DONE | wiring-184 10 + 14 consumer suites re-run green: state-wiring 51, state-persistence 8, state-store-crossprocess 5, tombstones 2, sync 18, sync-pull 15, agora-sync 7, mcp-agora-sync 8, msg-sync 9, org-sync 9, engine-parity-spine 70, mesh-status 7, consensus 8, remote-transport 23 |
 
 1. ~~`hotset` (#153) backs state-store tree reads~~ ✅ DONE pass 184 — see §13.
@@ -175,7 +175,7 @@ NEXT WIRING CANDIDATES (pass 194+):
 | Legacy imul shim retired | DONE | `lib/geometry/lattice-keys.js` — the raw `Math.imul` chain + `LATTICE_MULTIPLIER` export GONE (grep-proved zero live consumers: fragmenter's `deriveLatticeKeys` delegates to the #155 PRF; the GitHub adapter rides fragmenter). `fragmenter.deriveLatticeKeys` remains the single surviving name — one derivation chain in the repo |
 | #157 precision WIRED | DONE | `lib/geometry/quasicrystal.js` store quantizes the address-bearing metadata (position triple, theta/phi/depth) through the #157 deterministic quantizer (grid 1e-9) — cross-engine last-ulp drift can never become two different cells; stored integer-grid form is byte-stable across re-derivation |
 | Engine-parity over REAL math | DONE (pinned) | `qc.engineParity()` — the SAME golden-angle rotation through two algebraically distinct evaluation orders (direct libm coefficients vs an angle-sum double-rotation) must agree after quantization; returns mismatches, never asserts in-process. julia-optional policy unchanged |
-| Pins | DONE | `test/geometry-parity.test.js` 8 pins — retirement (source grep code-not-docs, delegation, require-shape), quantized-record shape, round-trip honesty, golden + 200-vector stress parity, and a sensitivity leg (a genuinely different rotation IS caught) |
+| Pins | DONE | `tests/geometry-parity.test.js` 8 pins — retirement (source grep code-not-docs, delegation, require-shape), quantized-record shape, round-trip honesty, golden + 200-vector stress parity, and a sensitivity leg (a genuinely different rotation IS caught) |
 | Verified | DONE | geometry-parity 8 + geometry-engine 1, connector 8, engine-parity-spine 70, hash-canon 29, sidecar 8, julia-sidecar-live (skip policy OK) — all green |
 | fold (#154) | SKETCH ONLY | `labs/SKETCH-facet-layout.md` — facet layout stays a document; implementation waits for the /world space consumer or capacity pressure |
 
@@ -194,7 +194,7 @@ NEXT WIRING CANDIDATES (pass 194+):
 | Stale getters wired | DONE | `getGithub()`/`getStegoframe()` read `_config` directly — null on any fresh caller (bin/auth.js session check). Both route through `load()` |
 | `cfR2Bucket()` zombie removed | DONE | grep-proved zero consumers; the feature was deleted in 0.8.6 but the getter survived |
 | ENV_REGISTRY Wave-B completion | DONE | 24 → 43 entries: the 19 vars `load()`/getters already consumed but the registry omitted (VANT_MSG_*, VANT_PRUNE_*, VANT_CLEAN_*, storage path/sync interval/brain password timeout/escrow budget/agent id/qos limits/wal) are registered; per-domain families (spine seeds, genesis mesh, sudo, s3 REMOTE) stay out with an explicit note — their domain modules are the reader of record |
-| Pins | DONE | `test/config-registry.test.js` 31 pins (8 new: merged msg shape, stegoframe reachability, fresh-load getGithub, cfR2 removal, msg/prune-clean/escrow-qos family coverage, registry ≥ 40) |
+| Pins | DONE | `tests/config-registry.test.js` 31 pins (8 new: merged msg shape, stegoframe reachability, fresh-load getGithub, cfR2 removal, msg/prune-clean/escrow-qos family coverage, registry ≥ 40) |
 | Verified | DONE | config-registry 31, config 20, config-persistence 13, agents 17, agents-split 23 — all green |
 
 ## Where the spine got large (the honest answer)

@@ -1,13 +1,13 @@
 # PRD — The Crashtest Two-Engine System (packs + canonical vant rigging)
 
-> Spec family: extends [prd-kernel.md](prd-kernel.md) (the test/ci canon),
+> Spec family: extends [prd-kernel.md](prd-kernel.md) (the tests/ci canon),
 > [prd-security.md](prd-security.md) (verdict semantics), and the
 > packs/README.md ledger. Cross-repo context: dhaupin/crashtest issues
 > **#8** (fakeD1 v0.2, Rook), **#9** (fakeD1/FakeKV breadth, us),
 > **#10** (memory-drift/hallucination/resolution rows), **#11** (governance
 > rows), **#12** (pack.json env-claim prerequisites), **#13** (vant
 > test-to-crashtest census), **#14** (chaining/step-scoped verdict
-> primitive, filed with this PRD). Census facts (2026-10-23): `test/` =
+> primitive, filed with this PRD). Census facts (2026-10-23): `tests/` =
 > 258 suites / ~54k lines; library rows on the vant run root: 30 REFUSED /
 > 0 EXPLOITED / 0 skipped, both CI gate layers green.
 
@@ -33,7 +33,7 @@ Rework next (P3 of this PRD): vant's OWN rigging becomes the consistent, canonic
 | Whitelist bookkeeping, ledger, exit codes | **crashtest** shapes vant wires | KNOWN_FINDINGS/ALLOWED_FINDINGS lockstep stays vant-side glue until the crate takes manifest expectations |
 | Scenario libraries (memory, governance, input, race, state, upload, …) | **crashtest** (rows) + **vant** (packs) | general families in the crate; vant-specific attackers beside the attacked code |
 | Run-root fixtures: shim routes over vant's real libs, fake env bindings | **vant** | only vant knows how `lib/brain` wants to be driven |
-| The native runner (`test/runner.js`), live/deploy gates | **vant** (P3 rework) | the buckets crashtest cannot grade stay ours, done canonically |
+| The native runner (`tests/runner.js`), live/deploy gates | **vant** (P3 rework) | the buckets crashtest cannot grade stay ours, done canonically |
 | Packs: `packs/public/<name>` with the thing they attack | **vant** | the pack lives with the thing it attacks |
 
 ## 3. The migration matrix (census → phases)
@@ -60,7 +60,7 @@ The census named ~70–80% rectangular. Here is the exact shopping list that tak
 4. **fakeD1/FakeKV breadth (issues #8 + #9).** Unlocks retiring vant's statement-mapped fake (`web/home` status arm) onto the crate backend, and lets the rollup/percentile SQL shapes run as-written instead of JS-hand-cast — the wire-surface bucket's static bottom.
 5. **Manifest env claims (issue #12).** `pack.json` declares binding/route prerequisites; armed-vs-absent becomes manifest-driven rather than five hand-probes per attack. Cheap, high leverage, unlocks clean diagnostics for any external run root adopting the packs.
 6. **Determinism lint.** `--lint-determinism`: grep pack/library sources for `Date.now`/`Math.random`/`performance.now` in verdicts. Cheap insurance that keeps the now-pattern from creeping back as more converters port suites.
-7. **Expectation tables as data.** Pack rows carry declarative expectation records (ledger/EXPECTED-style table) so CI keeps the "the table is complete" property vant's gate enforces by hand in `test/crashtest-packs.test.js` today.
+7. **Expectation tables as data.** Pack rows carry declarative expectation records (ledger/EXPECTED-style table) so CI keeps the "the table is complete" property vant's gate enforces by hand in `tests/crashtest-packs.test.js` today.
 8. **Fork fixture (child-process probes).** Vant's fresh-module probes (brain-state tamper, crew bus, MCP executor boot) exec probe children per route to dodge module caches. A crate `fork` fixture (an in-scope child with the same JSON/stdout contract as the vant probes) would let those become library rows rather than per-run-root shim routes. This is the LAST ask — everything above already precedes it.
 
 **Bottom line:** asks 1–3 unlock the stateful ~20%; asks 4–5 unlock the wire's static bottom + adoption ergonomics; ask 8 converts the last in-repo-native bucket. What NEVER moves: docker/deploy/live-federation gates and the two live sidecar suites (~10%) — externals/sockets stay outside crashtest's one law, and that layer is the wrong home for them.
@@ -69,9 +69,9 @@ The census named ~70–80% rectangular. Here is the exact shopping list that tak
 
 Vant keeps a native rigging for what crashtest cannot grade — reworked from today's organic accretion into one consistent system:
 
-1. **One runner.** `test/runner.js` stays the single native runner; the ad-hoc per-script runners (`run-all.js`, `ci.js` glue) unify under it with one config surface (suite list, allowlist, timeout policy — the same set `test/ci.js` hard-codes today, promoted to a manifest).
+1. **One runner.** `tests/runner.js` stays the single native runner; the ad-hoc per-script runners (`run-all.js`, `ci.js` glue) unify under it with one config surface (suite list, allowlist, timeout policy — the same set `tests/ci.js` hard-codes today, promoted to a manifest).
 2. **One whitelist source.** `ALLOWED_FINDINGS` (contract suite) and `KNOWN_FINDINGS` (run root) become ONE policy file (`packs/findings-policy.json`) read by both consumers — the lockstep rule ("both in the same commit, deleted together") becomes enforced by sharing the file, not by convention prose.
-3. **One fixture config crate.** The run-root env specs (library rows', vant-home's, future vant-relay's) move to a shared module (`test/fixtures/bindings.js`) exporting named binding specs — the same objects the fake backend instantiates. A pack author wanting the vant-arm shapes imports the spec instead of hand-copying tables.
+3. **One fixture config crate.** The run-root env specs (library rows', vant-home's, future vant-relay's) move to a shared module (`tests/fixtures/bindings.js`) exporting named binding specs — the same objects the fake backend instantiates. A pack author wanting the vant-arm shapes imports the spec instead of hand-copying tables.
 4. **One census gate.** The structural scripts (`scripts/check-*`) stay lint-based (per packs/README: repo-shape checks with no runtime; not packs) but get one standard entrypoint in the manifest with the same allowlist shape as everything else.
 5. **Anti-goal (stated twice on purpose): the canon is NOT a verdict engine.** It orchestrates, configures, and stages; the verdict vocabulary, determinism law, and honest-skip grading remain crashtest's alone. Any vant-side code that starts producing "verdicts" is deleted, not extended.
 
@@ -101,7 +101,7 @@ Success criteria (whole program): crashtest ledger is the PRIMARY record for eve
 
 | Risk | Mitigation |
 |---|---|
-| crate contract churn breaks vant CI (coupling) | schemaVersion-1 discipline + the census's per-bucket staging; contract-audit exists (`test/crashtest-packs.test.js`) and fails loudly on manifest drift |
+| crate contract churn breaks vant CI (coupling) | schemaVersion-1 discipline + the census's per-bucket staging; contract-audit exists (`tests/crashtest-packs.test.js`) and fails loudly on manifest drift |
 | conversion loses fidelity (native `it()` asserts a nuance a row cannot see) | reverse-verification rule; a suite that cannot be expressed as rows stays native — no Judgment Theater |
 | stateful smears before chaining lands | the stateful bucket stays native until #14; no smeared one-blob chains |
 | whitelists rot into a dump | one policy file (P3) + the same-commit rule already in packs/README |

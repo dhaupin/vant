@@ -49,7 +49,7 @@ The 258 unheard events stay emitted; we make the *security and integrity* ones h
 | `stego:encoded`, `stego:decoded` | audit | info entry (carrier path, encrypted flag) |
 | `secret:*` | audit | info (never values — event payloads already hold names only) |
 
-Pin: `test/event-observability.test.js` — emit + assert audit/health reaction for each wired pair; assert the tail CLI sees a canned event.
+Pin: `tests/event-observability.test.js` — emit + assert audit/health reaction for each wired pair; assert the tail CLI sees a canned event.
 
 ### A4. Migrate private emitters onto the shared bus (staged)
 
@@ -67,7 +67,7 @@ Stage 1 (this PRD's scope): trust, cron scheduler, market re-emit their domain e
 2. Modules stop reading `process.env` directly (excavate each match; `config.js`/`secret.js` are the only allowed direct readers).
 3. `vant config list` shows registered keys with source (default / ini / env / override) — makes drift visible.
 4. Health check gains a config section: env vars that are set but unknown to the registry (typo detection).
-5. Pins: `test/config-registry.test.js` — every env fallback resolves, direct `process.env` reads outside config/secret fail a grep gate.
+5. Pins: `tests/config-registry.test.js` — every env fallback resolves, direct `process.env` reads outside config/secret fail a grep gate.
 
 ---
 
@@ -99,7 +99,7 @@ Stage 1 (this PRD's scope): trust, cron scheduler, market re-emit their domain e
 
 ## 5a. Appendix — Storage ownership matrix (Wave D, pass 181)
 
-Measured on the tree: consumer counts via `getStorage('<type>')` and `new <Class>()` across lib/ bin/ test/ scripts/.
+Measured on the tree: consumer counts via `getStorage('<type>')` and `new <Class>()` across lib/ bin/ tests/ scripts/.
 
 | Data kind | Canonical store | Consumers | Backup | WAL | Mirror | API surface |
 |---|---|---|---|---|---|---|
@@ -153,7 +153,7 @@ Measured on the tree: consumer counts via `getStorage('<type>')` and `new <Class
 ### Wave E landed (pass 182)
 
 - `lib/messaging.js`: `makeEnvelope/validateEnvelope/versionGate/ signEnvelope/verifyEnvelope/setReceiverVersion` — the v1.0 envelope crew-bus has been sending since pass 61, made requirable without the network stack. Crew-bus now delegates `_validVersion` and `_setReceiverVersion` to it (single home; staging seam preserved byte-identically; the unstamped-v1.0 tolerance preserved exactly).
-- Pins: `test/messaging-envelope.test.js` — shape contract, version gate matrix (incl. garbage/unstamped/both-major-directions/minor), sign/verify vs Encrypt, crew-bus parity (staging moves the same object both layers read).
+- Pins: `tests/messaging-envelope.test.js` — shape contract, version gate matrix (incl. garbage/unstamped/both-major-directions/minor), sign/verify vs Encrypt, crew-bus parity (staging moves the same object both layers read).
 - Integration: msg conversation snapshot leg + stream work row wrap into the shared envelope and round-trip without semantic loss.
 - Consumer suites re-run green: msg, stream, crew-bus, agents, forum, mcp smoke, grand-tour.
 
@@ -178,7 +178,7 @@ Measured on the tree: consumer counts via `getStorage('<type>')` and `new <Class
 ## 8. Acceptance per wave
 
 Every wave lands with:
-- All affected suites green (`node test/run-all.js --only=...`).
+- All affected suites green (`node tests/run-all.js --only=...`).
 - New pins for the new contract (test file named in the wave).
 - WIRING.md updated (status column) — the canonical "is it wired" ledger.
 - PR comment cross-linking the wave to this PRD.

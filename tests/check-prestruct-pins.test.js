@@ -17,7 +17,7 @@
  * The guard accepts a rootDir arg, so every case drives it over a throwaway
  * fixture tree, never the real docs.
  *
- * Run: node test/check-prestruct-pins.test.js
+ * Run: node tests/check-prestruct-pins.test.js
  */
 
 const fs = require('fs');

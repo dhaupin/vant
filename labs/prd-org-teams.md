@@ -83,7 +83,7 @@ After 1-5, `bin/horcrux.js create` on a booted operator session produces a horcr
 
 ## 6. Verification plan
 
-- End-to-end script (the QC, kept as `test/orgflow.test.js` after O-6) must pass both postures: unconfigured sandbox (denied, F-2/D-2 behavior) and operator grant (full flow green).
+- End-to-end script (the QC, kept as `tests/orgflow.test.js` after O-6) must pass both postures: unconfigured sandbox (denied, F-2/D-2 behavior) and operator grant (full flow green).
 - Filtered listings (`listDepts(orgId)`, `listTeams({org})`) must return created children.
 - Delete org with live child → blocked (or cascaded per D-5); zero orphans after cleanup.
 - `vant horcrux inspect`-style CLI smoke: spawn → assign → `getAgentBrain` returns the spawned brain.

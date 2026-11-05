@@ -1,6 +1,6 @@
 // packs/public/vant-spine/index.mjs - the engine-parity spine battery.
 //
-// Converts the native test/engine-parity-spine.test.js pins (state PRD,
+// Converts the native tests/engine-parity-spine.test.js pins (state PRD,
 // #145-#166) onto pack rows per the campaign's reverse-verification law:
 // the native suite stays green ALONGSIDE until one full run cycle is
 // green on both sides; the S-counter only moves on that.
@@ -20,7 +20,7 @@
 // RAID cell addresses + CellStore rebates), the seed chain / orbits /
 // delta-ledger world clock, the mesh AOI filter + pure staleness +
 // deterministic write winners, and the brain verify + horcrux chain.
-// Native test/engine-parity-spine.test.js RETIRED WHOLE (2026-10-27, the
+// Native tests/engine-parity-spine.test.js RETIRED WHOLE (2026-10-27, the
 // carriers precedent: all six families - state core, storage, targeted,
 // geometry, world/clock, mesh/brains - are converted across the two
 // slices; the coverage lives in this pack's 16 rows).

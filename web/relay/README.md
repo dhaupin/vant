@@ -41,7 +41,7 @@ Why this small app matters: when any primary relay goes dark (a shared host, an 
 - every hop body arrives as an AES-256-GCM envelope, encrypted by the client BEFORE it touches this host — the relay forwards byte-verbatim and holds no key (12d's law, stated on the page);
 - every route answers `x-content-type-options: nosniff` + `referrer-policy: no-referrer` (12e).
 
-Pins: `test/relay-parity.test.js` block 12 (12a–12e).
+Pins: `tests/relay-parity.test.js` block 12 (12a–12e).
 
 ## The contract
 
@@ -50,7 +50,7 @@ The kit contract lives ONCE (`web/kit/contracts/relay-contract.js`); this app ve
 ## Verify
 
 ```bash
-node test/relay-parity.test.js        # the R1 block + both vendored flavors
+node tests/relay-parity.test.js        # the R1 block + both vendored flavors
 node scripts/vendor-relay-kit.js --check
 cd web/relay && bun x tsc -b --noEmit # the app + functions typecheck
 ```

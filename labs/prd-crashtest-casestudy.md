@@ -23,15 +23,15 @@
 
 | Orchestration surface | Lines | What it does |
 |---|---|---|
-| `test/ci.js` | 530 | the CI brain: suite orchestration, timeouts, async-wait bans |
-| `test/runner.js` | 339 | the micro-runner every suite rides |
+| `tests/ci.js` | 530 | the CI brain: suite orchestration, timeouts, async-wait bans |
+| `tests/runner.js` | 339 | the micro-runner every suite rides |
 | `scripts/crashtest-run.js` | 1,208 | the crashtest run root: sandbox, 24 shim routes, fixture bindings, library-row phase, both-policy exit codes |
-| `test/ci-crashtest-gate.js` | 188 | the two-layer gate (contract + real harness) |
-| `test/run-all.js` | 170 | suite lister |
+| `tests/ci-crashtest-gate.js` | 188 | the two-layer gate (contract + real harness) |
+| `tests/run-all.js` | 170 | suite lister |
 | `.github/workflows/test.yml` | 111 | the workflow itself |
 | **Total orchestration** | **≈2,550** | vs. crashtest's crate: owned upstream |
 
-Plus one harness-adjacent habit the census caught: **`test/` holds 258 suites (~54k lines) against a ~1-week-old verdict engine that already out-expresses most of them** — hostile-input → typed-refusal suites are written as `it()` blocks when the verdict vocabulary was BUILT for the same assertion. The runner is not wrong, it is *pre-crashtest*: it is the discipline crashtest formalized, hand-rolled three different ways in one repo.
+Plus one harness-adjacent habit the census caught: **`tests/` holds 258 suites (~54k lines) against a ~1-week-old verdict engine that already out-expresses most of them** — hostile-input → typed-refusal suites are written as `it()` blocks when the verdict vocabulary was BUILT for the same assertion. The runner is not wrong, it is *pre-crashtest*: it is the discipline crashtest formalized, hand-rolled three different ways in one repo.
 
 **What's already on the engine, measured (same day):**
 
@@ -39,8 +39,8 @@ Plus one harness-adjacent habit the census caught: **`test/` holds 258 suites (~
 |---|---|---|
 | Packs against vant | `node scripts/crashtest-run.js` | 7 packs: 28 REFUSED / 0 EXPLOITED / 4 honest skips (vant-census's rows ride declared host census data by design) |
 | Library rows | same | 30 REFUSED / 0 EXPLOITED / 0 skipped — D1/KV-shaped rows ARMED this day (race/state/upload), arming stays conditional by design |
-| Contract suite | `node test/crashtest-packs.test.js` | 67 passed / 0 failed |
-| Two-layer CI gate | `node test/ci-crashtest-gate.js` | GREEN, both whitelists EMPTY |
+| Contract suite | `node tests/crashtest-packs.test.js` | 67 passed / 0 failed |
+| Two-layer CI gate | `node tests/ci-crashtest-gate.js` | GREEN, both whitelists EMPTY |
 | Findings earned/fixed same-turn | ledger | 2 real findings measured + fixed the day armed (flood cost cap; upload double-extension), whitelists still empty |
 
 **Cross-repo state:** crate asks filed and open — #8 (fakeD1 v0.2, Rook's), #9 (fakeD1/FakeKV breadth), #10 (memory rows), #11 (governance rows), #12 (env-claims manifest), #13 (the census), #14 (chaining). The vant side waits for nothing hardcoded: the run root arms what the crate has, keeps native rigging for what it doesn't.

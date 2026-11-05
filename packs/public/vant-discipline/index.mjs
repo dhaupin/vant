@@ -1,8 +1,8 @@
 /**
  * vant-discipline pack — Phase A in-process module-discipline slice
  * (issue #249, S0→S1 campaign). Converts the B0-era native unit pins
- * (the memory envelope block in test/memory.test.js and the escrow
- * ledger block in test/escrow.test.js) into pack rows riding the run
+ * (the memory envelope block in tests/memory.test.js and the escrow
+ * ledger block in tests/escrow.test.js) into pack rows riding the run
  * root's REAL lib arms: the memory note store (memory-note-write/read/
  * delete), the grant ledger (gov-grant/gov-resolve), and the escrow
  * door (gov-escrow). Same posture as the crate's library family rows,

@@ -90,7 +90,7 @@ All modules MUST route brain/models file I/O through FileStorage, not raw fs. Th
 5. **Safe-charset validation** for ANY external name that becomes a path segment (`/^[a-zA-Z0-9][a-zA-Z0-9._-]*$/` + no `..` — islands/skills pattern).
 6. **Enumeration stays on fs** (readdir/stat) — storage.list is pattern-glob only; keep paths anchored to models roots, never caller input.
 7. **Binary/contained exceptions:** artifact dirs outside models (backups, stego payloads) use contained+validated fs, not FileStorage — document the choice at the call site.
-8. **Verify:** full `test/*.test.js` loop + `node test/ci.js` per commit, one module per commit, `axolotl:` prefix.
+8. **Verify:** full `tests/*.test.js` loop + `node tests/ci.js` per commit, one module per commit, `axolotl:` prefix.
 
 ---
 
@@ -806,16 +806,16 @@ event.on('storage:saved', (data) => {
 
 ```bash
 # Run storage tests
-node test/storage.test.js
+node tests/storage.test.js
 
 # Run format tests
-node test/format.test.js
+node tests/format.test.js
 
 # Run VAF tests
-node test/vaf.test.js
+node tests/vaf.test.js
 
 # Run brain tests (includes storage integration)
-node test/brain.test.js
+node tests/brain.test.js
 ```
 
 ### Test Coverage (v0.8.6+)
@@ -833,14 +833,14 @@ node test/brain.test.js
 
 ## 12. Future Enhancements (P3+)
 
-- [x] **Remote connectors**: S3, GCS, Azure Blob backends for FileStorage — DONE (axolotl `d22379b`+`b3d7f73`+`4597044`, relocated per dhaupin option B): own S3-API client `lib/connectors/s3.js` (SigV4 + global fetch, zero deps; registered as `connectors.s3(config)` in the connectors index) — ONE implementation covers S3, Cloudflare R2, MinIO, Backblaze B2 via provider presets (GCS/Azure speak non-S3 APIs, deliberately out of scope); `RemoteStorage` store via `getStorage('remote', {...})` — shared B-2 capability gate, key hardening (absolute/backslash/traversal refused pre-network, incl. raw bypass), recursive-by-default list (shallow parity opt-in), prefix round-trip mapping, `pushFrom`/`pullTo` sync helpers, per-store metrics at `remote://` pseudo basePath, DI client injection for offline tests; CLI `vant s3` (status/test/ls/push/pull, --dry-run). NOTE: `lib/remote.js` is the git-providers registry; `connectors/cloudflare.js` r2* ops now DELEGATE to this client (axolotl `9fd4a51`: R2's native S3 endpoint, SigV4 access keys `CF_R2_*`, new `r2Delete`, shared `_parseListXml`; the connector's old control-plane r2 impl was DOA — broken `./`-sibling requires crashed every path — and is gone). Tests: `test/remote.test.js` 10/10 (offline incl. SigV4 known-answer), `test/remote-storage.test.js` 13/13, `test/remote-cli.test.js` 6/6, `test/cloudflare-r2.test.js` 9/9.
+- [x] **Remote connectors**: S3, GCS, Azure Blob backends for FileStorage — DONE (axolotl `d22379b`+`b3d7f73`+`4597044`, relocated per dhaupin option B): own S3-API client `lib/connectors/s3.js` (SigV4 + global fetch, zero deps; registered as `connectors.s3(config)` in the connectors index) — ONE implementation covers S3, Cloudflare R2, MinIO, Backblaze B2 via provider presets (GCS/Azure speak non-S3 APIs, deliberately out of scope); `RemoteStorage` store via `getStorage('remote', {...})` — shared B-2 capability gate, key hardening (absolute/backslash/traversal refused pre-network, incl. raw bypass), recursive-by-default list (shallow parity opt-in), prefix round-trip mapping, `pushFrom`/`pullTo` sync helpers, per-store metrics at `remote://` pseudo basePath, DI client injection for offline tests; CLI `vant s3` (status/test/ls/push/pull, --dry-run). NOTE: `lib/remote.js` is the git-providers registry; `connectors/cloudflare.js` r2* ops now DELEGATE to this client (axolotl `9fd4a51`: R2's native S3 endpoint, SigV4 access keys `CF_R2_*`, new `r2Delete`, shared `_parseListXml`; the connector's old control-plane r2 impl was DOA — broken `./`-sibling requires crashed every path — and is gone). Tests: `tests/remote.test.js` 10/10 (offline incl. SigV4 known-answer), `tests/remote-storage.test.js` 13/13, `tests/remote-cli.test.js` 6/6, `tests/cloudflare-r2.test.js` 9/9.
 - [x] **Encryption at rest**: Optional AES-256 via `encrypt.js` integration — DONE (axolotl `e91111b`): FileStorage `encrypt: true` + `encryptKey`/`VANT_STORAGE_KEY`, `vant-enc:v1:` prefix, mixed stores OK
 - [x] **Compression**: Transparent gzip for large blobs — DONE (axolotl `d4990d8`): `compressAbove`/`VANT_STORAGE_COMPRESS_ABOVE`, `vant-gz:v1:` prefix, compress→encrypt order
-- [x] **WAL/Journal**: Write-ahead log for crash recovery — DONE (axolotl `5d22fae`): `lib/wal.js` JSONL journal + fsync-style flush, replay/verify/truncate API; FileStorage recovers uncommitted ops on open; CLI `vant wal` (status/replay/verify/truncate). Tests: `test/wal.test.js` incl. simulated crash-recovery fixtures.
-- [x] **Replication**: Multi-node sync — DONE (axolotl `4794d49`, mirror-style not Raft/CRDT): primary→mirror replication via FileStorage `mirror` config (push-on-write + manual `replicate()`); CLI `vant mirror <target>` (push/status). Tests: `test/storage-mirror.test.js`.
-- [x] **Metrics**: Prometheus exporter for storage ops — DONE (axolotl `59325b8` + `3fc1d3d`): shared in-process registry `lib/metrics.js` (counters/gauges/histograms, Prometheus text exposition `vant metrics --prom`); storage ops instrumented (op/outcome counters, duration histograms) + CLI storage section. Tests: `test/metrics.test.js`, `test/storage-metrics.test.js`.
-- [x] **Migration tool**: Schema/layout versioning for brain format changes — DONE (axolotl): `lib/migrations.js` + `vant migrate` CLI. Content-based detection (never trusts the marker alone), ordered idempotent steps (orgchart brain-scope, tmp-space re-anchor, dropfile relocation), dryRun, `models/private/.layout-version.json` marker written only after success, all moves through FileStorage (security chain). Tests: `test/migrations.test.js` 8/8 incl. real fixture layouts.
-- [x] **Backup/Restore**: Point-in-time snapshots — DONE (axolotl): FileStorage `snapshot(label)` / `listSnapshots()` / `restoreSnapshot(id)` / `deleteSnapshot(id)`. Tree copies live in `<basePath>/.snapshots/<id>/data` + manifest; every file moves through the secured read/write chain (hand-edited manifests with traversal paths are refused up front); `.snapshots/` excluded from capture and restore-removal; count capped via `maxSnapshots`/`VANT_STORAGE_MAX_SNAPSHOTS` (default 20, oldest pruned); encrypted stores round-trip through the codec. CLI: `vant storage snapshot|snapshots|restore|unsnapshot` against the models root. Tests: `test/snapshots.test.js` 9/9.
+- [x] **WAL/Journal**: Write-ahead log for crash recovery — DONE (axolotl `5d22fae`): `lib/wal.js` JSONL journal + fsync-style flush, replay/verify/truncate API; FileStorage recovers uncommitted ops on open; CLI `vant wal` (status/replay/verify/truncate). Tests: `tests/wal.test.js` incl. simulated crash-recovery fixtures.
+- [x] **Replication**: Multi-node sync — DONE (axolotl `4794d49`, mirror-style not Raft/CRDT): primary→mirror replication via FileStorage `mirror` config (push-on-write + manual `replicate()`); CLI `vant mirror <target>` (push/status). Tests: `tests/storage-mirror.test.js`.
+- [x] **Metrics**: Prometheus exporter for storage ops — DONE (axolotl `59325b8` + `3fc1d3d`): shared in-process registry `lib/metrics.js` (counters/gauges/histograms, Prometheus text exposition `vant metrics --prom`); storage ops instrumented (op/outcome counters, duration histograms) + CLI storage section. Tests: `tests/metrics.test.js`, `tests/storage-metrics.test.js`.
+- [x] **Migration tool**: Schema/layout versioning for brain format changes — DONE (axolotl): `lib/migrations.js` + `vant migrate` CLI. Content-based detection (never trusts the marker alone), ordered idempotent steps (orgchart brain-scope, tmp-space re-anchor, dropfile relocation), dryRun, `models/private/.layout-version.json` marker written only after success, all moves through FileStorage (security chain). Tests: `tests/migrations.test.js` 8/8 incl. real fixture layouts.
+- [x] **Backup/Restore**: Point-in-time snapshots — DONE (axolotl): FileStorage `snapshot(label)` / `listSnapshots()` / `restoreSnapshot(id)` / `deleteSnapshot(id)`. Tree copies live in `<basePath>/.snapshots/<id>/data` + manifest; every file moves through the secured read/write chain (hand-edited manifests with traversal paths are refused up front); `.snapshots/` excluded from capture and restore-removal; count capped via `maxSnapshots`/`VANT_STORAGE_MAX_SNAPSHOTS` (default 20, oldest pruned); encrypted stores round-trip through the codec. CLI: `vant storage snapshot|snapshots|restore|unsnapshot` against the models root. Tests: `tests/snapshots.test.js` 9/9.
 
 ---
 
@@ -852,7 +852,7 @@ node test/brain.test.js
 - **Brain Router**: `lib/brain.js`
 - **Sudo Escalation**: `lib/sudo.js`
 - **Sandbox**: `lib/sandbox.js`
-- **Tests**: `test/storage.test.js`, `test/format.test.js`, `test/vaf.test.js`
+- **Tests**: `tests/storage.test.js`, `tests/format.test.js`, `tests/vaf.test.js`
 - **Brain Design Doc**: `docs/architecture/brain.md`
 - **Security Audit**: `AUDIT_FINDINGS.md`
 
