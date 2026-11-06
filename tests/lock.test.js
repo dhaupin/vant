@@ -11,7 +11,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
-process.env.VANT_BRAIN = 'qc-lock-prim';
+require('./scratch-brain').scratchBrain('qc-lock-prim');
 
 const ROOT = path.resolve(__dirname, '..');
 const lock = require(path.join(ROOT, 'lib', 'lock'));

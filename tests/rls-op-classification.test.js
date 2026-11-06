@@ -31,8 +31,7 @@
  * Run: node tests/rls-op-classification.test.js
  */
 
-const SCRATCH_BRAIN = 'rls-ops-test-' + Date.now().toString(36);
-process.env.VANT_BRAIN = SCRATCH_BRAIN;
+const SCRATCH_BRAIN = require('./scratch-brain').scratchBrain('rls-ops-test-' + Date.now().toString(36));
 process.env.VANT_GATE_QUIET = '1';
 
 const path = require('path');

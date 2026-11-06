@@ -1,8 +1,20 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 107,
+  "_headingCount": 108,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 378 (test-harness hygiene - the suite that mints a scratch brain reaps it, vant#328)",
+      "sections": [
+        {
+          "name": "Fixed: `tests/*` — scratch brains no longer outlive the suite that minted them",
+          "items": []
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

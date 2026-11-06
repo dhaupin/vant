@@ -12,7 +12,7 @@
  * (scratch brain qc-sg, wiped at start; repo-root state files backed up)
  */
 
-process.env.VANT_BRAIN = 'qc-sg';
+require('./scratch-brain').scratchBrain('qc-sg');
 
 const fs = require('fs');
 const path = require('path');

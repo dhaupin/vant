@@ -21,8 +21,7 @@
  * the default vant brain taken before mutations and diffed after.
  */
 
-const SCRATCH_BRAIN = 'p94-second-boot';
-process.env.VANT_BRAIN = SCRATCH_BRAIN;
+const SCRATCH_BRAIN = require('./scratch-brain').scratchBrain('p94-second-boot');
 
 const crypto = require('crypto');
 const fs = require('fs');

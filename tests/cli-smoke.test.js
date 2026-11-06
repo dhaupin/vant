@@ -20,8 +20,7 @@
  * never touch a real brain.
  */
 
-const SCRATCH_BRAIN = 'p92-cli-smoke';
-process.env.VANT_BRAIN = SCRATCH_BRAIN;
+const SCRATCH_BRAIN = require('./scratch-brain').scratchBrain('p92-cli-smoke');
 
 const fs = require('fs');
 const path = require('path');

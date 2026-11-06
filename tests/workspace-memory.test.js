@@ -17,8 +17,7 @@
  * ISOLATION: scratch brain (VANT_BRAIN).
  */
 
-const SCRATCH_BRAIN = 'wm-test-' + Date.now().toString(36);
-process.env.VANT_BRAIN = SCRATCH_BRAIN;
+const SCRATCH_BRAIN = require('./scratch-brain').scratchBrain('wm-test-' + Date.now().toString(36));
 
 const path = require('path');
 const fs = require('fs');
