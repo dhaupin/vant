@@ -170,7 +170,7 @@ describe('the LIVE stamped rows (issue #264 steps b, c, d + the depstruct census
         if (source === 'packstruct') {
             expect(c.packs).toBeGreaterThanOrEqual(1)
             expect(c.ids).toBeGreaterThanOrEqual(0)
-            expect(c.honored + c.pinned).toBeLessThanOrEqual(8) // the conformance corpus is 8
+            expect(c.honored + c.pinned).toBeLessThanOrEqual(9) // the conformance corpus is 9 (packstruct 1.1.0)
             expect(c.violations).toBe(0)
             expect(String(feed.findings[0].message)).toMatch(/conformance honored/)
         }

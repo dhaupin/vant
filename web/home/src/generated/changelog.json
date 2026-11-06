@@ -1,8 +1,20 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 109,
+  "_headingCount": 110,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "the packstruct audit face loads under the HOST profile (crashtest #33)",
+      "sections": [
+        {
+          "name": "Fixed: `scripts/audit-host-loader.js` — the conformance face defers the scenario contract, so the SPEC §7 accept bundles load",
+          "items": []
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

@@ -5,6 +5,14 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - the packstruct audit face loads under the HOST profile (crashtest #33)
+
+### Fixed: `scripts/audit-host-loader.js` — the conformance face defers the scenario contract, so the SPEC §7 accept bundles load
+
+The packstruct `audit-conformance` harness (SPEC section 7) materializes manifest-conformant bundles and runs this repo's host face over each. The face loaded every bundle through crashtest's DEFAULT (scenario) profile, so two accept cases — the `clean` fixture (a profile-minimal entry) and the SPEC-2 `env-claims` bundle — were refused at load by a contract the host never claimed: `invalid scenario module (...): needs a one-line description`. The face now loads under the HOST (packstruct) profile — crashtest's `validateProfile: false` (crashtest #33) — which keeps the manifest contract fully enforced and defers the scenario shape to the host's run-time validation. crashtest 1.3.0's root scan drops that flag (only the one-pack-dir path forwards it; fixed on crashtest main, unreleased at this pin), so the face tries the honest root shape first and falls back to per-dir enumeration on that pin; a manifest refusal throws on both paths, so the refuse cases still exit non-zero.
+
+`scripts/audit-packs-gate.js` follows: the `clean` row is DELETED (the host-profile load closed it, and `env-claims` is honored), and the three SPEC section-2 manifest norms the path exposes — non-empty `description`, name/dir parity, and a dotted `version` — are pinned individually (crashtest's `validatePackManifest()` does not enforce them). The gate now reads 6/9 honored, 3 pinned, honest. The `packstruct` struct-feed rows (both flavors) are restamped to the new arithmetic, and `web/home/test/struct-feeds.test.mjs`'s corpus bound moves `<= 8 -> <= 9` (the packstruct 1.1.0 corpus size the gate already tracks; the stale bound only surfaced once the restamped row carried 6+3). `tests/packs-host-loader.test.js` pins the face's two directions against the real engine: a profile-minimal accept bundle loads (exit 0), an unsupported `schemaVersion` refuses (non-zero), a missing path exits 2. The accept case fails against the old strict load, proving the test bites.
+
 ## [Unreleased] - pass 379 (family pins - the devDependency cuts advance to the family floor)
 
 ### Changed: family devDependencies + CI pins advance to the current cuts

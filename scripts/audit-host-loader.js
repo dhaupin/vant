@@ -15,6 +15,11 @@
  *   - non-zero on a violation bundle, output naming the offending pack
  *     (identity matches; refusal wording stays host-owned).
  *
+ * The bundle is loaded under the HOST (packstruct) profile: the manifest
+ * contract stays fully enforced and the scenario-shape check is deferred to
+ * the host's run-time validation (crashtest's `validateProfile: false`, issue
+ * #33). The face adds no second validator - one truth per concern.
+ *
  * The loader we delegate to is CRASHTEST'S REAL LOADER - the engine this
  * repo's packs are actually consumed by (`crashtest` devDependency, the
  * npm consumption path; clone/CRASHTEST_DIR stays the HEAD-test
@@ -45,6 +50,50 @@ function findCrashtestDir() {
     return path.resolve(__dirname, '..', 'node_modules', 'crashtest');
 }
 
+// The bundle's own pack dirs (a pack.json at the root means the root IS one
+// pack). Used only by the 1.3.0 fallback below.
+function collectPackDirs(root) {
+    if (fs.existsSync(path.join(root, 'pack.json'))) return [root];
+    const dirs = [];
+    for (const visibility of ['public', 'local']) {
+        const dir = path.join(root, visibility);
+        let entries;
+        try {
+            entries = fs.readdirSync(dir, { withFileTypes: true });
+        } catch (_e) {
+            continue; // optional visibility dir
+        }
+        for (const ent of entries) {
+            if (ent.isDirectory()) dirs.push(path.join(dir, ent.name));
+        }
+    }
+    return dirs.length ? dirs : [root];
+}
+
+// Load a conformance bundle under the HOST (packstruct) profile: the manifest
+// contract stays fully enforced, the scenario-shape check is deferred to the
+// host's run-time validation. crashtest names this the `validateProfile:
+// false` host path (issue #33); we hand the ENGINE's own loader that option
+// and add no second validator.
+//
+// The honest shape is the ROOT scan. crashtest 1.3.0's root scan drops the
+// flag (only the one-pack-dir path forwards it; fixed on crashtest main but
+// unreleased at this pin), so a profile-minimal accept fixture throws there.
+// On that pin we fall back to enumerating the bundle's pack dirs and taking
+// the one-pack path per dir. The fallback only turns a throw into a success
+// when the enumeration itself succeeds, and a MANIFEST refusal throws on BOTH
+// paths - so a refusal bundle still exits non-zero. Fresh `seen` maps keep a
+// partial first attempt from leaking collision state into the retry.
+async function loadWithHostProfile(packsMod, packsRoot) {
+    try {
+        return await packsMod.loadPacks([packsRoot], new Map(), null, { validateProfile: false });
+    } catch (rootErr) {
+        const packDirs = collectPackDirs(packsRoot);
+        if (packDirs.length === 1 && packDirs[0] === packsRoot) throw rootErr;
+        return packsMod.loadPacks(packDirs, new Map(), null, { validateProfile: false });
+    }
+}
+
 async function main() {
     const packsRoot = process.argv[2];
     if (!packsRoot) {
@@ -67,10 +116,9 @@ async function main() {
     // fixture bundles are laid out as <bundle>/public/<name>/ by the
     // materializer, so the bundle dir IS the packs root. `seen` is fresh on
     // every invocation - one bundle, one run, no shared state.
-    const seen = new Map();
     let loaded;
     try {
-        loaded = await packsMod.loadPacks([packsRoot], seen);
+        loaded = await loadWithHostProfile(packsMod, packsRoot);
     } catch (err) {
         // Rule 3 loud manifest failure. The error message carries the pack
         // origin (e.g. "pack manifest at <dir>/unlisted/pack.json: ..."),
@@ -84,7 +132,7 @@ async function main() {
     // entries, so the face adds no second validation - one truth per
     // concern. The contract shape is the engine's call, not the face's.
 
-    console.log(`host-loader OK: ${loaded.length} pack(s) loaded from ${packsRoot} (${[...seen.keys()].length} named)`);
+    console.log(`host-loader OK: ${loaded.length} pack(s) loaded from ${packsRoot}`);
     process.exit(0);
 }
 
