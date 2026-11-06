@@ -16,8 +16,7 @@
  * ISOLATION: scratch brain (VANT_BRAIN).
  */
 
-const SCRATCH_BRAIN = 'ib-test-' + Date.now().toString(36);
-process.env.VANT_BRAIN = SCRATCH_BRAIN;
+const SCRATCH_BRAIN = require('./scratch-brain').scratchBrain('ib-test-' + Date.now().toString(36));
 
 const path = require('path');
 const ROOT = path.resolve(__dirname, '..');

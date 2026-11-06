@@ -18,8 +18,7 @@
  * real brain's escrow.json. run-all runs every suite in its own process.
  */
 
-const SCRATCH_BRAIN = 'wsb-test-' + Date.now().toString(36);
-process.env.VANT_BRAIN = SCRATCH_BRAIN;
+const SCRATCH_BRAIN = require('./scratch-brain').scratchBrain('wsb-test-' + Date.now().toString(36));
 
 const path = require('path');
 const ROOT = path.resolve(__dirname, '..');

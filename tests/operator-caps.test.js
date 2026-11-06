@@ -22,8 +22,7 @@
  * subprocesses inherit VANT_BRAIN via env.
  */
 
-const SCRATCH_BRAIN = 'op-test-' + Date.now().toString(36);
-process.env.VANT_BRAIN = SCRATCH_BRAIN;
+const SCRATCH_BRAIN = require('./scratch-brain').scratchBrain('op-test-' + Date.now().toString(36));
 
 const path = require('path');
 const fs = require('fs');

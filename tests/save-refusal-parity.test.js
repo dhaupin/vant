@@ -35,7 +35,7 @@
  * snapshot-guard gates already do. (scratch brain qc-parity, wiped)
  */
 
-process.env.VANT_BRAIN = 'qc-parity';
+require('./scratch-brain').scratchBrain('qc-parity');
 const os = require('os');
 const fs = require('fs');
 const path = require('path');

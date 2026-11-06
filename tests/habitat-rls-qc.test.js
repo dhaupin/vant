@@ -26,8 +26,7 @@
  * its own process, so the env override cannot leak.
  */
 
-const SCRATCH_BRAIN = 'p91-habitat-rls-qc';
-process.env.VANT_BRAIN = SCRATCH_BRAIN;
+const SCRATCH_BRAIN = require('./scratch-brain').scratchBrain('p91-habitat-rls-qc');
 
 const fs = require('fs');
 const os = require('os');
