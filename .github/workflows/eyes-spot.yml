@@ -44,9 +44,9 @@ jobs:
           CHROME: /usr/bin/google-chrome
         run: |
           mkdir -p labs/.eyes-candidates
-          npx -y eyestruct@1 spot https://vant.creadev.org \
+          npx -y eyestruct@1.1.0 spot https://vant.creadev.org \
             --viewport 1280x800 --browser-exec "$CHROME"
-          npx -y eyestruct@1 spot https://brain.creadev.org \
+          npx -y eyestruct@1.1.0 spot https://brain.creadev.org \
             --viewport 1280x800 --browser-exec "$CHROME"
           ls -la labs/.eyes-candidates/
 
