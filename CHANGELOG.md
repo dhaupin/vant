@@ -17,6 +17,10 @@ CI moves off its floats: the `eyes-spot` lane's `npx -y eyestruct@1` becomes `ey
 
 `scripts/check-prestruct-pins.cjs` FLOOR moves `1.2.0 -> 1.3.0` and the guard's battery gains the inverse case (the old `^1.2.0` floor now fails). The vendored `web/home/src/islands.js` header moves to `prestruct@1.3.0` — the body already matched the 1.3.0 engine byte for byte, so only the version line moved.
 
+### Changed: the dependency-ledger census and the compliance map move with the pins
+
+`scripts/audit-deps.js`'s `FAMILY_PINS` table and `govstruct/compliance/vant.json`'s `pin` fields both still recorded the pre-advance cuts (`monoforge 0.9.0`, `crashtest 1.1.0`, the rest `1.0.0`). The `lint:deps` census cross-checks them against the declared carets, so the advanced pins turned a stale ledger into a red gate — `pin:family` and `lock:family` both flagged `monoforge`. Both now record the current cuts (`crashtest 1.3.0`, `eyestruct`/`govstruct`/`monoforge`/`packstruct`/`poststruct` `1.1.0`); `npm run lint:deps` is PASS.
+
 ### Changed: the packstruct conformance gate tracks packstruct v1.1.0
 
 `scripts/audit-packs-gate.js` pins `packstruct@1.0.0 -> 1.1.0` and its expected corpus size `8 -> 9`. The v1.1.0 corpus adds the SPEC-2 `env-claims` accept bundle, which crashtest's scenario-profile loader refuses for the same reason it refuses `clean` (a manifest-level accept case that fails the scenario contract at load), so the allowlist gains the `env-claims` row and the gate stays honest: 7/9 honored, both gaps pinned to the one upstream engine finding.

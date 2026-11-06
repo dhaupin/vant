@@ -18,6 +18,10 @@
           "items": []
         },
         {
+          "name": "Changed: the dependency-ledger census and the compliance map move with the pins",
+          "items": []
+        },
+        {
           "name": "Changed: the packstruct conformance gate tracks packstruct v1.1.0",
           "items": []
         }
