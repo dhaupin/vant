@@ -5,6 +5,20 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 379 (pack-lane residue + the struct/forge family bump, vant#328)
+
+### Fixed: `packs/public/vant-leisure/index.mjs` — the pack reaps its own scratch brains
+
+The pass-378 suite lifecycle stopped `tests/*` leaks, but the pack lanes still minted scratch brain dirs (`leisure-pack-row`, `leisure-pack-empty`) through the real run root, and a direct `npx crashtest run` bypasses the sweep sandbox that used to reap them. The leisure pack now resolves its scratch paths at arm time and removes the ledger plus its brain dir in every row's `finally`, with a process-exit hook as the net for an early return; the dir is removed only when empty, so real brains are never touched. `tests/crashtest-packs.test.js` pins the post-run absence (430 checks green).
+
+### Changed: the struct/forge family — current npm cuts, one family pin ledger
+
+`crashtest` 1.3.0, `eyestruct`/`govstruct`/`monoforge`/`packstruct`/`poststruct` 1.1.0, and `prestruct`/`freestruct` 1.3.0 are pinned across the root/home/docs ledgers, the prestruct floor and vendored header, the dependency ledger, govstruct compliance, and the struct-feed stamps. crashtest 1.3.0's host-profile load (`validateProfile: false`) retires the old conformance `clean` pin and honors the env-claims accept case; the three SPEC §2 manifest gaps it exposes (empty description, name/dir mismatch, undotted version) are pinned individually in `scripts/audit-packs-gate.js`, with the host face enumerating pack dirs because 1.3.0's root scan does not forward the profile flag.
+
+### CI note: no parallel speedup yet
+
+crashtest 1.3.0's `--concurrency` only races rows that declare `isolated: true`; `packs/` has no such row, and the CI gate's contract table / run root are custom serial drivers, so the new flag does not shorten either job. The library-heavy phase B remains the wall; opting rows in would be a separate isolation pass, not a flag flip.
+
 ## [Unreleased] - pass 378 (test-harness hygiene - the suite that mints a scratch brain reaps it, vant#328)
 
 ### Fixed: `tests/*` — scratch brains no longer outlive the suite that minted them

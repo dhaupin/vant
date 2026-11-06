@@ -14,16 +14,13 @@
  *
  * Allowlist entries are case names from packstruct's bundled conformance
  * corpus (one clean bundle, one per SPEC-5 refusal norm, a name-collision
- * pair). Today's single pin:
- *
- *   "clean" - crashtest@1.1.0's loadPacks() refuses the SPEC clean fixture:
- *   a minimal manifest-conformant entry (default export `{ name }`) fails
- *   the engine's blanket scenario-contract validation at load ("needs a
- *   one-line description"), though the import itself succeeds. The engine
- *   is a scenario-profile host and the fixture is deliberately
- *   profile-minimal, so 7/8 cases honor and the "clean" row names the
- *   engine gap. Filed upstream; the allowlist line is deleted when the
- *   engine fix ships and the case flips to honored.
+ * pair, and one env-claims accept bundle). crashtest 1.3.0's host-profile
+ * load (`validateProfile: false`, packstruct SPEC section 7 / crashtest
+ * #33) closes the old `clean` pin and honors the env-claims accept case.
+ * It also exposes three SPEC section-2 manifest norms that crashtest's
+ * `validatePackManifest()` does not enforce: non-empty description,
+ * name/dir parity, and a dotted version. Those three cases are pinned
+ * below; the old `clean` row was deleted in the same pass.
  *
  * Usage: node scripts/audit-packs-gate.js
  */
@@ -39,14 +36,18 @@ const ROOT = path.resolve(__dirname, '..');
 // REAL loader - the engine this repo's packs are actually consumed by.
 const LOADER = 'node scripts/audit-host-loader.js {packs}';
 
-// Known engine gaps, each still nameable and still open. Never widen; only
-// delete a row on the pass that closes its upstream finding.
+// Known engine gaps, each still nameable and still open. Never widen a pin
+// to hide a regression; delete a row on the pass that closes its upstream
+// finding. This pass deletes `clean` (the host-profile load closed it) and
+// pins the three SPEC section-2 gaps that path exposed.
 const ALLOWED_VIOLATIONS = new Set([
-    'clean', // crashtest scenario-contract overreach on manifest-level load (filed on dhaupin/crashtest)
+    'description',    // crashtest accepts an empty manifest description (SPEC section 2 requires non-empty)
+    'name-dir-match', // crashtest does not compare manifest name to its directory (SPEC section 2/5)
+    'version',        // crashtest does not require the dotted MAJOR.MINOR[.PATCH] shape
 ]);
 
 function main() {
-    const res = spawnSync('npx', ['packstruct@1.0.0', 'audit-conformance', '.', '--loader', LOADER], {
+    const res = spawnSync('npx', ['packstruct@1.1.0', 'audit-conformance', '.', '--loader', LOADER], {
         cwd: ROOT,
         encoding: 'utf8',
         env: Object.assign({}, process.env, { NO_COLOR: '1' }),
@@ -71,7 +72,7 @@ function main() {
     let m;
     while ((m = lineRe.exec(out))) violations.push(m[1]);
 
-    const expectedCaseCount = 8;
+    const expectedCaseCount = 9;
     const unknown = violations.filter((c) => !ALLOWED_VIOLATIONS.has(c));
     const pinned = violations.filter((c) => ALLOWED_VIOLATIONS.has(c));
 

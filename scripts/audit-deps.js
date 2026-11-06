@@ -130,12 +130,12 @@ const LEDGER = {
 // The family pins the compliance map records (major must match the
 // resolved/declared line; caret ranges ride the minor).
 const FAMILY_PINS = {
-    'crashtest': '1.1.0',
-    'eyestruct': '1.0.0',
-    'packstruct': '1.0.0',
-    'poststruct': '1.0.0',
-    'govstruct': '1.0.0',
-    'monoforge': '0.9.0',
+    'crashtest': '1.3.0',
+    'eyestruct': '1.1.0',
+    'packstruct': '1.1.0',
+    'poststruct': '1.1.0',
+    'govstruct': '1.1.0',
+    'monoforge': '1.1.0',
 };
 
 // The family-adjacent census (NOT declared deps — appended to the human

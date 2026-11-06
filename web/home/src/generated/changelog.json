@@ -1,8 +1,28 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 108,
+  "_headingCount": 109,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 379 (pack-lane residue + the struct/forge family bump, vant#328)",
+      "sections": [
+        {
+          "name": "Fixed: `packs/public/vant-leisure/index.mjs` — the pack reaps its own scratch brains",
+          "items": []
+        },
+        {
+          "name": "Changed: the struct/forge family — current npm cuts, one family pin ledger",
+          "items": []
+        },
+        {
+          "name": "CI note: no parallel speedup yet",
+          "items": []
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

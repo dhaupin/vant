@@ -4,15 +4,15 @@
 // matches markers):
 //
 //   1. FLOOR - web/home's prestruct pin must be a caret floor at or above the
-//      family floor (^1.2.0). An exact older pin (1.1.0) or a floating range
+//      family floor (^1.3.0). An exact older pin (1.1.0) or a floating range
 //      (*, latest, ~) is refused: a range floats the engine (a random build),
-//      an old pin misses the 1.2.0 fixes the site depends on.
+//      an old pin misses the 1.3.0 fixes the site depends on.
 //
 //   2. VENDORED COPY FRESHNESS - web/home/src/islands.js is a vendored copy of
 //      the engine's init template, never edited locally. Its header must name
-//      the pinned prestruct version AND the file must carry the 1.2.0 island
+//      the pinned prestruct version AND the file must carry the 1.3.0 island
 //      observer-lifecycle markers (the `observing` WeakSet + the `observers`
-//      WeakMap added in prestruct 59cb046). The pre-1.2.0 94-line copy lacks
+//      WeakMap added in prestruct 59cb046). The pre-1.3.0 94-line copy lacks
 //      them, so a stale vendored file fails here instead of shipping a
 //      duplicate-IntersectionObserver bug on every SPA re-scan.
 //
@@ -28,7 +28,7 @@ const HOME_PKG = path.join(ROOT, 'web', 'home', 'package.json');
 const ISLANDS = path.join(ROOT, 'web', 'home', 'src', 'islands.js');
 
 // The family floor: the prestruct version every repo pins at or above.
-const FLOOR = '1.2.0';
+const FLOOR = '1.3.0';
 
 const problems = [];
 
@@ -69,7 +69,7 @@ if (typeof pin !== 'string' || pin === '') {
   }
 }
 
-// ---- 2. the vendored copy names the pin and carries the 1.2.0 markers ----
+// ---- 2. the vendored copy names the pin and carries the 1.3.0 markers ----
 if (!fs.existsSync(ISLANDS)) {
   problems.push(`web/home/src/islands.js is missing (the vendored engine copy)`);
 } else {

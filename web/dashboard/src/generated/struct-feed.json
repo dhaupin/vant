@@ -2,7 +2,7 @@
   "source": "crashtest",
   "ok": true,
   "version": "crashledger/1",
-  "generatedAt": "2026-11-05",
+  "generatedAt": "2026-11-06",
   "counts": {
     "packs": 24,
     "rows": 309,

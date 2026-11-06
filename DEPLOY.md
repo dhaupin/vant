@@ -563,7 +563,7 @@ The runbook lives ONCE in the lane; this repo keeps only the trigger, `permissio
 | 3. pinned `pagefind --site _site` | the search index is built AFTER freestruct | the engine rewrites the HTML, so the index must match what actually ships |
 | 4. upload artifact + deploy-pages | `docs/_site` goes live (main only) | the whole site lands as one GitHub Pages deployment |
 
-What the freestruct layer generates over the Jekyll output (config: `docs/freestruct.config.yml`; the lane pins the engine EXACT at `freestruct@1.2.0`, and `docs/package.json` mirrors that pin for local dev alongside `pagefind@^1.5.2`): per-page canonical/OG metas (missing-only — the hand-written tags in `_layouts/default.html` are never touched), a full `sitemap.xml` with real lastmod, a basePath-aware `robots.txt` pointer, `feed.xml`, a noindex `404.html`, and the broken-link check. Search stays with Pagefind (`searchIndex: false` — same owner call as the freestruct docs site itself); `basePath: /vant` is trusted, never doubled.
+What the freestruct layer generates over the Jekyll output (config: `docs/freestruct.config.yml`; the lane pins the engine EXACT at `freestruct@1.3.0`, and `docs/package.json` mirrors that pin for local dev alongside `pagefind@^1.5.2`): per-page canonical/OG metas (missing-only — the hand-written tags in `_layouts/default.html` are never touched), a full `sitemap.xml` with real lastmod, a basePath-aware `robots.txt` pointer, `feed.xml`, a noindex `404.html`, and the broken-link check. Search stays with Pagefind (`searchIndex: false` — same owner call as the freestruct docs site itself); `basePath: /vant` is trusted, never doubled.
 
 ### Release stamping + local preview
 
@@ -582,7 +582,7 @@ cd docs && bundle install && bundle exec jekyll serve
 # tools with ONE `npm install --no-save`; a second install prunes the
 # first, so request freestruct + pagefind together:
 cd docs
-npm install --no-save --no-audit --no-fund freestruct@1.2.0 pagefind@1.5.2
+npm install --no-save --no-audit --no-fund freestruct@1.3.0 pagefind@1.5.2
 node node_modules/freestruct/bin/freestruct.mjs --strict
 node node_modules/pagefind/lib/runner/bin.cjs --site _site
 cd ..

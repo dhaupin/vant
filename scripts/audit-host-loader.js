@@ -5,8 +5,9 @@
  *
  * The conformance harness materializes verdict-claiming fixture packs
  * (one clean bundle, one per section-5 refusal norm, a name-collision
- * pair) into scratch roots and runs THIS command over each, with the
- * scratch root passed as the `{packs}` placeholder:
+ * pair, and an env-claims bundle) into scratch roots and runs THIS
+ * command over each, with the scratch root passed as the `{packs}`
+ * placeholder:
  *
  *   node scripts/audit-host-loader.js <packs-dir>
  *
@@ -45,6 +46,24 @@ function findCrashtestDir() {
     return path.resolve(__dirname, '..', 'node_modules', 'crashtest');
 }
 
+function collectPackDirs(root) {
+    if (fs.existsSync(path.join(root, 'pack.json'))) return [root];
+    const dirs = [];
+    for (const visibility of ['public', 'local']) {
+        const dir = path.join(root, visibility);
+        let entries;
+        try {
+            entries = fs.readdirSync(dir, { withFileTypes: true });
+        } catch (_e) {
+            continue; // optional visibility dir
+        }
+        for (const ent of entries) {
+            if (ent.isDirectory()) dirs.push(path.join(dir, ent.name));
+        }
+    }
+    return dirs.length ? dirs : [root];
+}
+
 async function main() {
     const packsRoot = process.argv[2];
     if (!packsRoot) {
@@ -70,7 +89,18 @@ async function main() {
     const seen = new Map();
     let loaded;
     try {
-        loaded = await packsMod.loadPacks([packsRoot], seen);
+        // (packstruct SPEC section 7) this face carries the packstruct
+        // profile, not crashtest's scenario profile: the manifest contract
+        // stays fully enforced, and the scenario-shape check is deferred to
+        // the host's own run-time validation. crashtest 1.3.0 names this
+        // exact host-face path `validateProfile: false` (issue #33).
+        //
+        // crashtest 1.3.0's ROOT-SCAN branch does not forward that option to
+        // loadPackDir (only the one-pack-dir branch does), so enumerate the
+        // bundle's pack dirs ourselves and take the one-pack path per dir.
+        // This is the engine's own loader either way; no second validator.
+        const packDirs = collectPackDirs(packsRoot);
+        loaded = await packsMod.loadPacks(packDirs, seen, null, { validateProfile: false });
     } catch (err) {
         // Rule 3 loud manifest failure. The error message carries the pack
         // origin (e.g. "pack manifest at <dir>/unlisted/pack.json: ..."),
