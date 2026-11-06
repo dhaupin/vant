@@ -52,12 +52,17 @@ describe('ssr.config.js: the owner-face JSON-LD contract', () => {
         expect(app.isAccessibleForFree).toBe(true);
     });
 
-    it('appends the Vant maintainer Person last', () => {
+    it('appends the Vant maintainer Person last (with the Creadev.org affiliation, vant#261)', () => {
         expect(graph[3]).toEqual({
             '@type': 'Person',
             name: 'dhaupin',
             url: 'https://github.com/dhaupin',
             jobTitle: 'Vant maintainer',
+            worksFor: {
+                '@type': 'Organization',
+                name: 'Creadev.org',
+                url: 'https://creadev.org',
+            },
         });
     });
 });
