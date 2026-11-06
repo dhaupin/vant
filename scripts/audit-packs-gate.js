@@ -14,16 +14,25 @@
  *
  * Allowlist entries are case names from packstruct's bundled conformance
  * corpus (one clean bundle, one per SPEC-5 refusal norm, a name-collision
- * pair). Today's single pin:
+ * pair, and the SPEC-2 env-claims bundle). Today's two pins, both the same
+ * class - crashtest's scenario-profile loader over-validating a
+ * manifest-level accept case at load:
  *
- *   "clean" - crashtest@1.1.0's loadPacks() refuses the SPEC clean fixture:
- *   a minimal manifest-conformant entry (default export `{ name }`) fails
- *   the engine's blanket scenario-contract validation at load ("needs a
- *   one-line description"), though the import itself succeeds. The engine
- *   is a scenario-profile host and the fixture is deliberately
- *   profile-minimal, so 7/8 cases honor and the "clean" row names the
- *   engine gap. Filed upstream; the allowlist line is deleted when the
- *   engine fix ships and the case flips to honored.
+ *   "clean" - crashtest's loadPacks() refuses the SPEC clean fixture: a
+ *   minimal manifest-conformant entry (default export `{ name }`) fails the
+ *   engine's blanket scenario-contract validation at load ("needs a
+ *   one-line description"), though the import itself succeeds. The engine is
+ *   a scenario-profile host and the fixture is deliberately profile-minimal.
+ *
+ *   "env-claims" - the same root cause over the SPEC-2 `env` bundle: the
+ *   pack carries a spec'd host-owned `env` block (packstruct#71), which the
+ *   scenario loader never declares, so the load fails the same contract
+ *   check. A conforming loader must accept a pack that merely declares
+ *   claims.
+ *
+ *   7/9 cases honor; both rows name the one engine gap. Filed upstream; an
+ *   allowlist line is deleted when the engine fix ships and its case flips
+ *   to honored.
  *
  * Usage: node scripts/audit-packs-gate.js
  */
@@ -43,10 +52,11 @@ const LOADER = 'node scripts/audit-host-loader.js {packs}';
 // delete a row on the pass that closes its upstream finding.
 const ALLOWED_VIOLATIONS = new Set([
     'clean', // crashtest scenario-contract overreach on manifest-level load (filed on dhaupin/crashtest)
+    'env-claims', // same overreach over the SPEC-2 env block (packstruct#71); filed on dhaupin/crashtest
 ]);
 
 function main() {
-    const res = spawnSync('npx', ['packstruct@1.0.0', 'audit-conformance', '.', '--loader', LOADER], {
+    const res = spawnSync('npx', ['packstruct@1.1.0', 'audit-conformance', '.', '--loader', LOADER], {
         cwd: ROOT,
         encoding: 'utf8',
         env: Object.assign({}, process.env, { NO_COLOR: '1' }),
@@ -71,7 +81,7 @@ function main() {
     let m;
     while ((m = lineRe.exec(out))) violations.push(m[1]);
 
-    const expectedCaseCount = 8;
+    const expectedCaseCount = 9;
     const unknown = violations.filter((c) => !ALLOWED_VIOLATIONS.has(c));
     const pinned = violations.filter((c) => ALLOWED_VIOLATIONS.has(c));
 
