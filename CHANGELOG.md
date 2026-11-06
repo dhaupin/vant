@@ -5,6 +5,26 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 379 (family pins - the devDependency cuts advance to the family floor)
+
+### Changed: family devDependencies + CI pins advance to the current cuts
+
+Every family devDependency moves to the current cut: `crashtest ^1.2.0 -> ^1.3.0`, `eyestruct ^1.0.0 -> ^1.1.0`, `packstruct ^1.0.0 -> ^1.1.0`, `poststruct ^1.0.0 -> ^1.1.0`, `govstruct ^1.0.0 -> ^1.1.0`, and `monoforge ^0.9.0 -> ^1.1.0` (the last two were never advanced off the 0.x/1.0 line). `web/home` moves `prestruct 1.2.0 -> 1.3.0` (the SSRF-guard security round), and both lockfiles re-resolve to the new cuts.
+
+CI moves off its floats: the `eyes-spot` lane's `npx -y eyestruct@1` becomes `eyestruct@1.1.0` (a bare major floats the engine), the `docs` lane's caller SHA moves to freestruct v1.3.0 (`7dfb172`) with `freestruct-version 1.2.0 -> 1.3.0`, and the test-workflow step comments name the new cuts.
+
+### Changed: the prestruct floor guard moves to `^1.3.0`, and the vendored engine copy refreshes
+
+`scripts/check-prestruct-pins.cjs` FLOOR moves `1.2.0 -> 1.3.0` and the guard's battery gains the inverse case (the old `^1.2.0` floor now fails). The vendored `web/home/src/islands.js` header moves to `prestruct@1.3.0` — the body already matched the 1.3.0 engine byte for byte, so only the version line moved.
+
+### Changed: the dependency-ledger census and the compliance map move with the pins
+
+`scripts/audit-deps.js`'s `FAMILY_PINS` table and `govstruct/compliance/vant.json`'s `pin` fields both still recorded the pre-advance cuts (`monoforge 0.9.0`, `crashtest 1.1.0`, the rest `1.0.0`). The `lint:deps` census cross-checks them against the declared carets, so the advanced pins turned a stale ledger into a red gate — `pin:family` and `lock:family` both flagged `monoforge`. Both now record the current cuts (`crashtest 1.3.0`, `eyestruct`/`govstruct`/`monoforge`/`packstruct`/`poststruct` `1.1.0`); `npm run lint:deps` is PASS.
+
+### Changed: the packstruct conformance gate tracks packstruct v1.1.0
+
+`scripts/audit-packs-gate.js` pins `packstruct@1.0.0 -> 1.1.0` and its expected corpus size `8 -> 9`. The v1.1.0 corpus adds the SPEC-2 `env-claims` accept bundle, which crashtest's scenario-profile loader refuses for the same reason it refuses `clean` (a manifest-level accept case that fails the scenario contract at load), so the allowlist gains the `env-claims` row and the gate stays honest: 7/9 honored, both gaps pinned to the one upstream engine finding.
+
 ## [Unreleased] - pass 378 (test-harness hygiene - the suite that mints a scratch brain reaps it, vant#328)
 
 ### Fixed: `tests/*` — scratch brains no longer outlive the suite that minted them
@@ -66,6 +86,7 @@ A store-front, a guild schedule, an auction board, an event calendar - downstrea
 ### Tests: `tests/board-plates.test.js` — 10 pins, discriminating
 
 The three plate laws are each pinned as FLIP pins against a pre-fix tree: undeclared visibility refuses (and a ghost half-registration is impossible), template-field-only render (unselected `owner`/`tier` fields never ride the output), authorial text (string or object literal) refuses typed, tenancy withheld-and-counted for an unauthorized viewer while the authorized viewer sees the row and an honest `0 withheld`, and the export carries no write verbs beside `clearState`. Controls pin the stable provenance derivation across renders, multi-channel plates (a `since` filter rides the rows' own `at`), typed code-table membership (no phantom codes), and deterministic reading order. Pre-fix (module absent + codes table prior state): the suite refuses to even load the primitive - 10 fails; post-fix 10/0, and the whole memory suite stays green beside it.
+
 
 ## [Unreleased] - pass 371 (the economy seam - the credit-side ledger, the market tape, typed economy events, and the world-base connector contract land, vant#337)
 
