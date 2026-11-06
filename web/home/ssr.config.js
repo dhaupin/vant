@@ -172,7 +172,9 @@ description:
     // SoftwareApplication (the AI/open-source software face: version truth
     // read from package.json at build time, MIT license, repo, install and
     // docs doors), then the maintainer Person appended last (jobTitle is
-    // the truth the /contact page states). Each value below is repo-truth:
+    // the truth the /contact page states, worksFor is the Creadev.org
+    // affiliation the docs identity block also states - vant#261). Each
+    // value below is repo-truth:
     // no npm-install fiction, no invented handles, no support-desk claims.
     // inject-brand wraps the array into one { @context, @graph } script in
     // the head of every route.
@@ -227,6 +229,11 @@ description:
                 name: 'dhaupin',
                 url: 'https://github.com/dhaupin',
                 jobTitle: 'Vant maintainer',
+                worksFor: {
+                    '@type': 'Organization',
+                    name: 'Creadev.org',
+                    url: 'https://creadev.org',
+                },
             },
         ]
     },

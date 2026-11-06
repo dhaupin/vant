@@ -1,8 +1,20 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 106,
+  "_headingCount": 107,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 377 (home identity - the brand graph states the affiliation too, vant#261)",
+      "sections": [
+        {
+          "name": "Changed: `web/home/ssr.config.js` — the maintainer Person carries `worksFor` Creadev.org",
+          "items": []
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

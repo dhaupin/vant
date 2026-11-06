@@ -5,6 +5,12 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 377 (home identity - the brand graph states the affiliation too, vant#261)
+
+### Changed: `web/home/ssr.config.js` — the maintainer Person carries `worksFor` Creadev.org
+
+The docs identity block (pass 376) states the affiliation in schema.org terms: founder `Creadev.org` on the Organization graph, and the maintainer's `Person` with `worksFor` pointing back. The home site's owner-face brand graph baked the maintainer `Person` without that relation, so two surfaces told slightly different stories about the same identity. The home graph's `Person` now carries the same `worksFor: { @type: Organization, name: Creadev.org, url }` — one affiliation, stated identically everywhere it is claimed, with the pin updated in `test/config.test.mjs` (the owner-face JSON-LD contract now asserts the relation as part of the Person shape, not as an incidental extra).
+
 ## [Unreleased] - pass 376 (docs identity - founder + maintainer JSON-LD into the freestruct config, vant#261)
 
 ### Added: `docs/freestruct.config.yml` — the identity block the docs bake could not carry
