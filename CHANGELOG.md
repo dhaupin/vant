@@ -17,6 +17,10 @@ The pass-378 suite lifecycle stopped `tests/*` leaks, but the pack lanes still m
 
 The docs pipeline's `freestruct` pin also moves `1.2.0 -> 1.3.0` in `docs/package.json` + lock, matching the docs-lane version pass 379 named.
 
+### Fixed: the packstruct feed pin and the receipts move with the 9-case corpus
+
+The pass-380 restamp left two readers behind the new 9-case corpus. `web/home/test/struct-feeds.test.mjs` still capped `honored + pinned` at the old 8-case total (red CI on the branch), and the `packs/README.md` live-corpus receipts still showed the pre-advance `8 pack(s) / 48 id(s)` lint and the old one-row `clean` audit. The pin now reconciles the counts to the total the feed's OWN finding states (every case is honored or a named pin) instead of a hardcoded corpus size, so a future corpus move re-pins from the feed rather than a magic number; the receipts restamp to the measured `24 pack(s) / 333 id(s)` and the `6/9 honored, 3 pinned` audit.
+
 ### CI note: no parallel speedup yet
 
 crashtest 1.3.0's `--concurrency` only races rows that declare `isolated: true`; `packs/` has no such row, and the CI gate's contract table / run root are custom serial drivers, so the new flag does not shorten either job. The library-heavy phase B remains the wall; opting rows in would be a separate isolation pass, not a flag flip.

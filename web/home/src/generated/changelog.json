@@ -18,6 +18,10 @@
           "items": []
         },
         {
+          "name": "Fixed: the packstruct feed pin and the receipts move with the 9-case corpus",
+          "items": []
+        },
+        {
           "name": "CI note: no parallel speedup yet",
           "items": []
         }

@@ -984,24 +984,26 @@ Cross-repo asks filed on dhaupin/crashtest (build there, release, then the vant 
 
 ## The packstruct@1 gate (2026-10-25)
 
-`npm run packs:lint` runs `packstruct lint packs/ --deep` — the zero-dep spec linter from [packstruct@1.0.0](https://www.npmjs.com/package/packstruct) (pinned as an exact devDependency, author-time only; the runtime graph stays untouched). Step runs in CI (`test.yml`, right after install) and locally after a manifest edit.
+`npm run packs:lint` runs `packstruct lint packs/ --deep` — the zero-dep spec linter from [packstruct@1.1.0](https://www.npmjs.com/package/packstruct) (pinned as an exact devDependency, author-time only; the runtime graph stays untouched). Step runs in CI (`test.yml`, right after install) and locally after a manifest edit.
 
-**Live-corpus receipts** (vant#247 items 1–3, same-commit batch as the wiring):
+**Live-corpus receipts** (vant#247 items 1–3, same-commit batch as the wiring; restamped 2026-11-06 for the packstruct 1.1.0 corpus):
 
 ```
 $ npm run packs:lint
-packstruct lint --deep: 8 pack(s) checked in packs/ - 8 module(s) probed, 48 id(s) censused
+packstruct lint --deep: 24 pack(s) checked in packs/ - 24 module(s) probed, 333 id(s) censused
 
 $ npm run packs:audit
-packstruct audit-conformance: 7/8 case(s) honored by the loader
-  AUDIT clean [audit-accept]: loader exit 1 on case "clean" - the spec verdict is accept
-audit gate: ALLOWED (8 case(s), 1 pinned known finding(s): clean, rest honored)  # exit 0
+packstruct audit-conformance: 6/9 case(s) honored by the loader over .
+  AUDIT description [audit-refuse]: loader exit 0 (loader accepted) on case "description" - the spec verdict is refuse
+  AUDIT name-dir-match [audit-refuse]: loader exit 0 (loader accepted) on case "name-dir-match" - the spec verdict is refuse
+  AUDIT version [audit-refuse]: loader exit 0 (loader accepted) on case "version" - the spec verdict is refuse
+audit gate: ALLOWED (9 case(s), 3 pinned known finding(s): description, name-dir-match, version, rest honored)  # exit 0
 ```
 
 Elle spec neuva:
 
 - `packs:lint` runs `packstruct lint packs/ --deep` (author-time gate, CI step in test.yml).
-- `packs:audit` runs packstruct's SPEC §7 conformance harness: the host-loader face (`scripts/audit-host-loader.js`, a 30-line wrapper over crashtest's REAL loader — no second validation added) runs packstruct's bundled fixture corpus. Exit 0 today with one ALLOWED-pinned row: the **"clean" case refuses because crashtest@1.1.0's loadPacks applies the scenario contract to manifest-level loading, so a profile-minimal conformant entry (the SPEC clean fixture: default export `{ name }`) cannot exist** — the engine finding lives at dhaupin/crashtest#33 and the allowlist row is deleted the pass its fix lands (scripts/audit-packs-gate.js, same pattern as KNOWN_FINDINGS). CI: both `packs:lint` and `packs:audit` run in the main ci job.
+- `packs:audit` runs packstruct's SPEC §7 conformance harness: the host-loader face (`scripts/audit-host-loader.js`, a wrapper over crashtest's REAL loader — no second validation added) runs packstruct's bundled fixture corpus. crashtest 1.3.0's host-profile load (`validateProfile: false`, crashtest#33) closed the old `clean` pin (the scenario contract no longer applies to manifest-level loading) and honors the `env-claims` accept case. That path also exposed three SPEC §2 manifest norms crashtest's `validatePackManifest()` does not yet enforce — a non-empty `description`, `name`/dir parity, and a dotted `version` — so exit 0 today carries three ALLOWED-pinned rows (`description`, `name-dir-match`, `version`; scripts/audit-packs-gate.js, same pattern as KNOWN_FINDINGS). Each row is deleted the pass its engine fix lands; never widened to hide a regression. CI: both `packs:lint` and `packs:audit` run in the main ci job.
 
 specKey verification story: the `specKey` token was session-side shorthand for the manifest placeholder the spec landing was expected to produce. The delivered SPEC v1 (§2) defines `armedByKey` as OPTIONAL with absence semantics — *"Absent: the host's own default lifecycle governs"* — and vant's packs all arm via config enumeration (`ctx.config['<pack-name>']`), which is exactly the absent path. No pack manifest gains a new key; the placeholder never existed in any tree (checked dhaupin/vant, the packstruct scaffold, the crashtest packs, 2026-10-24) and the delivered spec confirms none was owed. Verified, not skipped: the gate above now enforces the field set every future manifest must carry.
 
