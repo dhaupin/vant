@@ -23,7 +23,7 @@ const { execFile } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-process.env.VANT_BRAIN = 'qc-alcli';
+require('./scratch-brain').scratchBrain('qc-alcli');
 
 const ROOT = path.resolve(__dirname, '..');
 const ARCHIVE_DIR = path.join(ROOT, 'models', 'audit-rotate');

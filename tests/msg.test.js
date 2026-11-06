@@ -93,7 +93,7 @@ test('msg has isOperationAllowed function', () => {
 // and leak "an era is open - work owns this attention" into the next
 // era-sensitive suite; leisure.test felt that). Scoped to a throwaway
 // brain (the ag-test-* pattern) so the operator state is never touched.
-process.env.VANT_BRAIN = process.env.VANT_BRAIN || 'msg-suite-local';
+if (!process.env.VANT_BRAIN) require('./scratch-brain').scratchBrain('msg-suite-local');
 
 // MULTIBRAIN STACK TESTS
 // ============================================

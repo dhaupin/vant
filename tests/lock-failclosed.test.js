@@ -19,7 +19,7 @@
  * (scratch brain qc-lock-fc, wiped at start)
  */
 
-process.env.VANT_BRAIN = 'qc-lock-fc';
+require('./scratch-brain').scratchBrain('qc-lock-fc');
 
 const fs = require('fs');
 const path = require('path');

@@ -20,8 +20,7 @@
  * every suite in its own process, so the env override cannot leak.
  */
 
-const SCRATCH_BRAIN = 'p90-rls-hookups-test';
-process.env.VANT_BRAIN = SCRATCH_BRAIN;
+const SCRATCH_BRAIN = require('./scratch-brain').scratchBrain('p90-rls-hookups-test');
 
 const os = require('os');
 const path = require('path');

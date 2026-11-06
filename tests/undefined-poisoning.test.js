@@ -37,7 +37,7 @@ const stateStore = require('../lib/state-store');
 
 function withBrain(name, fn) {
     const prev = process.env.VANT_BRAIN;
-    process.env.VANT_BRAIN = name;
+    require('./scratch-brain').scratchBrain(name);
     return Promise.resolve().then(fn).finally(() => {
         if (prev === undefined) delete process.env.VANT_BRAIN; else process.env.VANT_BRAIN = prev;
     });

@@ -24,7 +24,7 @@
  * (scratch brain qc-lockobs, wiped before and after)
  */
 
-process.env.VANT_BRAIN = 'qc-lockobs';
+require('./scratch-brain').scratchBrain('qc-lockobs');
 const os = require('os');
 const fs = require('fs');
 const path = require('path');

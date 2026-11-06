@@ -19,8 +19,7 @@
  * MCP server on an OS-assigned free loopback port.
  */
 
-const SCRATCH_BRAIN = 'p93-live-fresh';
-process.env.VANT_BRAIN = SCRATCH_BRAIN;
+const SCRATCH_BRAIN = require('./scratch-brain').scratchBrain('p93-live-fresh');
 
 const fs = require('fs');
 const http = require('http');

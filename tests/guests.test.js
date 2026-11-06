@@ -54,7 +54,7 @@ function testA(name, fn) {
         .catch((e) => { failed++; console.log('  ✗ ' + name + ' — ' + (e.message || e)); });
 }
 
-const BRAIN = 'gstest';
+const BRAIN = require('./scratch-brain').scratchBrain('gstest');
 const OPT = { brain: BRAIN };   // the throwaway-brain opts
 
 const GUESTS_PATH = path.join(ROOT, 'lib', 'guests.js');

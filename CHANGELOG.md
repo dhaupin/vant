@@ -5,6 +5,12 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 378 (test-harness hygiene - the suite that mints a scratch brain reaps it, vant#328)
+
+### Fixed: `tests/*` — scratch brains no longer outlive the suite that minted them
+
+The pass-328 heap sweep found ~110 timestamped scratch brains (`ag-test-*`, `ht-test-*`, `rls-test-*`, …) left by test runs. The sweep janitor only reaps mints made during one full sweep, so direct suite runs, fixed-name mints (`qc-*`, `p9x-*`, `gstest`) and killed shards leaked forever. `tests/scratch-brain.js` now owns the suite-local lifecycle: `scratchBrain(name)` validates the name, points `VANT_BRAIN` at it, and reaps exactly that dir from `models/private` + `models/public` on process exit — real brains and hostile names refused, silent and idempotent so cleanup never masks a suite result. Every scratch-minting suite uses it, and the audit suites reap their child-process brains in a `finally`; the sweep-level autoreap stays the net for SIGKILL/timeout residue. Pinned 5/5 in `tests/scratch-brain.test.js`.
+
 ## [Unreleased] - pass 377 (home identity - the brand graph states the affiliation too, vant#261)
 
 ### Changed: `web/home/ssr.config.js` — the maintainer Person carries `worksFor` Creadev.org

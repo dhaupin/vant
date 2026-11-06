@@ -16,7 +16,7 @@ process.env.VANT_GUESTS_MAX = '500';
 // honest-posture matrix — cross-suite contamination through merged
 // persisted state. Scoped to a throwaway brain (the ag-test-* pattern):
 // the door's own behavior is what's pinned, not which drawer it lands in.
-process.env.VANT_BRAIN = process.env.VANT_BRAIN || 'mcp-suite-local';
+if (!process.env.VANT_BRAIN) require('./scratch-brain').scratchBrain('mcp-suite-local');
 
 const path = require('path');
 const ROOT = path.resolve(__dirname, '..');

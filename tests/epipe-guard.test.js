@@ -68,7 +68,7 @@ const realBaseline = readRealEpipes();
 
 // ---------- child branch ----------
 if (process.argv.includes('--child')) {
-    process.env.VANT_BRAIN = 'qc-epipe-guard'; // isolate: scratch brain ledger
+    require('./scratch-brain').scratchBrain('qc-epipe-guard'); // isolate: scratch brain ledger
     // The REAL production handler (lib/vant.js) under fire.
     require(path.join(ROOT, 'lib', 'vant'));
 

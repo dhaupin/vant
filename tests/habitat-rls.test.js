@@ -15,8 +15,7 @@
  * executes every suite in its own process, so the env override cannot leak.
  */
 
-const SCRATCH_BRAIN = 'rls-test-' + Date.now().toString(36);
-process.env.VANT_BRAIN = SCRATCH_BRAIN;
+const SCRATCH_BRAIN = require('./scratch-brain').scratchBrain('rls-test-' + Date.now().toString(36));
 
 const path = require('path');
 const ROOT = path.resolve(__dirname, '..');

@@ -242,8 +242,9 @@ async function _withGuestDoor(fn) {
             });
         });
     `;
+    const scratchName = 'r4-5-' + Date.now();
     const child = spawn('node', ['-e', script], {
-        env: { ...process.env, VANT_GATE_QUIET: '1', VANT_BRAIN: 'r4-5-' + Date.now() },
+        env: { ...process.env, VANT_GATE_QUIET: '1', VANT_BRAIN: scratchName },
         stdio: ['ignore', 'pipe', 'pipe', 'ipc']
     });
     try {
@@ -263,6 +264,7 @@ async function _withGuestDoor(fn) {
         return await fn(call, port);
     } finally {
         child.kill();
+        require('./scratch-brain').reapScratchBrain(scratchName);
     }
 }
 
