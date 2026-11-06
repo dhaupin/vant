@@ -1,8 +1,20 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 105,
+  "_headingCount": 106,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 376 (docs identity - founder + maintainer JSON-LD into the freestruct config, vant#261)",
+      "sections": [
+        {
+          "name": "Added: `docs/freestruct.config.yml` — the identity block the docs bake could not carry",
+          "items": []
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,
