@@ -29,3 +29,17 @@ searchIndex: false
 
 # Broken internal links print by default and FAIL when CI passes --strict.
 linkCheck: true
+
+# Identity (vant#261): the founder rides the engine's Organization JSON-LD
+# via the author key (schema.org founder); the maintainer rides a custom
+# Person block appended to the injected structured data on every page.
+author: Creadev.org
+jsonLd:
+  - '@context': https://schema.org
+    '@type': Person
+    name: dhaupin
+    url: https://github.com/dhaupin
+    worksFor:
+      '@type': Organization
+      name: Creadev.org
+      url: https://creadev.org
