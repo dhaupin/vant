@@ -15,6 +15,8 @@ The pass-378 suite lifecycle stopped `tests/*` leaks, but the pack lanes still m
 
 `scripts/audit-host-loader.js` now loads the conformance bundles with `validateProfile: false` — the host-face path crashtest 1.3.0 added for packstruct SPEC §7 — and enumerates the bundle's pack dirs because 1.3.0's root scan does not forward the option. That closes the old `clean` and `env-claims` pins from pass 379 (both now load), and exposes three SPEC §2 manifest norms crashtest still does not enforce: empty description, name/dir mismatch, and undotted version. Those three are pinned individually in `scripts/audit-packs-gate.js`; `npm run packs:audit` exits 0 with 9 cases (6 honored, 3 pinned upstream gaps).
 
+The face tries the honest ROOT scan first and falls back to per-dir enumeration only when the root throws — the enumeration is the 1.3.0-pin workaround (crashtest `main` already forwards the option, unreleased at this pin), so the face needs no further change once a cut carries it. A manifest refusal throws on both paths, so the refuse bundles still exit non-zero. `tests/packs-host-loader.test.js` pins the face's two directions against the real engine (a profile-minimal accept bundle loads, an unsupported `schemaVersion` refuses, a missing path exits 2); the accept case fails against the strict load, proving the test bites.
+
 The docs pipeline's `freestruct` pin also moves `1.2.0 -> 1.3.0` in `docs/package.json` + lock, matching the docs-lane version pass 379 named.
 
 ### Fixed: the packstruct feed pin and the receipts move with the 9-case corpus
