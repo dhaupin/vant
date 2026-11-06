@@ -5,6 +5,12 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 376 (docs identity - founder + maintainer JSON-LD into the freestruct config, vant#261)
+
+### Added: `docs/freestruct.config.yml` — the identity block the docs bake could not carry
+
+Vant's docs site carries no authorship: the Jekyll `_layouts` own titles and descriptions by design (the missing-only contract), and the freestruct post-render layer's identity keys were never configured. The engine's schema has the exact two seats for it: `author` (ships as the schema.org founder on the Organization JSON-LD the engine already injects) and `jsonLd` (custom structured-data blocks appended to the injected set, missing-only everywhere). The block now reads truth: `author: Creadev.org` as the founder, and a custom `Person` JSON-LD for the maintainer (`dhaupin`, resolved to the GitHub profile, `worksFor` Creadev.org) — one block, every baked page, machine-readable schema.org graph. Verified with the pinned engine itself: `npx freestruct validate` exits 0 with no config warnings (unknown/retired keys never die silently — the loud-diagnostic posture confirmed the exact-seat naming).
+
 ## [Unreleased] - pass 375 (pin discipline - the plate determinism comparison strips the per-call stamp, vant#260)
 
 ### Fixed: `tests/board-plates.test.js` — the never-mutates pin cannot flake on a clock boundary
