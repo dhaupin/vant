@@ -5,6 +5,122 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 374 (the carriers pass - countersigned station records, declared-absent payload lanes, party pod holds, vant#341)
+
+### Added: the countersigned station record — every stage datable (vant#341 §1)
+
+carry() always walked CHECK (the scope lineage gate), RISK (the single-use approval burn) and AUDIT (the bus + trail) per station — what the certified letter never produced was the DATABLE PROCESS RECORD. It does now: every stage of `carry()` emits a countersigned row `{ stage, who, heldBy?, templateRow, receiptRef, at, verdict }` onto `report.records` — who ACTED (individual identity always), the hold (the pod when the stage rides one), the matched bill row (only DECLARED fields, a pod mirrored as its sorted member set, a template-less route mirroring the house wildcard `{ by: '*', op: '*' }`), the receipt reference (the SEED letter's root id + the landing seq — `rootId:seq`, the stable meterable hook integrators price routes from; per-step ids are the ledger's business, not the meter's), the timestamp, and the verdict: `'pass'` or the TYPED refusal code. Every refusal is countersigned too — a refusal is never silent, it datables. Template rows may make their record BINDING (`record: 'required'`): a letter whose required stations were not countersigned `pass` is NOT built (`report.built: false` with `report.unbuiltRecords` naming the stages), exactly like a reordered stage refuses — the bill's record duty is followed whole.
+
+### Added: `gdscript` + `binary` on the roster — the declared-absent payload lanes (vant#341 §2)
+
+Real operations also move payload PROCEDURES (PLC scripts, .gd mods, data patches) with their paperwork. Two lanes join the roster following the qr/png declared-absent pattern verbatim — the roster names its own holes, nothing pretends, `carry`-/`template`-invariants untouched: `gdscript` (family payload, carries `code-gdscript`) - a GDScript payload rides the stone frame (`VSTN:1:<seal>:<ctext>`) as a TEXT artifact, the control-byte ban fitting a .gd source naturally; `binary` (family payload, carries `payload-binary`) - base64-in-stone inside the existing 256 KiB ceiling (STONE_MAX_CTEXT), integrity-sealed carrier-side, the mesh/pod lane staying the named carrier above it. Both verbs encode/decode/matches REFUSE TYPED (`E_CARRIER_CARRIER`) until a runner is bound: carriers carry, runners run — a lane that cannot run stays silent; when a runner contract lands, only these entries re-open, nothing else changes.
+
+### Added: party routes — the pod hold rides the pod, the identity stays individual (vant#341 §3)
+
+Multiple agents operating AS A PARTY, each stage possibly needing a DIFFERENT member: `by` now accepts a peer set (an array of named members — the pod hold) with `actingBy` naming the member who acts at that station. The station RUNS as an individual on the wire (`advance({ by: actingBy })` — CHECK resolves the ACTING member's scope exactly as before, the single-use approval burns at their hand), while the route report and the station records carry BOTH: `by` = the individual, `heldBy` = the pod. The bill (template) declares the hold WHOLE: a pod row matches a pod hold as a SET (order is the pod's business, membership is the bill's), a solo row stays solo — pod↔solo or solo↔pod refuses typed `E_CARRIER_TEMPLATE` before anything moves (a hold is named whole, never halfway); an unnamed pod member or an `actingBy` outside the pod or missing on a pod stage refuses typed `E_CARRIER_SHAPE`. Fail-closed unchanged: a refused stage drops the packet and `replay()` certifies where continuity stopped — the record now shows exactly who did and did not countersign it.
+
+### Tests: `tests/carriers-pass.test.js` — 14 pins, discriminating
+
+Each ask pinned as FLIP against a record-less / solo-only / roster-without-lanes tree: the roster honestly names both payload holes (typed refusals on every verb, blockers naming the missing runner, built-ins untouched); landed stages are countersigned with the bill-row mirror, the rootId:seq receipt (unique per stage, anchored to the seed letter) and the honest wildcard mirror for template-less routes; a mid-route refusal (the RISK lane) is countersigned typed at its stage; `record: 'required'` builds when satisfied and names its unbuilt stages when missed; pod holds ride with `actingBy` + `heldBy` (identity individual on the packet ledger), refuse an unnamed/malformed/outside acting member, and the bill matches pod sets order-insensitively while pod↔solo deviations refuse typed before anything moves; a mixed pod+solo multi-stage letter builds with all records passing and the walk clean. Regression parity pinned against the pass-260 template law: deviations throw typed before routes move (they never return half-reports). audit-round6 (18/0), mcp (34/0), and the whole wave series green beside it; changelog pass-374 + docs funnel 6/0 + 4/0.
+
+## [Unreleased] - pass 373 (the boost lane - feature-duration windows buy display time, never rank, vant#340)
+
+### Added: `lib/boost.js` — the rank-neutral monetization primitive for surfaces
+
+Wherever hosted communities run their own surfaces (the wave-F channel + plate world, #339), the demand arrives immediately: "show mine more." The naive answer - bought RANK order - poisons the surface, paid placement over organic order being a canonical trust-destroyer. Wave G writes the rank-neutral answer instead: **a boost buys display TIME, never rank** - the purchasable is a bounded window (`record({ id, channel, rowId, by, seconds })`), the organic order is never touched (the export carries no ordering verb at all; one window per cell at a time, checked as a SPAN intersection so a candidate starting after a cell's busy-until is a fresh purchase, not a stack), and tolerance runs both ways: extend by REPLAYING the same id - the same id with the same intent returns the SAME window unmoved, flags `replayed: true` honestly, and emits no second `boost:recorded` event (an audit journal that never double-counts the sale) - while the same id with a DIFFERENT intent refuses typed `E_BOOST_ID_CONFLICT` and a fresh id over a span-crossing cell refuses `E_BOOST_OVERLAP` (money cannot stack a row's clock). Boosted rows SELF-IDENTIFY through engine-added structure only: `plates.render` now adorns live windows as `row.boost = { id, until }` plus a `featureWindow` export (boostId + until per boosted derive id) - no seller copy exists anywhere on the purchase surface to leak, the same no-free-text discipline as the plates law it rides. Tenancy is BOOST-NEUTRAL: the window list (`active({ viewer })`) and the render marker are computed THROUGH the owning channel's own visibility gate - a boosted gated row is withheld from an unauthorized viewer exactly like the unboosted one was (withheld-and-counted, never leaked, the feature window obeys the same gate as the rows), and the marker rides only rows that already passed tenancy at the plate. The purchase binds a PLATE-REGISTERED channel (a phantom surface refuses `E_BOOST_UNKNOWN_CHANNEL`), windows are seconds-bounded (positive, finite, <= 365d or `E_BOOST_WINDOW` - a window, not a lease), `by` names the buyer (accounting names its sale), and events ride the bus in the typed economy-events pattern (`boost:recorded`) so integrators audit the feature window the same way they audit the sale; `audit()` serves the sorted closed journal and the export shares the plates module's spine rules (refusal codes ride the `errors.CODES` table, no phantom names). Wave-F parity verified: its 10 pins stay 10/0 with the adornment live (an unadorned render is byte-deterministic, the boost rides outside the template fields).
+
+### Tests: `tests/boost-lane.test.js` — 13 pins, discriminating
+
+The four laws are each pinned as FLIP pins against a pre-fix tree (module absent, or a stack-anything / silent-double-record / tenancy-blind variant): the window purchase is a unit-shaped record with real span math; the replay returns the SAME window with exactly ONE recorded event; the same id with a different intent refuses; a second live window over a busy cell stacks NOTHING while another ROW is unaffected; expiry is real (a now past the span sees only fresh windows, a span-crossing candidate refuses); tenancy at the window is the owner's gate verbatim (unauthorized viewer: withheld + honest count; authorized: present); the plate marker + featureWindow ride together and obey the same gate the render ran (a boosted gated row leaks nothing, nothing reorders for it); and the journal never double-counts. Controls pin phantom-surface refusals, completeness/window-bounds typed edges, bare-render byte-determinism with an honestly empty featureWindow, and code-table membership (no phantom codes). Pre-fix: the suite refuses to load the primitive; post-fix 13/0.
+
+## [Unreleased] - pass 372 (the publication primitive - channels carry typed engine rows, plates render them read-only, vant#339)
+
+### Added: `lib/plates.js` — one typed publication primitive for player-run surfaces
+
+A store-front, a guild schedule, an auction board, an event calendar - downstream kept hand-rolling the same unifier over organs vant already owned (listings, claims, chapters, envelopes, typed events). Wave F writes the primitive itself. **CHANNEL** = a row family a module already generates, registered with its owning module id and a `rows()` provider the plate calls fresh at each render; provenance rides a deterministic derive identity (`${channel}:${rowId}@${version}`) so any reader caches and rehydrates without trusting a copy. **PLATE** = a read-only rendered view over 1..8 channels, and the three laws are structural, not aspirational: (1) template fields only - a template maps an output field to a row-field SELECTOR, and authorial content at render time (string literals, embedded objects, markup) refuses typed `E_PLATE_TEMPLATE`, so a render can never grow a new injection surface; (2) tenancy enforced at the plate, fail-closed - a channel declares its tier honestly ('public' or a `gate(row, viewer)` callable), and an undeclared tier is refused at registration (`E_CHANNEL_VISIBILITY`) rather than reading as public by default; a row the viewer cannot see is WITHHELD and counted, never leaked and never re-shaped; (3) the plate never mutates - the export carries no write verb for rows (the only `clear` is the test seam beside it, the suite pins the export shape), every write path stays in the owning module. Render output is deterministic (rows sorted by derive id), JSON-safe by construction, and exposes ONLY the template fields plus derivation - unselected row fields never leave the plate. Typo grammar for the double-blind: the refusal codes ride the `errors.CODES` table (E_CHANNEL_INPUT / E_CHANNEL_DUPLICATE / E_CHANNEL_ROWS / E_CHANNEL_VISIBILITY / E_PLATE_INPUT / E_PLATE_DUPLICATE / E_PLATE_UNKNOWN / E_PLATE_UNKNOWN_CHANNEL / E_PLATE_TEMPLATE), the typed-error convention wave A sealed. The naming reconciliation came from vant#341's confession and settled per its own gate: PLATE stays the reader layer's verb (render), CARRIER stays the process layer's verb (carry, lib/carriers.js) - two layers, one word each, and this module renders while that one moves.
+
+### Tests: `tests/board-plates.test.js` — 10 pins, discriminating
+
+The three plate laws are each pinned as FLIP pins against a pre-fix tree: undeclared visibility refuses (and a ghost half-registration is impossible), template-field-only render (unselected `owner`/`tier` fields never ride the output), authorial text (string or object literal) refuses typed, tenancy withheld-and-counted for an unauthorized viewer while the authorized viewer sees the row and an honest `0 withheld`, and the export carries no write verbs beside `clearState`. Controls pin the stable provenance derivation across renders, multi-channel plates (a `since` filter rides the rows' own `at`), typed code-table membership (no phantom codes), and deterministic reading order. Pre-fix (module absent + codes table prior state): the suite refuses to even load the primitive - 10 fails; post-fix 10/0, and the whole memory suite stays green beside it.
+
+## [Unreleased] - pass 371 (the economy seam - the credit-side ledger, the market tape, typed economy events, and the world-base connector contract land, vant#337)
+
+### Added: `lib/ledger.js` — the credit side of the economy's books
+
+lib/settlement.js's own header admitted it: the claims ledger records that a settlement happened but never answers "what have I earned, and what am I holding?" The ledger module closes that half. Its law is settlement's law verbatim - the owner's record is evidence, not income: a credit is a DERIVED row that names the settlement/trade ref it derives from, and refs are unique (a settlement becomes income exactly once - a double-credit is a typed E_LEDGER_DUPLICATE refusal, not a silent second entry). Amounts are cents-clean, capped, and positive-finite or refused; hydrate/persist follow the settlement pattern (merge-only adoption, seen-but-absent tombstoned); balance/history are read-only; every credit emits `economy:ledger.credited` on the bus.
+
+### Added: `settlement.tape(listingKey, opts)` — price discovery for programs
+
+A read-only export over settled owner-claims, per listing key: the realized trade count, the last-N realized prices, and a MEDIAN that publishes only above its guardrail (fewer than 3 realized claims is not evidence - a two-number median is noise dressed as a price, so the report names WHY it withheld). Tenant-gated like the publish-only trail exports: a scoped claim stays invisible to an ungated viewer, the scope machine decides who counts. No settle write path and no new trust rides the tape.
+
+### Added: `lib/connectors/world-base.js` — the world-shaped connector contract
+
+The connector base classes covered language compute and hosted services; a foreign WORLD is neither. The contract is declared upstream so downstream integrators and the transit machinery speak the same three verbs - identities() (the principal map), inventory() (a scoped read/export), txForward() (the tx-root stream a consuming ledger adopts through refs) - while vant itself stays world-agnostic. The base class is contract, not half-implementation: instantiating it and calling a verb refuses typed instead of silently no-opping, and the manifest (contract()) is machine-readable.
+
+### Verification
+
+tests/economy-seam.test.js carries 7 pins (the ledger ref law, the persistence read-through, the bus event, the tape count/median/guardrail/tenancy, the connector contract's no-op refusal). Adjacent suites hold: settlement 10/0, mesh-status 7/0. Wave E of the Synmergia port-review adoption (#337); remaining series items are the channel/board primitive naming + primitive (#339/#341), the boost lane (#340), and the carriers pass (station records, payload lanes, party routes - #341).
+
+## [Unreleased] - pass 370 (the publish-only exports - the forum decision trail becomes a read-only artifact and consensus learns the reconcile report, vant#335)
+
+### Added: `forum exportTrail(thread, opts)` — one derivation, many readers
+
+The durable decision log behind threadDecisionTrail exports as a read-only artifact: json rows only (the format gate names 'json' as the whole supported surface — the machine-readable contract IS the export; clarifying renderings belong outside the engine), an optional `since` filter on vote timestamps, and an optional voters-digest withhold (`withholdVotes: true`) for audiences that need the outcome without the voter names. A publication-backed thread rides the EXACT same tenancy gate the vote-carrying read path uses (`_publicationVisible`, pass 87 rules) — fail-closed to an anonymous reader (E_FORUM_VISIBILITY), so a publish-only channel cannot leak a gated row either. No write path and no vote surface is exposed by the mode.
+
+### Added: `consensus reconcile(topic)` — a health report, roots not ballots
+
+The cross-process merge unions votes and carries reap tombstones, but the surface never answered "do our ledgers agree". reconcile(topic) reports, per reachable tier (hot in-memory + the disk snapshot row each hydrate would load), the topic's deterministic row hash, vote-row count, and reap state, plus the first divergent row id on divergence — and DELIBERATELY no voting and no automatic repair: the caller (tenant) decides what reconciliation means. Tombstone discipline is kept in the report itself: a converged reap reads as agreement (both tiers dropped the row) while still naming the tombstone, and a tombstoned topic can never read as resurrected.
+
+### Verification
+
+tests/forum-consensus-exports.test.js carries 8 pins; ALL flip by stashing the lib/forum.js + lib/consensus.js fixes (verified pre-fix), and the adjacent suites hold green post-fix (forum-decisions-persistence 12/0, ledger-persistence 5/0). Wave D of the Synmergia port-review adoption (#335); the economy seam (#337: credit-side ledger, market tape, typed economy events, world-base connector) is the next pass.
+
+## [Unreleased] - pass 369 (the market settles by the record - vend-able settle contracts, the settle-verifier seam, and the trust layer as a per-tenant opt-out, vant#333/#334)
+
+### Added: vend-able settle contracts (deterministic settle without buyer discretion)
+
+bin/market settlements used to put the go/no-go squarely on the buyer's hand. Now a skill listing can carry a settle contract - a template object whose typed clauses (payloadIncludes tokens, payloadLength bounds; nothing else is accepted) the DELIVERY PROOF must match - and the buyer's confirm key only triggers the deterministic re-verification: the record decides. An unmet clause refuses typed (E_SKILL_CONTRACT carrying the unmet list) with the escrow semantics untouched - the hold releases, no debit, no penalty - and refute never consults the record (the release path stays the buyer's own hand). The contract is buyer-visible on skillStatus; contractCheck(tradeId) reads the deterministic evidence before the key is spent. A generic listing carrying a contract is refused fail-closed.
+
+### Added: the settle-verifier seam (registered per trade)
+
+registerSettleVerifier(tradeId, verifier) attaches a deterministic judge whose verdict (confirm | release) IS the settle decision when the buyer's confirm fires. A throwing or non-deterministic verifier withholds settlement typed (E_SKILL_VERIFIER) - the hold stays, no debit ever moves - and a seam-ruled release never bites the seller's trust feed (the seam's release is not a buyer complaint).
+
+### Added: the trust layer as a per-tenant opt-out
+
+The market.trustMode config key (off | record (default) | full) is consulted at every trust write/read site inside the market: 'off' writes no feed, reads no reputation (skillStatus surfaces sellerReputation: null and the trade path skips the score checks), while holds, scarcity counts and sweeps behave identically. A stray config value reads as 'record', so a typo can never silently disable the watchdog writes - and trustWritten tells the truth about an attempt (false under 'off', not accidentally true).
+
+### Verification
+
+tests/market-settle-contracts.test.js carries 9 pins on the skill surface; 8 are finding-shaped (flipped by stashing the lib/market.js wave-C fixes, verified by stash) and the refute-never-consults control holds both ways by design. The existing tests/market-skills.test.js suite holds 23/23 green. Wave C of the Synmergia port-review adoption (#333 + #334); #335's forum/consensus exports are the next pass.
+
+## [Unreleased] - pass 368 (the srv wire contract becomes a supported interface — contract:1 negotiation marker on /health plus the contract doc, vant#338)
+
+### Added: `lib/connectors/SRV-CONTRACT.md` - the supported wire interface of the language sidecars
+
+The smallest port-review asks (#338) was mostly a documentation ask, and it landed exactly as proposed: the rust-srv / julia-srv wire shape (GET /health, POST /eval {token, code}, POST /stop {token}, their bodies, their error shapes, and the loopback single-token threat model) is now a declared supported interface in one contract doc, so a downstream integrator can mirror it for another language instead of reverse-engineering a sidecar. No behavior changed.
+
+### Added: the `contract: 1` negotiation marker on `/health`
+
+Both sidecars now answer `{"ok":true,"lang":"<lang>","contract":1}` — integrators negotiate on the marker instead of guessing, additive fields stay inside the same version, and a breaking wire change is a bump. The shared runtime (`lib/sidecar.js` `healthy()`) still probes `ok === true && lang === spec.lang` and never the whole body, so the marker rides under it harmlessly; its header doc now names the contract. Headers of both sidecars declare the supported interface.
+
+## [Unreleased] - pass 367 (memory standing, wave A of the Synmergia port-review series: the durable state class, tombstone receipts, and the multi-writer declaration land, vant#336)
+
+### Added: `memory.state(key, value, { durable: true })` - the standing class
+
+The port review read the unified memory module and asked what it takes to run a small economy on it. The answer for memory is three additive flags, one at a time, with the default behavior untouched. Standing facts (reputation, indebtedness, holds, membership) now have a class of their own: a durable row carries no expiresAt at all, so it survives every read-time sweep and every cold read, and the only release is an explicit forget — standing that decays on a TTL timer is indistinguishable from a bug. The law has teeth: a durable row with a TTL next to it is a confused pin and refuses typed (MEMORY_INPUT_INVALID); a default (TTL) overwrite of a durable row refuses typed too, because a silent downgrade re-arms decay with no receipt — replace standing only with another durable:true write, or release it properly.
+
+### Added: `memory.forget(key, { receipt })` - the tombstone receipt
+
+Erase is loud since the B0 tombstones (#249); now it is datable. The receipt is template-shaped - reason (the why) and an optional stable reference - and it stamps the residue itself with at and by, so a forgotten hold, warrant or membership reads back as data, not silence. For a durable row the receipt is mandatory (MEMORY_FORGET_RECEIPT_REQUIRED when missing), because standing that is erased silently is indistinguishable from theft. Ordinary (non-durable) rows keep releasing exactly as before, receipt optional. The residue of standing keeps the durable marker as residue metadata - this row WAS standing - while reads stay gone.
+
+### Added: `memory.state(..., { multiWriter: true })` - the contested-by-construction declaration
+
+A note namespace can now be declared multi-writer: the flag records on the row, carries forward through the note-envelope merge the way the writers union does, and surfaces on every envelope read. The module still never adjudicates - disjoint writers flag a conflict exactly as before; the declaration only makes the contestedness legible to later readers.
+
+### Verification
+
+tests/memory-durable.test.js carries 7 pins, ALL discriminating - stashing the lib/memory.js + lib/error.js fixes flips every pin pre-fix (verified by stash), and the existing tests/memory.test.js suite holds green post-fix (29/29). Typed refusals ride two new canon codes (MEMORY_INPUT_INVALID, MEMORY_FORGET_RECEIPT_REQUIRED), values mirroring the names. Series context: this is wave A of the downstream design-note adoption (#333-#341); #338's srv-contract pin is the next pass.
+
 ## [Unreleased] - pass 366 (audit round 9 follow-up: the verdict surfaces get
 their own crashtest pack — the class is now attacked from the outside, in the
 engine's own verdict language)

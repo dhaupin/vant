@@ -1,8 +1,172 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 96,
+  "_headingCount": 104,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 374 (the carriers pass - countersigned station records, declared-absent payload lanes, party pod holds, vant#341)",
+      "sections": [
+        {
+          "name": "Added: the countersigned station record — every stage datable (vant#341 §1)",
+          "items": []
+        },
+        {
+          "name": "Added: `gdscript` + `binary` on the roster — the declared-absent payload lanes (vant#341 §2)",
+          "items": []
+        },
+        {
+          "name": "Added: party routes — the pod hold rides the pod, the identity stays individual (vant#341 §3)",
+          "items": []
+        },
+        {
+          "name": "Tests: `tests/carriers-pass.test.js` — 14 pins, discriminating",
+          "items": []
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 373 (the boost lane - feature-duration windows buy display time, never rank, vant#340)",
+      "sections": [
+        {
+          "name": "Added: `lib/boost.js` — the rank-neutral monetization primitive for surfaces",
+          "items": []
+        },
+        {
+          "name": "Tests: `tests/boost-lane.test.js` — 13 pins, discriminating",
+          "items": []
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 372 (the publication primitive - channels carry typed engine rows, plates render them read-only, vant#339)",
+      "sections": [
+        {
+          "name": "Added: `lib/plates.js` — one typed publication primitive for player-run surfaces",
+          "items": []
+        },
+        {
+          "name": "Tests: `tests/board-plates.test.js` — 10 pins, discriminating",
+          "items": []
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 371 (the economy seam - the credit-side ledger, the market tape, typed economy events, and the world-base connector contract land, vant#337)",
+      "sections": [
+        {
+          "name": "Added: `lib/ledger.js` — the credit side of the economy's books",
+          "items": []
+        },
+        {
+          "name": "Added: `settlement.tape(listingKey, opts)` — price discovery for programs",
+          "items": []
+        },
+        {
+          "name": "Added: `lib/connectors/world-base.js` — the world-shaped connector contract",
+          "items": []
+        },
+        {
+          "name": "Verification",
+          "items": []
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 370 (the publish-only exports - the forum decision trail becomes a read-only artifact and consensus learns the reconcile report, vant#335)",
+      "sections": [
+        {
+          "name": "Added: `forum exportTrail(thread, opts)` — one derivation, many readers",
+          "items": []
+        },
+        {
+          "name": "Added: `consensus reconcile(topic)` — a health report, roots not ballots",
+          "items": []
+        },
+        {
+          "name": "Verification",
+          "items": []
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 369 (the market settles by the record - vend-able settle contracts, the settle-verifier seam, and the trust layer as a per-tenant opt-out, vant#333/#334)",
+      "sections": [
+        {
+          "name": "Added: vend-able settle contracts (deterministic settle without buyer discretion)",
+          "items": []
+        },
+        {
+          "name": "Added: the settle-verifier seam (registered per trade)",
+          "items": []
+        },
+        {
+          "name": "Added: the trust layer as a per-tenant opt-out",
+          "items": []
+        },
+        {
+          "name": "Verification",
+          "items": []
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 368 (the srv wire contract becomes a supported interface — contract:1 negotiation marker on /health plus the contract doc, vant#338)",
+      "sections": [
+        {
+          "name": "Added: `lib/connectors/SRV-CONTRACT.md` - the supported wire interface of the language sidecars",
+          "items": []
+        },
+        {
+          "name": "Added: the `contract: 1` negotiation marker on `/health`",
+          "items": []
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 367 (memory standing, wave A of the Synmergia port-review series: the durable state class, tombstone receipts, and the multi-writer declaration land, vant#336)",
+      "sections": [
+        {
+          "name": "Added: `memory.state(key, value, { durable: true })` - the standing class",
+          "items": []
+        },
+        {
+          "name": "Added: `memory.forget(key, { receipt })` - the tombstone receipt",
+          "items": []
+        },
+        {
+          "name": "Added: `memory.state(..., { multiWriter: true })` - the contested-by-construction declaration",
+          "items": []
+        },
+        {
+          "name": "Verification",
+          "items": []
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

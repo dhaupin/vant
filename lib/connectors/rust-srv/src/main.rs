@@ -6,8 +6,9 @@
 //! spawn cost, many calls — the same amortization julia-srv.jl gives the
 //! JIT-heavy path, here applied to a compiled language.
 //!
-//! Wire (identical contract to julia-srv.jl, all JSON, token-checked):
-//!   GET  /health  -> {"ok":true,"lang":"rust"}
+//! Wire (identical contract to julia-srv.jl, all JSON, token-checked) —
+//! this is a SUPPORTED INTERFACE (SRV-CONTRACT.md, contract: 1):
+//!   GET  /health  -> {"ok":true,"lang":"rust","contract":1}
 //!   POST /eval    {"token","code"} -> {"ok":true,"stdout","stderr"}
 //!   POST /stop    {"token"}        -> process exits 0
 //!
@@ -261,7 +262,9 @@ fn handle(mut sock: TcpStream) -> Result<(), std::io::Error> {
     };
 
     if req.method == "GET" && req.path.starts_with("/health") {
-        respond(&mut sock, 200, "{\"ok\":true,\"lang\":\"rust\"}");
+        // (SRV-CONTRACT.md, vant#338) contract: 1 is the negotiation marker
+        // integrators read instead of guessing — bump only on a wire change.
+        respond(&mut sock, 200, "{\"ok\":true,\"lang\":\"rust\",\"contract\":1}");
         return Ok(());
     }
 
