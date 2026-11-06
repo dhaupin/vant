@@ -1,8 +1,20 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 104,
+  "_headingCount": 105,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 375 (pin discipline - the plate determinism comparison strips the per-call stamp, vant#260)",
+      "sections": [
+        {
+          "name": "Fixed: `tests/board-plates.test.js` — the never-mutates pin cannot flake on a clock boundary",
+          "items": []
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,
