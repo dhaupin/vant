@@ -1,7 +1,7 @@
 /**
  * src/islands.js
  * ==============
- * Engine file: vendored COPY from prestruct@1.2.0 (init/src/islands.js),
+ * Engine file: vendored COPY from prestruct@1.3.0 (init/src/islands.js),
  * never edited locally; upgrades come from the package's init template.
  *
  * Mounts dynamic React components into <pre-island> placeholders after

@@ -4,9 +4,9 @@
 // matches markers):
 //
 //   1. FLOOR - web/home's prestruct pin must be a caret floor at or above the
-//      family floor (^1.2.0). An exact older pin (1.1.0) or a floating range
+//      family floor (^1.3.0). An exact older pin (1.2.0) or a floating range
 //      (*, latest, ~) is refused: a range floats the engine (a random build),
-//      an old pin misses the 1.2.0 fixes the site depends on.
+//      an old pin misses the 1.3.0 fixes the site depends on.
 //
 //   2. VENDORED COPY FRESHNESS - web/home/src/islands.js is a vendored copy of
 //      the engine's init template, never edited locally. Its header must name
@@ -28,7 +28,7 @@ const HOME_PKG = path.join(ROOT, 'web', 'home', 'package.json');
 const ISLANDS = path.join(ROOT, 'web', 'home', 'src', 'islands.js');
 
 // The family floor: the prestruct version every repo pins at or above.
-const FLOOR = '1.2.0';
+const FLOOR = '1.3.0';
 
 const problems = [];
 

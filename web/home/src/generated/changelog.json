@@ -1,8 +1,32 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 108,
+  "_headingCount": 109,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 379 (family pins - the devDependency cuts advance to the family floor)",
+      "sections": [
+        {
+          "name": "Changed: family devDependencies + CI pins advance to the current cuts",
+          "items": []
+        },
+        {
+          "name": "Changed: the prestruct floor guard moves to `^1.3.0`, and the vendored engine copy refreshes",
+          "items": []
+        },
+        {
+          "name": "Changed: the dependency-ledger census and the compliance map move with the pins",
+          "items": []
+        },
+        {
+          "name": "Changed: the packstruct conformance gate tracks packstruct v1.1.0",
+          "items": []
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

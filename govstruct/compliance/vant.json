@@ -12,25 +12,25 @@
             "banner": "the crashtest packs floor (contract table + real-harness run root)",
             "runs": ["node tests/ci-crashtest-gate.js", "npx crashtest lint-determinism"],
             "where": "test.yml crashtest job",
-            "pin": "crashtest@1.1.0"
+            "pin": "crashtest@1.3.0"
         },
         {
             "banner": "packstruct author-time pack lint + the §7 conformance audit",
             "runs": ["npm run packs:lint", "npm run packs:audit"],
             "where": "test.yml ci job",
-            "pin": "packstruct@1.0.0"
+            "pin": "packstruct@1.1.0"
         },
         {
             "banner": "eyestruct visual ledger gate (browserless, the meanings not the pixels)",
             "runs": ["npx eyestruct gate"],
             "where": "test.yml ci job",
-            "pin": "eyestruct@1.0.0"
+            "pin": "eyestruct@1.1.0"
         },
         {
             "banner": "poststruct shipped audit over the baked home dist",
             "runs": ["npm run build:home", "npx poststruct audit web/home/dist --json"],
             "where": "test.yml ci job - Poststruct audit",
-            "pin": "poststruct@1.0.0"
+            "pin": "poststruct@1.1.0"
         },
         {
             "banner": "docs + home + claims truth gates",
@@ -46,7 +46,7 @@
             "banner": "this family's own identity + conformance (the manifest you are reading's gate)",
             "runs": ["npx govstruct lint", "npx govstruct check", "npx govstruct surface --verify", "npx govstruct doctor"],
             "where": "test.yml ci job - govstruct identity gate",
-            "pin": "govstruct@1.0.0"
+            "pin": "govstruct@1.1.0"
         }
     ]
 }
