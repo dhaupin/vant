@@ -1,8 +1,32 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 109,
+  "_headingCount": 110,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 380 (pack-lane residue + the audit host profile, vant#328)",
+      "sections": [
+        {
+          "name": "Fixed: `packs/public/vant-leisure/index.mjs` — the pack reaps its own scratch brains",
+          "items": []
+        },
+        {
+          "name": "Changed: the packstruct audit host face takes crashtest 1.3.0's host profile",
+          "items": []
+        },
+        {
+          "name": "Fixed: the packstruct feed pin and the receipts move with the 9-case corpus",
+          "items": []
+        },
+        {
+          "name": "CI note: no parallel speedup yet",
+          "items": []
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

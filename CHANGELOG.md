@@ -5,6 +5,26 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 380 (pack-lane residue + the audit host profile, vant#328)
+
+### Fixed: `packs/public/vant-leisure/index.mjs` — the pack reaps its own scratch brains
+
+The pass-378 suite lifecycle stopped `tests/*` leaks, but the pack lanes still minted scratch brain dirs (`leisure-pack-row`, `leisure-pack-empty`) through the real run root, and a direct `npx crashtest run` bypasses the sweep sandbox that used to reap them. The leisure pack now resolves its scratch paths at arm time and removes the ledger plus its brain dir in every row's `finally`, with a process-exit hook as the net for an early return; the dir is removed only when empty, so real brains are never touched. `tests/crashtest-packs.test.js` pins the post-run absence (430 checks green).
+
+### Changed: the packstruct audit host face takes crashtest 1.3.0's host profile
+
+`scripts/audit-host-loader.js` now loads the conformance bundles with `validateProfile: false` — the host-face path crashtest 1.3.0 added for packstruct SPEC §7 — and enumerates the bundle's pack dirs because 1.3.0's root scan does not forward the option. That closes the old `clean` and `env-claims` pins from pass 379 (both now load), and exposes three SPEC §2 manifest norms crashtest still does not enforce: empty description, name/dir mismatch, and undotted version. Those three are pinned individually in `scripts/audit-packs-gate.js`; `npm run packs:audit` exits 0 with 9 cases (6 honored, 3 pinned upstream gaps).
+
+The docs pipeline's `freestruct` pin also moves `1.2.0 -> 1.3.0` in `docs/package.json` + lock, matching the docs-lane version pass 379 named.
+
+### Fixed: the packstruct feed pin and the receipts move with the 9-case corpus
+
+The pass-380 restamp left two readers behind the new 9-case corpus. `web/home/test/struct-feeds.test.mjs` still capped `honored + pinned` at the old 8-case total (red CI on the branch), and the `packs/README.md` live-corpus receipts still showed the pre-advance `8 pack(s) / 48 id(s)` lint and the old one-row `clean` audit. The pin now reconciles the counts to the total the feed's OWN finding states (every case is honored or a named pin) instead of a hardcoded corpus size, so a future corpus move re-pins from the feed rather than a magic number; the receipts restamp to the measured `24 pack(s) / 333 id(s)` and the `6/9 honored, 3 pinned` audit.
+
+### CI note: no parallel speedup yet
+
+crashtest 1.3.0's `--concurrency` only races rows that declare `isolated: true`; `packs/` has no such row, and the CI gate's contract table / run root are custom serial drivers, so the new flag does not shorten either job. The library-heavy phase B remains the wall; opting rows in would be a separate isolation pass, not a flag flip.
+
 ## [Unreleased] - pass 379 (family pins - the devDependency cuts advance to the family floor)
 
 ### Changed: family devDependencies + CI pins advance to the current cuts

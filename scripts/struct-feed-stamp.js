@@ -9,7 +9,7 @@
  *                     (the same sentinel dump CRASHTEST_PACKS_JSON=1 gives
  *                     the CI gate). Counters derive from the measured rows;
  *                     the stamp date is the day the ledger ran.
- *   packstruct (c)  - `npx packstruct@1.0.0 lint packs/ --deep --json`
+ *   packstruct (c)  - `npx packstruct@1.1.0 lint packs/ --deep --json`
  *                     (the machine lint emit: {schema, packsChecked,
  *                     idsCensused, violations, ...}) plus the CI gate's own
  *                     run of scripts/audit-packs-gate.js (the honest
@@ -164,7 +164,7 @@ function deriveCrashFeed(dump, when) {
 // CI gate's verdict line (policy judged by the gate, recorded by the stamp).
 
 function derivePackstructFeed(when) {
-    const lint = spawnSync('npx', ['-y', 'packstruct@1.0.0', 'lint', 'packs/', '--deep', '--json'], {
+    const lint = spawnSync('npx', ['-y', 'packstruct@1.1.0', 'lint', 'packs/', '--deep', '--json'], {
         cwd: ROOT,
         encoding: 'utf8',
         timeout: 5 * 60 * 1000,
@@ -246,7 +246,7 @@ function derivePackstructFeed(when) {
         sourceHref: 'https://www.npmjs.com/package/packstruct',
         _stamp: {
             by: 'scripts/struct-feed-stamp.js',
-            from: 'npx packstruct@1.0.0 lint packs/ --deep --json + scripts/audit-packs-gate.js',
+            from: 'npx packstruct@1.1.0 lint packs/ --deep --json + scripts/audit-packs-gate.js',
             legend: 'values derive from the two measured emits (lint machine truth + the gate\'s own verdict line); restamp with npm run struct:stamp -- --rows packstruct after a packs/ or loader wave',
         },
     };
