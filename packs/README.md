@@ -984,7 +984,7 @@ Cross-repo asks filed on dhaupin/crashtest (build there, release, then the vant 
 
 ## The packstruct@1 gate (2026-10-25)
 
-`npm run packs:lint` runs `packstruct lint packs/ --deep` — the zero-dep spec linter from [packstruct@1.1.0](https://www.npmjs.com/package/packstruct) (pinned as an exact devDependency, author-time only; the runtime graph stays untouched). Step runs in CI (`test.yml`, right after install) and locally after a manifest edit.
+`npm run packs:lint` runs `packstruct lint packs/ --deep` — the zero-dep spec linter from [packstruct@1.0.0](https://www.npmjs.com/package/packstruct) (pinned as an exact devDependency, author-time only; the runtime graph stays untouched). Step runs in CI (`test.yml`, right after install) and locally after a manifest edit.
 
 **Live-corpus receipts** (vant#247 items 1–3, same-commit batch as the wiring):
 
@@ -1069,7 +1069,7 @@ The drift-off pass. The remaining 18 legacy shape-smokes were triaged against th
 
 ## Wave 8 (2026-10-28) - the STRUCT toolchain explained, eyestruct bumps to npm v1.0.0, and the QoS windows go behavioral
 
-- **The STRUCT toolchain section landed** (top of this README, before "What crashtest is"): an explainer table for the four sisters with their real pins and links - **packstruct** (npm `packstruct@1.1.0`, [github.com/dhaupin/packstruct](https://github.com/dhaupin/packstruct#readme), what the packs DECLARE), **crashtest** (npm `crashtest@1.1.0`, [crashtest.creadev.org](https://crashtest.creadev.org), what the code DOES), **eyestruct** (now npm `eyestruct@1.0.0`, [eyestruct.creadev.org](https://eyestruct.creadev.org), what the pixels SHOW), and **poststruct** ([poststruct.creadev.org](https://poststruct.creadev.org), landing tonight; staging at dhaupin/gistory poststruct-staging, what actually SHIPPED). One-sentence summary: packstruct approves the declaration, crashtest grades the code, eyestruct explains the pixels, poststruct probes the deploy - all four sharing the honesty contract (typed skips, no silent passes, deterministic).
+- **The STRUCT toolchain section landed** (top of this README, before "What crashtest is"): an explainer table for the four sisters with their real pins and links - **packstruct** (npm `packstruct@1.0.0`, [github.com/dhaupin/packstruct](https://github.com/dhaupin/packstruct#readme), what the packs DECLARE), **crashtest** (npm `crashtest@1.1.0`, [crashtest.creadev.org](https://crashtest.creadev.org), what the code DOES), **eyestruct** (now npm `eyestruct@1.0.0`, [eyestruct.creadev.org](https://eyestruct.creadev.org), what the pixels SHOW), and **poststruct** ([poststruct.creadev.org](https://poststruct.creadev.org), landing tonight; staging at dhaupin/gistory poststruct-staging, what actually SHIPPED). One-sentence summary: packstruct approves the declaration, crashtest grades the code, eyestruct explains the pixels, poststruct probes the deploy - all four sharing the honesty contract (typed skips, no silent passes, deterministic).
 
 - **eyestruct + CI bumped to npm v1.0.0.** package.json devDependency `^0.9.0 -> ^1.0.0` (npm v1.0.0 verified live), the CI gate lane renamed eyestruct@0.9 -> eyestruct@1.0 in .github/workflows/test.yml, the lockfile refreshed, and `npm run test:eyes` (the browserless ledger gate) run green on the new version: "gate: 0 visual artifacts all explained by 0 ledger row(s)". No behavior drift: `gate` stays read-only over labs/.eyes/ and the capture verbs stay LAN-local.
 
