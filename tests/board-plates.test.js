@@ -136,9 +136,16 @@ async function main() {
             /^(add|set|update|delete|clear|write|edit|patch|append|put)/i.test(k) && k !== 'clearState');
         assert.deepStrictEqual(mutators, [], 'no unowned write verbs beside clearState (a test seam)');
         // render twice with different "viewer" objects does not change stored rows
-        const before = JSON.stringify(plates.renderPlate('guild-storefront', {}));
+        // renderedAt is a per-call stamp on an otherwise immutable export — strip it
+        // before the strict compare, so a 1ms clock boundary can never flake the pin
+        const plateExportOf = () => {
+            const e = plates.renderPlate('guild-storefront', {});
+            delete e.renderedAt;
+            return JSON.stringify(e);
+        };
+        const before = plateExportOf();
         plates.renderPlate('guild-storefront', { limit: 2 });
-        assert.strictEqual(JSON.stringify(plates.renderPlate('guild-storefront', {})), before);
+        assert.strictEqual(plateExportOf(), before);
     });
 
     await pin('unknown plate / unknown channel / dup names refuse typed', async () => {

@@ -5,6 +5,12 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 375 (pin discipline - the plate determinism comparison strips the per-call stamp, vant#260)
+
+### Fixed: `tests/board-plates.test.js` — the never-mutates pin cannot flake on a clock boundary
+
+The pass-372 suite's never-mutates pin compared two `plates.renderPlate()` exports byte-for-byte to prove the export is immutable — but the export legitimately carries `renderedAt`, a per-call millisecond stamp, so two consecutive renders landing on either side of a clock boundary produced a 1ms-differing payload and the strictEqual flaked CI (run 42146929417, sweep shard 4 on the wave-21 promotion merge). The pin's intent is immutability of the ROW CONTENT, not of the stamp; the comparison now strips `renderedAt` from a local copy before the strict compare. Discrimination unchanged: the mutator-verb census, the viewer-independence, and the row-identity holds all stay; the pin still fails if an export ever carries row mutation or unselected fields — only the legitimate per-call stamp is exempted. Verified: 4/4 standalone greens, then the exact CI sequence (tests/ci.js seed + shard 4/4) run twice, both 59/59.
+
 ## [Unreleased] - pass 374 (the carriers pass - countersigned station records, declared-absent payload lanes, party pod holds, vant#341)
 
 ### Added: the countersigned station record — every stage datable (vant#341 §1)
