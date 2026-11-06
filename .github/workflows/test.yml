@@ -73,9 +73,9 @@ jobs:
           node tests/ci.js
           node tests/runner.js
 
-      - name: Eyes gate (eyestruct@1.0 visual ledger, browserless)
+      - name: Eyes gate (eyestruct@1.1 visual ledger, browserless)
         # The crashtest lane aimed at appearance instead of attackability.
-        # eyestruct@1.0 (npm v1.0.0): `gate` is read-only over
+        # eyestruct@1.1 (npm v1.1.0): `gate` is read-only over
         # labs/.eyes/ - every committed visual artifact must be explained
         # by a ledger row and every row must reference a live artifact on
         # disk. Browserless by design: capture verbs (look/diff/walk) are
@@ -110,7 +110,7 @@ jobs:
       - name: web/home config pin suite (vitest, pass 338 — the pins never ride CI until now)
         run: npm ci --prefix web/home && npm --prefix web/home run test:run
 
-      - name: Poststruct audit (poststruct@1.0 — the baked-HTML shipped contract)
+      - name: Poststruct audit (poststruct@1.1 — the baked-HTML shipped contract)
         # The four-STRUCT board closes its loop (issue #264's last family).
         # poststruct walks the BAKED web/home dist post-build and verifies
         # head/site/links/i18n/a11y/feeds + the language profile; FAIL

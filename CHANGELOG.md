@@ -5,19 +5,41 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - pass 379 (pack-lane residue + the struct/forge family bump, vant#328)
+## [Unreleased] - pass 380 (pack-lane residue + the audit host profile, vant#328)
 
 ### Fixed: `packs/public/vant-leisure/index.mjs` — the pack reaps its own scratch brains
 
 The pass-378 suite lifecycle stopped `tests/*` leaks, but the pack lanes still minted scratch brain dirs (`leisure-pack-row`, `leisure-pack-empty`) through the real run root, and a direct `npx crashtest run` bypasses the sweep sandbox that used to reap them. The leisure pack now resolves its scratch paths at arm time and removes the ledger plus its brain dir in every row's `finally`, with a process-exit hook as the net for an early return; the dir is removed only when empty, so real brains are never touched. `tests/crashtest-packs.test.js` pins the post-run absence (430 checks green).
 
-### Changed: the struct/forge family — current npm cuts, one family pin ledger
+### Changed: the packstruct audit host face takes crashtest 1.3.0's host profile
 
-`crashtest` 1.3.0, `eyestruct`/`govstruct`/`monoforge`/`packstruct`/`poststruct` 1.1.0, and `prestruct`/`freestruct` 1.3.0 are pinned across the root/home/docs ledgers, the prestruct floor and vendored header, the dependency ledger, govstruct compliance, and the struct-feed stamps. crashtest 1.3.0's host-profile load (`validateProfile: false`) retires the old conformance `clean` pin and honors the env-claims accept case; the three SPEC §2 manifest gaps it exposes (empty description, name/dir mismatch, undotted version) are pinned individually in `scripts/audit-packs-gate.js`, with the host face enumerating pack dirs because 1.3.0's root scan does not forward the profile flag.
+`scripts/audit-host-loader.js` now loads the conformance bundles with `validateProfile: false` — the host-face path crashtest 1.3.0 added for packstruct SPEC §7 — and enumerates the bundle's pack dirs because 1.3.0's root scan does not forward the option. That closes the old `clean` and `env-claims` pins from pass 379 (both now load), and exposes three SPEC §2 manifest norms crashtest still does not enforce: empty description, name/dir mismatch, and undotted version. Those three are pinned individually in `scripts/audit-packs-gate.js`; `npm run packs:audit` exits 0 with 9 cases (6 honored, 3 pinned upstream gaps).
+
+The docs pipeline's `freestruct` pin also moves `1.2.0 -> 1.3.0` in `docs/package.json` + lock, matching the docs-lane version pass 379 named.
 
 ### CI note: no parallel speedup yet
 
 crashtest 1.3.0's `--concurrency` only races rows that declare `isolated: true`; `packs/` has no such row, and the CI gate's contract table / run root are custom serial drivers, so the new flag does not shorten either job. The library-heavy phase B remains the wall; opting rows in would be a separate isolation pass, not a flag flip.
+
+## [Unreleased] - pass 379 (family pins - the devDependency cuts advance to the family floor)
+
+### Changed: family devDependencies + CI pins advance to the current cuts
+
+Every family devDependency moves to the current cut: `crashtest ^1.2.0 -> ^1.3.0`, `eyestruct ^1.0.0 -> ^1.1.0`, `packstruct ^1.0.0 -> ^1.1.0`, `poststruct ^1.0.0 -> ^1.1.0`, `govstruct ^1.0.0 -> ^1.1.0`, and `monoforge ^0.9.0 -> ^1.1.0` (the last two were never advanced off the 0.x/1.0 line). `web/home` moves `prestruct 1.2.0 -> 1.3.0` (the SSRF-guard security round), and both lockfiles re-resolve to the new cuts.
+
+CI moves off its floats: the `eyes-spot` lane's `npx -y eyestruct@1` becomes `eyestruct@1.1.0` (a bare major floats the engine), the `docs` lane's caller SHA moves to freestruct v1.3.0 (`7dfb172`) with `freestruct-version 1.2.0 -> 1.3.0`, and the test-workflow step comments name the new cuts.
+
+### Changed: the prestruct floor guard moves to `^1.3.0`, and the vendored engine copy refreshes
+
+`scripts/check-prestruct-pins.cjs` FLOOR moves `1.2.0 -> 1.3.0` and the guard's battery gains the inverse case (the old `^1.2.0` floor now fails). The vendored `web/home/src/islands.js` header moves to `prestruct@1.3.0` — the body already matched the 1.3.0 engine byte for byte, so only the version line moved.
+
+### Changed: the dependency-ledger census and the compliance map move with the pins
+
+`scripts/audit-deps.js`'s `FAMILY_PINS` table and `govstruct/compliance/vant.json`'s `pin` fields both still recorded the pre-advance cuts (`monoforge 0.9.0`, `crashtest 1.1.0`, the rest `1.0.0`). The `lint:deps` census cross-checks them against the declared carets, so the advanced pins turned a stale ledger into a red gate — `pin:family` and `lock:family` both flagged `monoforge`. Both now record the current cuts (`crashtest 1.3.0`, `eyestruct`/`govstruct`/`monoforge`/`packstruct`/`poststruct` `1.1.0`); `npm run lint:deps` is PASS.
+
+### Changed: the packstruct conformance gate tracks packstruct v1.1.0
+
+`scripts/audit-packs-gate.js` pins `packstruct@1.0.0 -> 1.1.0` and its expected corpus size `8 -> 9`. The v1.1.0 corpus adds the SPEC-2 `env-claims` accept bundle, which crashtest's scenario-profile loader refuses for the same reason it refuses `clean` (a manifest-level accept case that fails the scenario contract at load), so the allowlist gains the `env-claims` row and the gate stays honest: 7/9 honored, both gaps pinned to the one upstream engine finding.
 
 ## [Unreleased] - pass 378 (test-harness hygiene - the suite that mints a scratch brain reaps it, vant#328)
 
@@ -80,6 +102,7 @@ A store-front, a guild schedule, an auction board, an event calendar - downstrea
 ### Tests: `tests/board-plates.test.js` — 10 pins, discriminating
 
 The three plate laws are each pinned as FLIP pins against a pre-fix tree: undeclared visibility refuses (and a ghost half-registration is impossible), template-field-only render (unselected `owner`/`tier` fields never ride the output), authorial text (string or object literal) refuses typed, tenancy withheld-and-counted for an unauthorized viewer while the authorized viewer sees the row and an honest `0 withheld`, and the export carries no write verbs beside `clearState`. Controls pin the stable provenance derivation across renders, multi-channel plates (a `since` filter rides the rows' own `at`), typed code-table membership (no phantom codes), and deterministic reading order. Pre-fix (module absent + codes table prior state): the suite refuses to even load the primitive - 10 fails; post-fix 10/0, and the whole memory suite stays green beside it.
+
 
 ## [Unreleased] - pass 371 (the economy seam - the credit-side ledger, the market tape, typed economy events, and the world-base connector contract land, vant#337)
 
