@@ -183,7 +183,7 @@ The main <> staging flow (the staging rule — poststruct#32's canon, adopted fl
 - **`staging` is the permanent integration branch.** Never deleted. It is the only lane into `main`: work branches off it, PRs target it, and promotion (staging → main) is the only path out the other side.
 - **`main` stays the production truth.** Every deploy job (docs Pages, docker) gates itself to main explicitly — `if: github.ref == 'refs/heads/main'` — because being visible in a trigger list never keeps content out of production.
 - **`axolotl` is the free-bird dev branch.** Batch passes land there before any PR exists, so CI covers its pushes; nothing ships from it directly.
-- **`agent-*`** are per-agent working branches for memory work (below).
+- **`agent-*`** are per-agent working branches for memory work (below). Other head names (`fix/*`, anything) are fine too: PR CI keys on the PR's **base**, so every PR into `axolotl`, `staging`, or `main` gates regardless of what its head branch is called.
 
 **After every promotion, the sync is a required step, not a repair.** A merge-commit promotion puts a commit on `main` that `staging` lacks, so the two drift by one on every promotion even when the flow is followed exactly:
 
