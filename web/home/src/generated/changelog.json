@@ -1,8 +1,20 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 111,
+  "_headingCount": 112,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 382 (start arg-slice - `--brain-name` reaches the seed again, vant#353)",
+      "sections": [
+        {
+          "name": "Fixed: `bin/start.js` — `vant start --brain-name <x>` seeded the DEFAULT brain",
+          "items": []
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

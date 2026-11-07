@@ -5,6 +5,14 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 382 (start arg-slice - `--brain-name` reaches the seed again, vant#353)
+
+### Fixed: `bin/start.js` — `vant start --brain-name <x>` seeded the DEFAULT brain
+
+The dispatcher (`bin/vant.js`) spawns `start.js` with `process.argv.slice(3)` (dropping the `start` verb), but `bin/start.js` `main()` also read `process.argv.slice(3)`. The double slice was off by one: the first flag after the verb was eaten, so `vant start --brain-name openhands` arrived as `['openhands']`, `_resolveSeedTarget` never saw the flag, and the seed silently landed on the default brain (`vant`). Every sibling bin script (`brain.js`, `health.js`, `migrate.js`, `sync.js`) already used `slice(2)`; `start.js` was the lone outlier. It now reads `slice(2)` too. `--seed-starter`/`--no-migrate` looked fine only because losing a boolean is silent; a lost `--brain-name` value is not.
+
+The migrate-onboard-journey suite invoked `bin/start.js` DIRECTLY, so it never exercised the dispatcher slice and missed this. `tests/start-brain-name-dispatch.test.js` drives the real `vant start` path through `bin/vant.js` and pins both halves: the NAMED brain is seeded, and no stray default brain appears.
+
 ## [Unreleased] - pass 381 (CI trigger - every PR into axolotl gates again, vant#349)
 
 ### Changed: `.github/workflows/test.yml` — the PR trigger adds `axolotl`, so all axolotl PRs run CI
