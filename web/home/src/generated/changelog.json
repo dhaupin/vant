@@ -1,8 +1,20 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 110,
+  "_headingCount": 111,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 381 (CI trigger - every PR into axolotl gates again, vant#349)",
+      "sections": [
+        {
+          "name": "Changed: `.github/workflows/test.yml` — the PR trigger adds `axolotl`, so all axolotl PRs run CI",
+          "items": []
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

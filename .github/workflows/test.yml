@@ -28,7 +28,14 @@ on:
     # is drift by another name.
     branches: [main, staging, 'agent-*', axolotl]
   pull_request:
-    branches: [main, staging]
+    # PR CI keys on the PR's BASE, never its head. Work PRs target axolotl
+    # (the dev branch), so listing `axolotl` here gates EVERY PR into it -
+    # agent-*, fix/*, or any other head name, the head never enters this
+    # filter, so no head-pattern list could express it. The old [main,
+    # staging] list skipped axolotl PRs on purpose: CI was slow then and the
+    # minutes were not worth it. CI is fast now, so the gate is back on for
+    # all of it. Integration + promotion PRs (staging, main) are unchanged.
+    branches: [main, staging, axolotl]
   schedule:
     - cron: '0 0 * * 0'  # Weekly (default branch only); the gates + shards fanout re-measures drift
 

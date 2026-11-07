@@ -5,6 +5,14 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - pass 381 (CI trigger - every PR into axolotl gates again, vant#349)
+
+### Changed: `.github/workflows/test.yml` — the PR trigger adds `axolotl`, so all axolotl PRs run CI
+
+The `pull_request` trigger listed only `[main, staging]`, so a work PR into `axolotl` (the dev branch) ran no CI. That was a deliberate speed trade: CI was slow, and the minutes were not worth spending on axolotl PRs. CI is fast now, so the gate goes back on. The PR trigger is `[main, staging, axolotl]`.
+
+PR CI keys on the PR's **base**, never its head, so listing `axolotl` covers *every* PR into it - `agent-*`, `fix/*`, or any other head name. The head branch never enters the filter, so no head-pattern list could have expressed this. Integration and promotion PRs (`staging`, `main`) are unchanged. `docs/operations/ci.md` (trigger table, embedded shape, prose) and `AGENTS.md` (the branch-slate note) move with it.
+
 ## [Unreleased] - pass 380 (pack-lane residue + the audit host profile, vant#328)
 
 ### Fixed: `packs/public/vant-leisure/index.mjs` — the pack reaps its own scratch brains
