@@ -17,7 +17,11 @@ The security posture maps the spec's section 7 onto vant's own wall. Loopback is
 
 `play()` is the section-8 seam: when idle capacity appears, the brain pursues one want from its leisure want-list *through the same lane* - observe, act one safe affordance, return a learn line. A refused act is a first-class `{ ok:false, reason }`, never a throw.
 
-`tests/gamestruct-adapter.test.js` pins the contract with seven assertions against a REAL loopback door (a local http server, so every verdict measures the true wire): registration, door hygiene (leaked creds + non-http scheme refuse typed), the four primitives on their routes, the MCP binding, token fail-closed, the remote SSRF wall, and play. Stashing the adapter fails all seven.
+`tests/gamestruct-adapter.test.js` pins the contract with eight assertions against a REAL loopback door (a local http server, so every verdict measures the true wire): registration, door hygiene (leaked creds + non-http scheme refuse typed), the four primitives on their routes, the MCP binding, token fail-closed, the remote SSRF wall, play, and find. Stashing the adapter fails all eight.
+
+Two wire details were aligned against gamestruct's shipped bindings (`lib/bindings/http.mjs`, `lib/bindings/mcp.mjs`) rather than the earlier draft: the HTTP binding carries a first-class refusal as **`409`** (a refused act, N2/N21) and an honest timeout as **`408`** (N3), each with the `{ ok:false, reason }` JSON body. `lib/network.fetch` rejects a non-2xx and discards the body, so a refusal would have surfaced as a bare `HTTP 409` - the exact opposite of N21's "every refusal is a value". A new opt-in `allowStatus` option on `network.fetch` (default `[]`, so the fail-closed posture is byte-identical) lets the adapter read those bodies and hand the refusal back as data. Verified end-to-end against the real gamestruct `Bridge` + bindings: 13/13 (observe, act, a first-class refusal, an honest timeout, a resolved wait, the event ring, `tools/list` with inputSchema, `tools/call`, play, find, and the token gate refusing a tokenless client).
+
+The door's `records[]`-free wire is not the only sibling finding: binding the memory profile turned up that `packstruct lint --deep` never censused a memory pack's record ids (dhaupin/packstruct#88, fixed with discriminating fixtures).
 
 ## [Unreleased] - pass 384 (memstruct interchange - the brain speaks the family record grammar, vant#354)
 

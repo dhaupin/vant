@@ -193,4 +193,31 @@ test('getStackNetworkStatus returns object with source stack', () => {
     return { success: result && result.source === 'stack' };
 });
 
+// allowStatus: a protocol where a non-2xx carries a domain VALUE (gamestruct's
+// 409 refusal) opts in to reading the body. Default [] stays fail-closed.
+// DISCRIMINATING: without the allowStatus branch the second test rejects.
+_asyncTest('fetch rejects a non-2xx by default (fail-closed, body discarded)', async () => {
+    const http = require('http');
+    const network = require(path.join(ROOT, 'lib', 'network'));
+    const srv = http.createServer((req, res) => { res.statusCode = 409; res.end(JSON.stringify({ ok: false, reason: 'refused' })); });
+    await new Promise((r) => srv.listen(0, '127.0.0.1', r));
+    const url = 'http://127.0.0.1:' + srv.address().port + '/act';
+    let err = null;
+    try { await network.fetch(url, { method: 'POST', body: '{}', circuit: false, cache: false, skipDomainCheck: true, system: true }); } catch (e) { err = e; }
+    await new Promise((r) => srv.close(r));
+    return { success: err && /HTTP 409/.test(err.message) };
+});
+
+_asyncTest('fetch with allowStatus:[409] resolves the refusal body', async () => {
+    const http = require('http');
+    const network = require(path.join(ROOT, 'lib', 'network'));
+    const srv = http.createServer((req, res) => { res.statusCode = 409; res.end(JSON.stringify({ ok: false, reason: 'refused' })); });
+    await new Promise((r) => srv.listen(0, '127.0.0.1', r));
+    const url = 'http://127.0.0.1:' + srv.address().port + '/act';
+    let raw = null, err = null;
+    try { raw = await network.fetch(url, { method: 'POST', body: '{}', circuit: false, cache: false, skipDomainCheck: true, system: true, allowStatus: [409] }); } catch (e) { err = e; }
+    await new Promise((r) => srv.close(r));
+    return { success: !err && raw && JSON.parse(raw).reason === 'refused' };
+});
+
 _printResults();

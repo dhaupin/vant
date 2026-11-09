@@ -3,26 +3,28 @@
  * gamestruct adapter pins — the vant brain <-> gamestruct door client.
  *
  * gamestruct (dhaupin/gamestruct, SPEC v0.1.0) is the game-agent lane bridge:
- * synmergia is the WORLD (it implements the door), vant is the BRAIN (it
- * drives it as a client). This suite pins vant's half against a REAL loopback
- * door (a local http server), so every verdict measures the true wire.
+ * a game exposes a DOOR (the four primitives observe/act/wait_for/events), a
+ * brain drives it as a CLIENT. This suite pins vant's half against a REAL
+ * loopback door that speaks gamestruct's own HTTP wire (bindings/http.mjs
+ * shape), so every verdict measures the true contract.
  *
  *   G0 registration — the adapter is exported from the connectors index.
  *   G1 door hygiene  — credentials in the URL and non-http schemes refuse
  *                      typed (a leaked userinfo is a leaked secret).
- *   G2 the four primitives — observe/act/wait_for/events hit the right
- *                      routes and return the door's JSON.
- *   G3 MCP binding   — tools/list + tools/call ride the /mcp route.
+ *   G2 the four primitives — observe (GET), act (POST {id,verb,value}),
+ *                      wait_for, events (honest cursor) on their routes.
+ *   G3 MCP binding   — tools/list + tools/call ride the host MCP route.
  *   G4 token fail-closed — a configured token rides every request as
  *                      Authorization: Bearer (or x-api-key).
  *   G5 remote wall   — a non-loopback door rides vant's SSRF wall (an
  *                      internal/remote address is refused, never dialled).
- *   G6 play (section 8) — leisure pursuit over the lane: observe -> act one
- *                      safe affordance -> a learn line; a refused act is a
- *                      first-class outcome, never a throw.
+ *   G6 play (sec 8) — leisure pursuit over the lane: observe -> act one safe
+ *                      affordance -> a learn line; a refused act is a
+ *                      first-class outcome (N21), never a throw.
+ *   G7 find — locate a handle by role/name without hardcoding ids.
  *
  * DISCRIMINATING: every pin requires lib/adapters/gamestruct.js; stashing it
- * (and the connectors/index.js registration) fails G0–G6, passes post-fix.
+ * (and the connectors/index.js registration) fails G0–G7, passes post-fix.
  *
  * Run: node tests/gamestruct-adapter.test.js
  */
@@ -40,48 +42,51 @@ function test(name, fn) { _tests.push([name, fn]); }
 
 /** Start a real gamestruct-shaped door on loopback. Returns { door, close, seen }. */
 async function mintDoor() {
-    const seen = { auth: [], paths: [], mcp: [] };
+    const seen = { auth: [], paths: [], methods: [], mcp: [] };
     const srv = http.createServer((req, res) => {
         seen.auth.push(req.headers.authorization || req.headers['x-api-key'] || null);
         seen.paths.push(req.url);
+        seen.methods.push(req.method + ' ' + req.url.split('?')[0]);
         let body = '';
         req.on('data', (c) => { body += c; });
         req.on('end', () => {
             res.setHeader('content-type', 'application/json');
             const pathname = req.url.split('?')[0];
-            if (pathname === '/observe') {
-                return res.end(JSON.stringify({
-                    ok: true, scene: 'globe_world', in_world: true,
-                    actions: [
-                        { id: 'world:wolf_7', action: 'attack', disabled: false },
-                        { id: 'world:gate_1', action: 'open', disabled: true }
+            const send = (status, obj) => { res.statusCode = status; res.end(JSON.stringify(obj)); };
+            if (pathname === '/observe' && req.method === 'GET') {
+                return send(200, {
+                    ok: true, surface: 'globe_world', focus: 'world:wolf_7',
+                    summary: { nodes: 2 },
+                    nodes: [
+                        { id: 'world:wolf_7', role: 'button', name: 'Attack wolf', actions: ['activate'], disabled: false },
+                        { id: 'world:gate_1', role: 'button', name: 'Open gate', actions: ['activate'], disabled: true }
                     ]
-                }));
+                });
             }
-            if (pathname === '/act') {
+            if (pathname === '/act' && req.method === 'POST') {
                 const p = JSON.parse(body || '{}');
-                if (p.id === 'world:deny_1') return res.end(JSON.stringify({ ok: false, reason: 'no such handle: world:deny_1' }));
-                return res.end(JSON.stringify({ ok: true, detail: { did: p.id, args: p.args || {} } }));
+                if (p.id === 'world:deny_1') return send(409, { ok: false, reason: 'no such handle: world:deny_1' });
+                return send(200, { ok: true, id: p.id, verb: p.verb, value: p.value });
             }
-            if (pathname === '/wait_for') {
+            if (pathname === '/wait_for' && req.method === 'POST') {
                 const p = JSON.parse(body || '{}');
-                return res.end(JSON.stringify({ ok: true, detail: { held: true, predicate: p.predicate, timeoutMs: p.timeoutMs } }));
+                return send(200, { ok: true, held: true, predicate: p.predicate, timeoutMs: p.timeoutMs });
             }
-            if (pathname === '/events') {
-                return res.end(JSON.stringify([{ frame: 1, type: 'moved' }]));
+            if (pathname === '/events' && req.method === 'GET') {
+                return send(200, { ok: true, frame: 7, events: [{ frame: 1, type: 'moved' }] });
             }
-            if (pathname === '/mcp') {
+            if (pathname === '/health') return send(200, { ok: true, surface: 'globe_world', frame: 7 });
+            if (pathname === '/mcp/exec' && req.method === 'POST') {
                 const p = JSON.parse(body || '{}');
                 seen.mcp.push(p.method);
                 if (p.method === 'tools/list') {
-                    return res.end(JSON.stringify({ jsonrpc: '2.0', id: p.id, result: { tools: [
-                        { name: 'observe', description: 'state', inputSchema: { type: 'object' } }
-                    ] } }));
+                    return send(200, { jsonrpc: '2.0', id: 1, result: { tools: [
+                        { name: 'act__world__wolf_7', description: 'Attack wolf (button)', inputSchema: { type: 'object', properties: { verb: { type: 'string', enum: ['activate'] } } } }
+                    ] } });
                 }
-                return res.end(JSON.stringify({ jsonrpc: '2.0', id: p.id, result: { content: [{ type: 'text', text: 'ok' }] } }));
+                return send(200, { jsonrpc: '2.0', id: 1, result: { content: [{ type: 'text', text: '{"ok":true}' }], isError: false } });
             }
-            res.statusCode = 404;
-            res.end('{}');
+            send(404, { ok: false, reason: 'no such route: ' + pathname });
         });
     });
     await new Promise((r) => srv.listen(0, '127.0.0.1', r));
@@ -108,21 +113,25 @@ test('G1 a door URL with credentials or a non-http scheme refuses typed', () => 
     assert.strictEqual(err2 && err2.code, 'E_GAMESTRUCT_DOOR', 'non-http scheme must refuse typed');
 });
 
-// G2 — the four primitives hit the right routes.
+// G2 — the four primitives on the gamestruct v0.1.0 wire.
 test('G2 observe/act/wait_for/events ride the specified routes', async () => {
     const d = await mintDoor();
     try {
         const a = new GamestructAdapter({ door: d.door });
         const snap = await a.observe();
-        assert.strictEqual(snap.scene, 'globe_world', 'observe must return the snapshot');
+        assert.strictEqual(snap.surface, 'globe_world', 'observe must return the snapshot');
+        assert.strictEqual(snap.focus, 'world:wolf_7', 'observe must carry the focus handle (N5)');
         assert.strictEqual(a.connected, true, 'observe must mark the client connected');
-        const acted = await a.act('world:wolf_7', { n: 1 });
-        assert.strictEqual(acted.detail.did, 'world:wolf_7', 'act must carry the handle');
+        const acted = await a.act('world:wolf_7', 'activate');
+        assert.strictEqual(acted.id, 'world:wolf_7', 'act must carry the handle');
+        assert.strictEqual(acted.verb, 'activate', 'act must carry the verb');
         const waited = await a.waitFor({ hp_lt: 30 }, 500);
-        assert.strictEqual(waited.detail.held, true, 'wait_for must carry the predicate');
-        assert.strictEqual(waited.detail.timeoutMs, 500, 'wait_for must carry the honest timeout');
+        assert.strictEqual(waited.held, true, 'wait_for must carry the predicate');
+        assert.strictEqual(waited.timeoutMs, 500, 'wait_for must carry the honest timeout');
         const evs = await a.events(0);
-        assert.strictEqual(evs[0].type, 'moved', 'events must return the ring');
+        assert.strictEqual(evs.frame, 7, 'events must return the frame cursor (N4)');
+        assert.strictEqual(evs.events[0].type, 'moved', 'events must return the ring');
+        assert.ok(d.seen.methods.includes('GET /observe'), 'observe must be a GET');
         assert.ok(d.seen.paths.some((p) => p.startsWith('/events?since=0')), 'events must send the frame cursor');
     } finally { await d.close(); }
 });
@@ -132,12 +141,12 @@ test('G3 the MCP binding carries tools/list with a real inputSchema', async () =
     const d = await mintDoor();
     try {
         const a = new GamestructAdapter({ door: d.door });
-        const tools = await a.tools();
-        assert.strictEqual(tools[0].name, 'observe', 'tools/list must return the door tools');
-        assert.ok(tools[0].inputSchema && tools[0].inputSchema.type === 'object', 'each tool must carry an inputSchema');
-        const called = await a.call('observe', {});
+        const cat = await a.catalog();
+        assert.strictEqual(cat.tools[0].name, 'act__world__wolf_7', 'tools/list must return the door tools');
+        assert.ok(cat.tools[0].inputSchema && cat.tools[0].inputSchema.type === 'object', 'each tool must carry an inputSchema (N17)');
+        const called = await a.call('act__world__wolf_7', { verb: 'activate' });
         assert.ok(called && called.content, 'tools/call must return the door result');
-        assert.deepStrictEqual(d.seen.mcp, ['tools/list', 'tools/call'], 'both MCP methods must ride /mcp');
+        assert.deepStrictEqual(d.seen.mcp, ['tools/list', 'tools/call'], 'both MCP methods must ride the MCP route');
     } finally { await d.close(); }
 });
 
@@ -173,12 +182,24 @@ test('G6 play observes, acts one safe affordance, and a refusal is a first-class
         const played = await a.play('hunt');
         assert.strictEqual(played.acted, true, 'play must act');
         assert.strictEqual(played.handle, 'world:wolf_7', 'play must pick the first ENABLED affordance');
+        assert.strictEqual(played.action, 'activate', 'play must use the node default verb');
         assert.strictEqual(played.outcome, 'done', 'a successful act is done');
         assert.match(played.learned, /played:/, 'a learn line is returned');
-        // a door that refuses the act is honored as an outcome, not a throw
-        const refused = await a.act('world:deny_1');
+        // a door that refuses the act is honored as an outcome, not a throw (N21)
+        const refused = await a.act('world:deny_1', 'activate');
         assert.strictEqual(refused.ok, false, 'a refusal is a first-class result');
         assert.match(refused.reason, /no such handle/, 'the refusal is named');
+    } finally { await d.close(); }
+});
+
+// G7 — find a handle without hardcoding ids.
+test('G7 find locates a handle by role and name', async () => {
+    const d = await mintDoor();
+    try {
+        const a = new GamestructAdapter({ door: d.door });
+        const node = await a.find({ name: 'Attack' });
+        assert.ok(node, 'find must locate by name substring');
+        assert.strictEqual(node.id, 'world:wolf_7', 'find must return the matching node');
     } finally { await d.close(); }
 });
 

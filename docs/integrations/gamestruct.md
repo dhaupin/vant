@@ -17,14 +17,18 @@ description: Driving a game world from your brain over the gamestruct lane - obs
 
 ## The four primitives
 
+gamestruct SPEC v0.1.0 fixes the signatures (section 3). Every door exposes exactly these; a client that uses only these can operate the surface.
+
 | Verb | Signature | Meaning |
 |------|-----------|---------|
-| `observe` | `() -> Snapshot` | Where am I, what is around me, what can I do now |
-| `act` | `(id, args) -> Result` | Do one thing by a **stable handle** (`world:<id>`, `ui:<path>`, or a verb) |
-| `waitFor` | `(predicate, timeoutMs) -> Result` | Block until a condition holds, or an honest timeout |
-| `events` | `(sinceFrame) -> Array` | What happened while you were not looking |
+| `observe` | `() -> Snapshot` | The current state for this seat: `{ ok, nodes, focus, summary }` |
+| `act` | `(handle, verb, value) -> Result` | Do one thing by a **stable handle** (never by pixel or index) |
+| `waitFor` | `(predicate, timeoutMs) -> Outcome` | Resolve when a condition holds, or time out honestly (`reason:'timeout'`) |
+| `events` | `(sinceFrame) -> { frame, events[] }` | An honest cursor: the same cursor returns the same events; the frame is monotonic |
 
-The door also answers the MCP binding (`tools/list`, `tools/call`), so an agent auto-wires without hand-written glue. `tools()` and `call()` expose that side.
+A refusal is a value (`{ ok:false, reason }`), never a throw (N21). The HTTP binding carries it as `409` (a refused act) or `408` (an honest timeout) with that JSON body - the adapter reads the body, so the refusal arrives as data.
+
+The door also answers the MCP binding (section 7.2): `catalog()` is `tools/list` (each tool carries a real `inputSchema`, so an agent auto-wires with no bespoke code) and `call(name, args)` is `tools/call`, dispatched onto the same `act`.
 
 ## Driving a door
 
@@ -32,13 +36,16 @@ The door also answers the MCP binding (`tools/list`, `tools/call`), so an agent 
 const connectors = require('./lib/connectors');
 const world = connectors.gamestruct({ door: 'http://127.0.0.1:8791' });
 
-const snap = await world.observe();          // { ok, scene, actions: [...] }
-await world.act('world:wolf_7', { n: 1 });   // a refusal is a first-class { ok:false, reason }
-await world.waitFor({ hp_lt: 30 }, 5000);    // honest timeout, never a hang
-const seen = await world.events(0);          // the ring since frame 0
+const snap = await world.observe();               // { ok, nodes, focus, summary }
+const wolf = await world.find({ name: 'wolf' });  // locate a handle without hardcoding ids
+await world.act(wolf.id, 'activate');             // a refusal is a first-class { ok:false, reason }
+await world.waitFor({ hp_lt: 30 }, 5000);         // honest timeout, never a hang
+const { frame, events } = await world.events(0);  // the ring since frame 0
+const { tools } = await world.catalog();          // the MCP tool list
+await world.call(tools[0].name, { verb: 'activate' });
 ```
 
-An agent never guesses a handle: the world tells it what it can do now, by stable id.
+An agent never guesses a handle: the door tells it what it can do now, by stable id.
 
 ## Play: leisure over the lane
 
@@ -46,7 +53,8 @@ The brain keeps a want-list (see [Leisure](/vant/memory/leisure)). When idle cap
 
 ```js
 const played = await world.play('hunt');     // observe -> act one safe affordance
-// { ok:true, acted:true, handle:'world:wolf_7', action:'attack', outcome:'done', learned:'played: attack at world:wolf_7' }
+// { ok:true, acted:true, handle:'world:wolf_7', name:'Attack wolf',
+//   action:'activate', outcome:'done', learned:'played: activate at world:wolf_7' }
 ```
 
 A refused act comes back as `outcome: 'refused'` with a named reason, never a throw.
