@@ -14,6 +14,10 @@
           "items": []
         },
         {
+          "name": "Fixed: `lib/market.js` - a query search no longer crashes on a listing with no title/summary",
+          "items": []
+        },
+        {
           "name": "Added: `labs/mesh/cross-install-real-run.js` + `tests/cross-install.test.js` - the first two-install federation",
           "items": []
         }
