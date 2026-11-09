@@ -14,7 +14,16 @@ The crew bus signs ENVELOPE BYTES with the shared mesh secret, so a signature pr
 
 The same binding now guards the ledger-push leg: `state.push` called `mergeTopic` with the whole snapshot, adopting foreign ballots unguarded - probe-verified `peer-c` stuffed a ballot for `victim-agent` via `state.push` and the owner counted it (`labs/probe-push-injection.js`). `mergeTopic` gained an optional `admitVote(agentId)` filter, and the push dispatcher admits only the sender's own ballot. A `pull` (a deliberate read from a chosen owner) is unchanged, as are all existing `mergeTopic` callers.
 
-Pins: `tests/agora-distributed.test.js` (two FLIP pins - the vote-leg spoof and the push-leg injection - each fail pre-fix, pass post-fix). Registry rows in `tests/agora-distributed.test.js` + `tests/mcp-agora-sync.test.js` now carry the vetted `name`->`id` binding genesis writes.
+### Fixed: `lib/agora-sync.js` - a node can no longer SELF-intro to forge its own principal
+`member.intro` (the ring-admission leg genesis broadcasts) adopted `{name, agentId}` into the receiver's registry, and `resolvePrincipal` treats a `kind:'ring-member'` entry as a VETTED identity. A registered peer could therefore self-intro with any `agentId`, forge a vetted principal, and then vote as it - bypassing the identity bind above. An intro introduces OTHER nodes; a node never introduces itself, so a self-intro (`member.name === from`) is now refused. Probe: `labs/probe-intro-self-spoof.js`.
+
+### Fixed: `lib/agora-sync.js` - the gossip summary resolves the asker's VETTED principal, not the node name
+`gossip.request` keyed its scoped-topic filter on the crew node NAME, while `msg.request` and `status.request` resolve the vetted principal. Membership is by agent id, so a member node whose crew name differed from its principal was wrongly denied its OWN scoped topics in the summary (fail-closed, but wrong). The filter now resolves `_senderPrincipal(from)`, matching the other legs.
+
+### Fixed: `lib/agora-sync.js` - a scoped ledger is no longer leaked to a non-member through `state.request`
+`state.request` answered a registered peer with `consensus.exportTopic(topic)` - the FULL ledger, votes and voter identities included - and relied on the crew-bus envelope gate to drop scoped traffic. But that gate reads TOP-LEVEL `payload.scope`, while the reply NESTS the ledger (`payload.ledger.scope`), so the gate never saw it: probe-verified a registered peer outside the scope received the complete scoped ledger (`labs/probe-state-scope-leak.js`). The owner-side handler now resolves the asker's vetted principal and withholds the ledger as `null` (indistinguishable from not-found, the leg's stated design) when the scope denies.
+
+Pins: `tests/agora-distributed.test.js` (two FLIP pins - the vote-leg spoof and the push-leg injection - each fail pre-fix, pass post-fix); `tests/genesis-ring.test.js` (the self-intro refusal, plus a legit intro of another node still adopting); `tests/agora-hygiene.test.js` (the gossip principal resolution, fails pre-fix); `tests/agora-sync.test.js` (the scoped-ledger withholding, fails pre-fix). Registry rows in `tests/agora-distributed.test.js` + `tests/mcp-agora-sync.test.js` now carry the vetted `name`->`id` binding genesis writes.
 
 ## [Unreleased] - pass 386 (the first real cross-install run - two installs federate, and the carrier stops refusing its own artifact)
 

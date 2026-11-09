@@ -217,6 +217,30 @@ async function main() {
         assert(!JSON.stringify(captured).includes(pair.secret), 'RING SECRET LEAKED through member.intro');
     });
 
+    await test('member.intro: a node cannot SELF-intro (forge its own principal)', async () => {
+        // An intro introduces OTHER nodes; a node never introduces itself.
+        // Without the refusal a registered peer self-intros with any agentId
+        // and resolvePrincipal returns it — forging a vetted principal and
+        // bypassing the agora's vote identity bind (the pass-387 class).
+        registry.unregister('ghost-principal');
+        standingBus._state.dispatchers.get('member.intro')({
+            from: 'ring-host', type: 'member.intro',
+            payload: { member: { name: 'ring-host', agentId: 'ghost-principal', url: 'http://127.0.0.1:4899' } }
+        });
+        await wait(30);
+        assert(!registry.get('ghost-principal'), 'SELF-INTRO ADOPTED: a node forged its own principal');
+        assert(registry.resolvePrincipal('ring-host') !== 'ghost-principal', 'resolvePrincipal poisoned by a self-intro');
+        // A legit intro (of a DIFFERENT node) still adopts, merge-only.
+        registry.unregister('legit-introduced-a');
+        standingBus._state.dispatchers.get('member.intro')({
+            from: 'ring-host', type: 'member.intro',
+            payload: { member: { name: 'legit-introduced', agentId: 'legit-introduced-a', url: 'http://127.0.0.1:4897' } }
+        });
+        await wait(30);
+        assert(registry.get('legit-introduced-a'), 'a legit intro of ANOTHER node must still adopt');
+        registry.unregister('legit-introduced-a');
+    });
+
     await test('hello from an unexpected joiner is ignored (one member at a time)', async () => {
         // The rite expected 'new-member' (already acked). A hello from a
         // DIFFERENT name must be dropped silently.

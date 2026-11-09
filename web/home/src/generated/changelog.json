@@ -12,6 +12,18 @@
         {
           "name": "Fixed: `lib/agora-sync.js` + `lib/consensus.js` - a registered peer can no longer cast a ballot AS another node's agent",
           "items": []
+        },
+        {
+          "name": "Fixed: `lib/agora-sync.js` - a node can no longer SELF-intro to forge its own principal",
+          "items": []
+        },
+        {
+          "name": "Fixed: `lib/agora-sync.js` - the gossip summary resolves the asker's VETTED principal, not the node name",
+          "items": []
+        },
+        {
+          "name": "Fixed: `lib/agora-sync.js` - a scoped ledger is no longer leaked to a non-member through `state.request`",
+          "items": []
         }
       ]
     },

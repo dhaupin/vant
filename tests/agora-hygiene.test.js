@@ -187,6 +187,33 @@ async function main() {
         assert(member.includes('hy-scoped'), 'scoped topic hidden from a MEMBER');
     });
 
+    await test('gossip request: scope resolves the VETTED principal, not the node name', async () => {
+        // A member node whose crew name differs from its agent id must still
+        // see its OWN scoped topics. Keying the filter on the node name (the
+        // pre-fix shape) hid them — membership is by agent id.
+        registry.register({ id: 'g-member', name: 'g-node', host: '127.0.0.1', port: 1 });
+        const org = teams.createOrg('g-org');
+        const dept = teams.createDept('g-dept', { org: org.id });
+        const team = teams.createTeam('g-team', { dept: dept.id });
+        teams.assign('g-member', { org: org.id, dept: dept.id, team: team.id });
+        wireTopic('g-scoped', { 'g-member': { outcome: 'x', signature: 's', ts: now } }, { scope: { owner: 'team:' + team.id, visibility: 'scope' } });
+
+        const handlers = new Map();
+        const sent = [];
+        const bus = {
+            onDispatch: (t, fn) => handlers.set(t, fn),
+            send: async (to, type, payload) => { sent.push({ to, type, payload }); return { ok: true }; },
+            nodes: () => [{ name: 'g-node' }],
+            status: () => ({ name: 'g-owner' })
+        };
+        sync.install(bus);
+        handlers.get('gossip.request')({ from: 'g-node', payload: { reqId: 'g-req' } });
+        await new Promise((r) => setTimeout(r, 20));
+        const reply = sent.find((s) => s.type === 'gossip.reply');
+        assert(reply && reply.payload.topics.includes('g-scoped'),
+            'member (agentId != node name) denied its own scoped topic: ' + JSON.stringify(reply && reply.payload.topics));
+    });
+
     await test('gossip round: convergence over two stub nodes; pulls only below-quorum; per-peer floor', async () => {
         const replies = new Map([['rich-peer', null], ['offline-peer', null]]);
         const { bus, sent } = stubBus('hy-converge-bus', replies);
