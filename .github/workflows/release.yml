@@ -171,26 +171,32 @@ jobs:
       # item 3): the registry read replica can lag the publish by seconds, so
       # npm pack FROM the registry is polled (bounded) instead of racing it -
       # a re-run re-uploads (--clobber) rather than fighting the claim.
+      # The poll budget is the family's 60 x 5s = 300s (vant#343): a slow
+      # registry day exceeded the old 24 x 5s = 120s and failed a cut that
+      # had already landed.
       - name: attach the served tarball to the release (polled, idempotent)
         env:
-          BLOCK_VERSION: ${ needs.publish.outputs.version }
-          BLOCK_TAG: ${ needs.publish.outputs.tag }
+          GH_TOKEN: ${{ github.token }}
+          BLOCK_VERSION: ${{ needs.publish.outputs.version }}
+          BLOCK_TAG: ${{ needs.publish.outputs.tag }}
         run: |
           set -e
-          for i in $(seq 1 24); do
+          for i in $(seq 1 60); do
             if npm pack "vant-os@$BLOCK_VERSION" --pack-destination "$RUNNER_TEMP" > /dev/null 2>&1; then break; fi
-            if [ "$i" = "24" ]; then echo "the registry never served vant-os@$BLOCK_VERSION (24 attempts)"; exit 1; fi
-            echo "waiting for vant-os@$BLOCK_VERSION on the registry (attempt $i/24)"; sleep 5
+            if [ "$i" = "60" ]; then echo "the registry never served vant-os@$BLOCK_VERSION (60 attempts)"; exit 1; fi
+            echo "waiting for vant-os@$BLOCK_VERSION on the registry (attempt $i/60)"; sleep 5
           done
           gh release upload "$BLOCK_TAG" "$RUNNER_TEMP/vant-os-$BLOCK_VERSION.tgz" --clobber
 
 
-  # No `needs` on release here by design under the if: the verify leg runs
-  # after release on a real cut, but ALSO stands alone in verify-only mode
-  # (publish skipped, release skipped, the ladder judged against what is
-  # already served and released).
+  # verify judges what the registry AND GitHub actually serve, so it must
+  # wait for release to cut the object and attach the tarball (vant#343): a
+  # bare `needs: publish` let verify race release and red-flag a cut that had
+  # already landed (verify read the registry before it settled and the release
+  # before the asset attached - first seen on packstruct's v1.1.0 pilot). The
+  # `if:` still admits verify-only mode, where publish and release both skip.
   verify:
-    needs: publish
+    needs: [publish, release]
     if: >-
       always() &&
       (needs.publish.result == 'success' ||
