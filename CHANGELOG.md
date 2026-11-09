@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [Unreleased] - pass 387 (a signed envelope proves the NODE, not the agent it names - the agora binds remote ballots to the sender's vetted principal)
+
+### Fixed: `lib/agora-sync.js` + `lib/consensus.js` - a registered peer can no longer cast a ballot AS another node's agent
+The crew bus signs ENVELOPE BYTES with the shared mesh secret, so a signature proves only that the sending NODE holds the pair key - not that the node owns the agent identity it names. The remote-vote dispatcher checked that `from` was *a* registered peer, then took `payload.agentId` verbatim and passed it straight to `consensus.vote`. On the shared-secret mesh genesis boots (and the tests use), any registered peer could therefore ballot as any registry-known agent: probe-verified `peer-c` voted as `victim-agent` and the owner counted + attributed the ballot (`labs/probe-ballot-identity.js`). The dispatcher now resolves the sender's VETTED principal through the same `node-registry` anchor genesis writes (`resolvePrincipal(from)`; node-name convention when no binding was vetted) and drops a ballot whose `agentId` is not that principal.
+
+The same binding now guards the ledger-push leg: `state.push` called `mergeTopic` with the whole snapshot, adopting foreign ballots unguarded - probe-verified `peer-c` stuffed a ballot for `victim-agent` via `state.push` and the owner counted it (`labs/probe-push-injection.js`). `mergeTopic` gained an optional `admitVote(agentId)` filter, and the push dispatcher admits only the sender's own ballot. A `pull` (a deliberate read from a chosen owner) is unchanged, as are all existing `mergeTopic` callers.
+
+Pins: `tests/agora-distributed.test.js` (two FLIP pins - the vote-leg spoof and the push-leg injection - each fail pre-fix, pass post-fix). Registry rows in `tests/agora-distributed.test.js` + `tests/mcp-agora-sync.test.js` now carry the vetted `name`->`id` binding genesis writes.
+
 ## [Unreleased] - pass 386 (the first real cross-install run - two installs federate, and the carrier stops refusing its own artifact)
 
 ### Fixed: `lib/carriers.js` - a lane's own `encode()` output is now a legal artifact for that lane

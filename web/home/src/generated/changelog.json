@@ -1,8 +1,20 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 114,
+  "_headingCount": 115,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 387 (a signed envelope proves the NODE, not the agent it names - the agora binds remote ballots to the sender's vetted principal)",
+      "sections": [
+        {
+          "name": "Fixed: `lib/agora-sync.js` + `lib/consensus.js` - a registered peer can no longer cast a ballot AS another node's agent",
+          "items": []
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,
