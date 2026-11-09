@@ -1,8 +1,28 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 113,
+  "_headingCount": 114,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 386 (the first real cross-install run - two installs federate, and the carrier stops refusing its own artifact)",
+      "sections": [
+        {
+          "name": "Fixed: `lib/carriers.js` - a lane's own `encode()` output is now a legal artifact for that lane",
+          "items": []
+        },
+        {
+          "name": "Fixed: `lib/market.js` - a query search no longer crashes on a listing with no title/summary",
+          "items": []
+        },
+        {
+          "name": "Added: `labs/mesh/cross-install-real-run.js` + `tests/cross-install.test.js` - the first two-install federation",
+          "items": []
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

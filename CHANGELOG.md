@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [Unreleased] - pass 386 (the first real cross-install run - two installs federate, and the carrier stops refusing its own artifact)
+
+### Fixed: `lib/carriers.js` - a lane's own `encode()` output is now a legal artifact for that lane
+`decode(lane, encode(t, lane))` used to throw `E_CARRIER_SHAPE`: every carrier's `encode()` wraps its artifact in a `{ carrier, kind, <field> }` object, but `decode()` was handed that wrapper and expected the bare payload, so the artifact a lane had just emitted was refused by the same lane. Callers had to know each lane's private field name (`json.json`, `nsc9.frame`, `stone.envelope`, `svg.svg`, `qr.png`). The top-level `decode()` now unwraps a lane's own artifact back to its payload (and carries the svg `stonePassword` through), so `decode(lane, encode(t, lane))` round-trips on every lane. The unwrap is strictly additive: a raw payload still rides as before. Pin: `tests/carriers-pass.test.js` (FLIP, discriminating).
+
+### Fixed: `lib/market.js` - a query search no longer crashes on a listing with no title/summary
+`market.search({ query })` called `l.title.toLowerCase()` / `l.summary.toLowerCase()` unguarded, so any listing that carries neither field threw an uncaught `TypeError`. The mesh's own `crew-pin` listings set no `summary`, so a query search over a store the mesh had touched crashed. Search now reads an absent title/summary as empty and matches only the fields that exist. Pin: `tests/market.test.js` (discriminating).
+
+### Added: `labs/mesh/cross-install-real-run.js` + `tests/cross-install.test.js` - the first two-install federation
+Two INDEPENDENT vant installs, two brains, two repos, federating over the layer vant already ships (not the same-disk JV harness). Install A (`vant`) hosts: `genesis.create` mints the pair secret (handed to the peer out-of-band), forms the JV org model, opens the joint topic, casts its own ballot, and mints the triage pin (a `traveler`). Install B (`cairn`) joins: `genesis.join` with the out-of-band secret (the ack proves both sides booted the same key), casts a REMOTE agora ballot over the HMAC crew bus, then picks the traveler off a carrier, verifies it, advances its own station (the triage verdict), and carries it back; the host verifies continuity across both stations. The run exercises both transports a real install pair rides: the LIVE WIRE (crew bus) and the GAPPED LANE (the traveler over a carrier - no socket at all; here a file, in production a git commit, a stone, a scan frame). 6/6 phases. The suite test builds a HERMETIC peer install (its own `lib` + its own brain) and runs the harness against it, so the capability is pinned, not just demonstrated.
+
 ## [Unreleased] - pass 383 (the release lane waits for the release it verifies, vant#343)
 
 ### Fixed: `.github/workflows/release.yml` + `scripts/verify-release.cjs` — verify stops racing release, and the attach step actually runs

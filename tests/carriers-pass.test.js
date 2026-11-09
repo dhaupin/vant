@@ -225,6 +225,26 @@ async function main() {
         void carriers;
     });
 
+    // (pass 386) THE ROUND-TRIP LAW: a carrier's OWN encode() output is a legal
+    // artifact — decode(lane, encode(t, lane)) returns the packet. Before this
+    // the artifact a lane just emitted was refused by that same lane
+    // (E_CARRIER_SHAPE); every caller had to know each lane's private field
+    // (.frame/.json/.envelope/.svg/.png). DISCRIMINATING: reverting the
+    // _unwrapArtifact unwrap makes the json/stone cases throw.
+    await pin('FLIP: decode(lane, encode(t, lane)) round-trips — the artifact a lane emits is legal on that lane', () => {
+        const t = travel.mint({ from: 'origin_vant', verb: 'open', slots: { title: 'round-trip' } });
+        for (const lane of ['json', 'stone']) {
+            const art = carriers.encode(t, lane);
+            const back = carriers.decode(lane, art);
+            const pkt = back.traveler || back;
+            assert.strictEqual(pkt.id, t.id, lane + ': the round-tripped packet keeps its content address');
+            assert.strictEqual(travel.verify(pkt).ok, true, lane + ': the round-tripped packet still verifies');
+        }
+        // A raw payload still rides unchanged (the unwrap is strictly additive).
+        const raw = carriers.encode(t, 'json').json;
+        assert.strictEqual((carriers.decode('json', raw).traveler || {}).id, t.id, 'a raw payload still decodes');
+    });
+
     console.log('\nPassed:  ' + passed + '\nFailed:  ' + failed);
     if (failed) {
         console.log('Failures: ' + failedList.join(', '));

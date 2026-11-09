@@ -182,6 +182,16 @@ test('search by query returns text matches', async () => {
     return { success: results && results.length > 0 };
 });
 
+// (pass 386) DISCRIMINATING: a listing with NO summary (mesh-created listings,
+// e.g. crew pins, set none) must not crash a query search. Before the fix
+// search called l.summary.toLowerCase() unguarded -> uncaught TypeError.
+test('search by query tolerates listings with no title/summary', async () => {
+    const market = require(path.join(ROOT, 'lib', 'market'));
+    await market.list('knowledge', { title: 'No Summary Pin', tags: ['no-summary'] }, ctxWithConsent);
+    const results = await market.search({ query: 'no summary' });
+    return { success: Array.isArray(results) && results.length > 0 };
+});
+
 test('get returns listing by id', async () => {
     const market = require(path.join(ROOT, 'lib', 'market'));
     const created = await market.list('favor', {
