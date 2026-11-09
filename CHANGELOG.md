@@ -5,6 +5,18 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+
+## [Unreleased] - pass 383 (the release lane waits for the release it verifies, vant#343)
+
+### Fixed: `.github/workflows/release.yml` + `scripts/verify-release.cjs` — verify stops racing release, and the attach step actually runs
+
+`verify` declared `needs: publish` only, so on a fresh tag cut it ran **concurrently** with `release` and judged the npm registry and the GH release before either had settled - red-flagging a publish that had already landed (first seen on the sibling `packstruct` v1.1.0 pilot; both legs went green on a manual re-run). `verify` now declares `needs: [publish, release]`, and its `if:` is unchanged, so it still stands alone in verify-only mode. The same shape had already landed family-wide (crashtest, packstruct, govstruct, eyestruct, prestruct, monoforge, freestruct, poststruct, gistory, coreforge) - vant was the straggler.
+
+The same pass fixed a second defect in the attach step: its env used single-brace `${ needs.publish.outputs.version }` instead of `${{ ... }}`, so both values interpolated **literally** and the step's `npm pack "vant-os@${ needs... }"` could never resolve - the step burned its whole poll budget and exited 1 on every cut. The step also gained the `GH_TOKEN` its closing `gh release upload` authenticates with (every family sibling carries it; vant did not).
+
+Both poll budgets widen to the family values: the release-attach poll `24 x 5s = 120s` -> `60 x 5s = 300s`, and the registry poll default in `scripts/verify-release.cjs` `20 x 6s = 120s` -> `60 x 6s = 360s` (the `VERIFY_RELEASE_ATTEMPTS` / `VERIFY_RELEASE_DELAY_MS` knobs stay overridable). `tests/release-workflow.test.js` is the receipt: five assertions that each fail on the pre-fix shape (the race, the literal-expression typo, the missing `GH_TOKEN`, and both budgets).
+
 ## [Unreleased] - pass 382 (start arg-slice - `--brain-name` reaches the seed again, vant#353)
 
 ### Fixed: `bin/start.js` — `vant start --brain-name <x>` seeded the DEFAULT brain
@@ -12,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The dispatcher (`bin/vant.js`) spawns `start.js` with `process.argv.slice(3)` (dropping the `start` verb), but `bin/start.js` `main()` also read `process.argv.slice(3)`. The double slice was off by one: the first flag after the verb was eaten, so `vant start --brain-name openhands` arrived as `['openhands']`, `_resolveSeedTarget` never saw the flag, and the seed silently landed on the default brain (`vant`). Every sibling bin script (`brain.js`, `health.js`, `migrate.js`, `sync.js`) already used `slice(2)`; `start.js` was the lone outlier. It now reads `slice(2)` too. `--seed-starter`/`--no-migrate` looked fine only because losing a boolean is silent; a lost `--brain-name` value is not.
 
 The migrate-onboard-journey suite invoked `bin/start.js` DIRECTLY, so it never exercised the dispatcher slice and missed this. `tests/start-brain-name-dispatch.test.js` drives the real `vant start` path through `bin/vant.js` and pins both halves: the NAMED brain is seeded, and no stray default brain appears.
+
 
 ## [Unreleased] - pass 381 (CI trigger - every PR into axolotl gates again, vant#349)
 

@@ -1,8 +1,20 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 112,
+  "_headingCount": 113,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 383 (the release lane waits for the release it verifies, vant#343)",
+      "sections": [
+        {
+          "name": "Fixed: `.github/workflows/release.yml` + `scripts/verify-release.cjs` — verify stops racing release, and the attach step actually runs",
+          "items": []
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,
