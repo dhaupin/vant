@@ -21,6 +21,7 @@ Vant talks to the outside world through a small set of well-worn doors. Some hav
 | [Providers](/vant/integrations/providers) | LLM provider configuration |
 | [Agent Skills](/vant/integrations/agent-skills) | Skill packages agents can load |
 | [Hybrid Sync](/vant/integrations/hybrid) | Public/private brain split sync |
+| [gamestruct Lane](/vant/integrations/gamestruct) | Drive a game world from your brain (observe/act/wait_for/events) |
 
 Sync is not GitHub-only. The sync layer auto-detects the host from the remote URL, so GitLab, Bitbucket, Gitea, and self-hosted Git work with the same `vant sync` door (see [Sync](/vant/operations/sync)).
 

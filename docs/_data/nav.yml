@@ -54,6 +54,8 @@
     url: /vant/memory/leisure
   - title: State Spine
     url: /vant/memory/state-spine
+  - title: memstruct Interchange
+    url: /vant/memory/memstruct
   - title: RAG Tutorial
     url: /vant/memory/rag
 
@@ -128,6 +130,8 @@
     url: /vant/integrations/repos
   - title: Agents
     url: /vant/integrations/agents
+  - title: gamestruct Lane
+    url: /vant/integrations/gamestruct
 
 - title: Operations
   items:

@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [Unreleased] - pass 385 (the gamestruct lane - the brain plays, and the family's memory lane closes, dhaupin/gamestruct)
+
+### Added: `lib/adapters/gamestruct.js` + `tests/gamestruct-adapter.test.js` - vant as a gamestruct client
+
+gamestruct (SPEC v0.1.0) is the game-agent lane bridge: synmergia is the WORLD (it implements the door) and vant is the BRAIN (it drives it as a client). gamestruct names the four primitives so neither half owns the other's dialect. This pass lands vant's half: `lib/adapters/gamestruct.js` drives a gamestruct door's `observe`/`act`/`wait_for`/`events` (HTTP, SPEC section 3.1) and the MCP binding (`tools/list`/`tools/call`, section 3.2). It is a pure client (no service, no store), so it sits with the adapters beside memstruct and registers as `connectors.gamestruct()`.
+
+The security posture maps the spec's section 7 onto vant's own wall. Loopback is the default door (`http://127.0.0.1:<port>`); a literal loopback host skips the domain wall (no DNS to rebind), while any non-loopback door rides `lib/network.fetch` - the SSRF IP wall, the DNS-rebinding refusal, and the circuit breaker - exactly like the relay hop and the crew bus. A configured token rides every request as `Authorization: Bearer` (or `x-api-key`) and is never logged; a door URL carrying `user:pass@` refuses typed so a leaked userinfo can never become a leaked secret.
+
+`play()` is the section-8 seam: when idle capacity appears, the brain pursues one want from its leisure want-list *through the same lane* - observe, act one safe affordance, return a learn line. A refused act is a first-class `{ ok:false, reason }`, never a throw.
+
+`tests/gamestruct-adapter.test.js` pins the contract with seven assertions against a REAL loopback door (a local http server, so every verdict measures the true wire): registration, door hygiene (leaked creds + non-http scheme refuse typed), the four primitives on their routes, the MCP binding, token fail-closed, the remote SSRF wall, and play. Stashing the adapter fails all seven.
+
+## [Unreleased] - pass 384 (memstruct interchange - the brain speaks the family record grammar, vant#354)
+
+### Added: `lib/adapters/memstruct.js` + `tests/memstruct-adapter.test.js` - the brain as a memstruct store
+
+The brain is markdown in your repo, so git history is the memory lineage. That is the *store* tier. The *record grammar* - what a memory IS - is owned by [memstruct](https://github.com/dhaupin/memstruct) (`memstruct@1`), a language-neutral standard: one envelope, one merge contract, no transport. This pass lands the vant side of the interchange, filed under packstruct's `memory` profile (SPEC v1.2.0, packstruct#87).
+
+`lib/adapters/memstruct.js` is a pure data conversion, so it sits beside `langchain.js` in `lib/adapters/` and registers as an ADAPTER (`connectors.memstruct()`) in `lib/connectors/index.js` - not a connector (those carry endpoints and auth; memstruct has neither). `exportStore()` walks `models/<side>/<brain>/`, maps each markdown file to a record (path -> `id`, git history -> `createdAt`/`updatedAt`, side -> `scope`, body -> `body`), and returns a deterministic, id-sorted `{ memstruct: 1, records: [...] }`. `importStore()` writes live records back, refusing any id that escapes the brain root (path traversal) or does not name a markdown file; a `deletedAt` record is a tombstone and is never written.
+
+`tests/memstruct-adapter.test.js` pins the contract with seven discriminating assertions (registration, export envelope, determinism, round-trip, tombstone skip, traversal refusal, lint parity with the real `npx memstruct lint`); stashing the adapter fails all seven.
+
+`memstruct` joins the devDependencies with a conscious dep-ledger row (`lane: code`): `lint()` requires it opportunistically for lint parity and falls back to a dependency-free structural check, so the runtime never hard-depends on a dev package.
+
 ## [Unreleased] - pass 383 (the release lane waits for the release it verifies, vant#343)
 
 ### Fixed: `.github/workflows/release.yml` + `scripts/verify-release.cjs` — verify stops racing release, and the attach step actually runs

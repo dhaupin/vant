@@ -113,6 +113,10 @@ const LEDGER = {
         lane: 'record',
         note: 'the factory: pins the fleet DNA (mint-time doctor is a mint-time instrument, wired into NO lane over this living tree — the wave-19.29 decision, packs/README)',
     },
+    'memstruct': {
+        lane: 'code',
+        note: 'the memory record grammar (dhaupin/memstruct, format id `memstruct@1`): lib/adapters/memstruct.js lint() requires it opportunistically for lint parity and falls back to a dependency-free structural check when absent — the runtime never hard-depends on a dev package (vant#354)',
+    },
     'packstruct': {
         lane: 'ci',
         note: 'the pack author-time gate: packs:lint (--deep) + packs:audit §7 conformance in test.yml + struct-feed row',

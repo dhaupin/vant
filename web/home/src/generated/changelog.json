@@ -1,8 +1,32 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 113,
+  "_headingCount": 115,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 385 (the gamestruct lane - the brain plays, and the family's memory lane closes, dhaupin/gamestruct)",
+      "sections": [
+        {
+          "name": "Added: `lib/adapters/gamestruct.js` + `tests/gamestruct-adapter.test.js` - vant as a gamestruct client",
+          "items": []
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 384 (memstruct interchange - the brain speaks the family record grammar, vant#354)",
+      "sections": [
+        {
+          "name": "Added: `lib/adapters/memstruct.js` + `tests/memstruct-adapter.test.js` - the brain as a memstruct store",
+          "items": []
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,
