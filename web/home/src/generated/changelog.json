@@ -1,7 +1,7 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 118,
+  "_headingCount": 119,
   "entries": [
     {
       "kind": "unreleased",
@@ -27,6 +27,18 @@
         },
         {
           "name": "Removed: `lib/connectors/world-base.js` - the pre-gamestruct residue (vant#364)",
+          "items": []
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 390 (auditing pass - the boot URL guard no longer trusts a substring, and no longer misses cloud metadata)",
+      "sections": [
+        {
+          "name": "Fixed: `bin/boot.js` - the remote-horcrux URL guard was both bypassable and incomplete",
           "items": []
         }
       ]
