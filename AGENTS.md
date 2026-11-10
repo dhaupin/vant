@@ -952,3 +952,20 @@ tombstones. `memstruct` is an optional devDep loaded opportunistically.
   eslint. CI shards the sweep.
 - **Base branch:** work PRs target `axolotl` (the free-bird dev branch), NOT
   `main`. `main` lags `axolotl` on real content.
+
+### The hostname-vs-substring class (round 9+, vant#368/#360)
+When a URL/host is checked against a loopback/internal set, ALWAYS read the
+**parsed** hostname (`new URL(u).hostname`), never a substring of the whole URL
+or a raw string compare:
+- `url.includes('localhost')` is true for `http://evil.example.com/localhost` -
+  a remote host. `bin/boot.js` used exactly this for its HTTPS carve-out (fixed,
+  vant#368).
+- `new URL().hostname` returns an IPv6 literal WITH brackets: `[::1]`, not
+  `::1`. A set of `{'127.0.0.1','::1','localhost'}` misses every IPv6 literal
+  door (fixed, vant#360).
+- A fixed literal set also misses the rest of a CIDR: only `127.0.0.1` vs all of
+  `127/8`, only `172.16.` vs all of `172.16/12` (the docker bridge `172.17.0.1`).
+- Prefer `lib/network.isInternalIP(hostname)` (the SSRF wall's own internal set,
+  bracket-aware, covers `169.254` metadata + IPv6 ULA/link-local) over a
+  hand-rolled prefix list, and fail CLOSED if it is unavailable.
+
