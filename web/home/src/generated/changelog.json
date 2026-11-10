@@ -1,8 +1,20 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 119,
+  "_headingCount": 120,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 392 (memstruct interchange - the brain speaks the family record grammar, vant#354)",
+      "sections": [
+        {
+          "name": "Added: `lib/adapters/memstruct.js` + `tests/memstruct-adapter.test.js` - the brain as a memstruct store",
+          "items": []
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

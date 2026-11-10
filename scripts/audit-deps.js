@@ -117,6 +117,10 @@ const LEDGER = {
         lane: 'code',
         note: 'the game-agent lane: lib/adapters/synmergia.js + synmergia-leisure.js load its reference DoorClient/pursueOne (gamestruct/adapters/vant, SPEC N25) and fold the door wire with doorNodes (gamestruct/adapters/synmergia); vant injects its own SSRF wall as the client fetch (vant#360)',
     },
+    'memstruct': {
+        lane: 'code',
+        note: 'the memory interchange: lib/adapters/memstruct.js imports it opportunistically (lint parity, vant#354); the store export never requires it, so a consumer without it still runs',
+    },
     'packstruct': {
         lane: 'ci',
         note: 'the pack author-time gate: packs:lint (--deep) + packs:audit §7 conformance in test.yml + struct-feed row',

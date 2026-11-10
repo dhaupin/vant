@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [Unreleased] - pass 392 (memstruct interchange - the brain speaks the family record grammar, vant#354)
+
+### Added: `lib/adapters/memstruct.js` + `tests/memstruct-adapter.test.js` - the brain as a memstruct store
+
+The brain is markdown in your repo, so git history is the memory lineage. That is the *store* tier. The *record grammar* - what a memory IS - is owned by [memstruct](https://github.com/dhaupin/memstruct) (`memstruct@1`), a language-neutral standard: one envelope, one merge contract, no transport. This pass lands the vant side of the interchange.
+
+`lib/adapters/memstruct.js` is a pure data conversion, so it sits beside `langchain.js` in `lib/adapters/` and registers as an ADAPTER (`connectors.memstruct()`) in `lib/connectors/index.js` - not a connector (those carry endpoints and auth; memstruct has neither). `exportStore()` walks `models/<side>/<brain>/`, maps each markdown file to a record (path -> `id`, git history -> `createdAt`/`updatedAt`, side -> `scope`, body -> `body`), and returns a deterministic, id-sorted `{ memstruct: 1, records: [...] }`. `importStore()` writes live records back, refusing any id that escapes the brain root (path traversal) or does not name a markdown file; a `deletedAt` record is a tombstone and is never written.
+
+`tests/memstruct-adapter.test.js` pins the contract with eight discriminating assertions (registration, export envelope, determinism, round-trip, tombstone skip, traversal refusal, non-`memstruct@1` refusal, lint parity with the real `npx memstruct lint`); stashing the adapter fails all eight.
+
+`memstruct` joins the devDependencies with a conscious dep-ledger row (`lane: code`): `lint()` requires it opportunistically for lint parity and falls back to a dependency-free structural check, so the runtime never hard-depends on a dev package.
+
 ## [Unreleased] - pass 391 (the gamestruct bridge - vant drives the world through the family's own DoorClient, vant#360/#361/#364)
 
 ### Changed: `lib/adapters/synmergia.js` - the world client is now gamestruct's `DoorClient`, walled by vant
