@@ -47,8 +47,15 @@ require(path.join(ROOT, 'lib', 'sandbox')).defaultSandbox.setCapabilities({
     canRead: true, canWrite: true, canNetwork: true, canTrade: true, canSpawn: true
 });
 
-fs.rmSync(path.join(ROOT, 'models', 'private', 'vant', 'state'), { recursive: true, force: true });
-fs.rmSync(path.join(ROOT, 'models', 'private', 'vant', 'orgchart'), { recursive: true, force: true });
+// ISOLATION: scratch brain. This suite enrolls principals whose names collide
+// with the shared mesh's own fixtures (e.g. `peer-agent` in
+// tests/agora-sync.test.js). Writing keys into the real brain leaked an
+// enrolled key for `peer-agent` into that sibling suite, whose wire ballot was
+// then dropped as unverifiable — a real cross-suite contamination. Mint a
+// throwaway brain and reap it on exit (pass 378).
+const SCRATCH_BRAIN = require(path.join(__dirname, 'scratch-brain'))
+    .scratchBrain('agent-keys-' + process.pid.toString(36));
+const KEYS_FILE = path.join(ROOT, 'models', 'private', SCRATCH_BRAIN, 'state', 'agent-keys.json');
 
 const consensus = require(path.join(ROOT, 'lib', 'consensus'));
 const agentKeys = require(path.join(ROOT, 'lib', 'agent-keys'));
@@ -56,7 +63,7 @@ const registry = require(path.join(ROOT, 'lib', 'node-registry'));
 const sync = require(path.join(ROOT, 'lib', 'agora-sync'));
 
 registry.clearState();
-for (const v of ['owner-agent', 'voter-agent', 'tamper-agent', 'pinned-agent', 'stranger-agent', 'peer-agent']) {
+for (const v of ['owner-agent', 'voter-agent', 'tamper-agent', 'pinned-agent', 'stranger-agent', 'peer-agent', 'unsigned-remote', 'enrolled-remote']) {
     registry.register({ id: v, name: v, host: '127.0.0.1', port: 1 });
 }
 
@@ -81,7 +88,7 @@ function ballot(agentId, topic, outcome, ts) {
 
     await test('agent-keys: private key file is mode 0600; enroll is immutable', () => {
         agentKeys.ensure('voter-agent');
-        const file = path.join(ROOT, 'models', 'private', 'vant', 'state', 'agent-keys.json');
+        const file = KEYS_FILE;
         const mode = fs.statSync(file).mode & 0o777;
         assert(mode === 0o600, 'agent-keys.json mode is ' + mode.toString(8) + ', expected 600');
         const first = agentKeys.ensure('voter-agent').publicKey;
@@ -178,6 +185,72 @@ function ballot(agentId, topic, outcome, ts) {
         const led = consensus.get('k-merge');
         assert(led.votes['voter-agent'] && led.votes['voter-agent'].verified === true, 'valid enrolled ballot not adopted');
         assert(!led.votes['tamper-agent'], 'BAD-SIGNATURE ballot adopted from the wire');
+    });
+
+    await test('agent-keys: reserved principal names are refused (no prototype-key corruption)', () => {
+        for (const bad of ['__proto__', 'constructor', 'toString', 'hasOwnProperty']) {
+            assert(agentKeys.ensure(bad) === null, 'ensure minted a key for reserved name ' + bad);
+            assert(agentKeys.enrolledKey(bad) === null, 'reserved name resolved a key: ' + bad);
+        }
+    });
+
+    await test('vote: a REMOTE ballot is NEVER signed by the owner (unsigned → fail-closed)', async () => {
+        await consensus.create('k-nosig', { ballot: ['yes', 'no'], minQuorum: 5, useTrustWeight: false });
+        // (a) un-enrolled + unsigned: adopted for the migration window, but the
+        //     owner must NOT mark it verified nor mint a key it does not own.
+        //     Pre-fix this fell into the LOCAL branch: the owner signed the
+        //     peer's ballot itself and recorded verified:true.
+        const r1 = await consensus.vote('k-nosig', 'yes', 'unsigned-remote', { remote: true });
+        assert(!r1.error, 'unsigned un-enrolled remote ballot refused outright: ' + JSON.stringify(r1));
+        const rec = consensus.get('k-nosig').votes['unsigned-remote'];
+        assert(rec && rec.verified === false, 'owner VOUCHED for an unsigned remote ballot: ' + JSON.stringify(rec));
+        assert(rec.signature === null, 'owner minted a signature for a remote ballot');
+        assert(!agentKeys.enrolledKey('unsigned-remote'), 'owner enrolled a key for a remote principal');
+        // (b) enrolled + unsigned: refused outright (pre-fix the owner re-signed it).
+        agentKeys.enroll('enrolled-remote', agentKeys.ensure('enrolled-remote').publicKey);
+        const r2 = await consensus.vote('k-nosig', 'yes', 'enrolled-remote', { remote: true });
+        assert(r2 && r2.code === 'E_BAD_SIGNATURE', 'unsigned ENROLLED remote ballot accepted: ' + JSON.stringify(r2));
+    });
+
+    await test('remote vote leg: an UNSIGNED wire ballot is REFUSED (owner never vouches)', async () => {
+        const handlers = new Map();
+        const sent = [];
+        const bus = {
+            onDispatch: (t, fn) => handlers.set(t, fn),
+            send: async (to, type, payload) => { sent.push({ to, type, payload }); return { ok: true }; },
+            nodes: () => [{ name: 'peer-agent' }],
+            status: () => ({ name: 'owner-agent', agentId: 'owner-agent' })
+        };
+        sync.install(bus);
+        agentKeys.enroll('peer-agent', agentKeys.ensure('peer-agent').publicKey);
+        await consensus.create('k-wire-nosig', { ballot: ['yes', 'no'], minQuorum: 5, useTrustWeight: false });
+        handlers.get('vote')({ from: 'peer-agent', payload: { topic: 'k-wire-nosig', outcome: 'yes', agentId: 'peer-agent', reqId: 'n1' } });
+        await new Promise((res) => setTimeout(res, 40));
+        assert(!consensus.get('k-wire-nosig').votes['peer-agent'], 'owner VOUCHED for an unsigned wire ballot');
+        const ack = sent.find((s) => s.type === 'vote.ack');
+        assert(ack && ack.payload.result && ack.payload.result.code === 'E_BAD_SIGNATURE',
+            'unsigned wire ballot not acked as bad signature: ' + JSON.stringify(ack && ack.payload));
+    });
+
+    await test('member.intro: a peer cannot RE-KEY a registered principal (but a new member still enrolls)', () => {
+        // victim is registered (no key yet — the migration window).
+        registry.register({ id: 'rekey-victim', name: 'rekey-victim', host: '127.0.0.1', port: 1 });
+        const handlers = new Map();
+        const bus = {
+            onDispatch: (t, fn) => handlers.set(t, fn),
+            send: async () => ({ ok: true }),
+            nodes: () => [{ name: 'peer-agent' }],
+            status: () => ({ name: 'receiver', agentId: 'receiver' })
+        };
+        sync.install(bus);
+        const attackerKey = agentKeys.ensure('peer-agent').publicKey;
+        handlers.get('member.intro')({ from: 'peer-agent', payload: { member: { name: 'rekey-victim', agentId: 'rekey-victim', publicKey: attackerKey } } });
+        assert(agentKeys.enrolledKey('rekey-victim') !== attackerKey,
+            'a peer RE-KEYED a registered principal with its own key');
+        // A genuinely new member introduced by the peer is still enrolled.
+        const newKey = agentKeys.ensure('brand-new-member').publicKey;
+        handlers.get('member.intro')({ from: 'peer-agent', payload: { member: { name: 'brand-new-member', agentId: 'brand-new-member', publicKey: newKey } } });
+        assert(agentKeys.enrolledKey('brand-new-member') === newKey, 'a new member intro did not enroll its key');
     });
 
     console.log(`\n  Passed: ${results.passed}\n  Failed: ${results.failed}\n`);

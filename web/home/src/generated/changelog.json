@@ -1,8 +1,36 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 116,
+  "_headingCount": 117,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 389 (auditing pass 388 - the owner can no longer vouch for a remote ballot, and an intro can no longer re-key a principal)",
+      "sections": [
+        {
+          "name": "Fixed: `lib/consensus.js` + `lib/agora-sync.js` - the owner no longer SIGNS a remote ballot it never saw a signature for",
+          "items": []
+        },
+        {
+          "name": "Fixed: `lib/agora-sync.js` - `member.intro` can no longer RE-KEY a registered principal",
+          "items": []
+        },
+        {
+          "name": "Fixed: `lib/agent-keys.js` - reserved principal names are refused; `tests/agent-keys.test.js` isolates its brain",
+          "items": []
+        },
+        {
+          "name": "Fixed: `lib/mcp.js` - the vote surfaces bind to the VERIFIED token subject",
+          "items": []
+        },
+        {
+          "name": "Housekeeping",
+          "items": []
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

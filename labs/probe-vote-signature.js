@@ -12,13 +12,14 @@
  */
 'use strict';
 const path = require('path');
-const fs = require('fs');
 const ROOT = path.resolve(__dirname, '..');
 require(path.join(ROOT, 'lib', 'sandbox')).defaultSandbox.setCapabilities({
     canRead: true, canWrite: true, canNetwork: true, canTrade: true, canSpawn: true
 });
-fs.rmSync(path.join(ROOT, 'models', 'private', 'vant', 'state'), { recursive: true, force: true });
-fs.rmSync(path.join(ROOT, 'models', 'private', 'vant', 'orgchart'), { recursive: true, force: true });
+// ISOLATION: scratch brain, reaped on exit (pass 378). A probe that wipes the
+// SHARED brain state races the sweep's own suites (ENOTEMPTY) and leaves keys
+// behind — never touch models/private/vant from a probe.
+require(path.join(ROOT, 'tests', 'scratch-brain')).scratchBrain('probe-votesig-' + process.pid.toString(36));
 
 const consensus = require(path.join(ROOT, 'lib', 'consensus'));
 const agentKeys = require(path.join(ROOT, 'lib', 'agent-keys'));

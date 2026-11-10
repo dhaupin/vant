@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [Unreleased] - pass 389 (auditing pass 388 - the owner can no longer vouch for a remote ballot, and an intro can no longer re-key a principal)
+
+### Fixed: `lib/consensus.js` + `lib/agora-sync.js` - the owner no longer SIGNS a remote ballot it never saw a signature for
+The remote vote dispatcher forwarded `signature: undefined` when a peer sent none, and `vote()` then fell into its LOCAL branch: the owner minted a key for the peer's principal and signed the peer's ballot itself, recording `verified:true`. A peer could therefore get the owner to vouch for an unsigned ballot. `vote()` now takes `remote:true` from that leg and FAILS CLOSED: the sender must supply its own signature, verified against its enrolled key (an un-enrolled principal is adopted but flagged `verified:false`, never re-signed). Pin: the `k-nosig` leg + an unsigned wire ballot acked `E_BAD_SIGNATURE` (`tests/agent-keys.test.js`).
+
+### Fixed: `lib/agora-sync.js` - `member.intro` can no longer RE-KEY a registered principal
+`member.intro` enrolled a public key for ANY introduced member, including one this node already knows. `enroll()` is immutable so an already-pinned key was safe, but a principal that was REGISTERED yet had no key yet (the pass-388 migration window) could be pinned to a peer's own key - re-keying it so the attacker's ballots verified as the victim (probe: `labs/probe-intro-rekey.js`, variant B). A key is now enrolled only for a principal this node has never seen, or when the SAME introducer re-broadcasts it (the genesis host propagating a member's key after the hello). Pin: the `rekey-victim` / `brand-new-member` legs (`tests/agent-keys.test.js`).
+
+### Fixed: `lib/agent-keys.js` - reserved principal names are refused; `tests/agent-keys.test.js` isolates its brain
+`ensure()`/`enroll()`/`enrolledKey()` now refuse `__proto__` and friends (a principal carrying one would corrupt the key maps). The suite mints a scratch brain (pass 378) instead of writing keys into the real one - its `peer-agent` fixture collided with `tests/agora-sync.test.js` and leaked an enrolled key that silently dropped that suite's wire ballot.
+
+### Fixed: `lib/mcp.js` - the vote surfaces bind to the VERIFIED token subject
+`consensus_vote` and `forum_castVote` took `agentId` from the caller verbatim and never consulted the registry-verified request subject that the HTTP door already threads through the request (pass 86). A caller holding a verified bearer token could therefore ballot AS any other agent - the same identity class the pass-387 wire leg closed. When a verified subject is present the ballot is cast AS that subject and a claimed `agentId` that differs is refused (`E_IDENTITY_MISMATCH`, fail-closed); without a verified context (CLI / in-process) the declared `agentId` still stands. Pin: the `mcp-identity-bind` legs (`tests/mcp-agora.test.js`).
+
+### Housekeeping
+The two probes this pass added (`labs/probe-vote-signature.js`, `labs/probe-intro-rekey.js`) mint a scratch brain and reap it on exit instead of wiping the shared `models/private/vant` state - a probe that wiped it raced the sweep's own suites (`ENOTEMPTY`). Five prose em/en dashes in `docs/essential/sudo.md`, `docs/operations/webhooks.md`, and `docs/security/encryption.md` were normalized to hyphens, so `lint:docs` is green again (it was red before this pass).
+
 ## [Unreleased] - pass 388 (votes are signed with real per-agent keys - the ledger proves WHO cast each ballot)
 
 ### Added: `lib/agent-keys.js` - per-agent Ed25519 vote-signing identity
