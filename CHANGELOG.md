@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [Unreleased] - pass 388 (votes are signed with real per-agent keys - the ledger proves WHO cast each ballot)
+
+### Added: `lib/agent-keys.js` - per-agent Ed25519 vote-signing identity
+Each principal now has a real Ed25519 keypair. The PRIVATE key stays local, on disk at mode `0600` (the same pin `config.json` uses), and never leaves the node; the PUBLIC key is published during the genesis / ring ceremony so peers can verify that principal's ballots. A ballot is signed over the canonical encoding of `{kind:'vant-vote', topic, agentId, outcome, ts}` (the #146 deterministic encoder), so a signature is stable across processes and key order. Everything is synchronous - `consensus.vote()` is synchronous, so the async `lib/secret.js` store cannot sit in the signing path.
+
+### Fixed: `lib/consensus.js` - vote signatures were DECORATIVE (constant HMAC key, never verified)
+`_signVote` fell through to `createHmac('sha256', agentSecret || 'default')` because no caller ever threaded a secret, and `_verifyVote` was defined but called from nowhere in `lib/` or `tests/`. Every ballot in a ledger was therefore HMAC'd with the literal constant `'default'` - reproducible by anyone - and nothing ever checked it: the ledger carried no proof of authorship and tampering was undetectable. `_signVote` now mints a real per-agent signature, and `_verifyBallot` is enforced on every adoption path (fail-closed: a bad signature is dropped, `E_BAD_SIGNATURE`).
+
+### Fixed: `lib/agora-sync.js` - the remote vote leg no longer RE-SIGNS a peer's ballot under the owner's key
+The remote `vote` dispatcher called `consensus.vote(topic, outcome, agentId)` with no secret, so the owner re-signed the peer's ballot with its OWN fallback key - laundering a foreign ballot and erasing any authorship proof. The voter now signs with its own key, the `ts` travels with the signature, and the owner verifies the exact payload against the voter's ENROLLED key instead of re-signing.
+
+### Fixed: `lib/genesis.js` + `lib/agora-sync.js` - the ceremony now exchanges vote-signing keys
+`genesis.hello` carries the joiner's public key and `genesis.ack` returns the host's; both ends enroll the other during the ceremony that already exchanges the pair secret (public halves only). The ring admission path does the same, and the host re-broadcasts the member's now-known key over `member.intro` so every standing member enrolls it. Ballots from a principal with no vetted key are still adopted during the migration window but are flagged `verified:false` and surfaced as `unverifiedBallots` on the tally - observable, never silent.
+
+Pins: `tests/agent-keys.test.js` (sign/verify round-trip, tamper + wrong-key refusal, 0600 mode, immutable enroll, the remote verify-not-resign leg, and the merge-drop; 4 of its 8 pins fail pre-fix); `tests/genesis-ceremony.test.js` (the two-process ceremony's joiner ballot is `verified` - `unverifiedBallots === 0`). Probe: `labs/probe-vote-signature.js`.
+
 ## [Unreleased] - pass 387 (a signed envelope proves the NODE, not the agent it names - the agora binds remote ballots to the sender's vetted principal)
 
 ### Fixed: `lib/agora-sync.js` + `lib/consensus.js` - a registered peer can no longer cast a ballot AS another node's agent

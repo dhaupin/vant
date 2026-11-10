@@ -1,8 +1,32 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 115,
+  "_headingCount": 116,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 388 (votes are signed with real per-agent keys - the ledger proves WHO cast each ballot)",
+      "sections": [
+        {
+          "name": "Added: `lib/agent-keys.js` - per-agent Ed25519 vote-signing identity",
+          "items": []
+        },
+        {
+          "name": "Fixed: `lib/consensus.js` - vote signatures were DECORATIVE (constant HMAC key, never verified)",
+          "items": []
+        },
+        {
+          "name": "Fixed: `lib/agora-sync.js` - the remote vote leg no longer RE-SIGNS a peer's ballot under the owner's key",
+          "items": []
+        },
+        {
+          "name": "Fixed: `lib/genesis.js` + `lib/agora-sync.js` - the ceremony now exchanges vote-signing keys",
+          "items": []
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,
