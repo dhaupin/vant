@@ -26,6 +26,8 @@
  *                       gamestruct's own `doorNodes`.
  *   S7  leisure seam — the vant-side want-list records a want and pursues
  *                       exactly ONE act (gamestruct owns the choice).
+ *   S8  loopback detection — an IPv6 literal ([::1]) and any 127/8 door is
+ *                       recognised as loopback (else the wall refuses it).
  *
  * DISCRIMINATING: every pin requires `lib/adapters/synmergia.js` (the walled
  * DoorClient wrapper) and the `gamestruct` dependency; stashing either fails
@@ -218,6 +220,19 @@ test('S7 the leisure seam records a want and pursues exactly one act', async () 
         if (backup === null) { try { fs.unlinkSync(ledgerPath); } catch (e) { /* absent */ } }
         else { fs.writeFileSync(ledgerPath, backup); }
     }
+});
+
+// S8 — loopback detection covers IPv6 literals and all of 127/8 (a miss makes
+// the wall refuse a literal local door, so the door can never connect).
+test('S8 a literal loopback door is recognised (IPv6 [::1], 127/8), a remote door is not', () => {
+    const ipv6 = syn.connect({ door: 'http://[::1]:3789' });
+    assert.strictEqual(ipv6.isLoopback, true, 'an IPv6 literal [::1] door is loopback');
+    const alias = syn.connect({ door: 'http://127.0.0.5:3789' });
+    assert.strictEqual(alias.isLoopback, true, 'any 127/8 address is loopback');
+    const local = syn.connect({ door: 'http://localhost:3789' });
+    assert.strictEqual(local.isLoopback, true, 'localhost is loopback');
+    const remote = syn.connect({ door: 'http://10.0.0.5:3789' });
+    assert.strictEqual(remote.isLoopback, false, 'a private (non-loopback) address is not loopback');
 });
 
 (async () => {

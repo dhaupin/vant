@@ -17,6 +17,10 @@ The security posture is unchanged and now rides one wall. `DoorClient` takes an 
 
 vant is CommonJS and gamestruct is ESM; the modules load with a cached dynamic `import()` (gamestruct is zero-dependency, so this pulls in nothing but itself).
 
+### Fixed: a literal loopback door is now recognised (vant#360)
+
+The door's loopback test was a fixed set (`127.0.0.1`/`::1`/`localhost`). `new URL().hostname` returns an IPv6 literal WITH brackets (`[::1]`), so an IPv6 loopback door was not recognised as loopback and got the full domain wall - `Network: domain not allowed` - and could never connect. The test now strips the brackets, accepts any `127/8` address, and keeps `localhost`. Pin S8.
+
 ### Added: `world.see(opts)` - the eyes (vant#361)
 `see()` forwards to the door's `/see` and returns the descriptor UNCHANGED; a blind door's refusal is an honest `{ ok:false, reason }`, never a throw. `world.nodes()` / `world.find()` expose the door's actionable list folded through gamestruct's own `doorNodes`, so a caller locates a handle without hardcoding ids. The door's own multi-agent extension (`/coord`: register/delegate/step) stays on the seam, since it is not one of the four primitives.
 
@@ -26,7 +30,7 @@ The leisure plug no longer re-implements the choose-one-affordance step; gamestr
 ### Removed: `lib/connectors/world-base.js` - the pre-gamestruct residue (vant#364)
 `BaseWorldConnector` (added wave E, vant#337) declared a world-connector contract (`identities`/`inventory`/`txForward`) before the gamestruct lane existed. It had no consumer in `lib/` - only its own pin - and it pointed the opposite way from the settled architecture (a downstream world subclasses and implements, versus gamestruct, where vant is the client and the world implements a door). The bridge now exists, so the residue goes: the file and its pin are removed. The `economy-seam` suite keeps its ledger/tape/event pins.
 
-`tests/synmergia-adapter.test.js` pins all of the above against a REAL loopback door (eight assertions: registration + door hygiene, the four primitives, refusal-as-data, the network wall, `/coord`, `see`, `find`/`nodes`, the leisure seam). Stashing the adapter fails every pin.
+`tests/synmergia-adapter.test.js` pins all of the above against a REAL loopback door (nine assertions: registration + door hygiene, the four primitives, refusal-as-data, the network wall, `/coord`, `see`, `find`/`nodes`, the leisure seam, loopback detection). Stashing the adapter fails every pin.
 
 ## [Unreleased] - pass 389 (auditing pass 388 - the owner can no longer vouch for a remote ballot, and an intro can no longer re-key a principal)
 

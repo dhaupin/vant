@@ -14,6 +14,10 @@
           "items": []
         },
         {
+          "name": "Fixed: a literal loopback door is now recognised (vant#360)",
+          "items": []
+        },
+        {
           "name": "Added: `world.see(opts)` - the eyes (vant#361)",
           "items": []
         },
