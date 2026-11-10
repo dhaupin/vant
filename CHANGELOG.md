@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [Unreleased] - pass 391 (the gamestruct bridge - vant drives the world through the family's own DoorClient, vant#360/#361/#364)
+
+### Changed: `lib/adapters/synmergia.js` - the world client is now gamestruct's `DoorClient`, walled by vant
+
+`lib/adapters/synmergia.js` was a hand-rolled HTTP client written against gamestruct SPEC v0.1.0. gamestruct has since shipped its own reference client (`gamestruct/adapters/vant`, `DoorClient` + `pursueOne`) and the normalizer that folds a door's flat `actions[]` into the SPEC node tree (`gamestruct/adapters/synmergia`, `doorNodes`). This pass replaces the hand-rolled transport with a thin SEAM over those: vant keeps only what is vant's.
+
+The security posture is unchanged and now rides one wall. `DoorClient` takes an injected `fetch` (SPEC N25); vant injects its own `lib/network.fetch`, so every door request keeps the SSRF IP wall, the DNS-rebinding refusal, and the circuit breaker - exactly like the relay hop and the crew bus. A literal loopback door has no DNS to rebind, so it skips the domain check; a remote door keeps the full wall. The door URL still refuses `user:pass@` typed (a leaked userinfo is a leaked secret). `lib/network.fetch` gains a small opt-in `allowStatus` option (default `[]`, so the fail-closed posture is byte-identical): a door carries a first-class refusal as HTTP `409` and an honest timeout as `408` (SPEC N21/N3), and without it that refusal would surface as a bare `HTTP 409` - the opposite of "every refusal is a value".
+
+vant is CommonJS and gamestruct is ESM; the modules load with a cached dynamic `import()` (gamestruct is zero-dependency, so this pulls in nothing but itself).
+
+### Fixed: a literal loopback door is now recognised (vant#360)
+
+The door's loopback test was a fixed set (`127.0.0.1`/`::1`/`localhost`). `new URL().hostname` returns an IPv6 literal WITH brackets (`[::1]`), so an IPv6 loopback door was not recognised as loopback and got the full domain wall - `Network: domain not allowed` - and could never connect. The test now strips the brackets, accepts any `127/8` address, and keeps `localhost`. Pin S8.
+
+### Added: `world.see(opts)` - the eyes (vant#361)
+`see()` forwards to the door's `/see` and returns the descriptor UNCHANGED; a blind door's refusal is an honest `{ ok:false, reason }`, never a throw. `world.nodes()` / `world.find()` expose the door's actionable list folded through gamestruct's own `doorNodes`, so a caller locates a handle without hardcoding ids. The door's own multi-agent extension (`/coord`: register/delegate/step) stays on the seam, since it is not one of the four primitives.
+
+### Changed: `lib/adapters/synmergia-leisure.js` - the ledger seam only (vant#364)
+The leisure plug no longer re-implements the choose-one-affordance step; gamestruct's `pursueOne` owns that (the same lane used without an objective). Vant keeps the want-list: record wants, pick the next, mark it pursued with the world's own result as the receipt. A world with nothing to offer is honest, not a fabricated act.
+
+### Removed: `lib/connectors/world-base.js` - the pre-gamestruct residue (vant#364)
+`BaseWorldConnector` (added wave E, vant#337) declared a world-connector contract (`identities`/`inventory`/`txForward`) before the gamestruct lane existed. It had no consumer in `lib/` - only its own pin - and it pointed the opposite way from the settled architecture (a downstream world subclasses and implements, versus gamestruct, where vant is the client and the world implements a door). The bridge now exists, so the residue goes: the file and its pin are removed. The `economy-seam` suite keeps its ledger/tape/event pins.
+
+`tests/synmergia-adapter.test.js` pins all of the above against a REAL loopback door (nine assertions: registration + door hygiene, the four primitives, refusal-as-data, the network wall, `/coord`, `see`, `find`/`nodes`, the leisure seam, loopback detection). Stashing the adapter fails every pin.
+
 ## [Unreleased] - pass 389 (auditing pass 388 - the owner can no longer vouch for a remote ballot, and an intro can no longer re-key a principal)
 
 ### Fixed: `lib/consensus.js` + `lib/agora-sync.js` - the owner no longer SIGNS a remote ballot it never saw a signature for

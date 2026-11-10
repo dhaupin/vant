@@ -1,8 +1,36 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 117,
+  "_headingCount": 118,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 391 (the gamestruct bridge - vant drives the world through the family's own DoorClient, vant#360/#361/#364)",
+      "sections": [
+        {
+          "name": "Changed: `lib/adapters/synmergia.js` - the world client is now gamestruct's `DoorClient`, walled by vant",
+          "items": []
+        },
+        {
+          "name": "Fixed: a literal loopback door is now recognised (vant#360)",
+          "items": []
+        },
+        {
+          "name": "Added: `world.see(opts)` - the eyes (vant#361)",
+          "items": []
+        },
+        {
+          "name": "Changed: `lib/adapters/synmergia-leisure.js` - the ledger seam only (vant#364)",
+          "items": []
+        },
+        {
+          "name": "Removed: `lib/connectors/world-base.js` - the pre-gamestruct residue (vant#364)",
+          "items": []
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,
