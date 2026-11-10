@@ -897,3 +897,58 @@ live — but the inner gate is now correct too (R10-13, corroborating).
 - "Already shadowed by a correct outer gate" is a reason to downgrade severity,
   never a reason to leave the inner gate broken: the outer layer is one refactor
   away from gone.
+
+## Discovery: 2026-11-02 - Round 9+ (family-lane adoption: memstruct + gamestruct; residue removal)
+
+### The family lanes (read this before touching `lib/adapters/`)
+Vant is the BRAIN; a game world (synmergia) is the WORLD; **gamestruct** is the
+BRIDGE (npm `gamestruct`, the four primitives + semantic tree + HTTP/MCP
+bindings). Adopt gamestruct's reference clients rather than hand-rolling a
+transport:
+- `gamestruct/adapters/vant` exports `DoorClient` + `pursueOne` (the BRAIN client).
+  `DoorClient` takes an **injected `fetch`** (SPEC N25), so vant passes
+  `lib/network.fetch` and keeps its SSRF IP wall, DNS-rebinding refusal, and
+  circuit breaker. A literal loopback door (`127.0.0.1`/`::1`/`localhost`)
+  skips the domain check (`skipDomainCheck`); a remote door keeps it.
+- `gamestruct/adapters/synmergia` exports `doorNodes(snapshot)`, the ONE
+  normalizer that folds a door's flat `actions[]` into the SPEC node shape
+  (`{id,role,name,disabled,actions}`). Never re-slug a door handle.
+- gamestruct is **ESM**; vant is **CJS**. Load it with a cached dynamic
+  `import()` (gamestruct is zero-dependency). It is a RUNTIME dependency
+  (`dependencies`, not dev) because `lib/adapters/*` loads it.
+
+### `lib/network.fetch` `allowStatus`
+`network.fetch` rejects a non-2xx by default. A protocol where a non-2xx carries
+a domain VALUE (gamestruct's `409` refusal / `408` timeout, SPEC N21/N3) opts in
+per call: `allowStatus: [409, 408, 404]` resolves the body instead of a bare
+`HTTP 409`. Default `[]` keeps the fail-closed posture byte-identical.
+
+### The composition law (vant#363/#364) - what is vant's vs gamestruct's
+- vant owns: the want-list (`lib/leisure.js`), `seedWants`, `markPursued`, and
+  the agent roster/work-items.
+- gamestruct owns: the transport, the four primitives, and the
+  choose-one-affordance step (`pursueOne`). Do NOT re-implement it in vant.
+- `lib/connectors/world-base.js` (`BaseWorldConnector`) was pre-gamestruct
+  residue: no `lib/` consumer, pointed the opposite way (downstream subclass vs
+  vant-as-client). Removed. The bridge is the gamestruct lane now.
+
+### memstruct interchange (vant#354)
+`lib/adapters/memstruct.js` is a pure data conversion (no transport), registered
+as `connectors.memstruct()`. `exportStore()` maps a brain to a deterministic
+`{ memstruct: 1, records: [...] }`; `importStore()` refuses traversal ids and
+tombstones. `memstruct` is an optional devDep loaded opportunistically.
+
+### Adoption laws (how a change lands here)
+- **Split by lane, not by wish.** A PR that bundles two lanes (memstruct +
+  gamestruct) is two PRs; each must rebase cleanly on its own.
+- Every adopted dep needs a **dep-ledger row** (`scripts/audit-deps.js`, the
+  `lane:` field) or `lint:deps` fails (`lock:parity` too - regenerate
+  `package-lock.json` with `npm install --package-lock-only`).
+- Every finding gets a **discriminating pin**: stash the fix, the pin fails;
+  restore, it passes. Then run the full sweep (`node tests/run-all.js`) green.
+- Gates before opening a PR: `lint:deps`, `lint:docs`, `lint:surface`,
+  `lint:claims`, `lint:changelog` (regen `web/home/scripts/parse-changelog.mjs`),
+  `ledger:gate`, `struct:check`, `npx govstruct {lint,check,surface --verify}`,
+  eslint. CI shards the sweep.
+- **Base branch:** work PRs target `axolotl` (the free-bird dev branch), NOT
+  `main`. `main` lags `axolotl` on real content.
