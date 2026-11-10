@@ -15,9 +15,13 @@
  *   M5 traversal — an id that escapes the brain root REFUSES (typed), and a
  *                non-markdown id is skipped, never written.
  *   M6 lint parity — the adapter's lint agrees with the real memstruct CLI.
+ *   M7 sync — the replicated tier: the merge is the total order (newer edit
+ *                wins, tombstone propagates), commutative, and the
+ *                dependency-free mirror agrees with memstruct.mergeStores.
+ *   M7b refusal — a non-memstruct@1 side refuses typed, never a raw throw.
  *
  * DISCRIMINATING: every pin requires lib/adapters/memstruct.js; stashing it
- * (and the connectors/index.js registration) fails M1–M6, passes post-fix.
+ * (and the connectors/index.js registration) fails M1–M7, passes post-fix.
  *
  * Isolation: every pin runs against a tmp models root minted per test — the
  * real brain is never touched.
@@ -179,6 +183,41 @@ test('M6 the exported store passes the real memstruct CLI (lint parity)', () => 
         }
         if (cliOk !== null) assert.strictEqual(cliOk, true, 'memstruct CLI must accept the store');
     } finally { fs.rmSync(root, { recursive: true, force: true }); }
+});
+
+// M7 — the replicated tier: sync() is memstruct's reference merge (SPEC
+// section 4). It must converge (commutative), carry tombstones, and its
+// dependency-free mirror must agree with memstruct's own mergeStores.
+test('M7 sync merges by the total order, is commutative, and the mirror matches the reference', () => {
+    const adapter = new MemstructAdapter({ root: mintBrain({}) });
+    const a = { memstruct: 1, records: [
+        { id: 'x.md', createdAt: 100, updatedAt: 200, deletedAt: null, body: 'old' },
+        { id: 'y.md', createdAt: 100, updatedAt: 100, deletedAt: null, body: 'local-only' },
+    ] };
+    const b = { memstruct: 1, records: [
+        { id: 'x.md', createdAt: 100, updatedAt: 300, deletedAt: null, body: 'new' },
+        { id: 'z.md', createdAt: 100, updatedAt: 100, deletedAt: null, body: 'remote-only' },
+    ] };
+    const merged = adapter.sync(a, b);
+    const byId = Object.fromEntries(merged.records.map((r) => [r.id, r]));
+    assert.strictEqual(merged.memstruct, 1, 'the merged store is memstruct@1');
+    assert.deepStrictEqual(merged.records.map((r) => r.id), ['x.md', 'y.md', 'z.md'], 'the union is sorted by id');
+    assert.strictEqual(byId['x.md'].body, 'new', 'the newer edit wins');
+    assert.strictEqual(byId['y.md'].body, 'local-only', 'a local-only id survives');
+    assert.strictEqual(byId['z.md'].body, 'remote-only', 'a remote-only id is carried');
+    assert.deepStrictEqual(adapter.sync(b, a), merged, 'the merge is commutative (convergence)');
+    assert.deepStrictEqual(adapter._structuralMerge(a, b), merged, 'the dependency-free mirror matches memstruct.mergeStores');
+    const del = { memstruct: 1, records: [{ id: 'x.md', createdAt: 100, updatedAt: 100, deletedAt: 400, body: 'old' }] };
+    const tomb = adapter.sync(merged, del);
+    assert.strictEqual(tomb.records.find((r) => r.id === 'x.md').deletedAt, 400, 'a newer tombstone propagates');
+});
+
+// M7b — a non-memstruct@1 side refuses typed (no raw throw).
+test('M7b sync refuses a non-memstruct@1 side typed', () => {
+    const adapter = new MemstructAdapter({ root: mintBrain({}) });
+    let err = null;
+    try { adapter.sync({ memstruct: 1, records: [] }, { records: [] }); } catch (e) { err = e; }
+    assert.strictEqual(err && err.code, 'E_MEMSTRUCT_STORE', 'a non-store remote must refuse typed');
 });
 
 console.log(`\n=== memstruct-adapter: ${passed} passed, ${failed} failed ===\n`);

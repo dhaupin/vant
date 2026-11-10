@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [Unreleased] - pass 393 (the family seam grows a principal, and the brain's store merges)
+
+### Added: `principal` on the world seam - vant can drive a named agent body (vant#363)
+
+synmergia's agent-play lane seats more than one body behind one door: a `principal` names WHICH body a primitive drives (absent or `''` is the local seat, the human; a handle is that agent's body). `lib/adapters/synmergia.js` now passes it through - `world.observe({ principal })` rides the door's own `?principal=` route and `world.act(handle, verb, value, { principal })` rides a top-level `principal` on the `/act` body. The key is top-level on purpose: the door folds a dictionary `value` into its args, so a principal folded into `value` would be swallowed when `value` is a scalar. Both paths stay on gamestruct's reference `DoorClient` when no principal is given, so the common case is byte-identical. The principal is the wire key the door already reads, so no gamestruct release is needed for vant to speak it.
+
+Pin: `tests/synmergia-adapter.test.js` S9 - a principal routes observe to the agent body (not the human seat), a principal act carries the key top-level (a scalar value never swallows it), and no principal keeps the reference `{id,verb,value}` shape (fails pre-fix 9/1, passes post-fix 10/0).
+
+### Added: `sync()` on the memstruct adapter - the replicated tier (vant#354)
+
+`exportStore()`/`importStore()` are the store tier; the record grammar also owns the merge, so two installs of the same brain converge without a translation layer. `lib/adapters/memstruct.js` gains `sync(local, remote)`, memstruct's reference merge (SPEC section 4): records are keyed by id and each id resolves to the winner of the total order - the clock (the later of the last edit and the deletion), then a canonical content hash as the tie-break. The merge is therefore commutative and associative (same inputs, same output, any order or device), a newer edit never loses to an older one, and a tombstone is carried forward so a deletion propagates. It uses memstruct's own `mergeStores` when the dev package is present and a dependency-free mirror of the same math when it is not; both hold the four normative properties.
+
+Pin: `tests/memstruct-adapter.test.js` M7/M7b - the union is id-sorted, the newer edit wins, a local-only and a remote-only id both survive, the merge is commutative, the mirror equals the reference `mergeStores`, a newer tombstone propagates, and a non-`memstruct@1` side refuses typed (fails pre-fix 8/2, passes post-fix 10/0).
+
 ## [Unreleased] - pass 392 (memstruct interchange - the brain speaks the family record grammar, vant#354)
 
 ### Added: `lib/adapters/memstruct.js` + `tests/memstruct-adapter.test.js` - the brain as a memstruct store

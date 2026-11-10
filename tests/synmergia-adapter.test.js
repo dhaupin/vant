@@ -28,6 +28,10 @@
  *                       exactly ONE act (gamestruct owns the choice).
  *   S8  loopback detection — an IPv6 literal ([::1]) and any 127/8 door is
  *                       recognised as loopback (else the wall refuses it).
+ *   S9  principal — a multi-agent world: a principal names WHICH body a
+ *                       primitive drives, riding the door's own wire
+ *                       (`?principal=` on /observe, top-level `principal` on
+ *                       /act) so a scalar value can never swallow it.
  *
  * DISCRIMINATING: every pin requires `lib/adapters/synmergia.js` (the walled
  * DoorClient wrapper) and the `gamestruct` dependency; stashing either fails
@@ -52,7 +56,7 @@ function test(name, fn) { _tests.push([name, fn]); }
  * omits the /see route (an honest blind surface). Returns { door, close, seen }.
  */
 async function mintDoor(opts = {}) {
-    const seen = { paths: [], methods: [], auth: [] };
+    const seen = { paths: [], methods: [], auth: [], bodies: [] };
     const srv = http.createServer((req, res) => {
         seen.auth.push(req.headers.authorization || null);
         seen.paths.push(req.url);
@@ -62,10 +66,13 @@ async function mintDoor(opts = {}) {
         req.on('end', () => {
             res.setHeader('content-type', 'application/json');
             const pathname = req.url.split('?')[0];
+            const query = Object.fromEntries(new URL(req.url, 'http://x').searchParams.entries());
             const send = (status, obj) => { res.statusCode = status; res.end(JSON.stringify(obj)); };
             if (pathname === '/observe' && req.method === 'GET') {
                 return send(200, {
                     ok: true, frame: 7, scene: 'globe_world', in_world: true,
+                    principal: query.principal || '',
+                    player: query.principal ? 'agent:' + query.principal : 'human:me',
                     actions: [
                         { id: 'world:wolf_7', kind: 'entity', action: 'Attack wolf', disabled: false },
                         { id: 'ui:login:name', kind: 'lineedit', action: 'Name', disabled: false },
@@ -74,8 +81,9 @@ async function mintDoor(opts = {}) {
             }
             if (pathname === '/act' && req.method === 'POST') {
                 const p = JSON.parse(body || '{}');
+                seen.bodies.push(p);
                 if (p.id === 'world:deny_1') return send(409, { ok: false, reason: 'no such handle: world:deny_1' });
-                return send(200, { ok: true, id: p.id, verb: p.verb, value: p.value });
+                return send(200, { ok: true, id: p.id, verb: p.verb, value: p.value, principal: p.principal || '' });
             }
             if (pathname === '/wait_for' && req.method === 'POST') {
                 const p = JSON.parse(body || '{}');
@@ -233,6 +241,38 @@ test('S8 a literal loopback door is recognised (IPv6 [::1], 127/8), a remote doo
     assert.strictEqual(local.isLoopback, true, 'localhost is loopback');
     const remote = syn.connect({ door: 'http://10.0.0.5:3789' });
     assert.strictEqual(remote.isLoopback, false, 'a private (non-loopback) address is not loopback');
+});
+
+// S9 — the principal: a multi-agent world seats more than one body behind one
+// door. A principal names WHICH body a primitive drives, and it must ride the
+// door's OWN wire (`?principal=` on /observe, a top-level `principal` on /act)
+// so the target body is unambiguous even when `value` is not an object.
+test('S9 a principal routes observe and act to the named body over the door wire', async () => {
+    const d = await mintDoor();
+    try {
+        const w = syn.connect({ door: d.door });
+
+        // observe: the human's seat (no principal) vs the agent's body.
+        const human = await w.observe();
+        assert.strictEqual(human.player, 'human:me', 'no principal observes the local seat');
+        const agent = await w.observe({ principal: 'rook' });
+        assert.strictEqual(agent.player, 'agent:rook', 'a principal observes that agent body');
+        assert.ok(d.seen.paths.some((p) => p === '/observe?principal=rook'), 'observe must carry ?principal=');
+
+        // act: a scalar value must NOT swallow the principal (the wire key is
+        // top-level, not folded into value).
+        const acted = await w.act('world:wolf_7', 'activate', 'x', { principal: 'rook' });
+        assert.strictEqual(acted.ok, true, 'a principal act succeeds');
+        assert.strictEqual(acted.principal, 'rook', 'the door echoes the targeted principal');
+        const sent = d.seen.bodies[d.seen.bodies.length - 1];
+        assert.strictEqual(sent.principal, 'rook', 'the principal must be top-level on /act, not folded into value');
+        assert.strictEqual(sent.id, 'world:wolf_7', 'the handle still rides id');
+
+        // No principal: the reference DoorClient path (no `principal` key at all).
+        await w.act('world:wolf_7', 'activate', 'x');
+        const plain = d.seen.bodies[d.seen.bodies.length - 1];
+        assert.strictEqual('principal' in plain, false, 'no principal keeps the reference {id,verb,value} shape');
+    } finally { await d.close(); }
 });
 
 (async () => {

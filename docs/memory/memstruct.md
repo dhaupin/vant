@@ -42,6 +42,16 @@ memstruct.importStore(store);                  // writes live records back
 
 `exportStore()` is deterministic: records are sorted by id, so the store is diffable and lint-stable across runs. `importStore()` refuses any id that escapes the brain root and any id that does not name a markdown file, so a store from a foreign system never writes outside `models/`.
 
+## Sync (the replicated tier)
+
+Two installs of the same brain merge without a translation layer, because the merge is part of the grammar:
+
+```js
+const merged = memstruct.sync(localStore, remoteStore);   // or memstruct.sync(null, remoteStore)
+```
+
+`sync()` is memstruct's reference merge (SPEC section 4): records are keyed by id and each id resolves to the winner of the total order - the later of the last edit and the deletion (the clock), then a canonical content hash as the tie-break. So the merge is commutative and associative (same inputs, same output, any device or order), a newer edit never loses to an older one, and a tombstone (`deletedAt`) is carried forward so a deletion propagates. The first argument may be a store or `null` (this brain's own export).
+
 ## Validation
 
 The store validates with the memstruct CLI:
@@ -55,7 +65,7 @@ npx memstruct lint store.json
 
 ## Where it sits
 
-This is the vant side of the interchange, filed under the packstruct `memory` profile (SPEC v1.2.0). The replicated tier is the `sync` profile, which binds gistory's merge over the same grammar - so a store written here merges there without a translation layer.
+This is the vant side of the interchange, filed under the packstruct `memory` profile (SPEC v1.2.0). The replicated tier is the `sync` profile: `sync()` binds memstruct's own reference merge over the same grammar, so a store written here merges with a store from any other device or system without a translation layer.
 
 ## Related
 
