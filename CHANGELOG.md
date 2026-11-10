@@ -32,6 +32,11 @@ The leisure plug no longer re-implements the choose-one-affordance step; gamestr
 
 `tests/synmergia-adapter.test.js` pins all of the above against a REAL loopback door (nine assertions: registration + door hygiene, the four primitives, refusal-as-data, the network wall, `/coord`, `see`, `find`/`nodes`, the leisure seam, loopback detection). Stashing the adapter fails every pin.
 
+## [Unreleased] - pass 390 (auditing pass - the boot URL guard no longer trusts a substring, and no longer misses cloud metadata)
+
+### Fixed: `bin/boot.js` - the remote-horcrux URL guard was both bypassable and incomplete
+`boot()` fetched a remote stego image behind two checks, and both were wrong. The HTTPS gate allowed plaintext http when the WHOLE URL string contained `localhost` (`!validation.url.includes('localhost')`) - so `http://internal-svc:8080/localhost` and `http://evil.example.com/localhost` passed the gate and were fetched over plaintext from a REMOTE host while looking loopback. And `validateUrl` blocked internal hosts with a partial list: it missed cloud metadata (`169.254.169.254`), the bulk of `172.16/12` (only `172.16.` was caught, not `172.17.`-`172.31.`), IPv6 loopback/ULA/link-local (`[::1]`, `[fd00::]`, `[fe80::]`), `0.0.0.0`, and `.internal` names. The guard now reads the PARSED hostname (a new `isLoopbackUrl` helper, never a substring), refuses anything `network.isInternalIP` flags (the same internal set the SSRF wall uses), and fails CLOSED if `lib/network` is somehow unavailable. Pin: `tests/boot-url-guard.test.js` (5 pins - metadata / full RFC1918 / IPv6 hosts refused, a public host admitted, and the substring bypass closed; fails pre-fix, passes post-fix).
+
 ## [Unreleased] - pass 389 (auditing pass 388 - the owner can no longer vouch for a remote ballot, and an intro can no longer re-key a principal)
 
 ### Fixed: `lib/consensus.js` + `lib/agora-sync.js` - the owner no longer SIGNS a remote ballot it never saw a signature for
