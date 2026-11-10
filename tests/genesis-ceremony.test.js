@@ -102,7 +102,7 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
         await wait(200);
     }
     const t = consensus.tally(${JSON.stringify(TOPIC)});
-    console.log('HOST_TALLY:' + JSON.stringify({ votes, status: t.status }));
+    console.log('HOST_TALLY:' + JSON.stringify({ votes, status: t.status, unverified: t.unverifiedBallots }));
     setTimeout(() => process.exit(0), 300);
 })().catch((e) => { console.log('HOST_FAIL:' + e.message); process.exit(1); });
 `;
@@ -191,6 +191,12 @@ async function main() {
             'agora vote through the genesis pair failed: ' + JSON.stringify(obs.joinVote));
         assert(obs.hostTally && obs.hostTally.votes === 2 && obs.hostTally.status === 'passed',
             'joint tally wrong: ' + JSON.stringify(obs.hostTally));
+        // (pass 388) The ceremony exchanged vote-signing keys: the joiner's
+        // remote ballot is cryptographically VERIFIED by the host (0
+        // unverified). Pre-fix the ballot was re-signed under the host's
+        // fallback key and nothing checked it.
+        assert(obs.hostTally.unverified === 0,
+            'ceremony did not exchange vote-signing keys — joiner ballot unverified: ' + JSON.stringify(obs.hostTally));
     });
 
     await test('secret hygiene: genesis.json has topology, NEVER the secret; kind marker + secretSource', async () => {

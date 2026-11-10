@@ -234,6 +234,44 @@ async function main() {
         assert(!consensus.get('p51-scoped-2'), 'rejected snapshot left partial state');
     });
 
+    await test('state.request: a scoped ledger is WITHHELD from a non-member asker', async () => {
+        // The reply NESTS the ledger, so the crew-bus envelope gate (which
+        // reads top-level payload.scope) never sees the topic's scope. The
+        // owner-side handler must gate it: a registered peer outside the
+        // scope must not receive the full scoped ledger (votes + identities).
+        const org = teams.createOrg('p387-leak');
+        const dept = teams.createDept('p387-leak-d', { org: org.id });
+        const team = teams.createTeam('p387-leak-t', { dept: dept.id });
+        teams.assign('leak-member', { org: org.id, dept: dept.id, team: team.id });
+        registry.register({ id: 'outsider-node', name: 'outsider-node', host: '127.0.0.1', port: 1 });
+        registry.register({ id: 'leak-member', name: 'member-node', host: '127.0.0.1', port: 1 });
+        const SCOPE = { owner: 'team:' + team.id, visibility: 'scope' };
+        await consensus.create('p387-leak-topic', { ballot: ['yes', 'no'], minQuorum: 3, useTrustWeight: false, scope: SCOPE });
+        await consensus.vote('p387-leak-topic', 'yes', 'leak-member');
+
+        const handlers = new Map();
+        const sent = [];
+        const bus = {
+            onDispatch: (t, fn) => handlers.set(t, fn),
+            send: async (to, type, payload) => { sent.push({ to, type, payload }); return { ok: true, handlers: 1 }; },
+            nodes: () => [{ name: 'outsider-node', url: 'http://127.0.0.1:1' }, { name: 'member-node', url: 'http://127.0.0.1:2' }],
+            status: () => ({ name: 'owner-bus', agentId: 'leak-member' })
+        };
+        sync.install(bus);
+
+        handlers.get('state.request')({ from: 'outsider-node', payload: { topic: 'p387-leak-topic', reqId: 'leak-1' } });
+        await new Promise((r) => setTimeout(r, 20));
+        const leak = sent.find((s) => s.type === 'state');
+        assert(leak && leak.payload && leak.payload.ledger === null,
+            'SCOPED LEDGER LEAKED to a non-member: ' + JSON.stringify(leak && leak.payload && leak.payload.ledger));
+
+        sent.length = 0;
+        handlers.get('state.request')({ from: 'member-node', payload: { topic: 'p387-leak-topic', reqId: 'ok-1' } });
+        await new Promise((r) => setTimeout(r, 20));
+        const ok = sent.find((s) => s.type === 'state');
+        assert(ok && ok.payload && ok.payload.ledger, 'member denied its own scoped ledger');
+    });
+
     await test('reply legs are sender-bound: forged ack/reply resolves nothing (pass 51)', async () => {
         const handlers = new Map();
         const sent = [];

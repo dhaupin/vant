@@ -1,8 +1,84 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 114,
+  "_headingCount": 117,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 389 (auditing pass 388 - the owner can no longer vouch for a remote ballot, and an intro can no longer re-key a principal)",
+      "sections": [
+        {
+          "name": "Fixed: `lib/consensus.js` + `lib/agora-sync.js` - the owner no longer SIGNS a remote ballot it never saw a signature for",
+          "items": []
+        },
+        {
+          "name": "Fixed: `lib/agora-sync.js` - `member.intro` can no longer RE-KEY a registered principal",
+          "items": []
+        },
+        {
+          "name": "Fixed: `lib/agent-keys.js` - reserved principal names are refused; `tests/agent-keys.test.js` isolates its brain",
+          "items": []
+        },
+        {
+          "name": "Fixed: `lib/mcp.js` - the vote surfaces bind to the VERIFIED token subject",
+          "items": []
+        },
+        {
+          "name": "Housekeeping",
+          "items": []
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 388 (votes are signed with real per-agent keys - the ledger proves WHO cast each ballot)",
+      "sections": [
+        {
+          "name": "Added: `lib/agent-keys.js` - per-agent Ed25519 vote-signing identity",
+          "items": []
+        },
+        {
+          "name": "Fixed: `lib/consensus.js` - vote signatures were DECORATIVE (constant HMAC key, never verified)",
+          "items": []
+        },
+        {
+          "name": "Fixed: `lib/agora-sync.js` - the remote vote leg no longer RE-SIGNS a peer's ballot under the owner's key",
+          "items": []
+        },
+        {
+          "name": "Fixed: `lib/genesis.js` + `lib/agora-sync.js` - the ceremony now exchanges vote-signing keys",
+          "items": []
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 387 (a signed envelope proves the NODE, not the agent it names - the agora binds remote ballots to the sender's vetted principal)",
+      "sections": [
+        {
+          "name": "Fixed: `lib/agora-sync.js` + `lib/consensus.js` - a registered peer can no longer cast a ballot AS another node's agent",
+          "items": []
+        },
+        {
+          "name": "Fixed: `lib/agora-sync.js` - a node can no longer SELF-intro to forge its own principal",
+          "items": []
+        },
+        {
+          "name": "Fixed: `lib/agora-sync.js` - the gossip summary resolves the asker's VETTED principal, not the node name",
+          "items": []
+        },
+        {
+          "name": "Fixed: `lib/agora-sync.js` - a scoped ledger is no longer leaked to a non-member through `state.request`",
+          "items": []
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

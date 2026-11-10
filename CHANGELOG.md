@@ -7,6 +7,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [Unreleased] - pass 389 (auditing pass 388 - the owner can no longer vouch for a remote ballot, and an intro can no longer re-key a principal)
+
+### Fixed: `lib/consensus.js` + `lib/agora-sync.js` - the owner no longer SIGNS a remote ballot it never saw a signature for
+The remote vote dispatcher forwarded `signature: undefined` when a peer sent none, and `vote()` then fell into its LOCAL branch: the owner minted a key for the peer's principal and signed the peer's ballot itself, recording `verified:true`. A peer could therefore get the owner to vouch for an unsigned ballot. `vote()` now takes `remote:true` from that leg and FAILS CLOSED: the sender must supply its own signature, verified against its enrolled key (an un-enrolled principal is adopted but flagged `verified:false`, never re-signed). Pin: the `k-nosig` leg + an unsigned wire ballot acked `E_BAD_SIGNATURE` (`tests/agent-keys.test.js`).
+
+### Fixed: `lib/agora-sync.js` - `member.intro` can no longer RE-KEY a registered principal
+`member.intro` enrolled a public key for ANY introduced member, including one this node already knows. `enroll()` is immutable so an already-pinned key was safe, but a principal that was REGISTERED yet had no key yet (the pass-388 migration window) could be pinned to a peer's own key - re-keying it so the attacker's ballots verified as the victim (probe: `labs/probe-intro-rekey.js`, variant B). A key is now enrolled only for a principal this node has never seen, or when the SAME introducer re-broadcasts it (the genesis host propagating a member's key after the hello). Pin: the `rekey-victim` / `brand-new-member` legs (`tests/agent-keys.test.js`).
+
+### Fixed: `lib/agent-keys.js` - reserved principal names are refused; `tests/agent-keys.test.js` isolates its brain
+`ensure()`/`enroll()`/`enrolledKey()` now refuse `__proto__` and friends (a principal carrying one would corrupt the key maps). The suite mints a scratch brain (pass 378) instead of writing keys into the real one - its `peer-agent` fixture collided with `tests/agora-sync.test.js` and leaked an enrolled key that silently dropped that suite's wire ballot.
+
+### Fixed: `lib/mcp.js` - the vote surfaces bind to the VERIFIED token subject
+`consensus_vote` and `forum_castVote` took `agentId` from the caller verbatim and never consulted the registry-verified request subject that the HTTP door already threads through the request (pass 86). A caller holding a verified bearer token could therefore ballot AS any other agent - the same identity class the pass-387 wire leg closed. When a verified subject is present the ballot is cast AS that subject and a claimed `agentId` that differs is refused (`E_IDENTITY_MISMATCH`, fail-closed); without a verified context (CLI / in-process) the declared `agentId` still stands. Pin: the `mcp-identity-bind` legs (`tests/mcp-agora.test.js`).
+
+### Housekeeping
+The two probes this pass added (`labs/probe-vote-signature.js`, `labs/probe-intro-rekey.js`) mint a scratch brain and reap it on exit instead of wiping the shared `models/private/vant` state - a probe that wiped it raced the sweep's own suites (`ENOTEMPTY`). Five prose em/en dashes in `docs/essential/sudo.md`, `docs/operations/webhooks.md`, and `docs/security/encryption.md` were normalized to hyphens, so `lint:docs` is green again (it was red before this pass).
+
+## [Unreleased] - pass 388 (votes are signed with real per-agent keys - the ledger proves WHO cast each ballot)
+
+### Added: `lib/agent-keys.js` - per-agent Ed25519 vote-signing identity
+Each principal now has a real Ed25519 keypair. The PRIVATE key stays local, on disk at mode `0600` (the same pin `config.json` uses), and never leaves the node; the PUBLIC key is published during the genesis / ring ceremony so peers can verify that principal's ballots. A ballot is signed over the canonical encoding of `{kind:'vant-vote', topic, agentId, outcome, ts}` (the #146 deterministic encoder), so a signature is stable across processes and key order. Everything is synchronous - `consensus.vote()` is synchronous, so the async `lib/secret.js` store cannot sit in the signing path.
+
+### Fixed: `lib/consensus.js` - vote signatures were DECORATIVE (constant HMAC key, never verified)
+`_signVote` fell through to `createHmac('sha256', agentSecret || 'default')` because no caller ever threaded a secret, and `_verifyVote` was defined but called from nowhere in `lib/` or `tests/`. Every ballot in a ledger was therefore HMAC'd with the literal constant `'default'` - reproducible by anyone - and nothing ever checked it: the ledger carried no proof of authorship and tampering was undetectable. `_signVote` now mints a real per-agent signature, and `_verifyBallot` is enforced on every adoption path (fail-closed: a bad signature is dropped, `E_BAD_SIGNATURE`).
+
+### Fixed: `lib/agora-sync.js` - the remote vote leg no longer RE-SIGNS a peer's ballot under the owner's key
+The remote `vote` dispatcher called `consensus.vote(topic, outcome, agentId)` with no secret, so the owner re-signed the peer's ballot with its OWN fallback key - laundering a foreign ballot and erasing any authorship proof. The voter now signs with its own key, the `ts` travels with the signature, and the owner verifies the exact payload against the voter's ENROLLED key instead of re-signing.
+
+### Fixed: `lib/genesis.js` + `lib/agora-sync.js` - the ceremony now exchanges vote-signing keys
+`genesis.hello` carries the joiner's public key and `genesis.ack` returns the host's; both ends enroll the other during the ceremony that already exchanges the pair secret (public halves only). The ring admission path does the same, and the host re-broadcasts the member's now-known key over `member.intro` so every standing member enrolls it. Ballots from a principal with no vetted key are still adopted during the migration window but are flagged `verified:false` and surfaced as `unverifiedBallots` on the tally - observable, never silent.
+
+Pins: `tests/agent-keys.test.js` (sign/verify round-trip, tamper + wrong-key refusal, 0600 mode, immutable enroll, the remote verify-not-resign leg, and the merge-drop; 4 of its 8 pins fail pre-fix); `tests/genesis-ceremony.test.js` (the two-process ceremony's joiner ballot is `verified` - `unverifiedBallots === 0`). Probe: `labs/probe-vote-signature.js`.
+
+## [Unreleased] - pass 387 (a signed envelope proves the NODE, not the agent it names - the agora binds remote ballots to the sender's vetted principal)
+
+### Fixed: `lib/agora-sync.js` + `lib/consensus.js` - a registered peer can no longer cast a ballot AS another node's agent
+The crew bus signs ENVELOPE BYTES with the shared mesh secret, so a signature proves only that the sending NODE holds the pair key - not that the node owns the agent identity it names. The remote-vote dispatcher checked that `from` was *a* registered peer, then took `payload.agentId` verbatim and passed it straight to `consensus.vote`. On the shared-secret mesh genesis boots (and the tests use), any registered peer could therefore ballot as any registry-known agent: probe-verified `peer-c` voted as `victim-agent` and the owner counted + attributed the ballot (`labs/probe-ballot-identity.js`). The dispatcher now resolves the sender's VETTED principal through the same `node-registry` anchor genesis writes (`resolvePrincipal(from)`; node-name convention when no binding was vetted) and drops a ballot whose `agentId` is not that principal.
+
+The same binding now guards the ledger-push leg: `state.push` called `mergeTopic` with the whole snapshot, adopting foreign ballots unguarded - probe-verified `peer-c` stuffed a ballot for `victim-agent` via `state.push` and the owner counted it (`labs/probe-push-injection.js`). `mergeTopic` gained an optional `admitVote(agentId)` filter, and the push dispatcher admits only the sender's own ballot. A `pull` (a deliberate read from a chosen owner) is unchanged, as are all existing `mergeTopic` callers.
+
+### Fixed: `lib/agora-sync.js` - a node can no longer SELF-intro to forge its own principal
+`member.intro` (the ring-admission leg genesis broadcasts) adopted `{name, agentId}` into the receiver's registry, and `resolvePrincipal` treats a `kind:'ring-member'` entry as a VETTED identity. A registered peer could therefore self-intro with any `agentId`, forge a vetted principal, and then vote as it - bypassing the identity bind above. An intro introduces OTHER nodes; a node never introduces itself, so a self-intro (`member.name === from`) is now refused. Probe: `labs/probe-intro-self-spoof.js`.
+
+### Fixed: `lib/agora-sync.js` - the gossip summary resolves the asker's VETTED principal, not the node name
+`gossip.request` keyed its scoped-topic filter on the crew node NAME, while `msg.request` and `status.request` resolve the vetted principal. Membership is by agent id, so a member node whose crew name differed from its principal was wrongly denied its OWN scoped topics in the summary (fail-closed, but wrong). The filter now resolves `_senderPrincipal(from)`, matching the other legs.
+
+### Fixed: `lib/agora-sync.js` - a scoped ledger is no longer leaked to a non-member through `state.request`
+`state.request` answered a registered peer with `consensus.exportTopic(topic)` - the FULL ledger, votes and voter identities included - and relied on the crew-bus envelope gate to drop scoped traffic. But that gate reads TOP-LEVEL `payload.scope`, while the reply NESTS the ledger (`payload.ledger.scope`), so the gate never saw it: probe-verified a registered peer outside the scope received the complete scoped ledger (`labs/probe-state-scope-leak.js`). The owner-side handler now resolves the asker's vetted principal and withholds the ledger as `null` (indistinguishable from not-found, the leg's stated design) when the scope denies.
+
+Pins: `tests/agora-distributed.test.js` (two FLIP pins - the vote-leg spoof and the push-leg injection - each fail pre-fix, pass post-fix); `tests/genesis-ring.test.js` (the self-intro refusal, plus a legit intro of another node still adopting); `tests/agora-hygiene.test.js` (the gossip principal resolution, fails pre-fix); `tests/agora-sync.test.js` (the scoped-ledger withholding, fails pre-fix). Registry rows in `tests/agora-distributed.test.js` + `tests/mcp-agora-sync.test.js` now carry the vetted `name`->`id` binding genesis writes.
+
 ## [Unreleased] - pass 386 (the first real cross-install run - two installs federate, and the carrier stops refusing its own artifact)
 
 ### Fixed: `lib/carriers.js` - a lane's own `encode()` output is now a legal artifact for that lane
