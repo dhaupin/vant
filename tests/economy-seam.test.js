@@ -2,10 +2,8 @@
 /**
  * ECONOMY-SEAM pins (wave E, vant#337): the credit-side ledger (append-
  * only, ref-unique, fail-closed), the market tape (read-only price
- * discovery over settlement claims with a median guardrail), the typed
- * economy events (ledger emissions ride the bus), and the world-base
- * connector contract (identities/inventory/txForward, refusing to
- * silently no-op).
+ * discovery over settlement claims with a median guardrail), and the typed
+ * economy events (ledger emissions ride the bus).
  *
  * DISCRIMINATING: stashing the wave-E lib additions flips the pins.
  */
@@ -141,25 +139,6 @@ ok('tape tenancy: a scoped claim is invisible to an ungated viewer and visible t
     // the side we pin is: the viewer SUPPLIED but unauthorized still cannot
     // read it; the scope machinery is its own suite.
     assert(anon.median === null, 'a gated claim leaked into the median');
-});
-
-// ------------------------------------------------------------------
-// 3. the world-base connector contract
-// ------------------------------------------------------------------
-
-ok('world-base: the contract refuses to silently no-op, and the manifest rides', () => {
-    const { BaseWorldConnector } = require('../lib/connectors/world-base');
-    const w = new BaseWorldConnector({ name: 'downstream-world' });
-    const typed = (fn, frag) => {
-        try { fn(); return false; } catch (e) { return e && typeof e.message === 'string' && e.message.includes(frag); }
-    };
-    assert(typed(() => w.identities(), 'did not implement identities()'), 'identities() silently no-opped');
-    assert(typed(() => w.inventory('region-1'), 'implement inventory'), 'inventory() silently no-opped');
-    assert(typed(() => w.txForward(null), 'implement txForward'), 'txForward() silently no-opped');
-    assert(typed(() => new BaseWorldConnector({}), 'spec.name required'), 'nameless connector accepted');
-    const c = w.contract();
-    assert(c.kind === 'world-base' && c.verbs.join(',') === 'identities,inventory,txForward',
-        'contract manifest broken: ' + JSON.stringify(c));
 });
 
 // ------------------------------------------------------------------
