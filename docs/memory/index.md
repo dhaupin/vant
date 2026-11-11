@@ -26,6 +26,7 @@ Specialist formats:
 | **State spine** | Content-addressed state tree, seeds, anchors, checkpoints - "same state?" is one string comparison | [State spine](/vant/memory/state-spine) |
 | **Horcrux** | A whole brain embedded in an image, encrypted | [Horcrux](/vant/memory/horcrux) |
 | **Geometry** | Quasicrystal addressing for spatial retrieval (experimental) | [Geometry](/vant/memory/geometry) |
+| **memstruct** | The brain as a memstruct store - the one record grammar any memory system reads | [memstruct Interchange](/vant/memory/memstruct) |
 | **Tempo** | The time-dilation keeper: agent attention sampled across an owner-stated wall-clock window | [Tempo](/vant/memory/tempo) |
 | **Leisure** | The want-list keeper: play held between invocations, tied into the zen/dream/tempo loop | [Leisure](/vant/memory/leisure) |
 

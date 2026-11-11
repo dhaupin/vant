@@ -219,7 +219,12 @@ async function _maybeSeed(args) {
  * Main
  */
 function main() {
-    const args = process.argv.slice(3);
+    // (fix) slice(2), not slice(3): the dispatcher (bin/vant.js) spawns this
+    // script WITHOUT the `start` verb — argv is [node, start.js, ...flags] — so
+    // slice(3) ate the first flag after the verb (`--brain-name <x>` arrived as
+    // just `['<x>']`) and the seed silently fell back to the default brain.
+    // Every sibling bin script already uses slice(2).
+    const args = process.argv.slice(2);
     const doSync = args.includes('--sync');
     const doMigrate = !args.includes('--no-migrate');
 

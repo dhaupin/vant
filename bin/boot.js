@@ -88,18 +88,36 @@ function validateUrl(urlString) {
         throw new Error('Only HTTP/HTTPS URLs allowed');
     }
     
-    // Block internal/private IPs
+    // Block internal/private/loopback hosts. This is the AUTHORITATIVE
+    // internal check for the remote fetch: it reads the PARSED hostname (never
+    // a substring of the whole URL - `http://evil.example.com/localhost` is not
+    // loopback), covers every internal range the SSRF wall knows (incl.
+    // 169.254 metadata, 172.16/12, 127/8, IPv6 loopback/ULA/link-local), and
+    // refuses anything `network.isInternalIP` flags.
     const hostname = url.hostname.toLowerCase();
-    if (hostname.startsWith('localhost') || 
-        hostname.startsWith('127.') ||
-        hostname.startsWith('10.') ||
-        hostname.startsWith('192.168.') ||
-        hostname.startsWith('172.16.') ||
-        hostname.endsWith('.local')) {
+    let internal = false;
+    try { internal = require('../lib/network').isInternalIP(hostname); }
+    catch (e) {
+        // lib/network unavailable: fail CLOSED with a local pattern, never open.
+        internal = /^(127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|169\.254\.|0\.)/.test(hostname)
+            || /^\[?(::1|::|f[cd][0-9a-f]{2}:|fe[89ab][0-9a-f]:|ff[0-9a-f]{2}:)/i.test(hostname);
+    }
+    if (internal ||
+        hostname === 'localhost' || hostname.endsWith('.localhost') ||
+        hostname.endsWith('.local') || hostname.endsWith('.internal')) {
         throw new Error('Internal/ localhost URLs not allowed');
     }
     
     return { isLocal: false, url: urlString };
+}
+
+/** True when the URL's PARSED hostname is a literal loopback host. Never a
+ *  substring match: `http://evil.example.com/localhost` is NOT loopback. */
+function isLoopbackUrl(urlString) {
+    let host = '';
+    try { host = new URL(urlString).hostname.toLowerCase(); } catch (e) { return false; }
+    return host === 'localhost' || host.endsWith('.localhost') ||
+        /^127\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(host) || host === '::1' || host === '[::1]';
 }
 
 // Fetch image from URL
@@ -142,8 +160,11 @@ async function boot(imageInput, decryptPassword) {
     
     // If URL, download to temp file first
     if (!validation.isLocal) {
-        // Security: explicit HTTPS check
-        if (!validation.url.startsWith('https://') && !validation.url.includes('localhost')) {
+        // Security: HTTPS required for remote URLs, with a loopback carve-out
+        // for a LOCAL dev horcrux. The carve-out is a PARSED-hostname loopback
+        // check (never `url.includes('localhost')`, which `http://evil.com/
+        // localhost` satisfies while pointing at a remote host).
+        if (!validation.url.startsWith('https://') && !isLoopbackUrl(validation.url)) {
             throw new Error('HTTPS required for remote URLs (except localhost)');
         }
         
@@ -386,4 +407,6 @@ async function main() { _checkRead();
     }
 }
 
-main();
+if (require.main === module) main();
+
+module.exports = { validateUrl, isLoopbackUrl };

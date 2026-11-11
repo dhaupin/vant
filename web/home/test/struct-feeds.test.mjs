@@ -170,9 +170,13 @@ describe('the LIVE stamped rows (issue #264 steps b, c, d + the depstruct census
         if (source === 'packstruct') {
             expect(c.packs).toBeGreaterThanOrEqual(1)
             expect(c.ids).toBeGreaterThanOrEqual(0)
-            expect(c.honored + c.pinned).toBeLessThanOrEqual(8) // the conformance corpus is 8
+            // the feed's own finding states the corpus total; the counts must
+            // reconcile to it (every case is honored or a named pin)
+            const msg = String(feed.findings[0].message)
+            expect(msg).toMatch(/conformance honored/)
+            const total = Number(msg.match(/(\d+)\/(\d+) conformance honored/)[2])
+            expect(c.honored + c.pinned).toBe(total)
             expect(c.violations).toBe(0)
-            expect(String(feed.findings[0].message)).toMatch(/conformance honored/)
         }
         if (source === 'eyestruct') {
             expect(c.fail).toBe(0) // the gate judged ok: no unexplained artifact

@@ -14,25 +14,13 @@
  *
  * Allowlist entries are case names from packstruct's bundled conformance
  * corpus (one clean bundle, one per SPEC-5 refusal norm, a name-collision
- * pair, and the SPEC-2 env-claims bundle). Today's two pins, both the same
- * class - crashtest's scenario-profile loader over-validating a
- * manifest-level accept case at load:
- *
- *   "clean" - crashtest's loadPacks() refuses the SPEC clean fixture: a
- *   minimal manifest-conformant entry (default export `{ name }`) fails the
- *   engine's blanket scenario-contract validation at load ("needs a
- *   one-line description"), though the import itself succeeds. The engine is
- *   a scenario-profile host and the fixture is deliberately profile-minimal.
- *
- *   "env-claims" - the same root cause over the SPEC-2 `env` bundle: the
- *   pack carries a spec'd host-owned `env` block (packstruct#71), which the
- *   scenario loader never declares, so the load fails the same contract
- *   check. A conforming loader must accept a pack that merely declares
- *   claims.
- *
- *   7/9 cases honor; both rows name the one engine gap. Filed upstream; an
- *   allowlist line is deleted when the engine fix ships and its case flips
- *   to honored.
+ * pair, and one env-claims accept bundle). crashtest 1.3.0's host-profile
+ * load (`validateProfile: false`, packstruct SPEC section 7 / crashtest
+ * #33) closes the old `clean` pin and honors the env-claims accept case.
+ * It also exposes three SPEC section-2 manifest norms that crashtest's
+ * `validatePackManifest()` does not enforce: non-empty description,
+ * name/dir parity, and a dotted version. Those three cases are pinned
+ * below; the old `clean` row was deleted in the same pass.
  *
  * Usage: node scripts/audit-packs-gate.js
  */
@@ -48,11 +36,14 @@ const ROOT = path.resolve(__dirname, '..');
 // REAL loader - the engine this repo's packs are actually consumed by.
 const LOADER = 'node scripts/audit-host-loader.js {packs}';
 
-// Known engine gaps, each still nameable and still open. Never widen; only
-// delete a row on the pass that closes its upstream finding.
+// Known engine gaps, each still nameable and still open. Never widen a pin
+// to hide a regression; delete a row on the pass that closes its upstream
+// finding. This pass deletes `clean` (the host-profile load closed it) and
+// pins the three SPEC section-2 gaps that path exposed.
 const ALLOWED_VIOLATIONS = new Set([
-    'clean', // crashtest scenario-contract overreach on manifest-level load (filed on dhaupin/crashtest)
-    'env-claims', // same overreach over the SPEC-2 env block (packstruct#71); filed on dhaupin/crashtest
+    'description',    // crashtest accepts an empty manifest description (SPEC section 2 requires non-empty)
+    'name-dir-match', // crashtest does not compare manifest name to its directory (SPEC section 2/5)
+    'version',        // crashtest does not require the dotted MAJOR.MINOR[.PATCH] shape
 ]);
 
 function main() {

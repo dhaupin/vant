@@ -1,8 +1,232 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 109,
+  "_headingCount": 121,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 393 (the family seam grows a principal, and the brain's store merges)",
+      "sections": [
+        {
+          "name": "Added: `principal` on the world seam - vant can drive a named agent body (vant#363)",
+          "items": []
+        },
+        {
+          "name": "Added: `sync()` on the memstruct adapter - the replicated tier (vant#354)",
+          "items": []
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 392 (memstruct interchange - the brain speaks the family record grammar, vant#354)",
+      "sections": [
+        {
+          "name": "Added: `lib/adapters/memstruct.js` + `tests/memstruct-adapter.test.js` - the brain as a memstruct store",
+          "items": []
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 391 (the gamestruct bridge - vant drives the world through the family's own DoorClient, vant#360/#361/#364)",
+      "sections": [
+        {
+          "name": "Changed: `lib/adapters/synmergia.js` - the world client is now gamestruct's `DoorClient`, walled by vant",
+          "items": []
+        },
+        {
+          "name": "Fixed: a literal loopback door is now recognised (vant#360)",
+          "items": []
+        },
+        {
+          "name": "Added: `world.see(opts)` - the eyes (vant#361)",
+          "items": []
+        },
+        {
+          "name": "Changed: `lib/adapters/synmergia-leisure.js` - the ledger seam only (vant#364)",
+          "items": []
+        },
+        {
+          "name": "Removed: `lib/connectors/world-base.js` - the pre-gamestruct residue (vant#364)",
+          "items": []
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 390 (auditing pass - the boot URL guard no longer trusts a substring, and no longer misses cloud metadata)",
+      "sections": [
+        {
+          "name": "Fixed: `bin/boot.js` - the remote-horcrux URL guard was both bypassable and incomplete",
+          "items": []
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 389 (auditing pass 388 - the owner can no longer vouch for a remote ballot, and an intro can no longer re-key a principal)",
+      "sections": [
+        {
+          "name": "Fixed: `lib/consensus.js` + `lib/agora-sync.js` - the owner no longer SIGNS a remote ballot it never saw a signature for",
+          "items": []
+        },
+        {
+          "name": "Fixed: `lib/agora-sync.js` - `member.intro` can no longer RE-KEY a registered principal",
+          "items": []
+        },
+        {
+          "name": "Fixed: `lib/agent-keys.js` - reserved principal names are refused; `tests/agent-keys.test.js` isolates its brain",
+          "items": []
+        },
+        {
+          "name": "Fixed: `lib/mcp.js` - the vote surfaces bind to the VERIFIED token subject",
+          "items": []
+        },
+        {
+          "name": "Housekeeping",
+          "items": []
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 388 (votes are signed with real per-agent keys - the ledger proves WHO cast each ballot)",
+      "sections": [
+        {
+          "name": "Added: `lib/agent-keys.js` - per-agent Ed25519 vote-signing identity",
+          "items": []
+        },
+        {
+          "name": "Fixed: `lib/consensus.js` - vote signatures were DECORATIVE (constant HMAC key, never verified)",
+          "items": []
+        },
+        {
+          "name": "Fixed: `lib/agora-sync.js` - the remote vote leg no longer RE-SIGNS a peer's ballot under the owner's key",
+          "items": []
+        },
+        {
+          "name": "Fixed: `lib/genesis.js` + `lib/agora-sync.js` - the ceremony now exchanges vote-signing keys",
+          "items": []
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 387 (a signed envelope proves the NODE, not the agent it names - the agora binds remote ballots to the sender's vetted principal)",
+      "sections": [
+        {
+          "name": "Fixed: `lib/agora-sync.js` + `lib/consensus.js` - a registered peer can no longer cast a ballot AS another node's agent",
+          "items": []
+        },
+        {
+          "name": "Fixed: `lib/agora-sync.js` - a node can no longer SELF-intro to forge its own principal",
+          "items": []
+        },
+        {
+          "name": "Fixed: `lib/agora-sync.js` - the gossip summary resolves the asker's VETTED principal, not the node name",
+          "items": []
+        },
+        {
+          "name": "Fixed: `lib/agora-sync.js` - a scoped ledger is no longer leaked to a non-member through `state.request`",
+          "items": []
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 386 (the first real cross-install run - two installs federate, and the carrier stops refusing its own artifact)",
+      "sections": [
+        {
+          "name": "Fixed: `lib/carriers.js` - a lane's own `encode()` output is now a legal artifact for that lane",
+          "items": []
+        },
+        {
+          "name": "Fixed: `lib/market.js` - a query search no longer crashes on a listing with no title/summary",
+          "items": []
+        },
+        {
+          "name": "Added: `labs/mesh/cross-install-real-run.js` + `tests/cross-install.test.js` - the first two-install federation",
+          "items": []
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 383 (the release lane waits for the release it verifies, vant#343)",
+      "sections": [
+        {
+          "name": "Fixed: `.github/workflows/release.yml` + `scripts/verify-release.cjs` — verify stops racing release, and the attach step actually runs",
+          "items": []
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 382 (start arg-slice - `--brain-name` reaches the seed again, vant#353)",
+      "sections": [
+        {
+          "name": "Fixed: `bin/start.js` — `vant start --brain-name <x>` seeded the DEFAULT brain",
+          "items": []
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 381 (CI trigger - every PR into axolotl gates again, vant#349)",
+      "sections": [
+        {
+          "name": "Changed: `.github/workflows/test.yml` — the PR trigger adds `axolotl`, so all axolotl PRs run CI",
+          "items": []
+        }
+      ]
+    },
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 380 (pack-lane residue + the audit host profile, vant#328)",
+      "sections": [
+        {
+          "name": "Fixed: `packs/public/vant-leisure/index.mjs` — the pack reaps its own scratch brains",
+          "items": []
+        },
+        {
+          "name": "Changed: the packstruct audit host face takes crashtest 1.3.0's host profile",
+          "items": []
+        },
+        {
+          "name": "Fixed: the packstruct feed pin and the receipts move with the 9-case corpus",
+          "items": []
+        },
+        {
+          "name": "CI note: no parallel speedup yet",
+          "items": []
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,

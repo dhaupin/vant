@@ -2,9 +2,9 @@
 
 This directory ships **crashtest attack packs**: bundles of adversarial scenarios that attack vant's own surfaces — in-process, socket-free, and deterministic — so the defenses this repo promises are *measured*, not just documented.
 
-- **Crashtest**: <https://github.com/dhaupin/crashtest> — on npm as `crashtest@1.2.0` (this repo's devDependency; adopted at v1.1.0 for the S0→S1 campaign, vant#249, bumped to 1.2.0 at the #273 sign-off); live harness: <https://crashtest.creadev.org>
+- **Crashtest**: <https://github.com/dhaupin/crashtest> — on npm as `crashtest@1.3.0` (this repo's devDependency; adopted at v1.1.0 for the S0→S1 campaign, vant#249, bumped to 1.2.0 at the #273 sign-off, then 1.3.0 in the 2026-11-06 family pass); live harness: <https://crashtest.creadev.org>
 - **Where the packs target**: this repo (dhaupin/vant), `packs/public/<name>/`
-- **Run/validate from vant's side**: `node tests/crashtest-packs.test.js` (contract + verdict ledger, 400 checks)
+- **Run/validate from vant's side**: `node tests/crashtest-packs.test.js` (contract + verdict ledger, 430 checks)
 - **Real-harness dry run against vant**: `node scripts/crashtest-run.js` (see "Running the packs against vant")
 
 ## The STRUCT toolchain (the four sisters)
@@ -13,10 +13,10 @@ Vant's measurement discipline rides four sibling tools; each STRUCT is the same 
 
 | Tool | What it attacks/explains | Pin here | Links |
 |------|--------------------------|----------|-------|
-| **packstruct** | The PACKS themselves: author-time lint + conformance over `packs/*.json` manifests and their declared attack ids -- 22 packs / 312 ids censused green by `npm run packs:lint`, the conformance audit by `npm run packs:audit` (vant#247) | `packstruct@1.0.0` | [github.com/dhaupin/packstruct](https://github.com/dhaupin/packstruct#readme) · npm `packstruct` |
-| **crashtest** | The CODE: in-process, verdict-driven adversarial QA (REFUSED/EXPLOITED/BOUNDED/PASSED; absence honest; deterministic). The packs in this directory ARE crashtest packs; `scripts/crashtest-run.js` is the run root that arms them over vant's real routes | `crashtest@1.2.0` | [crashtest.creadev.org](https://crashtest.creadev.org) · [github.com/dhaupin/crashtest](https://github.com/dhaupin/crashtest) · npm `crashtest` |
-| **eyestruct** | The APPEARANCE: a visual ledger whose `gate` is read-only over `labs/.eyes/` -- every committed visual artifact must be explained by a ledger row, every row must reference a live artifact. Capture verbs (look/diff/walk) are LAN-local to the pinned chrome; CI runs the meanings, not the pixels (`npm run test:eyes`) | `eyestruct@1.0.0` | [eyestruct.creadev.org](https://eyestruct.creadev.org) · [docs.creadev.org/eyestruct](https://docs.creadev.org/eyestruct) · npm `eyestruct` |
-| **poststruct** | The SHIPPED THING: poststruct audits the BAKED `web/home/dist` post-build (head/site/links/i18n/a11y/feeds/language; FAIL findings exit non-zero, so the audit gates CI) and the /audit board card rides the stamped emit (schema 1, `poststruct-audit/1`) | `poststruct@1.0.0` | [poststruct.creadev.org](https://poststruct.creadev.org) · [docs.creadev.org/poststruct](https://docs.creadev.org/poststruct) · npm `poststruct` |
+| **packstruct** | The PACKS themselves: author-time lint + conformance over `packs/*.json` manifests and their declared attack ids -- 24 packs / 333 ids censused green by `npm run packs:lint`, the conformance audit by `npm run packs:audit` (vant#247) | `packstruct@1.1.0` | [github.com/dhaupin/packstruct](https://github.com/dhaupin/packstruct#readme) · npm `packstruct` |
+| **crashtest** | The CODE: in-process, verdict-driven adversarial QA (REFUSED/EXPLOITED/BOUNDED/PASSED; absence honest; deterministic). The packs in this directory ARE crashtest packs; `scripts/crashtest-run.js` is the run root that arms them over vant's real routes | `crashtest@1.3.0` | [crashtest.creadev.org](https://crashtest.creadev.org) · [github.com/dhaupin/crashtest](https://github.com/dhaupin/crashtest) · npm `crashtest` |
+| **eyestruct** | The APPEARANCE: a visual ledger whose `gate` is read-only over `labs/.eyes/` -- every committed visual artifact must be explained by a ledger row, every row must reference a live artifact. Capture verbs (look/diff/walk) are LAN-local to the pinned chrome; CI runs the meanings, not the pixels (`npm run test:eyes`) | `eyestruct@1.1.0` | [eyestruct.creadev.org](https://eyestruct.creadev.org) · [docs.creadev.org/eyestruct](https://docs.creadev.org/eyestruct) · npm `eyestruct` |
+| **poststruct** | The SHIPPED THING: poststruct audits the BAKED `web/home/dist` post-build (head/site/links/i18n/a11y/feeds/language; FAIL findings exit non-zero, so the audit gates CI) and the /audit board card rides the stamped emit (schema 1, `poststruct-audit/1`) | `poststruct@1.1.0` | [poststruct.creadev.org](https://poststruct.creadev.org) · [docs.creadev.org/poststruct](https://docs.creadev.org/poststruct) · npm `poststruct` |
 
 The chain in one sentence: **packstruct** approves what the packs DECLARE, **crashtest** grades what the code DOES, **eyestruct** explains what the pixels SHOW, and **poststruct** probes what actually SHIPPED. All four share the honesty contract: absence degrades to an explicit typed skip, never a silent pass, and same-commit same-findings is a law, not a hope.
 
@@ -26,8 +26,8 @@ The struct family's wider set is now npm-live and pinned in devDependencies, but
 
 | Layer | Tool + pin | What it does here |
 |-------|-----------|-------------------|
-| **governance** | `govstruct@1.0.0` | the one-member adopter manifest (`govstruct.config.json` + `govstruct/members/vant.json` + an evidence-map compliance block pointing at the CI lanes that actually run) — `npx govstruct lint && npx govstruct check && npx govstruct surface --verify && npx govstruct doctor` gates offline in test.yml;`--network` stays opt-in and is never set |
-| **mint (the factory)** | `monoforge@0.9.0` | stamps NEW fleet repos from proven blocks and doctors them for truth at mint time; its doctor is a mint-time instrument (dash-law: none, ever) and is wired into NO lane over this living tree (waves 19.29) |
+| **governance** | `govstruct@1.1.0` | the one-member adopter manifest (`govstruct.config.json` + `govstruct/members/vant.json` + an evidence-map compliance block pointing at the CI lanes that actually run) — `npx govstruct lint && npx govstruct check && npx govstruct surface --verify && npx govstruct doctor` gates offline in test.yml;`--network` stays opt-in and is never set |
+| **mint (the factory)** | `monoforge@1.1.0` | stamps NEW fleet repos from proven blocks and doctors them for truth at mint time; its doctor is a mint-time instrument (dash-law: none, ever) and is wired into NO lane over this living tree (waves 19.29) |
 | **sync** | `gistory-sync` | the E2EE multi-device sync engine behind the gistory prompt keeper, built at 0.9.0 in dhaupin/gistory; publishes from its first tag (registry-ladder law, still pre-npm as of this wave) — no vant runtime use |
 | **ledger (depstruct, in-repo)** | `scripts/audit-deps.js` (root `lint:deps`) | the never-add-deps law (wave 19.31): the LEDGER inside the census script is the only door a dependency rides through — a conscious row with lane + honest note, real evidence of that lane in the tree, the family pin, and package-lock parity, all offline over files on disk; it cross-checks that the pins the other rows record stay true (a `depstruct-census/1` row rides the STRUCT audit board). Wave 19.32 arms the pickup handler: `node scripts/audit-deps.js --probe <name>` grades ONE name through the same verdict math — the census CI step dogfoods it on two named deps so the one-name door can never silently rot |
 
@@ -512,7 +512,7 @@ Two ways, both from this repo:
 
 2. **Real harness dry-run** (crashtest resolves from the npm devDependency first; the clone stays a HEAD-testing fallback):
    ```sh
-   # resolution order: CRASHTEST_DIR override -> npm crashtest@1.2.0 -> clones
+   # resolution order: CRASHTEST_DIR override -> npm crashtest@1.3.0 -> clones
    node scripts/crashtest-run.js
    ```
    Loads every pack through crashtest's REAL v1.0.0 loader + Harness (not the micro-harness), runs every attack against the vant sandbox shim, and prints the honest ledger — verdicts, details, and explicit skips for routes the run root doesn't arm. It then runs crashtest's OWN scenario-library rows (input/guards/authz/session/recursion/…) against the armed routes. 2026-10-23, second stamp of the day: the D1- and KV-store-shaped rows ARMED — the run root now states a D1/KV binding (crashtest's own fake backend, `LIBRARY_ENV_SPEC` in `scripts/crashtest-run.js`: tables charges/settings/blobs/devices + a fake-KV `env.UPLOADS`) behind four fixture routes (charge / profile / device / upload), so race, state (enumeration + row aliasing), and the upload rows are all graded for real: that is **30 REFUSED / 0 EXPLOITED / 0 skipped** (was 25 / 0 / 5 honest skips). Arming stays conditional BY DESIGN: a run root that cannot state a binding arms nothing and the rows degrade to honest skipped-REFUSED again. The keyspace fixture measured one real finding the hour it armed (the upload fixture accepted a double-extension name verbatim — oracle EXPLOITED) and the single-dot-extension permit landed the same pass, so the ledger is clean again.
@@ -984,24 +984,26 @@ Cross-repo asks filed on dhaupin/crashtest (build there, release, then the vant 
 
 ## The packstruct@1 gate (2026-10-25)
 
-`npm run packs:lint` runs `packstruct lint packs/ --deep` — the zero-dep spec linter from [packstruct@1.0.0](https://www.npmjs.com/package/packstruct) (pinned as an exact devDependency, author-time only; the runtime graph stays untouched). Step runs in CI (`test.yml`, right after install) and locally after a manifest edit.
+`npm run packs:lint` runs `packstruct lint packs/ --deep` — the zero-dep spec linter from [packstruct@1.1.0](https://www.npmjs.com/package/packstruct) (pinned as an exact devDependency, author-time only; the runtime graph stays untouched). Step runs in CI (`test.yml`, right after install) and locally after a manifest edit.
 
-**Live-corpus receipts** (vant#247 items 1–3, same-commit batch as the wiring):
+**Live-corpus receipts** (vant#247 items 1–3, same-commit batch as the wiring; restamped 2026-11-06 for the packstruct 1.1.0 corpus):
 
 ```
 $ npm run packs:lint
-packstruct lint --deep: 8 pack(s) checked in packs/ - 8 module(s) probed, 48 id(s) censused
+packstruct lint --deep: 24 pack(s) checked in packs/ - 24 module(s) probed, 333 id(s) censused
 
 $ npm run packs:audit
-packstruct audit-conformance: 7/8 case(s) honored by the loader
-  AUDIT clean [audit-accept]: loader exit 1 on case "clean" - the spec verdict is accept
-audit gate: ALLOWED (8 case(s), 1 pinned known finding(s): clean, rest honored)  # exit 0
+packstruct audit-conformance: 6/9 case(s) honored by the loader over .
+  AUDIT description [audit-refuse]: loader exit 0 (loader accepted) on case "description" - the spec verdict is refuse
+  AUDIT name-dir-match [audit-refuse]: loader exit 0 (loader accepted) on case "name-dir-match" - the spec verdict is refuse
+  AUDIT version [audit-refuse]: loader exit 0 (loader accepted) on case "version" - the spec verdict is refuse
+audit gate: ALLOWED (9 case(s), 3 pinned known finding(s): description, name-dir-match, version, rest honored)  # exit 0
 ```
 
 Elle spec neuva:
 
 - `packs:lint` runs `packstruct lint packs/ --deep` (author-time gate, CI step in test.yml).
-- `packs:audit` runs packstruct's SPEC §7 conformance harness: the host-loader face (`scripts/audit-host-loader.js`, a 30-line wrapper over crashtest's REAL loader — no second validation added) runs packstruct's bundled fixture corpus. Exit 0 today with one ALLOWED-pinned row: the **"clean" case refuses because crashtest@1.1.0's loadPacks applies the scenario contract to manifest-level loading, so a profile-minimal conformant entry (the SPEC clean fixture: default export `{ name }`) cannot exist** — the engine finding lives at dhaupin/crashtest#33 and the allowlist row is deleted the pass its fix lands (scripts/audit-packs-gate.js, same pattern as KNOWN_FINDINGS). CI: both `packs:lint` and `packs:audit` run in the main ci job.
+- `packs:audit` runs packstruct's SPEC §7 conformance harness: the host-loader face (`scripts/audit-host-loader.js`, a wrapper over crashtest's REAL loader — no second validation added) runs packstruct's bundled fixture corpus. crashtest 1.3.0's host-profile load (`validateProfile: false`, crashtest#33) closed the old `clean` pin (the scenario contract no longer applies to manifest-level loading) and honors the `env-claims` accept case. That path also exposed three SPEC §2 manifest norms crashtest's `validatePackManifest()` does not yet enforce — a non-empty `description`, `name`/dir parity, and a dotted `version` — so exit 0 today carries three ALLOWED-pinned rows (`description`, `name-dir-match`, `version`; scripts/audit-packs-gate.js, same pattern as KNOWN_FINDINGS). Each row is deleted the pass its engine fix lands; never widened to hide a regression. CI: both `packs:lint` and `packs:audit` run in the main ci job.
 
 specKey verification story: the `specKey` token was session-side shorthand for the manifest placeholder the spec landing was expected to produce. The delivered SPEC v1 (§2) defines `armedByKey` as OPTIONAL with absence semantics — *"Absent: the host's own default lifecycle governs"* — and vant's packs all arm via config enumeration (`ctx.config['<pack-name>']`), which is exactly the absent path. No pack manifest gains a new key; the placeholder never existed in any tree (checked dhaupin/vant, the packstruct scaffold, the crashtest packs, 2026-10-24) and the delivered spec confirms none was owed. Verified, not skipped: the gate above now enforces the field set every future manifest must carry.
 

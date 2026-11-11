@@ -96,6 +96,26 @@ async function main() {
         assert(!dupe.totalVotes, 'dupe carried a tally: ' + JSON.stringify(dupe));
     });
 
+    await test('consensus_vote binds to the VERIFIED token subject (no voting as another agent)', async () => {
+        // (pass 389) The surface took agentId from the caller verbatim. A
+        // caller holding a verified bearer token could ballot AS any other
+        // agent. With a verified subject the vote is cast as that subject and
+        // a mismatched claim is refused (fail-closed).
+        registry.register({ id: 'mcp-token-subject', name: 'mcp-token-subject', host: '127.0.0.1', port: 1 });
+        const c = await mcp.execute('consensus_create', { topic: 'mcp-identity-bind', ballot: ['yes', 'no'], minQuorum: 5 });
+        assert(!c.error, 'consensus_create failed: ' + JSON.stringify(c));
+        const asSubject = (fn) => mcp._requestAls.run(
+            { verifiedCtx: { agentId: 'mcp-token-subject', userId: 'mcp-token-subject' } }, fn);
+        // (a) verified caller claiming a DIFFERENT agentId → refused, nothing counted.
+        const spoof = await asSubject(() => mcp.execute('consensus_vote', { topic: 'mcp-identity-bind', outcome: 'yes', agentId: 'mcp-voter-a' }));
+        assert(spoof && spoof.code === 'E_IDENTITY_MISMATCH', 'verified caller voted as another agent: ' + JSON.stringify(spoof));
+        assert(!consensus.get('mcp-identity-bind').votes['mcp-voter-a'], 'spoofed ballot was recorded');
+        // (b) the same verified caller voting as itself is accepted.
+        const ok = await asSubject(() => mcp.execute('consensus_vote', { topic: 'mcp-identity-bind', outcome: 'yes', agentId: 'mcp-token-subject' }));
+        assert(!ok.error, 'verified self-vote refused: ' + JSON.stringify(ok));
+        assert(consensus.get('mcp-identity-bind').votes['mcp-token-subject'], 'verified self-vote not recorded');
+    });
+
     await test('consensus_tally/get/list read the ledger', async () => {
         const tally = await mcp.execute('consensus_tally', { topic: voteId });
         assert(tally.totalVotes === 2, 'tally wrong: ' + JSON.stringify(tally));

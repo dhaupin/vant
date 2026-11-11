@@ -2153,6 +2153,9 @@ function checkVerdictRows(packName, verdicts) {
             }
             check(`${p.name} verdicts deterministic across two runs`, deterministic, 'double run diverged');
         }
+        // fixed-name pack scratches must not outlive their row
+        const packScratchLeft = ['leisure-pack-row', 'leisure-pack-empty'].filter((n) => fs.existsSync(path.join(sandbox, 'models', 'private', n)));
+        check('leisure pack reaps its scratch brain dirs', packScratchLeft.length === 0, packScratchLeft.join(', '));
     } finally {
         // back out of the sandbox dir before it vanishes; no fixture residue
         try { process.chdir(ROOT); } catch (e) { /* exit anyway */ }
