@@ -1,8 +1,24 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 120,
+  "_headingCount": 121,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "pass 393 (the family seam grows a principal, and the brain's store merges)",
+      "sections": [
+        {
+          "name": "Added: `principal` on the world seam - vant can drive a named agent body (vant#363)",
+          "items": []
+        },
+        {
+          "name": "Added: `sync()` on the memstruct adapter - the replicated tier (vant#354)",
+          "items": []
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,
