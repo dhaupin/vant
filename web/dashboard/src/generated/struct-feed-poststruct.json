@@ -2,7 +2,7 @@
   "source": "poststruct",
   "ok": true,
   "version": "poststruct-audit/1",
-  "generatedAt": "2026-11-04",
+  "generatedAt": "2026-11-06",
   "counts": {
     "fail": 0,
     "warn": 17
@@ -24,7 +24,7 @@
       "id": "language/dash-class",
       "page": "changelog/index.html",
       "level": "warn",
-      "message": "83 em dashs in prose (use a hyphen)"
+      "message": "111 em dashs in prose (use a hyphen)"
     },
     {
       "id": "language/dash-class",

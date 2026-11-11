@@ -58,9 +58,12 @@ const crewBusMod = require(path.join(ROOT, 'lib', 'crew-bus'));
 const registry = require(path.join(ROOT, 'lib', 'node-registry'));
 
 registry.clearState();
-for (const v of ['mcp-principal', 'mcp-second']) {
-    registry.register({ id: v, name: v, host: '127.0.0.1', port: 1 });
-}
+// The owner's registry carries the VETTED node<->agent binding (genesis's
+// shape): the crew node 'mcp-self' is owned by principal 'mcp-principal'.
+// The vote dispatcher resolves the sender node to this principal and
+// requires the ballot's claimed agentId to match (pass 387 identity bind).
+registry.register({ id: 'mcp-principal', name: 'mcp-self', host: '127.0.0.1', port: 1 });
+registry.register({ id: 'mcp-second', name: 'mcp-second', host: '127.0.0.1', port: 1 });
 
 // Owner-side stub bus: REAL agora-sync dispatchers + REAL consensus.
 const ownerHandlers = new Map();

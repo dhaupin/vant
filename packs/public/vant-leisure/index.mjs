@@ -16,6 +16,8 @@
 // containment, the gate ladder — is converted; the coverage lives in
 // this pack's 6 rows).
 
+import path from 'node:path';
+
 async function loadAll(mods) {
   const { createRequire } = await import('node:module');
   const { resolve } = await import('node:path');
@@ -36,16 +38,51 @@ function brief(o) {
  *  cache drop reproduces a fresh keeper process per row. */
 const BRAIN = 'leisure-pack-row';
 const EMPTY_BRAIN = 'leisure-pack-empty';
+const SCRATCH_BRAINS = [BRAIN, EMPTY_BRAIN];
 const OPT = { brain: BRAIN };
 const OPT_EMPTY = { brain: EMPTY_BRAIN };
+
+/**
+ * Reap the fixed-name scratch brains this pack mints. Each row's ledger is a
+ * file inside models/private/<brain>/; removing only the ledger leaves the
+ * brain DIR behind as harness residue. Remove the ledger, then rmdir the
+ * brain dir only when it is otherwise empty - a recursive delete could take
+ * a pre-existing brain that happens to share the reserved scratch name.
+ */
+function reapScratch(fsMod, leisure) {
+  for (const name of SCRATCH_BRAINS) {
+    let ledger;
+    try { ledger = leisure._ledgerPath(name); } catch { continue; }
+    try { fsMod.rmSync(ledger, { force: true }); } catch { /* already gone */ }
+    try { fsMod.rmdirSync(path.dirname(ledger)); } catch { /* non-empty or absent */ }
+  }
+}
+
+/** An interrupted row (process.exit/SIGINT mid-run) still leaves no dir:
+ *  resolve the two paths ONCE at arm time, so a later cwd change cannot
+ *  retarget the reap at some other tree's scratch-named brain. */
+let exitReapArmed = false;
+function armExitReap(fsMod, leisure) {
+  if (exitReapArmed) return;
+  exitReapArmed = true;
+  const ledgers = SCRATCH_BRAINS.map((name) => {
+    try { return path.resolve(leisure._ledgerPath(name)); } catch { return null; }
+  }).filter(Boolean);
+  process.once('exit', () => {
+    for (const ledger of ledgers) {
+      try { fsMod.rmSync(ledger, { force: true }); } catch { /* gone */ }
+      try { fsMod.rmdirSync(path.dirname(ledger)); } catch { /* not empty */ }
+    }
+  });
+}
 
 async function kit() {
   const [leisure, tempo, qos, era, escrow, ev, errors] =
     await loadAll(['lib/leisure.js', 'lib/tempo.js', 'lib/qos.js', 'lib/era.js', 'lib/escrow.js', 'lib/event.js', 'lib/error.js']);
   const { default: fs } = await import('node:fs');
   // rm the scratch ledgers so every row starts from disk truth
-  try { fs.rmSync(leisure._ledgerPath(BRAIN), { force: true }); } catch { /* fresh */ }
-  try { fs.rmSync(leisure._ledgerPath(EMPTY_BRAIN), { force: true }); } catch { /* fresh */ }
+  reapScratch(fs, leisure);
+  armExitReap(fs, leisure);
   try { leisure.registerAutoStepProvider(null); } catch { /* off by default */ }
   return { leisure, tempo, qos, era, escrow, ev, errors, fs };
 }
@@ -109,8 +146,7 @@ export default {
           }
           return { verdict: 'REFUSED', detail: 'the want ledger is honest: shape/id/containment law holds, dedupe keeps ONE normalized entry with the preserved pursuit count and the refreshed note, empty text refuses typed (no raw crash), and no soiled row ever lands', tookRequests: 7 };
         } finally {
-          try { fs.rmSync(leisure._ledgerPath(BRAIN), { force: true }); } catch { /* cleanup */ }
-          try { fs.rmSync(leisure._ledgerPath(EMPTY_BRAIN), { force: true }); } catch { /* cleanup */ }
+          reapScratch(fs, leisure);
         }
       },
     },
@@ -120,7 +156,7 @@ export default {
       description: 'the list is a want-list, NOT a queue: a NEVER-pursued want oligarchically leads the once-pursued (rotation by held-longest, suggest() reads the same head), markPursued receipting by Fuzzy text (receipt note lands IN the history), forget works by id AND by fuzzy (honest no-ops when there is nothing left to forget)',
       async run(_harness) {
         const k = await kit();
-        const { leisure } = k;
+        const { leisure, fs } = k;
         try {
           const alpha = leisure.want('orbit-pin alpha want', OPT);
           const beta = leisure.want('orbit-pin beta want', OPT);
@@ -169,6 +205,7 @@ export default {
           for (const w of (leisure.wantsToDo(OPT) || [])) {
             try { leisure.forget(w.id, OPT); } catch { /* cleanup */ }
           }
+          reapScratch(fs, leisure);
         }
       },
     },
@@ -223,7 +260,7 @@ export default {
           return { verdict: 'REFUSED', detail: 'the doing seam is real: empty ledgers null honestly, one-shot runs through the real tempo.pace and marks the pursuit at the rotation top, stretched arms a ledger-verified tempo budget keyed to the want and releases at .end, and both paradox pursuits refuse typed with nothing armed', tookRequests: 7 };
         } finally {
           try { tempo.budgetActive() && tempo._stopAll && tempo._stopAll(); } catch { /* noop */ }
-          try { fs.rmSync(leisure._ledgerPath(BRAIN), { force: true }); } catch { /* cleanup */ }
+          reapScratch(fs, leisure);
         }
       },
     },
@@ -265,8 +302,7 @@ export default {
           }
           return { verdict: 'REFUSED', detail: 'the loop seams are read-only and honest: exact 4th-breath cadence never fakes a suggestion (empty ledgers null on-cadence), and the dream rollup carries the open/aging/oldest/suggestion shape or nulls honestly', tookRequests: 7 };
         } finally {
-          try { fs.rmSync(leisure._ledgerPath(BRAIN), { force: true }); } catch { /* cleanup */ }
-          try { fs.rmSync(leisure._ledgerPath(EMPTY_BRAIN), { force: true }); } catch { /* cleanup */ }
+          reapScratch(fs, leisure);
         }
       },
     },
@@ -309,8 +345,7 @@ export default {
           }
           return { verdict: 'REFUSED', detail: 'the keeper is contained: per-brain .leisure.json never leaves models/private, re-require is path-stable and reads disk truth (the ledger survives the reload), and no hostile brain name traverses out', tookRequests: 5 };
         } finally {
-          try { fs.rmSync(leisure._ledgerPath(BRAIN), { force: true }); } catch { /* cleanup */ }
-          try { fs.rmSync(leisure._ledgerPath(EMPTY_BRAIN), { force: true }); } catch { /* cleanup */ }
+          reapScratch(fs, leisure);
         }
       },
     },
@@ -449,8 +484,7 @@ export default {
           for (const [evMod, h] of hadListener) { try { evMod.off('leisure:auto_refused', h); } catch { /* raced */ } }
           try { escrow.create({}).setBudget('brain:' + BRAIN, 0); } catch { /* cleanup */ }
           try { leisure.registerAutoStepProvider(null); } catch { /* cleanup */ }
-          try { fs.rmSync(leisure._ledgerPath(BRAIN), { force: true }); } catch { /* cleanup */ }
-          try { fs.rmSync(leisure._ledgerPath(EMPTY_BRAIN), { force: true }); } catch { /* cleanup */ }
+          reapScratch(fs, leisure);
         }
       },
     },

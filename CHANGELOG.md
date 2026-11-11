@@ -5,6 +5,175 @@ All notable changes to Vant will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+
+## [Unreleased] - pass 393 (the family seam grows a principal, and the brain's store merges)
+
+### Added: `principal` on the world seam - vant can drive a named agent body (vant#363)
+
+synmergia's agent-play lane seats more than one body behind one door: a `principal` names WHICH body a primitive drives (absent or `''` is the local seat, the human; a handle is that agent's body). `lib/adapters/synmergia.js` now passes it through - `world.observe({ principal })` rides the door's own `?principal=` route and `world.act(handle, verb, value, { principal })` rides a top-level `principal` on the `/act` body. The key is top-level on purpose: the door folds a dictionary `value` into its args, so a principal folded into `value` would be swallowed when `value` is a scalar. Both paths stay on gamestruct's reference `DoorClient` when no principal is given, so the common case is byte-identical. The principal is the wire key the door already reads, so no gamestruct release is needed for vant to speak it.
+
+Pin: `tests/synmergia-adapter.test.js` S9 - a principal routes observe to the agent body (not the human seat), a principal act carries the key top-level (a scalar value never swallows it), and no principal keeps the reference `{id,verb,value}` shape (fails pre-fix 9/1, passes post-fix 10/0).
+
+### Added: `sync()` on the memstruct adapter - the replicated tier (vant#354)
+
+`exportStore()`/`importStore()` are the store tier; the record grammar also owns the merge, so two installs of the same brain converge without a translation layer. `lib/adapters/memstruct.js` gains `sync(local, remote)`, memstruct's reference merge (SPEC section 4): records are keyed by id and each id resolves to the winner of the total order - the clock (the later of the last edit and the deletion), then a canonical content hash as the tie-break. The merge is therefore commutative and associative (same inputs, same output, any order or device), a newer edit never loses to an older one, and a tombstone is carried forward so a deletion propagates. It uses memstruct's own `mergeStores` when the dev package is present and a dependency-free mirror of the same math when it is not; both hold the four normative properties.
+
+Pin: `tests/memstruct-adapter.test.js` M7/M7b - the union is id-sorted, the newer edit wins, a local-only and a remote-only id both survive, the merge is commutative, the mirror equals the reference `mergeStores`, a newer tombstone propagates, and a non-`memstruct@1` side refuses typed (fails pre-fix 8/2, passes post-fix 10/0).
+
+## [Unreleased] - pass 392 (memstruct interchange - the brain speaks the family record grammar, vant#354)
+
+### Added: `lib/adapters/memstruct.js` + `tests/memstruct-adapter.test.js` - the brain as a memstruct store
+
+The brain is markdown in your repo, so git history is the memory lineage. That is the *store* tier. The *record grammar* - what a memory IS - is owned by [memstruct](https://github.com/dhaupin/memstruct) (`memstruct@1`), a language-neutral standard: one envelope, one merge contract, no transport. This pass lands the vant side of the interchange.
+
+`lib/adapters/memstruct.js` is a pure data conversion, so it sits beside `langchain.js` in `lib/adapters/` and registers as an ADAPTER (`connectors.memstruct()`) in `lib/connectors/index.js` - not a connector (those carry endpoints and auth; memstruct has neither). `exportStore()` walks `models/<side>/<brain>/`, maps each markdown file to a record (path -> `id`, git history -> `createdAt`/`updatedAt`, side -> `scope`, body -> `body`), and returns a deterministic, id-sorted `{ memstruct: 1, records: [...] }`. `importStore()` writes live records back, refusing any id that escapes the brain root (path traversal) or does not name a markdown file; a `deletedAt` record is a tombstone and is never written.
+
+`tests/memstruct-adapter.test.js` pins the contract with eight discriminating assertions (registration, export envelope, determinism, round-trip, tombstone skip, traversal refusal, non-`memstruct@1` refusal, lint parity with the real `npx memstruct lint`); stashing the adapter fails all eight.
+
+`memstruct` joins the devDependencies with a conscious dep-ledger row (`lane: code`): `lint()` requires it opportunistically for lint parity and falls back to a dependency-free structural check, so the runtime never hard-depends on a dev package.
+
+## [Unreleased] - pass 391 (the gamestruct bridge - vant drives the world through the family's own DoorClient, vant#360/#361/#364)
+
+### Changed: `lib/adapters/synmergia.js` - the world client is now gamestruct's `DoorClient`, walled by vant
+
+`lib/adapters/synmergia.js` was a hand-rolled HTTP client written against gamestruct SPEC v0.1.0. gamestruct has since shipped its own reference client (`gamestruct/adapters/vant`, `DoorClient` + `pursueOne`) and the normalizer that folds a door's flat `actions[]` into the SPEC node tree (`gamestruct/adapters/synmergia`, `doorNodes`). This pass replaces the hand-rolled transport with a thin SEAM over those: vant keeps only what is vant's.
+
+The security posture is unchanged and now rides one wall. `DoorClient` takes an injected `fetch` (SPEC N25); vant injects its own `lib/network.fetch`, so every door request keeps the SSRF IP wall, the DNS-rebinding refusal, and the circuit breaker - exactly like the relay hop and the crew bus. A literal loopback door has no DNS to rebind, so it skips the domain check; a remote door keeps the full wall. The door URL still refuses `user:pass@` typed (a leaked userinfo is a leaked secret). `lib/network.fetch` gains a small opt-in `allowStatus` option (default `[]`, so the fail-closed posture is byte-identical): a door carries a first-class refusal as HTTP `409` and an honest timeout as `408` (SPEC N21/N3), and without it that refusal would surface as a bare `HTTP 409` - the opposite of "every refusal is a value".
+
+vant is CommonJS and gamestruct is ESM; the modules load with a cached dynamic `import()` (gamestruct is zero-dependency, so this pulls in nothing but itself).
+
+### Fixed: a literal loopback door is now recognised (vant#360)
+
+The door's loopback test was a fixed set (`127.0.0.1`/`::1`/`localhost`). `new URL().hostname` returns an IPv6 literal WITH brackets (`[::1]`), so an IPv6 loopback door was not recognised as loopback and got the full domain wall - `Network: domain not allowed` - and could never connect. The test now strips the brackets, accepts any `127/8` address, and keeps `localhost`. Pin S8.
+
+### Added: `world.see(opts)` - the eyes (vant#361)
+`see()` forwards to the door's `/see` and returns the descriptor UNCHANGED; a blind door's refusal is an honest `{ ok:false, reason }`, never a throw. `world.nodes()` / `world.find()` expose the door's actionable list folded through gamestruct's own `doorNodes`, so a caller locates a handle without hardcoding ids. The door's own multi-agent extension (`/coord`: register/delegate/step) stays on the seam, since it is not one of the four primitives.
+
+### Changed: `lib/adapters/synmergia-leisure.js` - the ledger seam only (vant#364)
+The leisure plug no longer re-implements the choose-one-affordance step; gamestruct's `pursueOne` owns that (the same lane used without an objective). Vant keeps the want-list: record wants, pick the next, mark it pursued with the world's own result as the receipt. A world with nothing to offer is honest, not a fabricated act.
+
+### Removed: `lib/connectors/world-base.js` - the pre-gamestruct residue (vant#364)
+`BaseWorldConnector` (added wave E, vant#337) declared a world-connector contract (`identities`/`inventory`/`txForward`) before the gamestruct lane existed. It had no consumer in `lib/` - only its own pin - and it pointed the opposite way from the settled architecture (a downstream world subclasses and implements, versus gamestruct, where vant is the client and the world implements a door). The bridge now exists, so the residue goes: the file and its pin are removed. The `economy-seam` suite keeps its ledger/tape/event pins.
+
+`tests/synmergia-adapter.test.js` pins all of the above against a REAL loopback door (nine assertions: registration + door hygiene, the four primitives, refusal-as-data, the network wall, `/coord`, `see`, `find`/`nodes`, the leisure seam, loopback detection). Stashing the adapter fails every pin.
+
+## [Unreleased] - pass 390 (auditing pass - the boot URL guard no longer trusts a substring, and no longer misses cloud metadata)
+
+### Fixed: `bin/boot.js` - the remote-horcrux URL guard was both bypassable and incomplete
+`boot()` fetched a remote stego image behind two checks, and both were wrong. The HTTPS gate allowed plaintext http when the WHOLE URL string contained `localhost` (`!validation.url.includes('localhost')`) - so `http://internal-svc:8080/localhost` and `http://evil.example.com/localhost` passed the gate and were fetched over plaintext from a REMOTE host while looking loopback. And `validateUrl` blocked internal hosts with a partial list: it missed cloud metadata (`169.254.169.254`), the bulk of `172.16/12` (only `172.16.` was caught, not `172.17.`-`172.31.`), IPv6 loopback/ULA/link-local (`[::1]`, `[fd00::]`, `[fe80::]`), `0.0.0.0`, and `.internal` names. The guard now reads the PARSED hostname (a new `isLoopbackUrl` helper, never a substring), refuses anything `network.isInternalIP` flags (the same internal set the SSRF wall uses), and fails CLOSED if `lib/network` is somehow unavailable. Pin: `tests/boot-url-guard.test.js` (5 pins - metadata / full RFC1918 / IPv6 hosts refused, a public host admitted, and the substring bypass closed; fails pre-fix, passes post-fix).
+
+## [Unreleased] - pass 389 (auditing pass 388 - the owner can no longer vouch for a remote ballot, and an intro can no longer re-key a principal)
+
+### Fixed: `lib/consensus.js` + `lib/agora-sync.js` - the owner no longer SIGNS a remote ballot it never saw a signature for
+The remote vote dispatcher forwarded `signature: undefined` when a peer sent none, and `vote()` then fell into its LOCAL branch: the owner minted a key for the peer's principal and signed the peer's ballot itself, recording `verified:true`. A peer could therefore get the owner to vouch for an unsigned ballot. `vote()` now takes `remote:true` from that leg and FAILS CLOSED: the sender must supply its own signature, verified against its enrolled key (an un-enrolled principal is adopted but flagged `verified:false`, never re-signed). Pin: the `k-nosig` leg + an unsigned wire ballot acked `E_BAD_SIGNATURE` (`tests/agent-keys.test.js`).
+
+### Fixed: `lib/agora-sync.js` - `member.intro` can no longer RE-KEY a registered principal
+`member.intro` enrolled a public key for ANY introduced member, including one this node already knows. `enroll()` is immutable so an already-pinned key was safe, but a principal that was REGISTERED yet had no key yet (the pass-388 migration window) could be pinned to a peer's own key - re-keying it so the attacker's ballots verified as the victim (probe: `labs/probe-intro-rekey.js`, variant B). A key is now enrolled only for a principal this node has never seen, or when the SAME introducer re-broadcasts it (the genesis host propagating a member's key after the hello). Pin: the `rekey-victim` / `brand-new-member` legs (`tests/agent-keys.test.js`).
+
+### Fixed: `lib/agent-keys.js` - reserved principal names are refused; `tests/agent-keys.test.js` isolates its brain
+`ensure()`/`enroll()`/`enrolledKey()` now refuse `__proto__` and friends (a principal carrying one would corrupt the key maps). The suite mints a scratch brain (pass 378) instead of writing keys into the real one - its `peer-agent` fixture collided with `tests/agora-sync.test.js` and leaked an enrolled key that silently dropped that suite's wire ballot.
+
+### Fixed: `lib/mcp.js` - the vote surfaces bind to the VERIFIED token subject
+`consensus_vote` and `forum_castVote` took `agentId` from the caller verbatim and never consulted the registry-verified request subject that the HTTP door already threads through the request (pass 86). A caller holding a verified bearer token could therefore ballot AS any other agent - the same identity class the pass-387 wire leg closed. When a verified subject is present the ballot is cast AS that subject and a claimed `agentId` that differs is refused (`E_IDENTITY_MISMATCH`, fail-closed); without a verified context (CLI / in-process) the declared `agentId` still stands. Pin: the `mcp-identity-bind` legs (`tests/mcp-agora.test.js`).
+
+### Housekeeping
+The two probes this pass added (`labs/probe-vote-signature.js`, `labs/probe-intro-rekey.js`) mint a scratch brain and reap it on exit instead of wiping the shared `models/private/vant` state - a probe that wiped it raced the sweep's own suites (`ENOTEMPTY`). Five prose em/en dashes in `docs/essential/sudo.md`, `docs/operations/webhooks.md`, and `docs/security/encryption.md` were normalized to hyphens, so `lint:docs` is green again (it was red before this pass).
+
+## [Unreleased] - pass 388 (votes are signed with real per-agent keys - the ledger proves WHO cast each ballot)
+
+### Added: `lib/agent-keys.js` - per-agent Ed25519 vote-signing identity
+Each principal now has a real Ed25519 keypair. The PRIVATE key stays local, on disk at mode `0600` (the same pin `config.json` uses), and never leaves the node; the PUBLIC key is published during the genesis / ring ceremony so peers can verify that principal's ballots. A ballot is signed over the canonical encoding of `{kind:'vant-vote', topic, agentId, outcome, ts}` (the #146 deterministic encoder), so a signature is stable across processes and key order. Everything is synchronous - `consensus.vote()` is synchronous, so the async `lib/secret.js` store cannot sit in the signing path.
+
+### Fixed: `lib/consensus.js` - vote signatures were DECORATIVE (constant HMAC key, never verified)
+`_signVote` fell through to `createHmac('sha256', agentSecret || 'default')` because no caller ever threaded a secret, and `_verifyVote` was defined but called from nowhere in `lib/` or `tests/`. Every ballot in a ledger was therefore HMAC'd with the literal constant `'default'` - reproducible by anyone - and nothing ever checked it: the ledger carried no proof of authorship and tampering was undetectable. `_signVote` now mints a real per-agent signature, and `_verifyBallot` is enforced on every adoption path (fail-closed: a bad signature is dropped, `E_BAD_SIGNATURE`).
+
+### Fixed: `lib/agora-sync.js` - the remote vote leg no longer RE-SIGNS a peer's ballot under the owner's key
+The remote `vote` dispatcher called `consensus.vote(topic, outcome, agentId)` with no secret, so the owner re-signed the peer's ballot with its OWN fallback key - laundering a foreign ballot and erasing any authorship proof. The voter now signs with its own key, the `ts` travels with the signature, and the owner verifies the exact payload against the voter's ENROLLED key instead of re-signing.
+
+### Fixed: `lib/genesis.js` + `lib/agora-sync.js` - the ceremony now exchanges vote-signing keys
+`genesis.hello` carries the joiner's public key and `genesis.ack` returns the host's; both ends enroll the other during the ceremony that already exchanges the pair secret (public halves only). The ring admission path does the same, and the host re-broadcasts the member's now-known key over `member.intro` so every standing member enrolls it. Ballots from a principal with no vetted key are still adopted during the migration window but are flagged `verified:false` and surfaced as `unverifiedBallots` on the tally - observable, never silent.
+
+Pins: `tests/agent-keys.test.js` (sign/verify round-trip, tamper + wrong-key refusal, 0600 mode, immutable enroll, the remote verify-not-resign leg, and the merge-drop; 4 of its 8 pins fail pre-fix); `tests/genesis-ceremony.test.js` (the two-process ceremony's joiner ballot is `verified` - `unverifiedBallots === 0`). Probe: `labs/probe-vote-signature.js`.
+
+## [Unreleased] - pass 387 (a signed envelope proves the NODE, not the agent it names - the agora binds remote ballots to the sender's vetted principal)
+
+### Fixed: `lib/agora-sync.js` + `lib/consensus.js` - a registered peer can no longer cast a ballot AS another node's agent
+The crew bus signs ENVELOPE BYTES with the shared mesh secret, so a signature proves only that the sending NODE holds the pair key - not that the node owns the agent identity it names. The remote-vote dispatcher checked that `from` was *a* registered peer, then took `payload.agentId` verbatim and passed it straight to `consensus.vote`. On the shared-secret mesh genesis boots (and the tests use), any registered peer could therefore ballot as any registry-known agent: probe-verified `peer-c` voted as `victim-agent` and the owner counted + attributed the ballot (`labs/probe-ballot-identity.js`). The dispatcher now resolves the sender's VETTED principal through the same `node-registry` anchor genesis writes (`resolvePrincipal(from)`; node-name convention when no binding was vetted) and drops a ballot whose `agentId` is not that principal.
+
+The same binding now guards the ledger-push leg: `state.push` called `mergeTopic` with the whole snapshot, adopting foreign ballots unguarded - probe-verified `peer-c` stuffed a ballot for `victim-agent` via `state.push` and the owner counted it (`labs/probe-push-injection.js`). `mergeTopic` gained an optional `admitVote(agentId)` filter, and the push dispatcher admits only the sender's own ballot. A `pull` (a deliberate read from a chosen owner) is unchanged, as are all existing `mergeTopic` callers.
+
+### Fixed: `lib/agora-sync.js` - a node can no longer SELF-intro to forge its own principal
+`member.intro` (the ring-admission leg genesis broadcasts) adopted `{name, agentId}` into the receiver's registry, and `resolvePrincipal` treats a `kind:'ring-member'` entry as a VETTED identity. A registered peer could therefore self-intro with any `agentId`, forge a vetted principal, and then vote as it - bypassing the identity bind above. An intro introduces OTHER nodes; a node never introduces itself, so a self-intro (`member.name === from`) is now refused. Probe: `labs/probe-intro-self-spoof.js`.
+
+### Fixed: `lib/agora-sync.js` - the gossip summary resolves the asker's VETTED principal, not the node name
+`gossip.request` keyed its scoped-topic filter on the crew node NAME, while `msg.request` and `status.request` resolve the vetted principal. Membership is by agent id, so a member node whose crew name differed from its principal was wrongly denied its OWN scoped topics in the summary (fail-closed, but wrong). The filter now resolves `_senderPrincipal(from)`, matching the other legs.
+
+### Fixed: `lib/agora-sync.js` - a scoped ledger is no longer leaked to a non-member through `state.request`
+`state.request` answered a registered peer with `consensus.exportTopic(topic)` - the FULL ledger, votes and voter identities included - and relied on the crew-bus envelope gate to drop scoped traffic. But that gate reads TOP-LEVEL `payload.scope`, while the reply NESTS the ledger (`payload.ledger.scope`), so the gate never saw it: probe-verified a registered peer outside the scope received the complete scoped ledger (`labs/probe-state-scope-leak.js`). The owner-side handler now resolves the asker's vetted principal and withholds the ledger as `null` (indistinguishable from not-found, the leg's stated design) when the scope denies.
+
+Pins: `tests/agora-distributed.test.js` (two FLIP pins - the vote-leg spoof and the push-leg injection - each fail pre-fix, pass post-fix); `tests/genesis-ring.test.js` (the self-intro refusal, plus a legit intro of another node still adopting); `tests/agora-hygiene.test.js` (the gossip principal resolution, fails pre-fix); `tests/agora-sync.test.js` (the scoped-ledger withholding, fails pre-fix). Registry rows in `tests/agora-distributed.test.js` + `tests/mcp-agora-sync.test.js` now carry the vetted `name`->`id` binding genesis writes.
+
+## [Unreleased] - pass 386 (the first real cross-install run - two installs federate, and the carrier stops refusing its own artifact)
+
+### Fixed: `lib/carriers.js` - a lane's own `encode()` output is now a legal artifact for that lane
+`decode(lane, encode(t, lane))` used to throw `E_CARRIER_SHAPE`: every carrier's `encode()` wraps its artifact in a `{ carrier, kind, <field> }` object, but `decode()` was handed that wrapper and expected the bare payload, so the artifact a lane had just emitted was refused by the same lane. Callers had to know each lane's private field name (`json.json`, `nsc9.frame`, `stone.envelope`, `svg.svg`, `qr.png`). The top-level `decode()` now unwraps a lane's own artifact back to its payload (and carries the svg `stonePassword` through), so `decode(lane, encode(t, lane))` round-trips on every lane. The unwrap is strictly additive: a raw payload still rides as before. Pin: `tests/carriers-pass.test.js` (FLIP, discriminating).
+
+### Fixed: `lib/market.js` - a query search no longer crashes on a listing with no title/summary
+`market.search({ query })` called `l.title.toLowerCase()` / `l.summary.toLowerCase()` unguarded, so any listing that carries neither field threw an uncaught `TypeError`. The mesh's own `crew-pin` listings set no `summary`, so a query search over a store the mesh had touched crashed. Search now reads an absent title/summary as empty and matches only the fields that exist. Pin: `tests/market.test.js` (discriminating).
+
+### Added: `labs/mesh/cross-install-real-run.js` + `tests/cross-install.test.js` - the first two-install federation
+Two INDEPENDENT vant installs, two brains, two repos, federating over the layer vant already ships (not the same-disk JV harness). Install A (`vant`) hosts: `genesis.create` mints the pair secret (handed to the peer out-of-band), forms the JV org model, opens the joint topic, casts its own ballot, and mints the triage pin (a `traveler`). Install B (`cairn`) joins: `genesis.join` with the out-of-band secret (the ack proves both sides booted the same key), casts a REMOTE agora ballot over the HMAC crew bus, then picks the traveler off a carrier, verifies it, advances its own station (the triage verdict), and carries it back; the host verifies continuity across both stations. The run exercises both transports a real install pair rides: the LIVE WIRE (crew bus) and the GAPPED LANE (the traveler over a carrier - no socket at all; here a file, in production a git commit, a stone, a scan frame). 6/6 phases. The suite test builds a HERMETIC peer install (its own `lib` + its own brain) and runs the harness against it, so the capability is pinned, not just demonstrated.
+
+## [Unreleased] - pass 383 (the release lane waits for the release it verifies, vant#343)
+
+### Fixed: `.github/workflows/release.yml` + `scripts/verify-release.cjs` — verify stops racing release, and the attach step actually runs
+
+`verify` declared `needs: publish` only, so on a fresh tag cut it ran **concurrently** with `release` and judged the npm registry and the GH release before either had settled - red-flagging a publish that had already landed (first seen on the sibling `packstruct` v1.1.0 pilot; both legs went green on a manual re-run). `verify` now declares `needs: [publish, release]`, and its `if:` is unchanged, so it still stands alone in verify-only mode. The same shape had already landed family-wide (crashtest, packstruct, govstruct, eyestruct, prestruct, monoforge, freestruct, poststruct, gistory, coreforge) - vant was the straggler.
+
+The same pass fixed a second defect in the attach step: its env used single-brace `${ needs.publish.outputs.version }` instead of `${{ ... }}`, so both values interpolated **literally** and the step's `npm pack "vant-os@${ needs... }"` could never resolve - the step burned its whole poll budget and exited 1 on every cut. The step also gained the `GH_TOKEN` its closing `gh release upload` authenticates with (every family sibling carries it; vant did not).
+
+Both poll budgets widen to the family values: the release-attach poll `24 x 5s = 120s` -> `60 x 5s = 300s`, and the registry poll default in `scripts/verify-release.cjs` `20 x 6s = 120s` -> `60 x 6s = 360s` (the `VERIFY_RELEASE_ATTEMPTS` / `VERIFY_RELEASE_DELAY_MS` knobs stay overridable). `tests/release-workflow.test.js` is the receipt: five assertions that each fail on the pre-fix shape (the race, the literal-expression typo, the missing `GH_TOKEN`, and both budgets).
+
+## [Unreleased] - pass 382 (start arg-slice - `--brain-name` reaches the seed again, vant#353)
+
+### Fixed: `bin/start.js` — `vant start --brain-name <x>` seeded the DEFAULT brain
+
+The dispatcher (`bin/vant.js`) spawns `start.js` with `process.argv.slice(3)` (dropping the `start` verb), but `bin/start.js` `main()` also read `process.argv.slice(3)`. The double slice was off by one: the first flag after the verb was eaten, so `vant start --brain-name openhands` arrived as `['openhands']`, `_resolveSeedTarget` never saw the flag, and the seed silently landed on the default brain (`vant`). Every sibling bin script (`brain.js`, `health.js`, `migrate.js`, `sync.js`) already used `slice(2)`; `start.js` was the lone outlier. It now reads `slice(2)` too. `--seed-starter`/`--no-migrate` looked fine only because losing a boolean is silent; a lost `--brain-name` value is not.
+
+The migrate-onboard-journey suite invoked `bin/start.js` DIRECTLY, so it never exercised the dispatcher slice and missed this. `tests/start-brain-name-dispatch.test.js` drives the real `vant start` path through `bin/vant.js` and pins both halves: the NAMED brain is seeded, and no stray default brain appears.
+
+
+## [Unreleased] - pass 381 (CI trigger - every PR into axolotl gates again, vant#349)
+
+### Changed: `.github/workflows/test.yml` — the PR trigger adds `axolotl`, so all axolotl PRs run CI
+
+The `pull_request` trigger listed only `[main, staging]`, so a work PR into `axolotl` (the dev branch) ran no CI. That was a deliberate speed trade: CI was slow, and the minutes were not worth spending on axolotl PRs. CI is fast now, so the gate goes back on. The PR trigger is `[main, staging, axolotl]`.
+
+PR CI keys on the PR's **base**, never its head, so listing `axolotl` covers *every* PR into it - `agent-*`, `fix/*`, or any other head name. The head branch never enters the filter, so no head-pattern list could have expressed this. Integration and promotion PRs (`staging`, `main`) are unchanged. `docs/operations/ci.md` (trigger table, embedded shape, prose) and `AGENTS.md` (the branch-slate note) move with it.
+
+## [Unreleased] - pass 380 (pack-lane residue + the audit host profile, vant#328)
+
+### Fixed: `packs/public/vant-leisure/index.mjs` — the pack reaps its own scratch brains
+
+The pass-378 suite lifecycle stopped `tests/*` leaks, but the pack lanes still minted scratch brain dirs (`leisure-pack-row`, `leisure-pack-empty`) through the real run root, and a direct `npx crashtest run` bypasses the sweep sandbox that used to reap them. The leisure pack now resolves its scratch paths at arm time and removes the ledger plus its brain dir in every row's `finally`, with a process-exit hook as the net for an early return; the dir is removed only when empty, so real brains are never touched. `tests/crashtest-packs.test.js` pins the post-run absence (430 checks green).
+
+### Changed: the packstruct audit host face takes crashtest 1.3.0's host profile
+
+`scripts/audit-host-loader.js` now loads the conformance bundles with `validateProfile: false` — the host-face path crashtest 1.3.0 added for packstruct SPEC §7 — and enumerates the bundle's pack dirs because 1.3.0's root scan does not forward the option. That closes the old `clean` and `env-claims` pins from pass 379 (both now load), and exposes three SPEC §2 manifest norms crashtest still does not enforce: empty description, name/dir mismatch, and undotted version. Those three are pinned individually in `scripts/audit-packs-gate.js`; `npm run packs:audit` exits 0 with 9 cases (6 honored, 3 pinned upstream gaps).
+
+The face tries the honest ROOT scan first and falls back to per-dir enumeration only when the root throws — the enumeration is the 1.3.0-pin workaround (crashtest `main` already forwards the option, unreleased at this pin), so the face needs no further change once a cut carries it. A manifest refusal throws on both paths, so the refuse bundles still exit non-zero. `tests/packs-host-loader.test.js` pins the face's two directions against the real engine (a profile-minimal accept bundle loads, an unsupported `schemaVersion` refuses, a missing path exits 2); the accept case fails against the strict load, proving the test bites.
+
+The docs pipeline's `freestruct` pin also moves `1.2.0 -> 1.3.0` in `docs/package.json` + lock, matching the docs-lane version pass 379 named.
+
+### Fixed: the packstruct feed pin and the receipts move with the 9-case corpus
+
+The pass-380 restamp left two readers behind the new 9-case corpus. `web/home/test/struct-feeds.test.mjs` still capped `honored + pinned` at the old 8-case total (red CI on the branch), and the `packs/README.md` live-corpus receipts still showed the pre-advance `8 pack(s) / 48 id(s)` lint and the old one-row `clean` audit. The pin now reconciles the counts to the total the feed's OWN finding states (every case is honored or a named pin) instead of a hardcoded corpus size, so a future corpus move re-pins from the feed rather than a magic number; the receipts restamp to the measured `24 pack(s) / 333 id(s)` and the `6/9 honored, 3 pinned` audit.
+
+### CI note: no parallel speedup yet
+
+crashtest 1.3.0's `--concurrency` only races rows that declare `isolated: true`; `packs/` has no such row, and the CI gate's contract table / run root are custom serial drivers, so the new flag does not shorten either job. The library-heavy phase B remains the wall; opting rows in would be a separate isolation pass, not a flag flip.
+
 ## [Unreleased] - pass 379 (family pins - the devDependency cuts advance to the family floor)
 
 ### Changed: family devDependencies + CI pins advance to the current cuts

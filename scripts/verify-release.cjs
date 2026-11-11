@@ -317,9 +317,11 @@ function registryBase() {
 }
 
 // Poll knobs, overridable so the propagation-retry seam is testable fast.
+// Defaults are the family's (vant#343): 60 x 6s = 360s, widened from the old
+// 20 x 6s = 120s after a slow registry day outlasted it.
 function registryPollAttempts() {
   const n = Number(process.env.VERIFY_RELEASE_ATTEMPTS)
-  return Number.isFinite(n) && n > 0 ? Math.floor(n) : 20
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : 60
 }
 function registryPollDelayMs() {
   const n = Number(process.env.VERIFY_RELEASE_DELAY_MS)
