@@ -131,8 +131,26 @@ if (cmd === 'status' || !cmd) {
     config = { version: brain.getVersion(), succession: {} }
   }
   config.succession = config.succession || {}
-  config.succession.previous = config.succession.previous || {}
-  config.succession.previous.commit = commit
+  // (#373) Record the succession WITHOUT destroying the previous brain's
+  // provenance. The old code did `previous = previous || {}` then assigned
+  // `previous.commit` unconditionally: a populated block was collapsed to a
+  // single key, and a null block was fabricated into `{ commit }` (with the
+  // literal "unknown" whenever the install is outside a git tree -- the
+  // normal case for a restored brain). Two rules instead:
+  //   1. only stamp `commit` when a real commit resolved, never "unknown";
+  //   2. never shrink a richer `previous` block to one key.
+  const prev = config.succession.previous
+  const hasRealCommit = commit && commit !== 'unknown'
+  if (prev && typeof prev === 'object' && Object.keys(prev).length > 0) {
+    if (hasRealCommit) prev.commit = commit
+  } else {
+    config.succession.previous = hasRealCommit ? { commit } : null
+  }
+  // The config's `version` is the "current brain" record (getCurrentVersion,
+  // printStatus) and the ledger's `from` on the NEXT succession. It was never
+  // advanced, so a second `log` reported the wrong `from`. logSuccession()
+  // already advanced the ledger; mirror that here.
+  config.version = to
   fsMod.writeFileSync(configPath, JSON.stringify(config, null, 2))
   const ledger = succession.logSuccession(to, label)
   console.log(`Logged succession: ${label}`)
