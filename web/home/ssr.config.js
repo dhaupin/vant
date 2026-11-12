@@ -37,6 +37,13 @@ export default {
     ogImage: 'https://vant.creadev.org/vant-og.png',
     keywords: 'agent OS, AI agents, agent memory, MCP, markdown memory, open source',
 
+    // Auto BreadcrumbList JSON-LD (vant#362): the engine's injectMeta owns the
+    // route path, so it builds the per-route trail (site root -> segments ->
+    // page title; the lander ships none). Inert-but-safe on the current
+    // prestruct@1.3.0 pin (a non-fatal unknown-key warning) and live on the
+    // cut after it. Missing-only: a route with its own BreadcrumbList is untouched.
+    breadcrumb: true,
+
     appLayoutPath: '/src/AppLayout.jsx',
 
     // Same canon robots file as before (checked in at public/robots.txt and
