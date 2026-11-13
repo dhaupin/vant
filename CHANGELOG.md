@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [Unreleased] - the staging fast-forward sync (the family plumbing)
+
+### Added: the staging fast-forward sync workflow (the family plumbing)
+
+- **`.github/workflows/staging-ff-sync.yml`** - the family's required sync step, vendored byte-identical from the coreforge canon (44 lines). `staging` is a permanent mirror of `main`, and a merge-commit promotion drifts the two by one on every promotion even when the flow is followed exactly. On every push to `main` the job fast-forwards `staging` with a fast-forward-only refspec (`git push origin origin/main:refs/heads/staging`) - never a merge, never a force-push, so a real divergence fails the job loudly instead of rewriting history. The `delete` trigger recreates `staging` if the `--delete-branch` trap removes it. vant had `main` + `staging` but carried no such workflow. No version bump.
+
 ## [Unreleased] - pass 393 (the family seam grows a principal, and the brain's store merges)
 
 ### Added: `principal` on the world seam - vant can drive a named agent body (vant#363)

@@ -1,8 +1,22 @@
 {
   "_source": "CHANGELOG.md (root), parsed, never hand-copied; regenerate with npm run build:home",
   "_generatedBy": "web/home/scripts/parse-changelog.mjs",
-  "_headingCount": 121,
+  "_headingCount": 122,
   "entries": [
+    {
+      "kind": "unreleased",
+      "version": null,
+      "date": null,
+      "title": "the staging fast-forward sync (the family plumbing)",
+      "sections": [
+        {
+          "name": "Added: the staging fast-forward sync workflow (the family plumbing)",
+          "items": [
+            "**`.github/workflows/staging-ff-sync.yml`** - the family's required sync step, vendored byte-identical from the coreforge canon (44 lines). `staging` is a permanent mirror of `main`, and a merge-commit promotion drifts the two by one on every promotion even when the flow is followed exactly. On every push to `main` the job fast-forwards `staging` with a fast-forward-only refspec (`git push origin origin/main:refs/heads/staging`) - never a merge, never a force-push, so a real divergence fails the job loudly instead of rewriting history. The `delete` trigger recreates `staging` if the `--delete-branch` trap removes it. vant had `main` + `staging` but carried no such workflow. No version bump."
+          ]
+        }
+      ]
+    },
     {
       "kind": "unreleased",
       "version": null,
