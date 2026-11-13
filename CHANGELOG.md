@@ -7,11 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-## [Unreleased] - the staging fast-forward sync (the family plumbing)
+## [Unreleased] - the family plumbing (the staging fast-forward sync + the Dependabot flow)
 
-### Added: the staging fast-forward sync workflow (the family plumbing)
+### Added: the family plumbing (the staging fast-forward sync + the Dependabot flow)
 
 - **`.github/workflows/staging-ff-sync.yml`** - the family's required sync step, vendored byte-identical from the coreforge canon (44 lines). `staging` is a permanent mirror of `main`, and a merge-commit promotion drifts the two by one on every promotion even when the flow is followed exactly. On every push to `main` the job fast-forwards `staging` with a fast-forward-only refspec (`git push origin origin/main:refs/heads/staging`) - never a merge, never a force-push, so a real divergence fails the job loudly instead of rewriting history. The `delete` trigger recreates `staging` if the `--delete-branch` trap removes it. vant had `main` + `staging` but carried no such workflow. No version bump.
+- **`.github/dependabot.yml`** - the family's Dependabot flow, so the dev toolchain moves as upstream releases land and the SHA-pinned Action refs (packstruct#69) move without a hand-edit. Weekly (Monday), grouped minor/patch in one pull request, majors alone; the `github-actions` ecosystem plus npm over the five packages that carry dependencies (`/`, `/web/home`, `/web/dashboard`, `/web/relay`, `/docs`). The header names the family caveat - a tool whose output is committed as canon can have a "minor" release that changes the canon - so every bump arrives as a pull request that runs CI. Shape: the creadev flow (PR #38, `fca49c6`); the family-wide rollout is railyard#31. No version bump.
 
 ## [Unreleased] - pass 393 (the family seam grows a principal, and the brain's store merges)
 
