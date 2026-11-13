@@ -1,92 +1,92 @@
 {
   "schema": 1,
   "note": "Machine-visible open-item baseline for labs/TASKS.md + labs/MEM.md (pass-ledger lib/pass-ledger.js). ANY change to the census must update this file in the SAME commit as the ledger edit - a conscious act, never silent drift. Regenerate: npm run ledger:snapshot",
-  "stamped": "2026-11-04",
+  "stamped": "2026-11-13",
   "count": 14,
   "items": [
     {
-      "id": "TASKS.md:389",
+      "id": "TASKS.md:392",
       "marker": "**NEXT-UP:**",
       "source": "tasks",
-      "at": 389
+      "at": 392
     },
     {
-      "id": "TASKS.md:450",
+      "id": "TASKS.md:453",
       "marker": "**NEXT-UP:**",
       "source": "tasks",
-      "at": 450
+      "at": 453
     },
     {
-      "id": "TASKS.md:466",
+      "id": "TASKS.md:469",
       "marker": "**NEXT-UP:**",
       "source": "tasks",
-      "at": 466
+      "at": 469
     },
     {
-      "id": "TASKS.md:484",
+      "id": "TASKS.md:487",
       "marker": "**NEXT-UP:**",
       "source": "tasks",
-      "at": 484
+      "at": 487
     },
     {
-      "id": "TASKS.md:499",
+      "id": "TASKS.md:502",
       "marker": "**NEXT-UP:**",
       "source": "tasks",
-      "at": 499
+      "at": 502
     },
     {
-      "id": "TASKS.md:514",
+      "id": "TASKS.md:517",
       "marker": "**NEXT-UP:**",
       "source": "tasks",
-      "at": 514
+      "at": 517
     },
     {
-      "id": "TASKS.md:528",
+      "id": "TASKS.md:531",
       "marker": "**NEXT-UP:**",
       "source": "tasks",
-      "at": 528
+      "at": 531
     },
     {
-      "id": "TASKS.md:645",
+      "id": "TASKS.md:648",
       "marker": "**Next:**",
       "source": "tasks",
-      "at": 645
+      "at": 648
     },
     {
-      "id": "TASKS.md:667",
+      "id": "TASKS.md:670",
       "marker": "**Next:**",
       "source": "tasks",
-      "at": 667
+      "at": 670
     },
     {
-      "id": "TASKS.md:689",
+      "id": "TASKS.md:692",
       "marker": "**Next:**",
       "source": "tasks",
-      "at": 689
+      "at": 692
     },
     {
-      "id": "TASKS.md:705",
+      "id": "TASKS.md:708",
       "marker": "**Next:**",
       "source": "tasks",
-      "at": 705
+      "at": 708
     },
     {
-      "id": "TASKS.md:720",
+      "id": "TASKS.md:723",
       "marker": "**Next:**",
       "source": "tasks",
-      "at": 720
+      "at": 723
     },
     {
-      "id": "TASKS.md:736",
+      "id": "TASKS.md:739",
       "marker": "**Next:**",
       "source": "tasks",
-      "at": 736
+      "at": 739
     },
     {
-      "id": "TASKS.md:755",
+      "id": "TASKS.md:758",
       "marker": "**Next:**",
       "source": "tasks",
-      "at": 755
+      "at": 758
     }
   ]
 }
