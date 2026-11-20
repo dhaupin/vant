@@ -21,10 +21,18 @@
  *   node scripts/crashtest-run.js                 # auto-find the crashtest clone
  *   CRASHTEST_DIR=/path/to/crashtest node scripts/crashtest-run.js
  *   node scripts/crashtest-run.js --pack=vant-brain   # run one pack
+ *   node scripts/crashtest-run.js --shard=2/4     # this shard's slice of rows
  *
  * Exit 0 always unless the run itself faults; EXPLOITED findings are
  * honest results (the pinned ones are the documented leaders in
  * packs/README.md), so CI policy stays a caller decision.
+ *
+ * (vant#356) --shard=N/T partitions BOTH row phases so CI can fan the run
+ * root across T runners. The slice is computed on a GLOBALLY unique row key
+ * - the pack's own name for pack rows, `library/<module>` for library rows -
+ * never on a per-phase index, so two shards can never both grade the same
+ * row and the union of T shards is exactly the unsharded set. See
+ * shardOwns() for why the key is global.
  */
 
 'use strict';
@@ -48,6 +56,72 @@ const KNOWN_FINDINGS = new Set([
     // tests/ci-crashtest-gate.js ALLOWED_FINDINGS — both in the same commit,
     // and deleted together when its fix lands.
 ]);
+
+// (vant#356) --shard=N/T. The crashtest CLI has carried `--shard i/N` since
+// 1.4.0 (crashtest#99), but this run root hand-rolls its own loop and never
+// called it, so the whole 361-row matrix stayed one serial process. The
+// parser matches tests/run-all.js exactly (N/T, 1-based, N <= T) so the two
+// shard surfaces in CI cannot disagree about what "2/4" means.
+const shardArg = (process.argv.find((a) => a.startsWith('--shard=')) || '').replace('--shard=', '');
+const SHARD = (() => {
+    if (!shardArg) return null;
+    const m = shardArg.match(/^([1-9]\d*)\/([1-9]\d*)$/);
+    if (!m) {
+        console.error(`--shard expects N/T with 1 <= N <= T (got "${shardArg}")`);
+        process.exit(2);
+    }
+    const index = parseInt(m[1], 10);
+    const count = parseInt(m[2], 10);
+    if (index > count) {
+        console.error(`--shard out of range: ${shardArg}`);
+        process.exit(2);
+    }
+    return { index, count };
+})();
+
+// (vant#356) Assignment is by WEIGHTED greedy pack, not by key hash. A plain
+// hash is disjoint but badly balanced on this corpus: the packs range 2-44
+// attacks, and `hash % 4` happened to load the shards 136/23/64/138 — a 6:1
+// spread, so CI wall time would still be set by the heaviest shard and the
+// fan-out would buy nothing. Greedy longest-first over a deterministic order
+// (sort by weight desc, then key asc, so the result never depends on pack
+// directory order) lands 91/90/90/90.
+//
+// The plan is built in two steps that share one load vector: packs are
+// planned once they are loaded (their attack counts are known), then each
+// library module joins the lightest shard as the phase reaches it (its
+// attack count is only known after its import, and the phase already
+// imports it). One load vector means a heavy pack and a heavy library module
+// never land on the same runner.
+let shardPlan = null;
+let shardLoad = null;
+
+function planShardItem(key, weight) {
+    if (!SHARD) return;
+    if (!shardPlan) {
+        shardPlan = new Map();
+        shardLoad = new Array(SHARD.count).fill(0);
+    }
+    let best = 0;
+    for (let i = 1; i < SHARD.count; i++) if (shardLoad[i] < shardLoad[best]) best = i;
+    shardPlan.set(key, best);
+    shardLoad[best] += weight;
+}
+
+function planShards(packItems) {
+    if (!SHARD) return;
+    shardPlan = new Map();
+    shardLoad = new Array(SHARD.count).fill(0);
+    for (const item of [...packItems].sort((a, b) => (b.weight - a.weight) || a.key.localeCompare(b.key))) {
+        planShardItem(item.key, item.weight);
+    }
+}
+
+function shardOwns(key) {
+    if (!SHARD) return true;
+    if (!shardPlan) return true; // planner not reached yet: nothing to slice
+    return shardPlan.get(key) === SHARD.index - 1;
+}
 
 // --- locate crashtest. npm is the consumption path now (crashtest@1.1.0
 // --- is the devDependency - the v1.0.x→v1.1.0 adoption step of the
@@ -103,15 +177,42 @@ async function main() {
         if (process.env.CRASHTEST_SWEEP_DEFAULTS === '1') loadDirs.push(path.join(CT_DIR, 'packs'));
         const loaded = await packsMod.loadPacks(loadDirs, seen);
         const onlyPack = (process.argv.find((a) => a.startsWith('--pack=')) || '').replace('--pack=', '') || null;
-        const packs = onlyPack ? loaded.filter((p) => p.manifest.name === onlyPack) : loaded;
-        if (!packs.length) {
+        const loadedPacks = onlyPack ? loaded.filter((p) => p.manifest.name === onlyPack) : loaded;
+        if (!loadedPacks.length) {
             console.error(onlyPack ? `pack "${onlyPack}" not found in ${path.join(ROOT, 'packs')}` : 'no packs found');
             process.exit(1);
+        }
+        // (vant#356) plan the slice from the loaded packs' real attack counts,
+        // then take this shard's share. --pack= is an explicit single-pack ask
+        // and wins over the slice: a caller naming one pack wants that pack,
+        // not "that pack if this shard happens to own it".
+        planShards(loadedPacks.map((p) => ({ key: p.manifest.name, weight: p.module.attacks.length })));
+        // (vant#356) --dump-plan: print the pack half of the plan as JSON and
+        // exit. The library half needs the library modules imported, and that
+        // is the phase's own job, so the dump is what tests/crashtest-shard
+        // can grade without a 3-minute run. It is a diagnostic surface, not a
+        // run mode: it never grades a row.
+        if (process.argv.includes('--dump-plan')) {
+            const plan = {};
+            const weights = {};
+            for (const p of loadedPacks) weights[p.manifest.name] = p.module.attacks.length;
+            if (shardPlan) for (const [key, idx] of shardPlan) plan[key] = idx + 1;
+            console.log(JSON.stringify({ shard: SHARD, packs: plan, weights }));
+            return;
+        }
+        const packs = onlyPack ? loadedPacks : loadedPacks.filter((p) => shardOwns(p.manifest.name));
+        // (vant#356) a shard that owns no packs must never read as green: an
+        // empty slice is a silent pass, which is the one verdict this run
+        // root refuses to print. T > the pack count is a misconfiguration,
+        // not a result.
+        if (SHARD && !packs.length) {
+            console.error(`shard ${SHARD.index}/${SHARD.count} owns 0 of ${loadedPacks.length} pack(s) — refusing a vacuous pass`);
+            process.exit(2);
         }
         const harness = buildRoutes(sb, harnessMod.Harness);
         const ctx = { config: {} };
 
-        console.log(`=== crashtest run-root: ${packs.length} pack(s) against vant (harness: ${CT_DIR}) ===`);            const summaries = [];
+        console.log(`=== crashtest run-root: ${packs.length} pack(s) against vant (harness: ${CT_DIR})${SHARD ? ` [shard ${SHARD.index}/${SHARD.count}]` : ''} ===`);            const summaries = [];
             const exploitedAttackIds = [];
         for (const p of packs) {
             contractMod.validateScenario(p.module, `${p.origin}/${p.manifest.entry}`);
@@ -196,6 +297,10 @@ async function main() {
             // per-approval windows.
             governance: { grantsRoute: 'gov-grant', resolveRoute: 'gov-resolve', locksRoute: 'gov-locks', escrowRoute: 'gov-escrow', ttlMode: 'held' },
         };
+            // (vant#356) every module is imported and planned; only this
+            // shard's share runs. Planning here (rather than up front) is what
+            // lets a module's real attack count join the same load vector the
+            // packs already filled.
             const entries = fs.readdirSync(libDir).filter((f) => f.endsWith('.js')).sort();
             console.log(`\n=== crashtest scenario library rows against the armed routes (${armedRoutes.length} routes; D1/KV bindings armed: ${harness.env && harness.env.DB && harness.env.UPLOADS ? 'DB+UPLOADS' : 'none'}) ===`);
             let libRefused = 0, libExploited = 0, libSkipped = 0;
@@ -207,6 +312,8 @@ async function main() {
                 catch (e) { console.log(`  · ${file}: library module failed to import (${e.name}) - skipped`); continue; }
                 try { contractMod.validateScenario(mod, `library/${file}`); }
                 catch (e) { console.log(`  · ${file}: contract invalid (${e.message}) - skipped`); continue; }
+                planShardItem(`library/${file}`, mod.attacks.length);
+                if (!shardOwns(`library/${file}`)) { modIndex++; continue; }
                 let attackIdx = 0;
                 for (const a of mod.attacks) {
                     let rec;

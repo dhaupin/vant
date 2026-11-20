@@ -2,7 +2,7 @@
 
 This directory ships **crashtest attack packs**: bundles of adversarial scenarios that attack vant's own surfaces — in-process, socket-free, and deterministic — so the defenses this repo promises are *measured*, not just documented.
 
-- **Crashtest**: <https://github.com/dhaupin/crashtest> — on npm as `crashtest@1.3.0` (this repo's devDependency; adopted at v1.1.0 for the S0→S1 campaign, vant#249, bumped to 1.2.0 at the #273 sign-off, then 1.3.0 in the 2026-11-06 family pass); live harness: <https://crashtest.creadev.org>
+- **Crashtest**: <https://github.com/dhaupin/crashtest> — on npm as `crashtest@1.4.0` (this repo's devDependency; adopted at v1.1.0 for the S0→S1 campaign, vant#249, bumped to 1.2.0 at the #273 sign-off, 1.3.0 in the 2026-11-06 family pass, then 1.4.0 (vant#356, which carries the --shard i/N row partition the run root now uses)); live harness: <https://crashtest.creadev.org>
 - **Where the packs target**: this repo (dhaupin/vant), `packs/public/<name>/`
 - **Run/validate from vant's side**: `node tests/crashtest-packs.test.js` (contract + verdict ledger, 430 checks)
 - **Real-harness dry run against vant**: `node scripts/crashtest-run.js` (see "Running the packs against vant")
@@ -14,7 +14,7 @@ Vant's measurement discipline rides four sibling tools; each STRUCT is the same 
 | Tool | What it attacks/explains | Pin here | Links |
 |------|--------------------------|----------|-------|
 | **packstruct** | The PACKS themselves: author-time lint + conformance over `packs/*.json` manifests and their declared attack ids -- 24 packs / 333 ids censused green by `npm run packs:lint`, the conformance audit by `npm run packs:audit` (vant#247) | `packstruct@1.1.0` | [github.com/dhaupin/packstruct](https://github.com/dhaupin/packstruct#readme) · npm `packstruct` |
-| **crashtest** | The CODE: in-process, verdict-driven adversarial QA (REFUSED/EXPLOITED/BOUNDED/PASSED; absence honest; deterministic). The packs in this directory ARE crashtest packs; `scripts/crashtest-run.js` is the run root that arms them over vant's real routes | `crashtest@1.3.0` | [crashtest.creadev.org](https://crashtest.creadev.org) · [github.com/dhaupin/crashtest](https://github.com/dhaupin/crashtest) · npm `crashtest` |
+| **crashtest** | The CODE: in-process, verdict-driven adversarial QA (REFUSED/EXPLOITED/BOUNDED/PASSED; absence honest; deterministic). The packs in this directory ARE crashtest packs; `scripts/crashtest-run.js` is the run root that arms them over vant's real routes | `crashtest@1.4.0` | [crashtest.creadev.org](https://crashtest.creadev.org) · [github.com/dhaupin/crashtest](https://github.com/dhaupin/crashtest) · npm `crashtest` |
 | **eyestruct** | The APPEARANCE: a visual ledger whose `gate` is read-only over `labs/.eyes/` -- every committed visual artifact must be explained by a ledger row, every row must reference a live artifact. Capture verbs (look/diff/walk) are LAN-local to the pinned chrome; CI runs the meanings, not the pixels (`npm run test:eyes`) | `eyestruct@1.1.0` | [eyestruct.creadev.org](https://eyestruct.creadev.org) · [docs.creadev.org/eyestruct](https://docs.creadev.org/eyestruct) · npm `eyestruct` |
 | **poststruct** | The SHIPPED THING: poststruct audits the BAKED `web/home/dist` post-build (head/site/links/i18n/a11y/feeds/language; FAIL findings exit non-zero, so the audit gates CI) and the /audit board card rides the stamped emit (schema 1, `poststruct-audit/1`) | `poststruct@1.1.0` | [poststruct.creadev.org](https://poststruct.creadev.org) · [docs.creadev.org/poststruct](https://docs.creadev.org/poststruct) · npm `poststruct` |
 
@@ -512,7 +512,7 @@ Two ways, both from this repo:
 
 2. **Real harness dry-run** (crashtest resolves from the npm devDependency first; the clone stays a HEAD-testing fallback):
    ```sh
-   # resolution order: CRASHTEST_DIR override -> npm crashtest@1.3.0 -> clones
+   # resolution order: CRASHTEST_DIR override -> npm crashtest@1.4.0 -> clones
    node scripts/crashtest-run.js
    ```
    Loads every pack through crashtest's REAL v1.0.0 loader + Harness (not the micro-harness), runs every attack against the vant sandbox shim, and prints the honest ledger — verdicts, details, and explicit skips for routes the run root doesn't arm. It then runs crashtest's OWN scenario-library rows (input/guards/authz/session/recursion/…) against the armed routes. 2026-10-23, second stamp of the day: the D1- and KV-store-shaped rows ARMED — the run root now states a D1/KV binding (crashtest's own fake backend, `LIBRARY_ENV_SPEC` in `scripts/crashtest-run.js`: tables charges/settings/blobs/devices + a fake-KV `env.UPLOADS`) behind four fixture routes (charge / profile / device / upload), so race, state (enumeration + row aliasing), and the upload rows are all graded for real: that is **30 REFUSED / 0 EXPLOITED / 0 skipped** (was 25 / 0 / 5 honest skips). Arming stays conditional BY DESIGN: a run root that cannot state a binding arms nothing and the rows degrade to honest skipped-REFUSED again. The keyspace fixture measured one real finding the hour it armed (the upload fixture accepted a double-extension name verbatim — oracle EXPLOITED) and the single-dot-extension permit landed the same pass, so the ledger is clean again.

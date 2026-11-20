@@ -138,7 +138,7 @@ const LEDGER = {
 // The family pins the compliance map records (major must match the
 // resolved/declared line; caret ranges ride the minor).
 const FAMILY_PINS = {
-    'crashtest': '1.3.0',
+    'crashtest': '1.4.0',
     'eyestruct': '1.1.0',
     'packstruct': '1.1.0',
     'poststruct': '1.1.0',

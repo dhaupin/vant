@@ -35,6 +35,14 @@
  *   node tests/ci-crashtest-gate.js --phase=a  # contract table only
  *   node tests/ci-crashtest-gate.js --phase=b  # run root only
  *   node tests/ci-crashtest-gate.js --json     # machine-readable summary
+ *   node tests/ci-crashtest-gate.js --shard=2/4 # this shard's slice (vant#356)
+ *
+ * (vant#356) --shard=N/T fans the gate across T CI runners. Phase A is the
+ * whole contract table on every shard (it is 13s and its verdict ledger is
+ * what the whitelist policy is written against, so splitting it would mean
+ * splitting the policy too - not worth 13s). Phase B is the 3m42s half and
+ * that is what shards: each runner grades its own slice, and the policy is
+ * applied per shard over the rows that shard actually measured.
  */
 
 'use strict';
@@ -67,6 +75,15 @@ const phaseOpt = (() => {
 })();
 const asJson = args.includes('--json');
 const phase = ['a', 'b'].includes(phaseOpt) ? phaseOpt : null;
+
+// (vant#356) pass the slice straight through to the run root. The gate does
+// not interpret it: shardOwns() in scripts/crashtest-run.js is the single
+// definition of what a shard owns, so the gate and a hand-run
+// `node scripts/crashtest-run.js --shard=N/T` can never disagree.
+const shardOpt = (() => {
+    const hit = args.find((a) => a.startsWith('--shard='));
+    return hit ? hit.replace('--shard=', '') : null;
+})();
 
 const SUITE_TIMEOUT_MS = 8 * 60 * 1000;
 const RUNROOT_TIMEOUT_MS = 15 * 60 * 1000;
@@ -143,7 +160,9 @@ function runPhaseA() {
 }
 
 function runPhaseB() {
-    const r = spawnSync(process.execPath, ['scripts/crashtest-run.js'], {
+    const runArgs = ['scripts/crashtest-run.js'];
+    if (shardOpt) runArgs.push(`--shard=${shardOpt}`);
+    const r = spawnSync(process.execPath, runArgs, {
         cwd: ROOT,
         encoding: 'utf8',
         timeout: RUNROOT_TIMEOUT_MS,
@@ -152,7 +171,7 @@ function runPhaseB() {
     });
     if (r.error) { return { ok: false, name: 'B: real harness', reason: `gate could not run the run root: ${r.error}` }; }
     const status = r.status === null ? -1 : r.status;
-    if (status === 0) { return { ok: true, name: 'B: real harness', note: 'clean (only whitelisted findings if any)' }; }
+    if (status === 0) { return { ok: true, name: 'B: real harness', note: `clean (only whitelisted findings if any)${shardOpt ? ` [shard ${shardOpt}]` : ''}` }; }
     const EXIT = { 1: 'run fault', 3: 'library finding', 4: 'finding outside the whitelist' };
     // (detail-through 2026-10-28) the run root already prints each finding
     // row with its full detail; surfacing THE FINDING LINES verbatim next
