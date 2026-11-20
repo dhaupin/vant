@@ -27,3 +27,31 @@
 # Hashed build assets are immutable: cache hard, and they need no policy.
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
+
+# ---------------------------------------------------------------------------
+# HSTS is NOT set here on purpose - the Cloudflare zone owns it.
+#
+# A zone-level HSTS rule (SSL/TLS -> Edge Certificates -> HSTS) is the only
+# thing that reaches every host in one place, and it is the only thing that
+# can reach docs.creadev.org, which is GitHub Pages behind Cloudflare and
+# cannot send custom headers of its own. Setting HSTS in this file too would
+# make brain.creadev.org answer with two conflicting Strict-Transport-Security
+# headers on one response, which browsers handle by ignoring both.
+#
+# Scoping check before flipping includeSubDomains (verified 2026-11-17):
+#   - every live subdomain redirects http->https with no loop: brain, vant,
+#     docs, gistory, prestruct, stegoframe, threadforge, migrare,
+#     audithole, www (www -> apex)
+#   - no wildcard DNS record, so no unenumerated host is silently covered
+#   - no MX, no SRV, no mail/imap/ftp subdomain, so nothing non-HTTP is
+#     stranded by includeSubDomains
+#   - every record is Cloudflare-proxied, so the zone rule applies to all
+#   - the apex already advertises includeSubDomains + preload, but
+#     hstspreload.org reports creadev.org as `unknown`, so nothing is in the
+#     browser preload list yet
+#
+# Ramp max-age from 300 up. Browsers cache the value and it cannot be
+# recalled, so a bad includeSubDomains costs every visitor that window.
+# Only submit to hstspreload.org once max-age=31536000 has been served on
+# every host for a while and docs matches the apex.
+# ---------------------------------------------------------------------------
