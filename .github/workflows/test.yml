@@ -80,9 +80,9 @@ jobs:
           node tests/ci.js
           node tests/runner.js
 
-      - name: Eyes gate (eyestruct@1.1 visual ledger, browserless)
+      - name: Eyes gate (eyestruct@1.3 visual ledger, browserless)
         # The crashtest lane aimed at appearance instead of attackability.
-        # eyestruct@1.1 (npm v1.1.0): `gate` is read-only over
+        # eyestruct@1.3 (npm v1.3.2): `gate` is read-only over
         # labs/.eyes/ - every committed visual artifact must be explained
         # by a ledger row and every row must reference a live artifact on
         # disk. Browserless by design: capture verbs (look/diff/walk) are

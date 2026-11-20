@@ -89,7 +89,7 @@
     "crashtest": "^1.3.0",
     "eslint": "^8.57.1",
     "eslint-plugin-react-hooks": "4.6.2",
-    "eyestruct": "^1.1.0",
+    "eyestruct": "^1.3.2",
     "govstruct": "^1.1.0",
     "memstruct": "^0.9.0",
     "monoforge": "^1.1.0",

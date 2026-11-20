@@ -24,7 +24,7 @@
             "banner": "eyestruct visual ledger gate (browserless, the meanings not the pixels)",
             "runs": ["npx eyestruct gate"],
             "where": "test.yml ci job",
-            "pin": "eyestruct@1.1.0"
+            "pin": "eyestruct@1.3.2"
         },
         {
             "banner": "poststruct shipped audit over the baked home dist",

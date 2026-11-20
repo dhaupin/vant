@@ -139,7 +139,7 @@ const LEDGER = {
 // resolved/declared line; caret ranges ride the minor).
 const FAMILY_PINS = {
     'crashtest': '1.3.0',
-    'eyestruct': '1.1.0',
+    'eyestruct': '1.3.2',
     'packstruct': '1.1.0',
     'poststruct': '1.1.0',
     'govstruct': '1.1.0',
