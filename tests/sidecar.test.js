@@ -25,7 +25,7 @@ function ok(name) { passed++; console.log('  ✓ ' + name); }
 function fail(name, detail) { failed++; console.log('  ✗ ' + name + (detail ? ' — ' + detail : '')); }
 
 /** Fake srv speaking the julia-srv wire: /health, /eval (token-checked), /stop */
-function fakeSrv(token) {
+function fakeSrv(token, state = { active: 0, max: 0 }) {
     const server = http.createServer((req, res) => {
         let body = '';
         req.on('data', d => body += d);
@@ -39,11 +39,16 @@ function fakeSrv(token) {
             if (req.url === '/eval') {
                 let parsed = {};
                 try { parsed = JSON.parse(body); } catch (e) {}
-                if (parsed.code && parsed.code.includes('THROW_IN_SRV')) {
-                    res.writeHead(200); res.end('{"ok":false,"stderr":"srv-side error"}'); return;
-                }
-                res.writeHead(200);
-                res.end(JSON.stringify({ ok: true, stdout: 'FAKE:' + (parsed.code || ''), stderr: '' }));
+                state.active++;
+                state.max = Math.max(state.max, state.active);
+                setTimeout(() => {
+                    state.active--;
+                    if (parsed.code && parsed.code.includes('THROW_IN_SRV')) {
+                        res.writeHead(200); res.end('{"ok":false,"stderr":"srv-side error"}'); return;
+                    }
+                    res.writeHead(200);
+                    res.end(JSON.stringify({ ok: true, stdout: 'FAKE:' + (parsed.code || ''), stderr: '' }));
+                }, 75);
                 return;
             }
             if (req.url === '/stop') {
@@ -59,7 +64,8 @@ function fakeSrv(token) {
 
 async function main() {
     const token = 'tok-' + Date.now();
-    const server = fakeSrv(token);
+    const evalState = { active: 0, max: 0 };
+    const server = fakeSrv(token, evalState);
     await new Promise(r => server.listen(0, '127.0.0.1', r));
     const port = server.address().port;
 
@@ -82,6 +88,17 @@ async function main() {
             if (bad.success === false && bad.stderr.includes('srv-side error')) {
                 ok('srv-side failure surfaces as success:false + stderr (no throw)');
             } else fail('srv-side failure shape', JSON.stringify(bad));
+        }
+
+        // ---- Pin 2b: overlapping evals serialize on one sidecar ----
+        {
+            const [a, b] = await Promise.all([
+                sidecar.evalOn(spec, 'OVERLAP-A', 5000),
+                sidecar.evalOn(spec, 'OVERLAP-B', 5000)
+            ]);
+            if (a.stdout === 'FAKE:OVERLAP-A' && b.stdout === 'FAKE:OVERLAP-B' && evalState.max === 1) {
+                ok('overlapping evals serialize (one in flight per sidecar)');
+            } else fail('overlapping eval serialization', `maxActive=${evalState.max}`);
         }
 
         // ---- Pin 3: SidecarConnector 'auto' — healthy sidecar path ----

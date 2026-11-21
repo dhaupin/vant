@@ -49,6 +49,15 @@ const langs = compute.list();
 const s = compute.status();
 ```
 
+## Julia sidecar
+
+`invoke()` converts JSON arguments to Julia literals: arrays become vectors,
+objects become `Dict(...)`, so the documented shape parses instead of emitting
+JSON braces. Live-tested on Julia 1.10.4 and 1.11.1. Set `JULIA_DEPOT_PATH` to
+a pre-populated depot for a hermetic run; a clean depot may resolve/precompile
+packages on first use. Overlapping evals on one sidecar are serialized because
+Julia's stdout/stderr capture is process-global.
+
 ## Events
 
 | Event | When |

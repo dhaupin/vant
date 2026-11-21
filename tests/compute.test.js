@@ -81,6 +81,20 @@ test('getStackComputeConfigs returns object with source stack', () => {
 });
 
 // ============================================
+// JULIA CODEGEN
+// ============================================
+
+test('julia invoke codegen emits Julia literals (not JSON braces)', () => {
+    const julia = require(path.join(ROOT, 'lib', 'connectors', 'julia'));
+    const code = julia._funcToCode('identity', { matrix: [[1, 2], [3, 4]], note: 'x' });
+    const good = code.includes('Dict(') &&
+        code.includes('"matrix" => [[1, 2], [3, 4]]') &&
+        code.includes('"note" => "x"') &&
+        !code.includes('{"matrix"');
+    return { success: good, error: code };
+});
+
+// ============================================
 // SUMMARY
 // ============================================
 
