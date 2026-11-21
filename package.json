@@ -95,7 +95,7 @@
     "monoforge": "^1.1.0",
     "packstruct": "^1.1.0",
     "poststruct": "^1.1.0",
-    "typescript": "5.8.3"
+    "typescript": "7.0.2"
   },
   "main": "index.js",
   "directories": {
