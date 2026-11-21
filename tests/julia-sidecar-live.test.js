@@ -14,6 +14,10 @@
  * foreign machines without the language are a supported configuration;
  * the wire contract itself is pinned protocol-level in
  * tests/sidecar.test.js (fake srv on the identical wire).
+ *
+ * Version/depot note: live-verified 2026-11-21 on Julia 1.11.1 (and earlier
+ * on 1.10.4). Point JULIA_DEPOT_PATH at a pre-populated depot for a hermetic
+ * run; a clean depot may resolve/precompile packages on first use.
  */
 
 const { execFileSync } = require('child_process');
@@ -30,6 +34,7 @@ if (!juliaBin) {
 
 const { spawnAndWait, evalOn, stop, buildSpec } = require('../lib/sidecar');
 const { SidecarConnector } = require('../lib/connectors/sidecar');
+const juliaConnector = require('../lib/connectors/julia');
 
 (async () => {
     console.log('  julia at ' + juliaBin);
@@ -53,6 +58,21 @@ const { SidecarConnector } = require('../lib/connectors/sidecar');
         proc.kill(); process.exit(1);
     }
     console.log('  ✓ SidecarConnector round-trip (geometry-style workload)');
+
+    const invokeCode = juliaConnector._funcToCode('identity', { matrix: [[1, 2], [3, 4]] });
+    const r3 = await evalOn(spec, invokeCode);
+    if (!(r3.success && r3.stdout.includes('matrix') && !r3.stderr)) {
+        console.error('  ✗ invoke codegen — ' + JSON.stringify(r3));
+        proc.kill(); process.exit(1);
+    }
+    console.log('  ✓ invoke codegen parses + runs (JSON -> Julia Dict)');
+
+    const r4 = await juliaConnector.invoke('identity', { matrix: [[1, 2], [3, 4]] });
+    if (!(r4.success && r4.stdout.includes('matrix') && !r4.stderr)) {
+        console.error('  ✗ invoke() round-trip — ' + JSON.stringify(r4));
+        proc.kill(); process.exit(1);
+    }
+    console.log('  ✓ invoke() subprocess round-trip uses the same Julia literal');
 
     const t0 = Date.now();
     for (let i = 0; i < 10; i++) {

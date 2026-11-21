@@ -58,6 +58,10 @@ export const onRequestPost: Handler = async (context: PagesContext) => {
   try {
     await sendOtpEmail(context, { to: email.trim(), code: verdict.code, ttlMinutes: Math.round(OTP_TTL_SECONDS / 60) });
   } catch (err) {
+    // delivery failed: the code never reached anyone, so holding the
+    // cooldown would lock the address out for a sender outage it did not
+    // cause. Release both rows so the retry is immediate.
+    await accounts.releaseOtp(email);
     await ledger.append("bridge.refused", { reason: err instanceof EmailSenderUnavailableError ? "sender_unconfigured" : "delivery" });
     if (err instanceof EmailSenderUnavailableError) {
       return json({ error: "E_EMAIL_UNCONFIGURED", detail: err.message }, 503);
