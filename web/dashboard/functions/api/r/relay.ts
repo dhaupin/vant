@@ -136,6 +136,17 @@ async function forwardDoorCalls(
     const tBridge = Date.now();
     let lastUp: Response | null = null;
     let lastErr = "";
+    // The pod door is the authority: the bridge resolves the credential
+    // from THIS request (podTokenFor reads Authorization, then the bound
+    // session cookie). Rebuilding the request without them forwarded every
+    // translated call with no credential at all, so a pod with its default
+    // mcpRequireKey=false executed it unauthenticated - and a forged
+    // `vguest_` prefix satisfied the browserLane gate above with nothing
+    // left to verify it. Carry the caller's credential through so the pod
+    // validates what the edge only shape-checked.
+    const carried: Record<string, string> = { "content-type": "application/json" };
+    const callerAuth = context.request.headers.get("Authorization");
+    if (callerAuth) carried["Authorization"] = callerAuth;
     for (const dc of doorCalls) {
         try {
             const doorUrl = new URL(context.request.url);
@@ -143,7 +154,7 @@ async function forwardDoorCalls(
             doorUrl.search = "";
             lastUp = await podBridgeForward(context, new Request(doorUrl, {
                 method: "POST",
-                headers: { "content-type": "application/json" },
+                headers: carried,
                 body: JSON.stringify(dc),
             }));
         } catch (e) {
@@ -462,3 +473,8 @@ export const onRequestPost: Handler = async (context) => {
         reply: { ok: true, raw: text, ms: Date.now() - t0 },
     });
 };
+
+/** Without this, a GET falls through to the SPA asset and answers 200 HTML,
+ *  so a mistyped method reads as success instead of a routing error. */
+export const onRequestGet: Handler = async () =>
+    plain(405, { ok: false, error: "E_METHOD_NOT_ALLOWED", allow: "POST" });

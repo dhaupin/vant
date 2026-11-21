@@ -302,7 +302,7 @@ export default {
 
     {
       name: 'mint-lane-typed-and-cooldown',
-      description: 'the mint lane with NO sender configured: the request answers 503 E_EMAIL_UNCONFIGURED typed (the mint is real, the delivery is honestly absent), and the SECOND request for the same address rides the live per-email cooldown (429 E_OTP_COOLDOWN) - unavailability is loud, and the wire never fakes a "sent"',
+      description: 'the mint lane with NO sender configured: the request answers 503 E_EMAIL_UNCONFIGURED typed, and because delivery failed the mint is RELEASED - a second request for the same address is not locked out, it answers the same typed 503 instead of a 429 cooldown; a sender outage never costs the operator the retry window',
       async run(harness) {
         const results = await probeDoors(harness, [
           call('mint-no-sender', { env: { sink: false }, endpoint: 'request-otp', body: { email: EMAIL } }),
@@ -317,10 +317,10 @@ export default {
         if (first.status !== 503 || !first.body || first.body.error !== 'E_EMAIL_UNCONFIGURED') {
           return { verdict: 'EXPLOITED', detail: `unconfigured sender answered ${first.status} - a missing sender is a typed 503, never a fake ok`, tookRequests: 2, evidence: { status: first.status } };
         }
-        if (second.status !== 429 || !second.body || second.body.error !== 'E_OTP_COOLDOWN') {
-          return { verdict: 'EXPLOITED', detail: `repeat request answered ${second.status} - the per-email cooldown rides the FIRST request (an undelivered mint still budgets), typed 429`, tookRequests: 2, evidence: { status: second.status } };
+        if (second.status !== 503 || !second.body || second.body.error !== 'E_EMAIL_UNCONFIGURED') {
+          return { verdict: 'EXPLOITED', detail: `repeat request answered ${second.status} - a failed delivery must RELEASE the mint and its cooldown, so the retry is the same typed 503, not a 429 lockout`, tookRequests: 2, evidence: { status: second.status } };
         }
-        return { verdict: 'REFUSED', detail: 'no-sender answered 503 typed and the repeat request rode the cooldown 429 - the mint lane is honest about delivery and strict about budget', tookRequests: 2 };
+        return { verdict: 'REFUSED', detail: 'no-sender answered 503 typed twice - failed delivery releases the mint and cooldown, so a sender outage never locks the address out', tookRequests: 2 };
       },
     },
 
