@@ -145,6 +145,11 @@ export interface AccountsApi {
   requestOtp(
     email: string,
   ): Promise<{ verdict: "send"; code: string } | { verdict: "cooldown" } | { verdict: "invalid" }>;
+  /** Undo a "send" whose delivery failed: drops the minted code AND the
+   *  cooldown row, so a sender outage does not lock the address out of a
+   *  retry for the full cooldown window. Never touches a live code that
+   *  was actually delivered. */
+  releaseOtp(email: string): Promise<void>;
   /** Verify path: burns the code on success. "burned" = attempts
    *  exhausted, then the row is deleted. */
   verifyOtp(
@@ -302,6 +307,13 @@ export function makeAccounts(
     async destroySession(sessionId) {
       await store.delete(keys.session(sessionId));
       return true;
+    },
+
+    async releaseOtp(email) {
+      if (!validEmailShape(email)) return;
+      const eh = await ehFor(email);
+      await store.delete(keys.code(eh));
+      await store.delete(keys.throttle(eh));
     },
 
     async accountFor(sessionId) {

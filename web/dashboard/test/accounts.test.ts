@@ -70,6 +70,28 @@ describe("requestOtp", () => {
     expect((await accounts.requestOtp("a@b.co")).verdict).toBe("send");
     expect((await accounts.requestOtp("c@d.co")).verdict).toBe("send");
   });
+
+  it("releaseOtp clears the cooldown so a failed send does not lock the address out", async () => {
+    const accounts = makeAccounts(memoryStore(), "");
+    expect((await accounts.requestOtp("a@b.co")).verdict).toBe("send");
+    expect((await accounts.requestOtp("a@b.co")).verdict).toBe("cooldown");
+    await accounts.releaseOtp("a@b.co");
+    expect((await accounts.requestOtp("a@b.co")).verdict).toBe("send");
+  });
+
+  it("releaseOtp drops the minted code too, so a released code never verifies", async () => {
+    const store = memoryStore();
+    const accounts = makeAccounts(store, "salt");
+    const sent = await accounts.requestOtp("op@x.dev");
+    if (sent.verdict !== "send") throw new Error("expected send");
+    await accounts.releaseOtp("op@x.dev");
+    expect((await accounts.verifyOtp("op@x.dev", sent.code)).verdict).toBe("expired");
+  });
+
+  it("releaseOtp ignores a malformed address instead of throwing", async () => {
+    const accounts = makeAccounts(memoryStore(), "");
+    await expect(accounts.releaseOtp("not-an-email")).resolves.toBeUndefined();
+  });
 });
 
 describe("verifyOtp", () => {
