@@ -30,6 +30,12 @@ searchIndex: false
 # Broken internal links print by default and FAIL when CI passes --strict.
 linkCheck: true
 
+# Auto BreadcrumbList JSON-LD (vant#362): a trail from the URL tree
+# (site root -> path segments -> page title; the home page ships none).
+# Carried since freestruct 1.1.0, so it is live on the pinned 1.3.0.
+# Missing-only: a page that already ships its own BreadcrumbList is untouched.
+breadcrumb: true
+
 # Identity (vant#261): the founder rides the engine's Organization JSON-LD
 # via the author key (schema.org founder); the maintainer rides a custom
 # Person block appended to the injected structured data on every page.

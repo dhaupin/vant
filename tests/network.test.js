@@ -166,6 +166,40 @@ test('isDomainAllowed works for string', () => {
 });
 
 // ============================================
+// ALLOWLIST / DNS REBINDING
+// ============================================
+
+_asyncTest('allowlisted host skips DNS rebinding refusal', async () => {
+    const dns = require('dns');
+    const http = require('http');
+    const network = require(path.join(ROOT, 'lib', 'network'));
+    const real4 = dns.resolve4;
+    const real6 = dns.resolve6;
+    const previous = network.getAllowedDomains();
+    const server = http.createServer((req, res) => res.end('ok'));
+    await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+    const port = server.address().port;
+    // CI's resolver answers a literal loopback lookup with 127.0.0.1; the
+    // local resolver usually returns ENOTFOUND. Pin the CI shape so this
+    // regression is reproducible on every machine.
+    dns.resolve4 = (hostname, cb) => cb(null, ['127.0.0.1']);
+    dns.resolve6 = (hostname, cb) => cb(null, []);
+    network.setAllowedDomains(['127.0.0.1']);
+    try {
+        const body = await network.fetch(`http://127.0.0.1:${port}/`, {
+            system: true, cache: false, circuit: false
+        });
+        return { success: body === 'ok' };
+    } finally {
+        dns.resolve4 = real4;
+        dns.resolve6 = real6;
+        network.setAllowedDomains(previous);
+        server.closeAllConnections?.();
+        await new Promise((resolve) => server.close(resolve));
+    }
+});
+
+// ============================================
 // SUMMARY
 // ============================================
 
